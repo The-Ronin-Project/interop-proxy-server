@@ -1,0 +1,31 @@
+{
+    appointmentsByMRNAndDate (endDate: "__END_DATE__", mrn: "202497", startDate: "__START_DATE__", tenantId: "APP_O_SND") {
+        appointmentType {
+            coding {
+                code
+                display
+                system
+                userSelected
+                version
+            }
+            text
+        }
+        id
+        identifier {
+            system
+            value
+        }
+        serviceType {
+            coding {
+                code
+                display
+                system
+                userSelected
+                version
+            }
+            text
+        }
+        start
+        status
+    }
+}

@@ -1,0 +1,10 @@
+databaseChangeLog:
+  - changeSet:
+      id: insert-tenant
+      author: Mike Esposito
+      changes:
+        - sqlFile:
+            dbms: 'mysql'
+            splitStatements: true
+            path: db/changelog/insertTestData.sql
+            stripComments: true

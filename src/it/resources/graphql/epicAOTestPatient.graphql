@@ -1,0 +1,28 @@
+query {
+    patientsByNameAndDOB(tenantId: "APP_O_SND", family: "Mychart", given: "Allison", birthdate: "1987-01-15") {
+        address {
+            city
+            line
+            postalCode
+            state
+            use
+        }
+        birthDate
+        gender
+        id
+        identifier {
+            system
+            value
+        }
+        name {
+            family
+            given
+            use
+        }
+        telecom {
+            system
+            use
+            value
+        }
+    }
+}

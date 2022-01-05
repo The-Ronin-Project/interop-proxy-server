@@ -1,0 +1,16 @@
+{
+    "variables": {
+        "message": {
+            "patient": {
+                "mrn": "202497"
+            },
+            "recipients": {
+                "id": "IPMD",
+                "poolInd": false
+            },
+            "text": "Test message... blah blah"
+        },
+        "tenantId": "APP_O_SND"
+    },
+    "query": "mutation sendMessage ($message: MessageInput!, $tenantId: String!) {sendMessage (message: $message, tenantId: $tenantId)}"
+}

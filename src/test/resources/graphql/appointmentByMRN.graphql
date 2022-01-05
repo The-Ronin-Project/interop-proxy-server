@@ -1,0 +1,10 @@
+query {
+    appointmentsByMRNAndDate(tenantId: "tenant", mrn: "UUID-APPT-1", startDate: "01-01-2020", endDate: "01-01-2021") {
+        identifier {
+            system
+            value
+        }
+        start
+        status
+    }
+}

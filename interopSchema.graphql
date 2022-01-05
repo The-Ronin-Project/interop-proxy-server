@@ -1,0 +1,162 @@
+schema {
+  query: Query
+  mutation: Mutation
+}
+
+"Directs the executor to include this field or fragment only when the `if` argument is true"
+directive @include(
+    "Included when true."
+    if: Boolean!
+  ) on FIELD | FRAGMENT_SPREAD | INLINE_FRAGMENT
+
+"Directs the executor to skip this field or fragment when the `if`'argument is true."
+directive @skip(
+    "Skipped when true."
+    if: Boolean!
+  ) on FIELD | FRAGMENT_SPREAD | INLINE_FRAGMENT
+
+"Marks the field or enum value as deprecated"
+directive @deprecated(
+    "The reason for the deprecation"
+    reason: String = "No longer supported"
+  ) on FIELD_DEFINITION | ENUM_VALUE
+
+"Exposes a URL that specifies the behaviour of this scalar."
+directive @specifiedBy(
+    "The URL that specifies the behaviour of this scalar."
+    url: String!
+  ) on SCALAR
+
+"A physical address"
+type Address {
+  "Name of city, town, etc."
+  city: String
+  "Street name, number, direction & P.O. Box etc."
+  line: [String!]!
+  "Postal code for area"
+  postalCode: String
+  "Subunit of country"
+  state: String
+  "Purpose of address - home | work | temp | old | billing"
+  use: String
+}
+
+"An appointment in a clinical setting"
+type Appointment {
+  "The style of appointment or patient that has been booked in the slot (not service type)"
+  appointmentType: CodeableConcept
+  "The internal identifier for this appointment"
+  id: String!
+  "List of appointment identifiers"
+  identifier: [Identifier!]!
+  "The specific service that is to be performed during this appointment"
+  serviceType: [CodeableConcept!]!
+  "When appointment is to take place. An instant in time in the format YYYY-MM-DDThh:mm:ss.sss+zz:zz (e.g. 2015-02-07T13:28:17.239+02:00 or 2017-01-01T00:00:00Z). The time SHALL specified at least to the second and SHALL include a time zone."
+  start: String!
+  "Current status of the meeting"
+  status: String!
+}
+
+"A CodeableConcept represents a value that is usually supplied by providing a reference to one or more terminologies or ontologies but may also be defined by the provision of text."
+type CodeableConcept {
+  "Code defined by a terminology system"
+  coding: [Coding!]!
+  "Plain text representation of the concept"
+  text: String
+}
+
+"A Coding is a representation of a defined concept using a symbol from a defined \"code system\""
+type Coding {
+  "Symbol in syntax defined by the system"
+  code: String
+  "Representation defined by the system"
+  display: String
+  "Identity of the terminology system"
+  system: String
+  "If this coding was chosen directly by the user"
+  userSelected: Boolean
+  "Version of the system"
+  version: String
+}
+
+"Detail about an available form of contact with a patient"
+type ContactPoint {
+  "The system of contact (e.g. phone, email, fax, etc"
+  system: String
+  "The purpose of this contact (e.g. home, work, mobile, etc)"
+  use: String
+  "The actual contact value"
+  value: String
+}
+
+"The name of a person"
+type HumanName {
+  "Family name (often called 'Surname')"
+  family: String
+  "Given named (not always 'first'). Given names appear in the order they should be presented."
+  given: [String!]!
+  "Defines the use of this name (e.g. official, nickname, maiden, etc)"
+  use: String
+}
+
+"An identifier intended for computation"
+type Identifier {
+  "The namespace for the identifier"
+  system: String!
+  "The value."
+  value: String!
+}
+
+type Mutation {
+  "Sends a message and returns the current status"
+  sendMessage(message: MessageInput!, tenantId: String!): String!
+}
+
+"A patient"
+type Patient {
+  "Physical address(es)"
+  address: [Address!]!
+  "Date of birth in ISO 8601 format (YYYY-MM-DD)"
+  birthDate: String
+  "Gender (for administrative uses)"
+  gender: String
+  "The internal identifier for this patient"
+  id: String!
+  "List of patient known identifiers (e.g. MRN, EPI, etc.)"
+  identifier: [Identifier!]!
+  "The name(s) of the patient"
+  name: [HumanName!]!
+  "The available means of telecommunication"
+  telecom: [ContactPoint!]!
+}
+
+type Query {
+  "Finds appointments for a given MRN and date range"
+  appointmentsByMRNAndDate(endDate: String!, mrn: String!, startDate: String!, tenantId: String!): [Appointment!]!
+  "Finds patient(s) by family name, given name, and birthdate (YYYY-mm-dd format)"
+  patientsByNameAndDOB(birthdate: String!, family: String!, given: String!, tenantId: String!): [Patient!]!
+}
+
+"A message that should be submitted to one or more recipients"
+input MessageInput {
+  "The patient for whom the message is being sent"
+  patient: MessagePatientInput!
+  "The List of recipients of the message"
+  recipients: [MessageRecipientInput!]!
+  "The text of the message that should be sent"
+  text: String!
+}
+
+"The patient for whom the message is being sent"
+input MessagePatientInput {
+  "The MRN of the patient"
+  mrn: String!
+}
+
+"The recipient of a message"
+input MessageRecipientInput {
+  "The ID of the message recipient"
+  id: String!
+  "True if this recipient represents a pool; otherwise, false."
+  poolInd: Boolean
+}

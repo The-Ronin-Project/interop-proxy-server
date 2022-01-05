@@ -1,0 +1,11 @@
+query {
+    patientsByNameAndDOB(tenantId: "tenant", given: "First", family: "Last", birthdate: "1980-12-20") {
+        identifier {
+            system
+            value
+        }
+        name {
+            family
+        }
+    }
+}

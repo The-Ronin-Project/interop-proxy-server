@@ -1,0 +1,3 @@
+mutation SendMessage($message:MessageInput!) {
+    sendMessage(tenantId: "tenant", message:$message)
+}
