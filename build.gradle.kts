@@ -7,7 +7,6 @@ plugins {
     id("com.projectronin.interop.gradle.ktor") version "1.0.0-SNAPSHOT"
     id("com.projectronin.interop.gradle.spring") version "1.0.0-SNAPSHOT"
     id("com.projectronin.interop.gradle.jackson") version "1.0.0-SNAPSHOT"
-    id("com.projectronin.interop.gradle.publish") version "1.0.0-SNAPSHOT"
 
     id("org.springframework.boot") version "2.4.5"
 
@@ -16,6 +15,8 @@ plugins {
     id("com.google.cloud.tools.jib") version "3.1.4"
 
     id("org.unbroken-dome.test-sets") version "4.0.0"
+
+    `maven-publish`
 }
 
 dependencyManagement {
@@ -102,3 +103,21 @@ val graphqlGenerateSDL by tasks.getting(GraphQLGenerateSDLTask::class) {
 
 // We want to tie the GraphQL schema generation to the kotlin compile step.
 tasks.compileKotlin.get().finalizedBy(graphqlGenerateSDL)
+
+publishing {
+    repositories {
+        maven {
+            name = "GitHubPackages"
+            url = uri("https://maven.pkg.github.com/projectronin/package-repo")
+            credentials {
+                username = System.getenv("PACKAGE_USER")
+                password = System.getenv("PACKAGE_TOKEN")
+            }
+        }
+    }
+    publications {
+        create<MavenPublication>("bootJava") {
+            artifact(tasks.getByName("bootJar"))
+        }
+    }
+}
