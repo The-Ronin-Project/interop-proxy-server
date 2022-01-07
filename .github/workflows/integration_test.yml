@@ -1,4 +1,4 @@
-name: Tests
+name: Integration Tests
 on:
   push:
     branches: [ master ]
@@ -19,15 +19,9 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
-      - name: Gradlew Test
-        run: ./gradlew test
+      - name: Gradlew Integration Tests
+        run: ./gradlew it
         env:
           PACKAGE_USER: ${{ secrets.PACKAGES_PAT_USER }}
           PACKAGE_TOKEN: ${{ secrets.PACKAGES_PAT }}
-
-      - name: Upload Coverage
-        uses: codecov/codecov-action@v2
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          fail_ci_if_error: false
-          file: ./codecov/test/jacocoTestReport.xml
+          AO_SANDBOX_KEY: ${{ secrets.AO_SANDBOX_KEY }}

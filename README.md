@@ -1,5 +1,6 @@
 [![codecov](https://codecov.io/gh/projectronin/interop-proxy-server/branch/master/graph/badge.svg?token=6066BAwJYk)](https://app.codecov.io/gh/projectronin/interop-proxy-server/branch/master)
 [![Tests](https://github.com/projectronin/interop-proxy-server/actions/workflows/test.yml/badge.svg)](https://github.com/projectronin/interop-proxy-server/actions/workflows/test.yml)
+[![Integration Tests](https://github.com/projectronin/interop-proxy-server/actions/workflows/integration_test.yml/badge.svg)](https://github.com/projectronin/interop-proxy-server/actions/workflows/integration_test.yml)
 [![Lint](https://github.com/projectronin/interop-proxy-server/actions/workflows/lint.yml/badge.svg)](https://github.com/projectronin/interop-proxy-server/actions/workflows/lint.yml)
 
 # interop-proxy-server
