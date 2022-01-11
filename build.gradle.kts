@@ -19,39 +19,14 @@ plugins {
     `maven-publish`
 }
 
-dependencyManagement {
-    dependencies {
-        // This all works, but IntelliJ may not properly recognize the actual dependencies method being called and thus cannot find the referenced methods below.
-        dependencySet("com.projectronin.interop:1.0.0-SNAPSHOT") {
-            entry("interop-common")
-            entry("interop-common-test-db")
-        }
-        dependencySet("com.projectronin.interop.ehr:1.0.0-SNAPSHOT") {
-            entry("interop-ehr")
-            entry("interop-ehr-auth")
-            entry("interop-ehr-epic")
-            entry("interop-ehr-factory")
-            entry("interop-ehr-liquibase")
-            entry("interop-fhir")
-            entry("interop-tenant")
-            entry("interop-transform")
-        }
-        dependencySet("com.projectronin.interop.queue:1.0.0-SNAPSHOT") {
-            entry("interop-queue")
-            entry("interop-queue-db")
-            entry("interop-queue-liquibase")
-        }
-    }
-}
-
 dependencies {
-    implementation("com.projectronin.interop:interop-common")
-    implementation("com.projectronin.interop.ehr:interop-ehr")
-    implementation("com.projectronin.interop.ehr:interop-ehr-factory")
-    implementation("com.projectronin.interop.ehr:interop-fhir")
-    implementation("com.projectronin.interop.ehr:interop-tenant")
-    implementation("com.projectronin.interop.queue:interop-queue")
-    implementation("com.projectronin.interop.queue:interop-queue-db")
+    implementation("com.projectronin.interop:interop-common:${project.property("interopCommonVersion")}")
+    implementation("com.projectronin.interop.ehr:interop-ehr:${project.property("interopEhrVersion")}")
+    implementation("com.projectronin.interop.ehr:interop-ehr-factory:${project.property("interopEhrVersion")}")
+    implementation("com.projectronin.interop.ehr:interop-fhir:${project.property("interopEhrVersion")}")
+    implementation("com.projectronin.interop.ehr:interop-tenant:${project.property("interopEhrVersion")}")
+    implementation("com.projectronin.interop.queue:interop-queue:${project.property("interopQueueVersion")}")
+    implementation("com.projectronin.interop.queue:interop-queue-db:${project.property("interopQueueVersion")}")
 
     implementation("org.springframework.boot:spring-boot-starter-jdbc")
     implementation("mysql:mysql-connector-java:8.0.13")
@@ -60,7 +35,7 @@ dependencies {
     implementation("com.expediagroup:graphql-kotlin-spring-server:4.2.0")
 
     // Runtime Dependency on each EHR implementation.
-    runtimeOnly("com.projectronin.interop.ehr:interop-ehr-epic")
+    runtimeOnly("com.projectronin.interop.ehr:interop-ehr-epic:${project.property("interopEhrVersion")}")
 
     testImplementation("org.springframework.boot:spring-boot-starter-test:2.5.5") {
         exclude(module = "mockito-core")
@@ -70,11 +45,11 @@ dependencies {
         exclude(module = "mockito-core")
     }
 
-    testImplementation("com.projectronin.interop:interop-common-test-db")
-    testImplementation("com.projectronin.interop.ehr:interop-ehr-liquibase")
-    testImplementation("com.projectronin.interop.queue:interop-queue-liquibase")
+    testImplementation("com.projectronin.interop:interop-common-test-db:${project.property("interopCommonVersion")}")
+    testImplementation("com.projectronin.interop.ehr:interop-ehr-liquibase:${project.property("interopEhrVersion")}")
+    testImplementation("com.projectronin.interop.queue:interop-queue-liquibase:${project.property("interopQueueVersion")}")
 
-    testImplementation("com.projectronin.interop.ehr:interop-ehr-epic")
+    testImplementation("com.projectronin.interop.ehr:interop-ehr-epic:${project.property("interopEhrVersion")}")
 
     testImplementation("com.beust:klaxon:5.5")
 }
