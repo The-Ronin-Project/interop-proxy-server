@@ -1,0 +1,34 @@
+{
+  "user": {
+    "email": "a41ce4b5fe_dummyemail@projectronin.com",
+    "id": "e7fce543-7c68-4781-ab5b-f1ce78f0dda2",
+    "patient_ronin_id": null,
+    "preferred_timezone": "America/Chicago",
+    "provider_ronin_id": "9c8fe9ba-f1bf-4982-aa8d-298a5b9e17d9",
+    "tenant_id": "peeng",
+    "tenant_name": "peeng"
+  },
+  "user_session": {
+    "expires_at": "2022-03-05T00:38:09",
+    "metadata": {
+      "epicuserid": "DDEDIC",
+      "fhirpatid": "To6NjKLPQd9Wil.PxqBhZLyblmr6skWm0lD-a-0MnMh4B",
+      "fname": "Bob",
+      "hash": "40E81CA5BF81E95A6B2842EAF1C6C3536B6A1BF9F1C66D5FABD8FF61AEB816D9",
+      "idp": "ehr",
+      "lname": "Test",
+      "maskid": "203258",
+      "mdauserid": "DDEDIC",
+      "mname": null,
+      "patid": "1234567",
+      "patient_ronin_id": "e01fe4b9-2beb-42c9-85fc-efb2a99608ba",
+      "raw_mda_token_string": "EPICUSERID=DDEDIC&MDAUSERID=DDEDIC&USERFNAME=Dzenad&USERLNAME=Dedic&USERPROVNPI=234567890&USERPROVFHIRID=TTDg.HGCROl-UD-7imNStmwB&ENV=TST&FNAME=Bob&LNAME=Test&MNAME=&PATID=1234567&FHIRPATID=To6NjKLPQd9Wil.PxqBhZLyblmr6skWm0lD-a-0MnMh4B&MASKID=203258&UTC=2022:1:4:0:38:9&HASH=40E81CA5BF81E95A6B2842EAF1C6C3536B6A1BF9F1C66D5FABD8FF61AEB816D9",
+      "userfname": "Dzenad",
+      "userlname": "Dedic",
+      "userprovfhirid": "TTDg.HGCROl-UD-7imNStmwB",
+      "userprovnpi": "234567890",
+      "utc": "2022:1:4:0:38:9"
+    },
+    "token_string": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2NDEyNTY2ODksImlzcyI6IlNla2kiLCJqdGkiOiIycjNla2dyNzQwaGptY21xbzQwMDUyODEiLCJzdWIiOiJlN2ZjZTU0My03YzY4LTQ3ODEtYWI1Yi1mMWNlNzhmMGRkYTIiLCJ0ZW5hbnRpZCI6InBlZW5nIn0.VgpwxwV6-uDCLmoYW0P3zUMFnkjKOAeueRLTJ8ZPQYk"
+  }
+}
