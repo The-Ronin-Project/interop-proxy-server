@@ -2,7 +2,6 @@ rootProject.name = "interop-proxy-server"
 
 pluginManagement {
     repositories {
-        gradlePluginPortal()
         maven {
             url = uri("https://maven.pkg.github.com/projectronin/package-repo")
             credentials {
@@ -10,6 +9,7 @@ pluginManagement {
                 password = System.getenv("PACKAGE_TOKEN")
             }
         }
-        mavenLocal()
+        mavenCentral()
+        gradlePluginPortal()
     }
 }
