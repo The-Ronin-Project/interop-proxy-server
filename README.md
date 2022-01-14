@@ -35,12 +35,13 @@ to deploy to the chosen image location. This is not currently enabled for the pr
 ./gradlew jib --image=[IMAGE_NAME]
 ```
 
-### Running integration tests
+### AppOrchard Sandbox Key
 
-First, the sandbox key has to be set as an environment variable named AO_SANDBOX_KEY. On Github, this is already taken
-care of, but it'll need to be set on your local system before you can successfully run the tests. Assuming you're
-running on a Mac, go to your home directory and look for a hidden file called .zshenv, and if it doesn't exist, create
-it. Then, add the following line to the file, replacing KEY_VALUE with whatever the key is.
+Running integration test and running locally both require the sandbox key has to be set as an environment variable named
+AO_SANDBOX_KEY. On Github, this is already taken care of, but it'll need to be set on your local system before you can
+successfully run the tests. Assuming you're running on a Mac, go to your home directory and look for a hidden file
+called .zshenv, and if it doesn't exist, create it. Then, add the following line to the file, replacing KEY_VALUE with
+whatever the key is.
 
 ```shell
 export AO_SANDBOX_KEY=KEY_VALUE
@@ -51,6 +52,8 @@ remove any newlines or comments from the key and save the file.
 
 Next, restart IntelliJ to let it pick up the change. To make sure it has, open the Terminal tab at the bottom and enter
 the command "echo $AO_SANDBOX_KEY" and it should print the value of the key.
+
+### Running integration tests
 
 Finally, you can start running the integration tests. From the command line, run:
 
@@ -84,3 +87,17 @@ preferred port number:
 
 Due to the way the arguments work, note that we do need to tell this command to use our "it" profile that is usually
 auto-defaulted by bootRun.
+
+### Running locally via Docker
+
+The proxy server can also be run via docker-compose by building the [container image](#generating-container) from jib in
+combination with the [docker compose configuration](docker-compose.yml). Additionally, you will need to have the
+interop-queue-liquibase container image for database schema deployment. Follow
+the [instructions](https://github.com/projectronin/interop-queue/tree/master/interop-queue-liquibase/README.md#building-the-docker-container-image)
+to build that image locally.
+
+Using the below command the container image and then start that container and the other dependent containers.
+
+```shell
+./gradlew jibDockerBuild && docker-compose up
+```
