@@ -1,6 +1,6 @@
 ---
 # List of Tenants and their configuration
-- mnemonic: "APP_O_SND"
+- mnemonic: "app_o_snd" #seki sends only lowercase
   batchConfig:
     availableStart: "22:00:00"
     availableEnd: "06:00:00"
@@ -14,3 +14,4 @@
     release: "1.0"
     ehrUserId: "1"
     messageType: "1"
+

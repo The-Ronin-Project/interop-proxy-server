@@ -9,11 +9,14 @@ import com.projectronin.interop.fhir.r4.valueset.AdministrativeGender
 import com.projectronin.interop.fhir.r4.valueset.ContactPointSystem
 import com.projectronin.interop.fhir.r4.valueset.ContactPointUse
 import com.projectronin.interop.fhir.r4.valueset.NameUse
+import com.projectronin.interop.proxy.server.context.INTEROP_CONTEXT_KEY
+import com.projectronin.interop.proxy.server.context.InteropGraphQLContext
 import com.projectronin.interop.queue.QueueService
 import com.projectronin.interop.queue.model.Message
 import com.projectronin.interop.queue.model.MessageType
 import com.projectronin.interop.tenant.config.TenantService
 import com.projectronin.interop.tenant.config.model.Tenant
+import graphql.schema.DataFetchingEnvironment
 import io.mockk.Runs
 import io.mockk.every
 import io.mockk.just
@@ -29,18 +32,21 @@ class PatientHandlerTest {
     private lateinit var tenantService: TenantService
     private lateinit var queueService: QueueService
     private lateinit var patientHandler: PatientHandler
+    private lateinit var dfe: DataFetchingEnvironment
 
     @BeforeEach
     fun initTest() {
         ehrFactory = mockk()
         tenantService = mockk()
         queueService = mockk()
+        dfe = mockk()
         patientHandler = PatientHandler(ehrFactory, tenantService, queueService)
     }
 
     @Test
     fun `unknown tenant returns an error`() {
         every { tenantService.getTenantForMnemonic("tenantId") } returns null
+        every { dfe.graphQlContext.get<InteropGraphQLContext>(INTEROP_CONTEXT_KEY).authzTenantId } returns "tenantId"
 
         every { queueService.enqueueMessages(listOf()) } just Runs
 
@@ -49,17 +55,64 @@ class PatientHandlerTest {
             tenantId = "tenantId",
             birthdate = "1984-08-31",
             given = "Josh",
-            family = "Smith"
+            family = "Smith",
+            dfe = dfe
         )
 
         assertNotNull(result)
-        assertEquals("Tenant not found: tenantId", result.errors[0].message)
+        assertEquals("Invalid Tenant: tenantId", result.errors[0].message)
+    }
+
+    @Test
+    fun `unauthorized user returns an error`() {
+        val tenant = mockk<Tenant>()
+        every { tenantService.getTenantForMnemonic("tenantId") } returns tenant
+        every { dfe.graphQlContext.get<InteropGraphQLContext>(INTEROP_CONTEXT_KEY).authzTenantId } returns null
+
+        every { queueService.enqueueMessages(listOf()) } just Runs
+
+        // Run Test
+        val result = patientHandler.patientsByNameAndDOB(
+            tenantId = "tenantId",
+            birthdate = "1984-08-31",
+            given = "Josh",
+            family = "Smith",
+            dfe = dfe
+        )
+
+        assertNotNull(result)
+        assertEquals("No Tenants authorized for request.", result.errors[0].message)
+    }
+
+    @Test
+    fun `unauthorized tenant returns an error`() {
+        val tenant = mockk<Tenant>()
+        every { tenantService.getTenantForMnemonic("tenantId") } returns tenant
+        every { dfe.graphQlContext.get<InteropGraphQLContext>(INTEROP_CONTEXT_KEY).authzTenantId } returns "differentTenantId"
+
+        every { queueService.enqueueMessages(listOf()) } just Runs
+
+        // Run Test
+        val result = patientHandler.patientsByNameAndDOB(
+            tenantId = "tenantId",
+            birthdate = "1984-08-31",
+            given = "Josh",
+            family = "Smith",
+            dfe = dfe
+        )
+
+        assertNotNull(result)
+        assertEquals(
+            "Requested Tenant 'tenantId' does not match authorized Tenant 'differentTenantId'",
+            result.errors[0].message
+        )
     }
 
     @Test
     fun `unknown vendor returns an error`() {
         val tenant = mockk<Tenant>()
         every { tenantService.getTenantForMnemonic("tenantId") } returns tenant
+        every { dfe.graphQlContext.get<InteropGraphQLContext>(INTEROP_CONTEXT_KEY).authzTenantId } returns "tenantId"
 
         every { ehrFactory.getVendorFactory(tenant) } throws IllegalStateException("Error")
 
@@ -70,7 +123,8 @@ class PatientHandlerTest {
             tenantId = "tenantId",
             birthdate = "1984-08-31",
             given = "Josh",
-            family = "Smith"
+            family = "Smith",
+            dfe = dfe
         )
 
         assertNotNull(result)
@@ -81,6 +135,7 @@ class PatientHandlerTest {
     fun `ensure findPatient exception is returned as error`() {
         val tenant = mockk<Tenant>()
         every { tenantService.getTenantForMnemonic("tenantId") } returns tenant
+        every { dfe.graphQlContext.get<InteropGraphQLContext>(INTEROP_CONTEXT_KEY).authzTenantId } returns "tenantId"
 
         every { ehrFactory.getVendorFactory(tenant) } returns mockk {
             every { patientService } returns mockk {
@@ -102,7 +157,8 @@ class PatientHandlerTest {
             tenantId = "tenantId",
             birthdate = "1984-08-31",
             given = "Josh",
-            family = "Smith"
+            family = "Smith",
+            dfe = dfe
         )
 
         assertNotNull(result)
@@ -153,6 +209,7 @@ class PatientHandlerTest {
 
         val tenant = mockk<Tenant>()
         every { tenantService.getTenantForMnemonic("tenantId") } returns tenant
+        every { dfe.graphQlContext.get<InteropGraphQLContext>(INTEROP_CONTEXT_KEY).authzTenantId } returns "tenantId"
 
         every { ehrFactory.getVendorFactory(tenant) } returns mockk {
             every { patientService } returns mockk {
@@ -186,7 +243,8 @@ class PatientHandlerTest {
             tenantId = "tenantId",
             birthdate = "1984-08-31",
             given = "Josh",
-            family = "Smith"
+            family = "Smith",
+            dfe = dfe
         )
 
         // Assert outcome
@@ -273,6 +331,7 @@ class PatientHandlerTest {
 
         val tenant = mockk<Tenant>()
         every { tenantService.getTenantForMnemonic("tenantId") } returns tenant
+        every { dfe.graphQlContext.get<InteropGraphQLContext>(INTEROP_CONTEXT_KEY).authzTenantId } returns "tenantId"
 
         every { ehrFactory.getVendorFactory(tenant) } returns mockk {
             every { patientService } returns mockk {
@@ -306,7 +365,8 @@ class PatientHandlerTest {
             tenantId = "tenantId",
             birthdate = "1984-08-31",
             given = "Josh",
-            family = "Smith"
+            family = "Smith",
+            dfe = dfe
         )
 
         // Assert outcome
@@ -368,6 +428,7 @@ class PatientHandlerTest {
 
         val tenant = mockk<Tenant>()
         every { tenantService.getTenantForMnemonic("tenantId") } returns tenant
+        every { dfe.graphQlContext.get<InteropGraphQLContext>(INTEROP_CONTEXT_KEY).authzTenantId } returns "tenantId"
 
         every { ehrFactory.getVendorFactory(tenant) } returns mockk {
             every { patientService } returns mockk {
@@ -401,7 +462,8 @@ class PatientHandlerTest {
             tenantId = "tenantId",
             birthdate = "1984-08-31",
             given = "Josh",
-            family = "Smith"
+            family = "Smith",
+            dfe = dfe
         )
 
         // Assert outcome
@@ -472,6 +534,7 @@ class PatientHandlerTest {
 
         val tenant = mockk<Tenant>()
         every { tenantService.getTenantForMnemonic("tenantId") } returns tenant
+        every { dfe.graphQlContext.get<InteropGraphQLContext>(INTEROP_CONTEXT_KEY).authzTenantId } returns "tenantId"
 
         every { ehrFactory.getVendorFactory(tenant) } returns mockk {
             every { patientService } returns mockk {
@@ -505,7 +568,8 @@ class PatientHandlerTest {
             tenantId = "tenantId",
             birthdate = "1984-08-31",
             given = "Josh",
-            family = "Smith"
+            family = "Smith",
+            dfe = dfe
         )
 
         // Assert outcome
@@ -550,6 +614,7 @@ class PatientHandlerTest {
 
         val tenant = mockk<Tenant>()
         every { tenantService.getTenantForMnemonic("tenantId") } returns tenant
+        every { dfe.graphQlContext.get<InteropGraphQLContext>(INTEROP_CONTEXT_KEY).authzTenantId } returns "tenantId"
 
         every { ehrFactory.getVendorFactory(tenant) } returns mockk {
             every { patientService } returns mockk {
@@ -571,7 +636,8 @@ class PatientHandlerTest {
             tenantId = "tenantId",
             birthdate = "1984-08-31",
             given = "Josh",
-            family = "Smith"
+            family = "Smith",
+            dfe = dfe
         )
 
         // Assert outcome

@@ -10,7 +10,7 @@
             },
             "text": "Test message... blah blah"
         },
-        "tenantId": "APP_O_SND"
+        "tenantId": "app_o_snd"
     },
     "query": "mutation sendMessage ($message: MessageInput!, $tenantId: String!) {sendMessage (message: $message, tenantId: $tenantId)}"
 }

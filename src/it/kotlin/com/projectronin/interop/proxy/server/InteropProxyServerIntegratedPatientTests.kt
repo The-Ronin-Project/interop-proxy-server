@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import org.junitpioneer.jupiter.SetEnvironmentVariable
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment
@@ -16,11 +17,14 @@ import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.test.context.ActiveProfiles
+import org.springframework.test.context.ContextConfiguration
 import java.net.URI
 import javax.sql.DataSource
 
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("it")
+@ContextConfiguration(initializers = [(InteropProxyServerAuthInitializer::class)])
+@SetEnvironmentVariable(key = "SERVICE_CALL_JWT_SECRET", value = "abc") // prevent Exception in AuthService.kt
 class InteropProxyServerIntegratedPatientTests {
     @LocalServerPort
     private var port = 0
@@ -35,6 +39,13 @@ class InteropProxyServerIntegratedPatientTests {
 
     init {
         httpHeaders.set("Content-Type", "application/graphql")
+        httpHeaders.set(
+            "Authorization",
+            "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2NDIxMDg1NjUsImlzcyI6IlNla2ki" +
+                "LCJqdGkiOiIycjR2MjJpM2hhY2R1cGRyNG8wMHNiZjEiLCJzdWIiOiJkMGEyMDUyMC01MjAzLTQ3Yzkt" +
+                "OTFhZS1kMzExZjgzMzllZmYiLCJ0ZW5hbnRpZCI6ImFwcF9vX3NuZCJ9.NtZEm3Zlfr-HmIFEtFQxOBp" +
+                "w8PqY0wtczvKHzkxbl_Q"
+        )
     }
 
     /**
@@ -95,7 +106,7 @@ class InteropProxyServerIntegratedPatientTests {
 
     @Test
     fun `server handles missing data`() {
-        val tenantId = "APP_O_SND"
+        val tenantId = "app_o_snd"
         val given = "Allison"
         val birthdate = "1987-01-15"
 
@@ -117,7 +128,7 @@ class InteropProxyServerIntegratedPatientTests {
 
     @Test
     fun `server handles no patient found`() {
-        val tenantId = "APP_O_SND"
+        val tenantId = "app_o_snd"
         val family = "Fake Name"
         val given = "Fake Name"
         val birthdate = "1900-01-15"

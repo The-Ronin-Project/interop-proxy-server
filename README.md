@@ -41,14 +41,16 @@ Running integration test and running locally both require the sandbox key has to
 AO_SANDBOX_KEY. On Github, this is already taken care of, but it'll need to be set on your local system before you can
 successfully run the tests. Assuming you're running on a Mac, go to your home directory and look for a hidden file
 called .zshenv, and if it doesn't exist, create it. Then, add the following line to the file, replacing KEY_VALUE with
-whatever the key is.
+whatever the key is. You will also need to add the public JWT secret used by Seki for authentication.
 
 ```shell
 export AO_SANDBOX_KEY=KEY_VALUE
+export SERVICE_CALL_JWT_SECRET=SECRET_VALUE
 ```
 
 The key can be found in the 1Password Interoperability vault under "Epic AO Sandbox Private Key (pkcs8)". Make sure to
-remove any newlines or comments from the key and save the file.
+remove any newlines or comments from the key and save the file. The secret can be found in the same place under
+'Seki JWT Secret'.
 
 Next, restart IntelliJ to let it pick up the change. To make sure it has, open the Terminal tab at the bottom and enter
 the command "echo $AO_SANDBOX_KEY" and it should print the value of the key.

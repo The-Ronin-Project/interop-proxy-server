@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import org.junitpioneer.jupiter.SetEnvironmentVariable
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.web.client.TestRestTemplate
@@ -15,10 +16,13 @@ import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.test.context.ActiveProfiles
+import org.springframework.test.context.ContextConfiguration
 import java.net.URI
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("it")
+@ContextConfiguration(initializers = [(InteropProxyServerAuthInitializer::class)])
+@SetEnvironmentVariable(key = "SERVICE_CALL_JWT_SECRET", value = "abc") // prevent Exception in AuthService.kt
 class InteropProxyServerIntegratedMessageTests {
     @LocalServerPort
     private var port = 0
@@ -30,6 +34,13 @@ class InteropProxyServerIntegratedMessageTests {
 
     init {
         httpHeaders.set("Content-Type", "application/json")
+        httpHeaders.set(
+            "Authorization",
+            "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2NDIxMDg1NjUsImlzcyI6IlNla2ki" +
+                "LCJqdGkiOiIycjR2MjJpM2hhY2R1cGRyNG8wMHNiZjEiLCJzdWIiOiJkMGEyMDUyMC01MjAzLTQ3Yzkt" +
+                "OTFhZS1kMzExZjgzMzllZmYiLCJ0ZW5hbnRpZCI6ImFwcF9vX3NuZCJ9.NtZEm3Zlfr-HmIFEtFQxOBp" +
+                "w8PqY0wtczvKHzkxbl_Q"
+        )
     }
 
     @Test
@@ -92,7 +103,7 @@ class InteropProxyServerIntegratedMessageTests {
 
     @Test
     fun `server handles epic bad data response`() {
-        val tenantId = "APP_O_SND"
+        val tenantId = "app_o_snd"
         val mrn = "fake"
         val id = "IPMD"
         val poolInd = false
@@ -132,7 +143,7 @@ class InteropProxyServerIntegratedMessageTests {
 
     @Test
     fun `server handles epic missing data`() {
-        val tenantId = "APP_O_SND"
+        val tenantId = "app_o_snd"
         val mrn = "202497"
         val id = "IPMD"
         val poolInd = false

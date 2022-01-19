@@ -29,19 +29,19 @@ dependencies {
     implementation("com.projectronin.interop.queue:interop-queue-db:${project.property("interopQueueVersion")}")
 
     implementation("org.springframework.boot:spring-boot-starter-jdbc")
-    implementation("mysql:mysql-connector-java:8.0.13")
+    implementation("mysql:mysql-connector-java:8.0.25")
 
-    implementation("com.expediagroup:graphql-kotlin-schema-generator:4.2.0")
-    implementation("com.expediagroup:graphql-kotlin-spring-server:4.2.0")
+    implementation("com.expediagroup:graphql-kotlin-schema-generator:5.3.1")
+    implementation("com.expediagroup:graphql-kotlin-spring-server:5.3.1")
 
     // Runtime Dependency on each EHR implementation.
     runtimeOnly("com.projectronin.interop.ehr:interop-ehr-epic:${project.property("interopEhrVersion")}")
 
-    testImplementation("org.springframework.boot:spring-boot-starter-test:2.5.5") {
+    testImplementation("org.springframework.boot:spring-boot-starter-test:2.6.2") {
         exclude(module = "mockito-core")
     }
-    testImplementation("com.ninja-squad:springmockk:3.0.1")
-    testImplementation("com.graphql-java-kickstart:graphql-spring-boot-starter-test:11.1.0") {
+    testImplementation("com.ninja-squad:springmockk:3.1.0")
+    testImplementation("com.graphql-java-kickstart:graphql-spring-boot-starter-test:12.0.0") {
         exclude(module = "mockito-core")
     }
 

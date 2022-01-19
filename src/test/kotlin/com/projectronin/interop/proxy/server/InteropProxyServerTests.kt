@@ -20,6 +20,7 @@ import org.springframework.test.context.ActiveProfiles
 
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
+
 class InteropProxyServerTests {
     @Autowired
     private lateinit var graphQLTestTemplate: GraphQLTestTemplate

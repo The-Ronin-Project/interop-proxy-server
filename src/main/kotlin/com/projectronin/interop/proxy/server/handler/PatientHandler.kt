@@ -1,4 +1,5 @@
 package com.projectronin.interop.proxy.server.handler
+
 import com.expediagroup.graphql.generator.annotations.GraphQLDescription
 import com.expediagroup.graphql.server.extensions.toGraphQLError
 import com.expediagroup.graphql.server.operations.Query
@@ -8,9 +9,11 @@ import com.projectronin.interop.queue.QueueService
 import com.projectronin.interop.queue.model.Message
 import com.projectronin.interop.queue.model.MessageType
 import com.projectronin.interop.tenant.config.TenantService
+import com.projectronin.interop.tenant.config.model.Tenant
 import graphql.GraphQLError
 import graphql.GraphQLException
 import graphql.execution.DataFetcherResult
+import graphql.schema.DataFetchingEnvironment
 import mu.KotlinLogging
 import org.springframework.stereotype.Component
 import com.projectronin.interop.ehr.model.Patient as EHRPatient
@@ -32,29 +35,27 @@ class PatientHandler(
         tenantId: String,
         family: String,
         given: String,
-        birthdate: String
+        birthdate: String,
+        dfe: DataFetchingEnvironment // automatically added to request calls
     ): DataFetcherResult<List<ProxyServerPatient>> {
         logger.debug { "Processing patient query for tenant: $tenantId" }
 
         // Call to patient service
         val findPatientErrors = mutableListOf<GraphQLError>()
 
-        val tenant =
-            tenantService.getTenantForMnemonic(tenantId)
-        if (tenant == null) {
-            findPatientErrors.add(GraphQLException("Tenant not found: $tenantId").toGraphQLError())
-            logger.error { "No tenant found for $tenantId" }
+        val tenant: Tenant? = try {
+            findAndValidateTenant(dfe, tenantService, tenantId)
+        } catch (e: Exception) {
+            findPatientErrors.add(GraphQLException(e.message).toGraphQLError())
+            null
         }
 
         val patients = tenant?.let {
             try {
-                val patientService = ehrFactory.getVendorFactory(tenant).patientService
+                val patientService = ehrFactory.getVendorFactory(it).patientService
 
                 patientService.findPatient(
-                    tenant = tenant,
-                    familyName = family,
-                    givenName = given,
-                    birthDate = birthdate
+                    tenant = it, familyName = family, givenName = given, birthDate = birthdate
                 ).resources
             } catch (e: Exception) {
                 findPatientErrors.add(GraphQLException(e.message).toGraphQLError())

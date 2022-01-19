@@ -9,9 +9,11 @@ import com.projectronin.interop.queue.QueueService
 import com.projectronin.interop.queue.model.Message
 import com.projectronin.interop.queue.model.MessageType
 import com.projectronin.interop.tenant.config.TenantService
+import com.projectronin.interop.tenant.config.model.Tenant
 import graphql.GraphQLError
 import graphql.GraphQLException
 import graphql.execution.DataFetcherResult
+import graphql.schema.DataFetchingEnvironment
 import mu.KotlinLogging
 import org.springframework.stereotype.Component
 import com.projectronin.interop.ehr.model.Appointment as EHRAppointment
@@ -25,8 +27,7 @@ class AppointmentHandler(
     private val ehrFactory: EHRFactory,
     private val tenantService: TenantService,
     private val queueService: QueueService
-) :
-    Query {
+) : Query {
     private val logger = KotlinLogging.logger { }
 
     @GraphQLDescription("Finds appointments for a given MRN and date range")
@@ -34,42 +35,39 @@ class AppointmentHandler(
         tenantId: String,
         mrn: String,
         startDate: String,
-        endDate: String
+        endDate: String,
+        dfe: DataFetchingEnvironment // automatically added to requests
     ): DataFetcherResult<List<ProxyServerAppointment>> {
         logger.debug { "Processing appointment query for tenant: $tenantId" }
 
-        // Call to appointment service
         val findAppointmentErrors = mutableListOf<GraphQLError>()
 
-        val tenant =
-            tenantService.getTenantForMnemonic(tenantId)
-        if (tenant == null) {
-            findAppointmentErrors.add(GraphQLException("Tenant not found: $tenantId").toGraphQLError())
-            logger.error { "No tenant found for $tenantId" }
+        // make sure requested tenant is valid
+        val tenant: Tenant? = try {
+            findAndValidateTenant(dfe, tenantService, tenantId)
+        } catch (e: Exception) {
+            findAppointmentErrors.add(GraphQLException(e.message).toGraphQLError())
+            null
         }
 
+        // request appointment list from EHR
         val appointments = tenant?.let {
             try {
-                val appointmentService = ehrFactory.getVendorFactory(tenant).appointmentService
-
+                val appointmentService = ehrFactory.getVendorFactory(it).appointmentService
                 appointmentService.findAppointments(
-                    tenant = tenant,
-                    patientMRN = mrn,
-                    startDate = startDate,
-                    endDate = endDate
+                    tenant = it, patientMRN = mrn, startDate = startDate, endDate = endDate
                 ).resources
             } catch (e: Exception) {
                 findAppointmentErrors.add(GraphQLException(e.message).toGraphQLError())
                 logger.error { "Appointment query for tenant $tenantId contains error: ${e.message}" }
-
-                listOf()
+                null
             }
         } ?: listOf()
 
         logger.debug { "Appointment query for tenant $tenantId returned" }
 
-        // Send appointments to queue service
-        try {
+        // send appointments to queue service
+        if (appointments.isNotEmpty()) try {
             queueService.enqueueMessages(
                 appointments.map {
                     Message(
@@ -87,7 +85,7 @@ class AppointmentHandler(
 
         logger.debug { "Appointments for $tenantId sent to queue" }
 
-        // Translate for return
+        // translate for return
         return DataFetcherResult.newResult<List<ProxyServerAppointment>>().data(mapEHRAppointments(appointments))
             .errors(findAppointmentErrors).build()
     }
