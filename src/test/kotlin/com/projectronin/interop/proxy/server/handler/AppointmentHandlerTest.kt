@@ -12,6 +12,7 @@ import com.projectronin.interop.queue.model.Message
 import com.projectronin.interop.queue.model.MessageType
 import com.projectronin.interop.tenant.config.TenantService
 import com.projectronin.interop.tenant.config.model.Tenant
+import com.projectronin.interop.transform.fhir.r4.util.localize
 import graphql.schema.DataFetchingEnvironment
 import io.mockk.Runs
 import io.mockk.every
@@ -22,6 +23,7 @@ import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 
 class AppointmentHandlerTest {
     private lateinit var ehrFactory: EHRFactory
@@ -45,16 +47,16 @@ class AppointmentHandlerTest {
         every { dfe.graphQlContext.get<InteropGraphQLContext>(INTEROP_CONTEXT_KEY).authzTenantId } returns "tenantId"
 
         // Run Test
-        val result = appointmentHandler.appointmentsByMRNAndDate(
-            tenantId = "tenantId",
-            mrn = "123456789",
-            startDate = "2025-01-20T13:30:00+00:00",
-            endDate = "2025-01-22T14:30:00+00:00",
-            dfe = dfe
-        )
-
-        assertNotNull(result)
-        assertEquals("Invalid Tenant: tenantId", result.errors[0].message)
+        val exception = assertThrows<IllegalArgumentException> {
+            appointmentHandler.appointmentsByMRNAndDate(
+                tenantId = "tenantId",
+                mrn = "123456789",
+                startDate = "2025-01-20T13:30:00+00:00",
+                endDate = "2025-01-22T14:30:00+00:00",
+                dfe = dfe
+            )
+        }
+        assertEquals("Invalid Tenant: tenantId", exception.message)
     }
 
     @Test
@@ -64,16 +66,17 @@ class AppointmentHandlerTest {
         every { dfe.graphQlContext.get<InteropGraphQLContext>(INTEROP_CONTEXT_KEY).authzTenantId } returns null
 
         // Run Test
-        val result = appointmentHandler.appointmentsByMRNAndDate(
-            tenantId = "tenantId",
-            mrn = "123456789",
-            startDate = "2025-01-20T13:30:00+00:00",
-            endDate = "2025-01-22T14:30:00+00:00",
-            dfe = dfe
-        )
+        val exception = assertThrows<IllegalArgumentException> {
+            appointmentHandler.appointmentsByMRNAndDate(
+                tenantId = "tenantId",
+                mrn = "123456789",
+                startDate = "2025-01-20T13:30:00+00:00",
+                endDate = "2025-01-22T14:30:00+00:00",
+                dfe = dfe
+            )
+        }
 
-        assertNotNull(result)
-        assertEquals("No Tenants authorized for request.", result.errors[0].message)
+        assertEquals("No Tenants authorized for request.", exception.message)
     }
 
     @Test
@@ -83,18 +86,19 @@ class AppointmentHandlerTest {
         every { dfe.graphQlContext.get<InteropGraphQLContext>(INTEROP_CONTEXT_KEY).authzTenantId } returns "differentTenantId"
 
         // Run Test
-        val result = appointmentHandler.appointmentsByMRNAndDate(
-            tenantId = "tenantId",
-            mrn = "123456789",
-            startDate = "2025-01-20T13:30:00+00:00",
-            endDate = "2025-01-22T14:30:00+00:00",
-            dfe = dfe
-        )
+        val exception = assertThrows<IllegalArgumentException> {
+            appointmentHandler.appointmentsByMRNAndDate(
+                tenantId = "tenantId",
+                mrn = "123456789",
+                startDate = "2025-01-20T13:30:00+00:00",
+                endDate = "2025-01-22T14:30:00+00:00",
+                dfe = dfe
+            )
+        }
 
-        assertNotNull(result)
         assertEquals(
             "Requested Tenant 'tenantId' does not match authorized Tenant 'differentTenantId'",
-            result.errors[0].message
+            exception.message
         )
     }
 
@@ -122,6 +126,7 @@ class AppointmentHandlerTest {
     @Test
     fun `ensure findAppointment exception is returned as error`() {
         val tenant = mockk<Tenant>()
+        every { tenant.mnemonic } returns "tenantId"
         every { tenantService.getTenantForMnemonic("tenantId") } returns tenant
         every { dfe.graphQlContext.get<InteropGraphQLContext>(INTEROP_CONTEXT_KEY).authzTenantId } returns "tenantId"
 
@@ -200,6 +205,7 @@ class AppointmentHandlerTest {
         }
 
         val tenant = mockk<Tenant>()
+        every { tenant.mnemonic } returns "tenantId"
         every { tenantService.getTenantForMnemonic("tenantId") } returns tenant
         every { dfe.graphQlContext.get<InteropGraphQLContext>(INTEROP_CONTEXT_KEY).authzTenantId } returns "tenantId"
 
@@ -245,7 +251,7 @@ class AppointmentHandlerTest {
         // Appointment
         assertEquals(1, actualResponse.data.size)
         val actualAppointment = actualResponse.data[0]
-        assertEquals("APPT-ID-1", actualAppointment.id)
+        assertEquals("APPT-ID-1".localize(tenant), actualAppointment.id)
         assertEquals("booked", actualAppointment.status)
         assertEquals("2025-01-21T14:30:00+00:00", actualAppointment.start)
 
@@ -327,6 +333,7 @@ class AppointmentHandlerTest {
         }
 
         val tenant = mockk<Tenant>()
+        every { tenant.mnemonic } returns "tenantId"
         every { tenantService.getTenantForMnemonic("tenantId") } returns tenant
         every { dfe.graphQlContext.get<InteropGraphQLContext>(INTEROP_CONTEXT_KEY).authzTenantId } returns "tenantId"
 
@@ -372,7 +379,7 @@ class AppointmentHandlerTest {
         // Appointment
         assertEquals(1, actualResponse.data.size)
         val actualAppointment = actualResponse.data[0]
-        assertEquals("APPT-ID-1", actualAppointment.id)
+        assertEquals("APPT-ID-1".localize(tenant), actualAppointment.id)
         assertEquals("booked", actualAppointment.status)
         assertEquals("2025-01-21T14:30:00+00:00", actualAppointment.start)
 
@@ -428,6 +435,7 @@ class AppointmentHandlerTest {
         }
 
         val tenant = mockk<Tenant>()
+        every { tenant.mnemonic } returns "tenantId"
         every { tenantService.getTenantForMnemonic("tenantId") } returns tenant
         every { dfe.graphQlContext.get<InteropGraphQLContext>(INTEROP_CONTEXT_KEY).authzTenantId } returns "tenantId"
 
@@ -473,7 +481,7 @@ class AppointmentHandlerTest {
         // Appointment
         assertEquals(1, actualResponse.data.size)
         val actualAppointment = actualResponse.data[0]
-        assertEquals("APPT-ID-1", actualAppointment.id)
+        assertEquals("APPT-ID-1".localize(tenant), actualAppointment.id)
         assertEquals("booked", actualAppointment.status)
         assertEquals("2025-01-21T14:30:00+00:00", actualAppointment.start)
 
@@ -525,6 +533,7 @@ class AppointmentHandlerTest {
         }
 
         val tenant = mockk<Tenant>()
+        every { tenant.mnemonic } returns "tenantId"
         every { tenantService.getTenantForMnemonic("tenantId") } returns tenant
         every { dfe.graphQlContext.get<InteropGraphQLContext>(INTEROP_CONTEXT_KEY).authzTenantId } returns "tenantId"
 
@@ -570,7 +579,7 @@ class AppointmentHandlerTest {
         // Appointment
         assertEquals(1, actualResponse.data.size)
         val actualAppointment = actualResponse.data[0]
-        assertEquals("APPT-ID-1", actualAppointment.id)
+        assertEquals("APPT-ID-1".localize(tenant), actualAppointment.id)
         assertEquals("", actualAppointment.status)
         assertEquals("", actualAppointment.start)
         assertNull(actualAppointment.appointmentType)
@@ -597,6 +606,7 @@ class AppointmentHandlerTest {
         }
 
         val tenant = mockk<Tenant>()
+        every { tenant.mnemonic } returns "tenantId"
         every { tenantService.getTenantForMnemonic("tenantId") } returns tenant
         every { dfe.graphQlContext.get<InteropGraphQLContext>(INTEROP_CONTEXT_KEY).authzTenantId } returns "tenantId"
 

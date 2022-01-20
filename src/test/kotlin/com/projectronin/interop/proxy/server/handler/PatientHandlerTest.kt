@@ -16,6 +16,7 @@ import com.projectronin.interop.queue.model.Message
 import com.projectronin.interop.queue.model.MessageType
 import com.projectronin.interop.tenant.config.TenantService
 import com.projectronin.interop.tenant.config.model.Tenant
+import com.projectronin.interop.transform.fhir.r4.util.localize
 import graphql.schema.DataFetchingEnvironment
 import io.mockk.Runs
 import io.mockk.every
@@ -26,6 +27,8 @@ import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
+import java.lang.IllegalArgumentException
 
 class PatientHandlerTest {
     private lateinit var ehrFactory: EHRFactory
@@ -51,16 +54,17 @@ class PatientHandlerTest {
         every { queueService.enqueueMessages(listOf()) } just Runs
 
         // Run Test
-        val result = patientHandler.patientsByNameAndDOB(
-            tenantId = "tenantId",
-            birthdate = "1984-08-31",
-            given = "Josh",
-            family = "Smith",
-            dfe = dfe
-        )
+        val exception = assertThrows<IllegalArgumentException> {
+            patientHandler.patientsByNameAndDOB(
+                tenantId = "tenantId",
+                birthdate = "1984-08-31",
+                given = "Josh",
+                family = "Smith",
+                dfe = dfe
+            )
+        }
 
-        assertNotNull(result)
-        assertEquals("Invalid Tenant: tenantId", result.errors[0].message)
+        assertEquals("Invalid Tenant: tenantId", exception.message)
     }
 
     @Test
@@ -72,16 +76,17 @@ class PatientHandlerTest {
         every { queueService.enqueueMessages(listOf()) } just Runs
 
         // Run Test
-        val result = patientHandler.patientsByNameAndDOB(
-            tenantId = "tenantId",
-            birthdate = "1984-08-31",
-            given = "Josh",
-            family = "Smith",
-            dfe = dfe
-        )
+        val exception = assertThrows<IllegalArgumentException> {
+            patientHandler.patientsByNameAndDOB(
+                tenantId = "tenantId",
+                birthdate = "1984-08-31",
+                given = "Josh",
+                family = "Smith",
+                dfe = dfe
+            )
+        }
 
-        assertNotNull(result)
-        assertEquals("No Tenants authorized for request.", result.errors[0].message)
+        assertEquals("No Tenants authorized for request.", exception.message)
     }
 
     @Test
@@ -93,18 +98,19 @@ class PatientHandlerTest {
         every { queueService.enqueueMessages(listOf()) } just Runs
 
         // Run Test
-        val result = patientHandler.patientsByNameAndDOB(
-            tenantId = "tenantId",
-            birthdate = "1984-08-31",
-            given = "Josh",
-            family = "Smith",
-            dfe = dfe
-        )
+        val exception = assertThrows<IllegalArgumentException> {
+            patientHandler.patientsByNameAndDOB(
+                tenantId = "tenantId",
+                birthdate = "1984-08-31",
+                given = "Josh",
+                family = "Smith",
+                dfe = dfe
+            )
+        }
 
-        assertNotNull(result)
         assertEquals(
             "Requested Tenant 'tenantId' does not match authorized Tenant 'differentTenantId'",
-            result.errors[0].message
+            exception.message
         )
     }
 
@@ -134,6 +140,7 @@ class PatientHandlerTest {
     @Test
     fun `ensure findPatient exception is returned as error`() {
         val tenant = mockk<Tenant>()
+        every { tenant.mnemonic } returns "tenantId"
         every { tenantService.getTenantForMnemonic("tenantId") } returns tenant
         every { dfe.graphQlContext.get<InteropGraphQLContext>(INTEROP_CONTEXT_KEY).authzTenantId } returns "tenantId"
 
@@ -208,6 +215,7 @@ class PatientHandlerTest {
         }
 
         val tenant = mockk<Tenant>()
+        every { tenant.mnemonic } returns "tenantId"
         every { tenantService.getTenantForMnemonic("tenantId") } returns tenant
         every { dfe.graphQlContext.get<InteropGraphQLContext>(INTEROP_CONTEXT_KEY).authzTenantId } returns "tenantId"
 
@@ -253,7 +261,7 @@ class PatientHandlerTest {
         // Patient
         assertEquals(1, actualResponse.data.size)
         val actualPatient = actualResponse.data[0]
-        assertEquals("Patient-UUID-1", actualPatient.id)
+        assertEquals("Patient-UUID-1".localize(tenant), actualPatient.id)
         assertEquals("male", actualPatient.gender)
         assertEquals("1984-08-31", actualPatient.birthDate) // so old
 
@@ -330,6 +338,7 @@ class PatientHandlerTest {
         }
 
         val tenant = mockk<Tenant>()
+        every { tenant.mnemonic } returns "tenantId"
         every { tenantService.getTenantForMnemonic("tenantId") } returns tenant
         every { dfe.graphQlContext.get<InteropGraphQLContext>(INTEROP_CONTEXT_KEY).authzTenantId } returns "tenantId"
 
@@ -375,7 +384,7 @@ class PatientHandlerTest {
         // Patient
         assertEquals(1, actualResponse.data.size)
         val actualPatient = actualResponse.data[0]
-        assertEquals("Patient-UUID-1", actualPatient.id)
+        assertEquals("Patient-UUID-1".localize(tenant), actualPatient.id)
         assertEquals("male", actualPatient.gender)
         assertEquals("1984-08-31", actualPatient.birthDate) // so old
 
@@ -427,6 +436,7 @@ class PatientHandlerTest {
         }
 
         val tenant = mockk<Tenant>()
+        every { tenant.mnemonic } returns "tenantId"
         every { tenantService.getTenantForMnemonic("tenantId") } returns tenant
         every { dfe.graphQlContext.get<InteropGraphQLContext>(INTEROP_CONTEXT_KEY).authzTenantId } returns "tenantId"
 
@@ -472,7 +482,7 @@ class PatientHandlerTest {
         // Patient
         assertEquals(1, actualResponse.data.size)
         val actualPatient = actualResponse.data[0]
-        assertEquals("Patient-UUID-1", actualPatient.id)
+        assertEquals("Patient-UUID-1".localize(tenant), actualPatient.id)
         assertEquals("male", actualPatient.gender)
         assertEquals("1984-08-31", actualPatient.birthDate) // so old
 
@@ -533,6 +543,7 @@ class PatientHandlerTest {
         }
 
         val tenant = mockk<Tenant>()
+        every { tenant.mnemonic } returns "tenantId"
         every { tenantService.getTenantForMnemonic("tenantId") } returns tenant
         every { dfe.graphQlContext.get<InteropGraphQLContext>(INTEROP_CONTEXT_KEY).authzTenantId } returns "tenantId"
 
@@ -578,7 +589,7 @@ class PatientHandlerTest {
         // Patient
         assertEquals(1, actualResponse.data.size)
         val actualPatient = actualResponse.data[0]
-        assertEquals("Patient-UUID-1", actualPatient.id)
+        assertEquals("Patient-UUID-1".localize(tenant), actualPatient.id)
         assertNull(actualPatient.gender)
         assertNull(actualPatient.birthDate)
 
@@ -613,6 +624,7 @@ class PatientHandlerTest {
         }
 
         val tenant = mockk<Tenant>()
+        every { tenant.mnemonic } returns "tenantId"
         every { tenantService.getTenantForMnemonic("tenantId") } returns tenant
         every { dfe.graphQlContext.get<InteropGraphQLContext>(INTEROP_CONTEXT_KEY).authzTenantId } returns "tenantId"
 

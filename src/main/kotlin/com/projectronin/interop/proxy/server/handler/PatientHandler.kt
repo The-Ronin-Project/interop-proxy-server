@@ -40,30 +40,24 @@ class PatientHandler(
     ): DataFetcherResult<List<ProxyServerPatient>> {
         logger.debug { "Processing patient query for tenant: $tenantId" }
 
-        // Call to patient service
         val findPatientErrors = mutableListOf<GraphQLError>()
 
-        val tenant: Tenant? = try {
-            findAndValidateTenant(dfe, tenantService, tenantId)
+        // make sure requested tenant is valid
+        val tenant = findAndValidateTenant(dfe, tenantService, tenantId)
+
+        // Call patient service
+        val patients = try {
+            val patientService = ehrFactory.getVendorFactory(tenant).patientService
+
+            patientService.findPatient(
+                tenant = tenant, familyName = family, givenName = given, birthDate = birthdate
+            ).resources
         } catch (e: Exception) {
             findPatientErrors.add(GraphQLException(e.message).toGraphQLError())
-            null
+            logger.error { "Patient query for tenant $tenantId contains errors" }
+
+            listOf()
         }
-
-        val patients = tenant?.let {
-            try {
-                val patientService = ehrFactory.getVendorFactory(it).patientService
-
-                patientService.findPatient(
-                    tenant = it, familyName = family, givenName = given, birthDate = birthdate
-                ).resources
-            } catch (e: Exception) {
-                findPatientErrors.add(GraphQLException(e.message).toGraphQLError())
-                logger.error { "Patient query for tenant $tenantId contains errors" }
-
-                listOf()
-            }
-        } ?: listOf()
 
         logger.debug { "Patient query for tenant $tenantId returned" }
 
@@ -87,14 +81,14 @@ class PatientHandler(
         logger.debug { "Patient results for $tenantId sent to queue" }
 
         // Translate for return
-        return DataFetcherResult.newResult<List<ProxyServerPatient>>().data(mapEHRPatients(patients))
+        return DataFetcherResult.newResult<List<ProxyServerPatient>>().data(mapEHRPatients(patients, tenant))
             .errors(findPatientErrors).build()
     }
 
     /**
      * Translates a list of [EHRPatient]s into the appropriate list of proxy server [ProxyServerPatient]s for return.
      */
-    private fun mapEHRPatients(ehrPatients: List<EHRPatient>): List<ProxyServerPatient> {
-        return ehrPatients.map { it.toProxyServerPatient() }
+    private fun mapEHRPatients(ehrPatients: List<EHRPatient>, tenant: Tenant): List<ProxyServerPatient> {
+        return ehrPatients.map { it.toProxyServerPatient(tenant) }
     }
 }

@@ -92,7 +92,7 @@ class InteropProxyServerIntegratedAppointmentTests {
         val errorJSONObject = (resultJSONObject["errors"] as JsonArray<*>)[0] as JsonObject
 
         assertEquals(HttpStatus.OK, responseEntity.statusCode)
-        assertEquals("Requested Tenant 'fake' does not match authorized Tenant 'app_o_snd'", errorJSONObject["message"])
+        assertEquals("Exception while fetching data (/appointmentsByMRNAndDate) : Requested Tenant 'fake' does not match authorized Tenant 'app_o_snd'", errorJSONObject["message"])
     }
 
     @Test

@@ -24,11 +24,8 @@ class InteropProxyServerAuthInitializer : ApplicationContextInitializer<Configur
         mockAuthWebServer.dispatcher = queueDispatcher
         try { // try/catch block necessary since the server is 'already started' after the first test
             mockAuthWebServer.start()
-        } catch (e: Exception) {
-            when (e) {
-                !is IllegalStateException -> throw e // throw other errors besides "already started"
-            }
-        }
+        } catch (_: IllegalStateException) {} // throw anything besides IllegalStateException
+
         TestPropertyValues.of(mapOf("seki.endpoint" to mockWebServerUrl))
             .applyTo(applicationContext) // overwrites the 'real' endpoint in application-it.properties
     }

@@ -1,5 +1,7 @@
 package com.projectronin.interop.proxy.server.handler
 
+import com.projectronin.interop.tenant.config.model.Tenant
+import com.projectronin.interop.transform.fhir.r4.util.localize
 import com.projectronin.interop.ehr.model.Address as EHRAddress
 import com.projectronin.interop.ehr.model.Appointment as EHRAppointment
 import com.projectronin.interop.ehr.model.CodeableConcept as EHRCodeableConcept
@@ -20,9 +22,9 @@ import com.projectronin.interop.proxy.server.model.Patient as ProxyServerPatient
 /**
  * Translate [EHRAppointment] to [ProxyServerAppointment].
  */
-fun EHRAppointment.toProxyServerAppointment(): ProxyServerAppointment {
+fun EHRAppointment.toProxyServerAppointment(tenant: Tenant): ProxyServerAppointment {
     return ProxyServerAppointment(
-        id = this.id,
+        id = this.id.localize(tenant),
         identifier = this.identifier.map { it.toProxyServerIdentifier() },
         start = this.start ?: "",
         status = this.status?.code ?: "",
@@ -67,9 +69,9 @@ fun EHRCoding.toProxyServerCoding(): ProxyServerCoding {
 /**
  * Translate [EHRPatient] to [ProxyServerPatient]
  */
-fun EHRPatient.toProxyServerPatient(): ProxyServerPatient {
+fun EHRPatient.toProxyServerPatient(tenant: Tenant): ProxyServerPatient {
     return ProxyServerPatient(
-        id = this.id,
+        id = this.id.localize(tenant),
         identifier = this.identifier.map { it.toProxyServerIdentifier() },
         name = this.name.map { it.toProxyServerHumanName() },
         birthDate = this.birthDate,

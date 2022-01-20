@@ -23,8 +23,8 @@
           }
         ],
         "birthDate": "1987-01-15",
-        "gender": "female",
-        "id": "eJzlzKe3KPzAV5TtkxmNivQ3",
+        "gender": "male",
+        "id": "app_o_snd-eJzlzKe3KPzAV5TtkxmNivQ3",
         "identifier": [
           {
             "system": "urn:oid:2.16.840.1.113883.4.1",
@@ -99,6 +99,11 @@
             "system": "phone",
             "use": "home",
             "value": "608-123-4567"
+          },
+          {
+            "system": "email",
+            "use": null,
+            "value": "jklimek@kyruus.com"
           }
         ]
       }

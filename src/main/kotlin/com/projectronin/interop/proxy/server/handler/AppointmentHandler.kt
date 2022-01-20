@@ -43,26 +43,19 @@ class AppointmentHandler(
         val findAppointmentErrors = mutableListOf<GraphQLError>()
 
         // make sure requested tenant is valid
-        val tenant: Tenant? = try {
-            findAndValidateTenant(dfe, tenantService, tenantId)
-        } catch (e: Exception) {
-            findAppointmentErrors.add(GraphQLException(e.message).toGraphQLError())
-            null
-        }
+        val tenant = findAndValidateTenant(dfe, tenantService, tenantId)
 
         // request appointment list from EHR
-        val appointments = tenant?.let {
-            try {
-                val appointmentService = ehrFactory.getVendorFactory(it).appointmentService
-                appointmentService.findAppointments(
-                    tenant = it, patientMRN = mrn, startDate = startDate, endDate = endDate
-                ).resources
-            } catch (e: Exception) {
-                findAppointmentErrors.add(GraphQLException(e.message).toGraphQLError())
-                logger.error { "Appointment query for tenant $tenantId contains error: ${e.message}" }
-                null
-            }
-        } ?: listOf()
+        val appointments = try {
+            val appointmentService = ehrFactory.getVendorFactory(tenant).appointmentService
+            appointmentService.findAppointments(
+                tenant = tenant, patientMRN = mrn, startDate = startDate, endDate = endDate
+            ).resources
+        } catch (e: Exception) {
+            findAppointmentErrors.add(GraphQLException(e.message).toGraphQLError())
+            logger.error { "Appointment query for tenant $tenantId contains error: ${e.message}" }
+            listOf()
+        }
 
         logger.debug { "Appointment query for tenant $tenantId returned" }
 
@@ -86,14 +79,18 @@ class AppointmentHandler(
         logger.debug { "Appointments for $tenantId sent to queue" }
 
         // translate for return
-        return DataFetcherResult.newResult<List<ProxyServerAppointment>>().data(mapEHRAppointments(appointments))
+        return DataFetcherResult.newResult<List<ProxyServerAppointment>>()
+            .data(mapEHRAppointments(appointments, tenant))
             .errors(findAppointmentErrors).build()
     }
 
     /**
      * Translates a list of [EHRAppointment]s into the appropriate list of proxy server [ProxyServerAppointment]s for return.
      */
-    private fun mapEHRAppointments(ehrAppointments: List<EHRAppointment>): List<ProxyServerAppointment> {
-        return ehrAppointments.map { it.toProxyServerAppointment() }
+    private fun mapEHRAppointments(
+        ehrAppointments: List<EHRAppointment>,
+        tenant: Tenant
+    ): List<ProxyServerAppointment> {
+        return ehrAppointments.map { it.toProxyServerAppointment(tenant) }
     }
 }

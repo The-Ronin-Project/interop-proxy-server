@@ -25,6 +25,7 @@ dependencies {
     implementation("com.projectronin.interop.ehr:interop-ehr-factory:${project.property("interopEhrVersion")}")
     implementation("com.projectronin.interop.ehr:interop-fhir:${project.property("interopEhrVersion")}")
     implementation("com.projectronin.interop.ehr:interop-tenant:${project.property("interopEhrVersion")}")
+    implementation("com.projectronin.interop.ehr:interop-transform:${project.property("interopEhrVersion")}")
     implementation("com.projectronin.interop.queue:interop-queue:${project.property("interopQueueVersion")}")
     implementation("com.projectronin.interop.queue:interop-queue-db:${project.property("interopQueueVersion")}")
 
