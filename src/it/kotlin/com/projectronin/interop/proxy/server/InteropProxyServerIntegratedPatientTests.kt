@@ -107,7 +107,7 @@ class InteropProxyServerIntegratedPatientTests {
 
     @Test
     fun `server handles missing data`() {
-        val tenantId = "app_o_snd"
+        val tenantId = "apposnd"
         val given = "Allison"
         val birthdate = "1987-01-15"
 
@@ -129,7 +129,7 @@ class InteropProxyServerIntegratedPatientTests {
 
     @Test
     fun `server handles no patient found`() {
-        val tenantId = "app_o_snd"
+        val tenantId = "apposnd"
         val family = "Fake Name"
         val given = "Fake Name"
         val birthdate = "1900-01-15"

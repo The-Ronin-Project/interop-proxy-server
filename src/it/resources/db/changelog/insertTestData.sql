@@ -5,7 +5,7 @@ GO
 
 insert into io_tenant
 (io_tenant_id, mnemonic, io_ehr_id, available_batch_start, available_batch_end)
-values ( 1001, 'app_o_snd', 101, '22:00:00',  '06:00:00')
+values ( 1001, 'apposnd', 101, '22:00:00',  '06:00:00')
 GO
 
 insert into io_tenant_epic

@@ -103,7 +103,7 @@ class InteropProxyServerIntegratedMessageTests {
 
     @Test
     fun `server handles epic bad data response`() {
-        val tenantId = "app_o_snd"
+        val tenantId = "apposnd"
         val mrn = "fake"
         val id = "IPMD"
         val poolInd = false
@@ -143,7 +143,7 @@ class InteropProxyServerIntegratedMessageTests {
 
     @Test
     fun `server handles epic missing data`() {
-        val tenantId = "app_o_snd"
+        val tenantId = "apposnd"
         val mrn = "202497"
         val id = "IPMD"
         val poolInd = false

@@ -5,7 +5,7 @@
     "patient_ronin_id": null,
     "preferred_timezone": "America/Chicago",
     "provider_ronin_id": "mock_provider_id",
-    "tenant_id": "app_o_snd",
+    "tenant_id": "apposnd",
     "tenant_name": "epic app orchard sandbox"
   },
   "user_session": {

@@ -92,12 +92,12 @@ class InteropProxyServerIntegratedAppointmentTests {
         val errorJSONObject = (resultJSONObject["errors"] as JsonArray<*>)[0] as JsonObject
 
         assertEquals(HttpStatus.OK, responseEntity.statusCode)
-        assertEquals("Exception while fetching data (/appointmentsByMRNAndDate) : Requested Tenant 'fake' does not match authorized Tenant 'app_o_snd'", errorJSONObject["message"])
+        assertEquals("Exception while fetching data (/appointmentsByMRNAndDate) : Requested Tenant 'fake' does not match authorized Tenant 'apposnd'", errorJSONObject["message"])
     }
 
     @Test
     fun `server handles bad mrn`() {
-        val tenantId = "app_o_snd"
+        val tenantId = "apposnd"
         val startDate = "12-01-2021"
         val endDate = "01-01-2022"
         val mrn = "FAKE_MRN"
@@ -120,7 +120,7 @@ class InteropProxyServerIntegratedAppointmentTests {
 
     @Test
     fun `server handles bad dates`() {
-        val tenantId = "app_o_snd"
+        val tenantId = "apposnd"
         val startDate = "12-01-2021"
         val endDate = "01-01-2020" // endDate before startDate
         val mrn = "202497"
@@ -143,7 +143,7 @@ class InteropProxyServerIntegratedAppointmentTests {
 
     @Test
     fun `server handles missing data`() {
-        val tenantId = "app_o_snd"
+        val tenantId = "apposnd"
         val startDate = "12-01-2021"
         val mrn = "202497"
 
@@ -165,7 +165,7 @@ class InteropProxyServerIntegratedAppointmentTests {
 
     @Test
     fun `server handles no appointment found`() {
-        val tenantId = "app_o_snd"
+        val tenantId = "apposnd"
         val startDate = "01-01-2001"
         val endDate = "12-01-2001"
         val mrn = "202497"

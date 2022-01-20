@@ -1,6 +1,6 @@
 ---
 # List of Tenants and their configuration
-- mnemonic: "app_o_snd" #seki sends only lowercase
+- mnemonic: "apposnd" #seki sends only lowercase
   batchConfig:
     availableStart: "22:00:00"
     availableEnd: "06:00:00"
