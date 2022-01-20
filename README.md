@@ -9,6 +9,10 @@ A GraphQL API server for retrieving data. This server uses [Spring Boot](https:/
 and [GraphQL Kotlin](https://opensource.expediagroup.com/graphql-kotlin/docs/) to dynamically generate a GraphQL API
 based off the defined Queries, Mutations and model classes.
 
+### Project Ronin's package repo
+
+Follow the steps [here](https://projectronin.atlassian.net/wiki/spaces/ENG/pages/1645740033/GitHub) to ensure your local machine can download the Project Ronin's artifacts. 
+
 ### Generating GraphQL schema
 
 Graphql schema is generated directly from the corresponding Kotlin data classes and persisted
