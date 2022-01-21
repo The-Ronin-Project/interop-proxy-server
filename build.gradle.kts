@@ -19,6 +19,8 @@ plugins {
     `maven-publish`
 }
 
+val tracerAgent: Configuration by configurations.creating
+
 dependencies {
     implementation("com.projectronin.interop:interop-common:${project.property("interopCommonVersion")}")
     implementation("com.projectronin.interop.ehr:interop-ehr:${project.property("interopEhrVersion")}")
@@ -34,6 +36,9 @@ dependencies {
 
     implementation("com.expediagroup:graphql-kotlin-schema-generator:5.3.1")
     implementation("com.expediagroup:graphql-kotlin-spring-server:5.3.1")
+
+    // Dependency on the datadog agent jar.
+    tracerAgent("com.datadoghq:dd-java-agent:0.92.0")
 
     // Runtime Dependency on each EHR implementation.
     runtimeOnly("com.projectronin.interop.ehr:interop-ehr-epic:${project.property("interopEhrVersion")}")
@@ -100,5 +105,39 @@ publishing {
         create<MavenPublication>("bootJava") {
             artifact(tasks.getByName("bootJar"))
         }
+    }
+}
+
+val copyTraceAgent by tasks.register<Copy>("copyTraceAgent") {
+    // Copy the tracer agent jar from the repo to a project folder.
+    from(tracerAgent.asPath)
+    into("$buildDir/tracer")
+}
+
+// Jib depends on getting the trace agent.
+tasks.jib.get().dependsOn(copyTraceAgent)
+tasks.jibDockerBuild.get().dependsOn(copyTraceAgent)
+tasks.jibBuildTar.get().dependsOn(copyTraceAgent)
+
+jib {
+    extraDirectories {
+        paths {
+            path {
+                // Pull in the tracer jar to the container image.
+                // https://github.com/GoogleContainerTools/jib/issues/2715
+                setFrom("$buildDir/tracer")
+                into = "/opt/tracer"
+            }
+        }
+    }
+    container {
+        jvmFlags = listOf("-javaagent:/opt/tracer/${tracerAgent.files.first().name}")
+        environment = mapOf(
+            "DD_SERVICE" to project.name,
+            "DD_VERSION" to "$project.version",
+            "DD_APM_ENABLED" to "false",
+            // automatically include dd.correlation_id and dd.span_id in log MDC
+            "DD_LOGS_INJECTION" to "true"
+        )
     }
 }

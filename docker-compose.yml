@@ -12,6 +12,7 @@ services:
     depends_on:
       - liquibase
       - db
+      - datadog-agent
   db:
     image: mysql/mysql-server
     container_name: db
@@ -27,4 +28,10 @@ services:
       - JDBC_URL=jdbc:mysql://queue:secret@db:3306/interop
     depends_on:
       - db
-
+  datadog-agent:
+    image: gcr.io/datadoghq/agent:7
+    environment:
+      DD_ENV: local
+      DD_APM_ENABLED: 'true'
+      DD_DOGSTATSD_NON_LOCAL_TRAFFIC: 'true'
+      DD_API_KEY: ${DD_API_KEY}
