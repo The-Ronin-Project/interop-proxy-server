@@ -79,6 +79,20 @@ type Coding {
   version: String
 }
 
+"A patient condition"
+type Condition {
+  "The category of this condition (e.g. probelm-list-item, encounter-diagnosis, etc)"
+  category: [CodeableConcept!]!
+  "The clinical status of this condition (e.g. active, relapse, recurrence, etc)"
+  clinicalStatus: CodeableConcept
+  "Identification of the condition, problem or diagnosis"
+  code: CodeableConcept!
+  "The internal identifier for this condition"
+  id: String!
+  "List of external identifiers for this condition"
+  identifier: [Identifier!]!
+}
+
 "Detail about an available form of contact with a patient"
 type ContactPoint {
   "The system of contact (e.g. phone, email, fax, etc"
@@ -133,8 +147,14 @@ type Patient {
 type Query {
   "Finds appointments for a given MRN and date range"
   appointmentsByMRNAndDate(endDate: String!, mrn: String!, startDate: String!, tenantId: String!): [Appointment!]!
+  "Finds active patient conditions for a given patient and category. Only conditions registered within the category will be returned."
+  conditionsByPatientAndCategory(conditionCategoryCode: ConditionCategoryCode!, patientFhirId: String!, tenantId: String!): [Condition!]!
   "Finds patient(s) by family name, given name, and birthdate (YYYY-mm-dd format)"
   patientsByNameAndDOB(birthdate: String!, family: String!, given: String!, tenantId: String!): [Patient!]!
+}
+
+enum ConditionCategoryCode {
+  PROBLEM_LIST_ITEM
 }
 
 "A message that should be submitted to one or more recipients"

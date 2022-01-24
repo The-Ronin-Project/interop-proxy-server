@@ -1,0 +1,31 @@
+query {
+    conditionsByPatientAndCategory(tenantId: "tenant", patientFhirId: "1234567890abcdef", conditionCategoryCode: PROBLEM_LIST_ITEM) {
+        id
+        identifier {
+            system
+            value
+        }
+        clinicalStatus {
+            coding {
+                system
+                code
+                display
+            }
+        }
+        category {
+            coding {
+                system
+                code
+                display
+            }
+        }
+        code {
+            coding {
+                system
+                code
+                display
+            }
+            text
+        }
+    }
+}

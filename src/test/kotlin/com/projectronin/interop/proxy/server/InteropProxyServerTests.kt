@@ -80,6 +80,12 @@ class InteropProxyServerTests {
     }
 
     @Test
+    fun `Server handles condition query`() {
+        val response = graphQLTestTemplate.postForResource("graphql/conditionsByPatientAndCategory.graphql")
+        assertEquals(HttpStatus.OK, response.statusCode)
+    }
+
+    @Test
     fun `Handles message input`() {
         val tenant = mockk<Tenant>()
         every { tenantService.getTenantForMnemonic("tenant") } returns tenant
