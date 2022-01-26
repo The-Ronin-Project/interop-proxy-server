@@ -2,9 +2,9 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   namespace: {{ .Release.Namespace }}
-  name: {{ include "kotlin-reference-app.fullname" . }}
+  name: {{ include "interop-proxy-server.fullname" . }}
   labels:
-    app: {{ template "kotlin-reference-app.fullname" . }}
+    app: {{ template "interop-proxy-server.fullname" . }}
     chart: {{ .Chart.Name }}-{{ .Chart.Version }}
 spec:
   replicas: {{ .Values.deployment.replicas }}
@@ -12,11 +12,11 @@ spec:
     type: RollingUpdate
   selector:
     matchLabels:
-      app: {{ template "kotlin-reference-app.fullname" . }}
+      app: {{ template "interop-proxy-server.fullname" . }}
   template:
     metadata:
       labels:
-        app: {{ template "kotlin-reference-app.fullname" . }}
+        app: {{ template "interop-proxy-server.fullname" . }}
         chart: {{ .Chart.Name }}-{{ .Chart.Version }}
       annotations:
     spec:
@@ -26,15 +26,15 @@ spec:
           whenUnsatisfiable: ScheduleAnyway
           labelSelector:
             matchLabels:
-              app: {{ template "kotlin-reference-app.fullname" . }}
+              app: {{ template "interop-proxy-server.fullname" . }}
         - maxSkew: 1
           topologyKey: topology.kubernetes.io/node
           whenUnsatisfiable: ScheduleAnyway
           labelSelector:
             matchLabels:
-              app: {{ template "kotlin-reference-app.fullname" . }}
+              app: {{ template "interop-proxy-server.fullname" . }}
       containers:
-        - name: kotlin-reference-app
+        - name: interop-proxy-server
           image: {{ .Values.image.repo }}:{{ .Values.image.tag }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           resources:
@@ -46,7 +46,7 @@ spec:
           ports:
             - containerPort: 80
           env:
-            {{- include "kotlin-reference-app.env" . | nindent 10 }}
+            {{- include "interop-proxy-server.env" . | nindent 10 }}
           livenessProbe:
             initialDelaySeconds: 30
             httpGet:

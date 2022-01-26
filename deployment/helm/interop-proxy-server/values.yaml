@@ -2,7 +2,7 @@ infra:
   env: dev
 
 image:
-  repo: "ronincloud.azurecr.io/kotlin-reference-app"
+  repo: "ronincloud.azurecr.io/interop-proxy-server"
   tag: "1.0.0"
   pullPolicy: Always
 

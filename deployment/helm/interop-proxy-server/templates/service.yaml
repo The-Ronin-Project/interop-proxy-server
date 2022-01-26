@@ -2,7 +2,7 @@ apiVersion: v1
 kind: Service
 metadata:
   namespace: {{ .Release.Namespace }}
-  name: {{ include "kotlin-reference-app.fullname" . }}
+  name: {{ include "interop-proxy-server.fullname" . }}
 spec:
   ports:
     - port: 80
@@ -10,4 +10,4 @@ spec:
       protocol: TCP
   type: ClusterIP
   selector:
-    app: {{ template "kotlin-reference-app.fullname" . }}
+    app: {{ template "interop-proxy-server.fullname" . }}
