@@ -1,0 +1,10 @@
+apiVersion: v1
+name: kotlin-reference-app
+version: 1.0.0
+description: Kotlin Reference App
+home: https://github.com/projectronin/kotlin-reference-app/tree/master/kotlin-reference-app
+sources:
+  - https://github.com/projectronin/kotlin-reference-app/tree/master/kotlin-reference-app
+maintainers:
+  - name: developer experience
+    email: developer-experience@projectronin.com

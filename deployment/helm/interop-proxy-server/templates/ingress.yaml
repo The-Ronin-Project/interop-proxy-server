@@ -1,0 +1,28 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  namespace: {{ .Release.Namespace }}
+  name: {{ include "kotlin-reference-app.fullname" . }}
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: kotlin-reference-app.{{ .Values.infra.env }}.projectronin.io
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ include "kotlin-reference-app.fullname" . }}
+                port:
+                  number: 80
+    - host: kotlin-reference-app-ds.{{ .Values.infra.env }}.projectronin.io
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ include "kotlin-reference-app.fullname" . }}
+                port:
+                  number: 80
