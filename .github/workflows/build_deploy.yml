@@ -2,7 +2,7 @@ name: Deployment to K8s
 
 on:
   push:
-    branches: [master]
+    #branches: [master]
 
 jobs:
   get-tags:
@@ -18,7 +18,7 @@ jobs:
     - name: github information
       id: git_info
       run: |
-        TAG=$(cat deployment/helm/kotlin-reference-app/Chart.yaml | grep version | egrep -o '[0-9]+\.[0-9]+\.[0-9]+')
+        TAG=$(cat deployment/helm/interop-proxy-server/Chart.yaml | grep version | egrep -o '[0-9]+\.[0-9]+\.[0-9]+')
         echo ${TAG}
         echo ::set-output name=helm_tag::$(echo "${TAG}")
 
@@ -27,7 +27,7 @@ jobs:
     env:
       repo: 'kotlin-reference-app'
       server: 'ronincloud.azurecr.io'
-      base-directory: ./api
+      base-directory: ./
       image-tag: ${{ github.sha }}
 
     steps:
@@ -54,11 +54,6 @@ jobs:
     - name: Build
       run: |
         ./gradlew jibBuildTar
-        #
-        # -PDOCKER_USERNAME=${{ secrets.ACR_USERNAME }} -PDOCKER_PASSWORD=${{ secrets.ACR_PASSWORD }}
-        # docker push spring-boot-jib
-        # docker build -t ${{ inputs.server }}/${{ inputs.repo }}:${{ inputs.image-tag }}
-        #
       working-directory: ${{ env.base-directory }}
     - name: Load, Tag, and Push
       run: |
@@ -69,7 +64,7 @@ jobs:
   helm:
     uses: projectronin/github/.github/workflows/helm_push.yml@master
     with:
-      repo: 'kotlin-reference-app'
+      repo: 'interop-proxy-server'
     secrets:
       helm-repo: ${{ secrets.HELM_REPO }}
       helm-password: ${{ secrets.HELM_PASSWORD }}
@@ -83,7 +78,7 @@ jobs:
       resource-group: rg-infra-k8s-prod
       helm-tag: ${{ needs.get-tags.outputs.helm_tag }}
       image-tag: ${{ github.sha }}
-      repo: 'kotlin-reference-app'
+      repo: 'interop-proxy-server'
     secrets:
       helm-repo: ${{ secrets.HELM_REPO }}
       helm-password: ${{ secrets.HELM_PASSWORD }}
