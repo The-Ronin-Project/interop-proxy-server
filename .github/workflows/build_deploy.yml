@@ -25,7 +25,7 @@ jobs:
   image-push:
     runs-on: self-hosted
     env:
-      repo: 'kotlin-reference-app'
+      repo: 'interop-proxy-server'
       server: 'ronincloud.azurecr.io'
       base-directory: ./
       image-tag: ${{ github.sha }}
