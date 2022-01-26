@@ -120,6 +120,7 @@ tasks.jibDockerBuild.get().dependsOn(copyTraceAgent)
 tasks.jibBuildTar.get().dependsOn(copyTraceAgent)
 
 jib {
+    image = "spring-boot-jib"
     extraDirectories {
         paths {
             path {
