@@ -29,6 +29,9 @@ jobs:
       server: 'ronincloud.azurecr.io'
       base-directory: ./
       image-tag: ${{ github.sha }}
+      PACKAGE_USER: ${{ secrets.PACKAGES_PAT_USER }}
+      PACKAGE_TOKEN: ${{ secrets.PACKAGES_PAT }}
+
 
     steps:
     - name: Check out code
