@@ -1,6 +1,34 @@
 ---
-# List of Tenants and their configuration
-- mnemonic: "apposnd" #seki sends only lowercase
+# List of Tenants and their configuration based on http://dev.projectronin.io/seki/tenants
+- mnemonic: "apposnd"
+  batchConfig:
+    availableStart: "22:00:00"
+    availableEnd: "06:00:00"
+  vendor:
+    type: "EPIC"
+    clientId: "a3da9a08-4fd4-443b-b0f5-6226547a98db"
+    serviceEndpoint: "https://apporchard.epic.com/interconnect-aocurprd-oauth"
+    authenticationConfig:
+      publicKey: "public"
+      privateKey: "${AO_SANDBOX_KEY}"
+    release: "1.0"
+    ehrUserId: "1"
+    messageType: "1"
+- mnemonic: "mdaoc"
+  batchConfig:
+    availableStart: "22:00:00"
+    availableEnd: "06:00:00"
+  vendor:
+    type: "EPIC"
+    clientId: "a3da9a08-4fd4-443b-b0f5-6226547a98db"
+    serviceEndpoint: "https://apporchard.epic.com/interconnect-aocurprd-oauth"
+    authenticationConfig:
+      publicKey: "public"
+      privateKey: "${AO_SANDBOX_KEY}"
+    release: "1.0"
+    ehrUserId: "1"
+    messageType: "1"
+- mnemonic: "peeng"
   batchConfig:
     availableStart: "22:00:00"
     availableEnd: "06:00:00"

@@ -94,6 +94,10 @@ preferred port number:
 Due to the way the arguments work, note that we do need to tell this command to use our "it" profile that is usually
 auto-defaulted by bootRun.
 
+The proxy server implements authentication via Seki, so you will need to provide one of the tenants that exist in the 
+Seki database, along with an appropriate user session Bearer token. Check the `src/it/resources/tenants.yaml` file for 
+the current list. 
+
 ### Running locally via Docker
 
 The proxy server can also be run via docker-compose by building the [container image](#generating-container) from jib in
