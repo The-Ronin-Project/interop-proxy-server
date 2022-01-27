@@ -2,21 +2,16 @@ import com.expediagroup.graphql.plugin.gradle.tasks.GraphQLGenerateSDLTask
 import org.springframework.boot.gradle.tasks.run.BootRun
 
 plugins {
+    `maven-publish`
     id("com.projectronin.interop.gradle.mockk") version "1.0.0-SNAPSHOT"
     id("com.projectronin.interop.gradle.ktorm") version "1.0.0-SNAPSHOT"
     id("com.projectronin.interop.gradle.ktor") version "1.0.0-SNAPSHOT"
     id("com.projectronin.interop.gradle.spring") version "1.0.0-SNAPSHOT"
     id("com.projectronin.interop.gradle.jackson") version "1.0.0-SNAPSHOT"
-
     id("org.springframework.boot") version "2.4.5"
-
     id("com.expediagroup.graphql") version "4.2.0"
-
     id("com.google.cloud.tools.jib") version "3.1.4"
-
     id("org.unbroken-dome.test-sets") version "4.0.0"
-
-    `maven-publish`
 }
 
 val tracerAgent: Configuration by configurations.creating
