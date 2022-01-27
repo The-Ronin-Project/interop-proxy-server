@@ -6,6 +6,7 @@ import com.projectronin.interop.ehr.model.Address as EHRAddress
 import com.projectronin.interop.ehr.model.Appointment as EHRAppointment
 import com.projectronin.interop.ehr.model.CodeableConcept as EHRCodeableConcept
 import com.projectronin.interop.ehr.model.Coding as EHRCoding
+import com.projectronin.interop.ehr.model.Condition as EHRCondition
 import com.projectronin.interop.ehr.model.ContactPoint as EHRContactPoint
 import com.projectronin.interop.ehr.model.HumanName as EHRHumanName
 import com.projectronin.interop.ehr.model.Identifier as EHRIdentifier
@@ -14,6 +15,7 @@ import com.projectronin.interop.proxy.server.model.Address as ProxyServerAddress
 import com.projectronin.interop.proxy.server.model.Appointment as ProxyServerAppointment
 import com.projectronin.interop.proxy.server.model.CodeableConcept as ProxyServerCodeableConcept
 import com.projectronin.interop.proxy.server.model.Coding as ProxyServerCoding
+import com.projectronin.interop.proxy.server.model.Condition as ProxyServerCondition
 import com.projectronin.interop.proxy.server.model.ContactPoint as ProxyServerContactPoint
 import com.projectronin.interop.proxy.server.model.HumanName as ProxyServerHumanName
 import com.projectronin.interop.proxy.server.model.Identifier as ProxyServerIdentifier
@@ -113,5 +115,20 @@ fun EHRAddress.toProxyServerAddress(): ProxyServerAddress {
         city = this.city,
         state = this.state,
         postalCode = this.postalCode
+    )
+}
+
+/**
+ * Translate [EHRCondition] to [ProxyServerCondition]
+ */
+fun EHRCondition.toProxyServerCondition(tenant: Tenant): ProxyServerCondition {
+    return ProxyServerCondition(
+        id = this.id.localize(tenant),
+        identifier = this.identifier.map { it.toProxyServerIdentifier() },
+        clinicalStatus = this.clinicalStatus?.toProxyServerCodeableConcept(),
+        category = this.category.map { it.toProxyServerCodeableConcept() },
+
+        // Code is nullable in the EHR model, but required for the proxy server response
+        code = this.code?.toProxyServerCodeableConcept() ?: ProxyServerCodeableConcept(coding = listOf(), text = "")
     )
 }

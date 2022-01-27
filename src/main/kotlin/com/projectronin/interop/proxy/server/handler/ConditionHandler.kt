@@ -1,70 +1,106 @@
 package com.projectronin.interop.proxy.server.handler
 
 import com.expediagroup.graphql.generator.annotations.GraphQLDescription
+import com.expediagroup.graphql.server.extensions.toGraphQLError
 import com.expediagroup.graphql.server.operations.Query
-import com.projectronin.interop.proxy.server.model.CodeableConcept
-import com.projectronin.interop.proxy.server.model.Coding
-import com.projectronin.interop.proxy.server.model.Condition
+import com.projectronin.interop.common.resource.ResourceType
+import com.projectronin.interop.ehr.factory.EHRFactory
 import com.projectronin.interop.proxy.server.model.ConditionCategoryCode
+import com.projectronin.interop.queue.QueueService
+import com.projectronin.interop.queue.model.Message
+import com.projectronin.interop.queue.model.MessageType
+import com.projectronin.interop.tenant.config.TenantService
+import com.projectronin.interop.tenant.config.model.Tenant
+import graphql.GraphQLError
+import graphql.GraphQLException
 import graphql.execution.DataFetcherResult
+import graphql.schema.DataFetchingEnvironment
+import mu.KotlinLogging
 import org.springframework.stereotype.Component
+import com.projectronin.interop.ehr.model.Condition as EHRCondition
+import com.projectronin.interop.proxy.server.model.Condition as ProxyServerCondition
 
 /**
  * Handler for Condition resources.
  */
 @Component
-class ConditionHandler : Query {
+class ConditionHandler(
+    private val ehrFactory: EHRFactory,
+    private val tenantService: TenantService,
+    private val queueService: QueueService
+) : Query {
+    private val logger = KotlinLogging.logger { }
+
+    /**
+     * Returns only active [ProxyServerCondition]s for the given [patientFhirId] and [conditionCategoryCode]
+     * See [Jira](https://projectronin.atlassian.net/browse/INT-284?focusedCommentId=24692)
+     */
     @GraphQLDescription("Finds active patient conditions for a given patient and category. Only conditions registered within the category will be returned.")
     fun conditionsByPatientAndCategory(
         tenantId: String,
         patientFhirId: String,
-        conditionCategoryCode: ConditionCategoryCode
-    ): DataFetcherResult<List<Condition>> {
-        val active = CodeableConcept(
-            coding = listOf(
-                Coding(
-                    system = "http://terminology.hl7.org/CodeSystem/condition-clinical",
-                    code = "active"
-                )
-            )
-        )
-        val problemList = CodeableConcept(
-            coding = listOf(
-                Coding(
-                    system = "http://terminology.hl7.org/CodeSystem/condition-category",
-                    code = "problem-list-item",
-                    display = "Problem List Item"
-                )
-            )
-        )
-        val condition1 = Condition(
-            id = "f205",
-            clinicalStatus = active,
-            category = listOf(problemList),
-            code = CodeableConcept(
-                coding = listOf(
-                    Coding(
-                        system = "http://snomed.info/sct",
-                        code = "87628006",
-                        display = "Bacterial infectious disease"
+        conditionCategoryCode: ConditionCategoryCode,
+        dfe: DataFetchingEnvironment // automatically added to request
+    ): DataFetcherResult<List<ProxyServerCondition>> {
+        logger.debug { "Processing patient query for tenant: $tenantId" }
+
+        // Make sure requested tenant is valid
+        val tenant = findAndValidateTenant(dfe, tenantService, tenantId)
+
+        val findConditionErrors = mutableListOf<GraphQLError>()
+
+        // Call condition service
+        val conditions = try {
+            val conditionService = ehrFactory.getVendorFactory(tenant).conditionService
+
+            conditionService.findConditions(
+                tenant = tenant,
+                patientFhirId = patientFhirId,
+                conditionCategoryCode = conditionCategoryCode.code,
+                clinicalStatus = "active" // We're only interested in active Conditions
+            ).resources
+        } catch (e: Exception) {
+            findConditionErrors.add(GraphQLException(e.message).toGraphQLError())
+            logger.error { "Condition query for tenant $tenantId contains errors" }
+
+            listOf()
+        }
+
+        logger.debug { "Condition query for tenant $tenantId returned" }
+
+        val countWithoutCode = conditions.count { it.code == null }
+        if (countWithoutCode > 0) {
+            logger.warn { "$countWithoutCode condition(s) returned without codes" }
+        }
+
+        // Send conditions to queue service
+        try {
+            queueService.enqueueMessages(
+                conditions.map {
+                    Message(
+                        id = null,
+                        messageType = MessageType.API,
+                        resourceType = ResourceType.CONDITION,
+                        tenant = tenantId,
+                        text = it.raw
                     )
-                )
+                }
             )
-        )
-        val condition2 = Condition(
-            id = "f001",
-            clinicalStatus = active,
-            category = listOf(problemList),
-            code = CodeableConcept(
-                coding = listOf(
-                    Coding(
-                        system = "http://snomed.info/sct",
-                        code = "368009",
-                        display = "Heart valve disorder"
-                    )
-                )
-            )
-        )
-        return DataFetcherResult.newResult<List<Condition>>().data(listOf(condition1, condition2)).build()
+        } catch (e: Exception) {
+            logger.error { "Exception sending conditions to queue: ${e.message}" }
+        }
+
+        logger.debug { "Patient results for $tenantId sent to queue" }
+
+        // Translate for return
+        return DataFetcherResult.newResult<List<ProxyServerCondition>>().data(mapEHRConditions(conditions, tenant))
+            .errors(findConditionErrors).build()
+    }
+
+    /**
+     * Translates a list of [EHRCondition]s into the appropriate list of proxy server [ProxyServerCondition]s for return.
+     */
+    private fun mapEHRConditions(ehrConditions: List<EHRCondition>, tenant: Tenant): List<ProxyServerCondition> {
+        return ehrConditions.map { it.toProxyServerCondition(tenant) }
     }
 }
