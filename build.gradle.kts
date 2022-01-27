@@ -117,7 +117,7 @@ tasks.jibBuildTar.get().dependsOn(copyTraceAgent)
 jib {
     to {
         image = "spring-boot-jib"
-        }
+    }
     extraDirectories {
         paths {
             path {
