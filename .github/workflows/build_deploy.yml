@@ -7,7 +7,6 @@ on:
     branches: [master]
 
 jobs:
-
   get-tags:
     name: Standard tags
     runs-on: ubuntu-18.04
