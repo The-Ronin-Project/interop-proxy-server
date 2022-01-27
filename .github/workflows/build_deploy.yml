@@ -1,10 +1,14 @@
 name: Deployment to K8s
 
 on:
-  push:
-    #branches: [master]
+  workflow_run:
+    workflows: [Tests]
+    types: [completed]
+    branches: [master]
+
 
 jobs:
+  if: ${{ github.event.workflow_run.conclusion == 'success' }}
   get-tags:
     name: Standard tags
     runs-on: ubuntu-18.04
