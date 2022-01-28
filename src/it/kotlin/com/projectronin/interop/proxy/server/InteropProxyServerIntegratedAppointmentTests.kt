@@ -35,13 +35,7 @@ class InteropProxyServerIntegratedAppointmentTests {
 
     init {
         httpHeaders.set("Content-Type", "application/graphql")
-        httpHeaders.set(
-            "Authorization",
-            "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2NDIxMDg1NjUsImlzcyI6IlNla2ki" +
-                "LCJqdGkiOiIycjR2MjJpM2hhY2R1cGRyNG8wMHNiZjEiLCJzdWIiOiJkMGEyMDUyMC01MjAzLTQ3Yzkt" +
-                "OTFhZS1kMzExZjgzMzllZmYiLCJ0ZW5hbnRpZCI6ImFwcF9vX3NuZCJ9.NtZEm3Zlfr-HmIFEtFQxOBp" +
-                "w8PqY0wtczvKHzkxbl_Q"
-        )
+        httpHeaders.set("Authorization", "Fake Token")
     }
 
     @Test
