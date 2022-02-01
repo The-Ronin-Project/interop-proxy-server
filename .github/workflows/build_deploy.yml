@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-18.04
     outputs:
       helm_tag: ${{ steps.git_info.outputs.helm_tag }}
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    #if: ${{ github.event.workflow_run.conclusion == 'success' }}
     steps:
     - name: Check out code
       uses: actions/checkout@v2.1.0
@@ -35,7 +35,7 @@ jobs:
       PACKAGE_USER: ${{ secrets.PACKAGES_PAT_USER }}
       PACKAGE_TOKEN: ${{ secrets.PACKAGES_PAT }}
 
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    #if: ${{ github.event.workflow_run.conclusion == 'success' }}
     steps:
     - name: Check out code
       uses: actions/checkout@v2.1.0
@@ -68,7 +68,7 @@ jobs:
         docker push ${{ env.server }}/${{ env.repo }}:${{ env.image-tag }}
       working-directory: ${{ env.base-directory }}
   helm:
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    #if: ${{ github.event.workflow_run.conclusion == 'success' }}
     uses: projectronin/github/.github/workflows/helm_push.yml@master
     with:
       repo: 'interop-proxy-server'
@@ -77,7 +77,7 @@ jobs:
       helm-password: ${{ secrets.HELM_PASSWORD }}
 
   k8s:
-    if: ${{ github.event.workflow_run.conclusion == 'success' && contains(needs.helm.result, 'success') }}
+    if: ${{ always() && contains(needs.helm.result, 'success') }}
     uses: projectronin/github/.github/workflows/k8s_deploy.yml@master
     needs: [get-tags,image-push,helm]
     with:
