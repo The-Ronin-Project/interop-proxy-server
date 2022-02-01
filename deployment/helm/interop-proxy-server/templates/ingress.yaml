@@ -1,0 +1,28 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  namespace: {{ .Release.Namespace }}
+  name: {{ include "interop-proxy-server.fullname" . }}
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: interop-proxy-server.{{ .Values.infra.env }}.projectronin.io
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ include "interop-proxy-server.fullname" . }}
+                port:
+                  number: 80
+    - host: interop-proxy-server-ds.{{ .Values.infra.env }}.projectronin.io
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ include "interop-proxy-server.fullname" . }}
+                port:
+                  number: 80

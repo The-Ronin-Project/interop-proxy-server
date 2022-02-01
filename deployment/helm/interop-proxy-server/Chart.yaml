@@ -1,0 +1,10 @@
+apiVersion: v1
+name: interop-proxy-server
+version: 1.0.0
+description: Interop Proxy Server
+home: https://github.com/projectronin/interop-proxy-server/tree/master/interop-proxy-server
+sources:
+  - https://github.com/projectronin/interop-proxy-server/tree/master/interop-proxy-server
+maintainers:
+  - name: developer experience
+    email: developer-experience@projectronin.com
