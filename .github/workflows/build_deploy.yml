@@ -75,7 +75,11 @@ jobs:
       helm-repo: ${{ secrets.HELM_REPO }}
       helm-password: ${{ secrets.HELM_PASSWORD }}
 
+ if: ${{ always() && contains(needs.helm.result, 'success') && !(contains(needs.*.result, 'failure')) }}
+
+
   k8s:
+    if: ${{ github.event.workflow_run.conclusion == 'success' && contains(needs.helm.result, 'success') }}
     uses: projectronin/github/.github/workflows/k8s_deploy.yml@master
     needs: [get-tags,image-push,helm]
     with:
