@@ -1,10 +1,11 @@
 name: Deployment to K8s
 
 on:
+  push:
   workflow_run:
     workflows: [Tests]
     types: [completed]
-    #branches: [master]
+    branches: [master]
 
 jobs:
   get-tags:
