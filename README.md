@@ -11,7 +11,7 @@ based off the defined Queries, Mutations and model classes.
 
 ### Project Ronin's package repo
 
-Follow the steps [here](https://projectronin.atlassian.net/wiki/spaces/ENG/pages/1645740033/GitHub) to ensure your local machine can download the Project Ronin's artifacts. 
+Follow the steps [here](https://projectronin.atlassian.net/wiki/spaces/ENG/pages/1645740033/GitHub) to ensure your local machine can download the Project Ronin's artifacts.
 
 ### Generating GraphQL schema
 
@@ -94,9 +94,9 @@ preferred port number:
 Due to the way the arguments work, note that we do need to tell this command to use our "it" profile that is usually
 auto-defaulted by bootRun.
 
-The proxy server implements authentication via Seki, so you will need to provide one of the tenants that exist in the 
-Seki database, along with an appropriate user session Bearer token. Check the `src/it/resources/tenants.yaml` file for 
-the current list. 
+The proxy server implements authentication via Seki, so you will need to provide one of the tenants that exist in the
+Seki database, along with an appropriate user session Bearer token. Check the `src/it/resources/tenants.yaml` file for
+the current list.
 
 ### Running locally via Docker
 
@@ -111,3 +111,10 @@ Using the below command the container image and then start that container and th
 ```shell
 ./gradlew jibDockerBuild && docker-compose up
 ```
+
+#### Code Review, Codeowners, and the PR process
+
+The current policy is that at least two approving reviews are required from the
+[codeowners](CODEOWNERS) for a PR to pass, in addition to status checks for codecov.
+
+In addition, we have set the merge policy to squash commits on a merge to master, and to automatically delete the PR branch on a succesful merge to master
