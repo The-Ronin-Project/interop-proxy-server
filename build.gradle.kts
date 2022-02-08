@@ -3,11 +3,11 @@ import org.springframework.boot.gradle.tasks.run.BootRun
 
 plugins {
     `maven-publish`
-    id("com.projectronin.interop.gradle.mockk") version "1.0.0-SNAPSHOT"
-    id("com.projectronin.interop.gradle.ktorm") version "1.0.0-SNAPSHOT"
-    id("com.projectronin.interop.gradle.ktor") version "1.0.0-SNAPSHOT"
-    id("com.projectronin.interop.gradle.spring") version "1.0.0-SNAPSHOT"
-    id("com.projectronin.interop.gradle.jackson") version "1.0.0-SNAPSHOT"
+    id("com.projectronin.interop.gradle.mockk")
+    id("com.projectronin.interop.gradle.ktorm")
+    id("com.projectronin.interop.gradle.ktor")
+    id("com.projectronin.interop.gradle.spring")
+    id("com.projectronin.interop.gradle.jackson")
     id("org.springframework.boot") version "2.4.5"
     id("com.expediagroup.graphql") version "4.2.0"
     id("com.google.cloud.tools.jib") version "3.1.4"
