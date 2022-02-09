@@ -1,6 +1,6 @@
 services:
   proxyserver:
-    image: interop-proxy-server:1.0.0-SNAPSHOT
+    image: interop-proxy-server
     environment:
       - INTEROP_TENANT_CONFIG=file:/config/tenants.yaml
       - SPRING_DATASOURCE_URL=jdbc:mysql://queue:secret@db:3306/interop

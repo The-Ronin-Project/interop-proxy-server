@@ -63,7 +63,7 @@ jobs:
     - name: Load, Tag, and Push
       run: |
         docker load --input build/jib-image.tar
-        docker tag spring-boot-jib:latest ${{ env.server }}/${{ env.repo }}:${{ env.image-tag }}
+        docker tag interop-proxy-server:latest ${{ env.server }}/${{ env.repo }}:${{ env.image-tag }}
         docker push ${{ env.server }}/${{ env.repo }}:${{ env.image-tag }}
       working-directory: ${{ env.base-directory }}
   helm:

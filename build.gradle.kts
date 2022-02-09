@@ -116,7 +116,7 @@ tasks.jibBuildTar.get().dependsOn(copyTraceAgent)
 
 jib {
     to {
-        image = "spring-boot-jib"
+        image = "interop-proxy-server"
     }
     extraDirectories {
         paths {
