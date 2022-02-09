@@ -42,7 +42,7 @@ class ConditionHandler(
         conditionCategoryCode: ConditionCategoryCode,
         dfe: DataFetchingEnvironment // automatically added to request
     ): DataFetcherResult<List<ProxyServerCondition>> {
-        logger.debug { "Processing patient query for tenant: $tenantId" }
+        logger.info { "Processing condition query for tenant: $tenantId" }
 
         // Make sure requested tenant is valid
         val tenant = findAndValidateTenant(dfe, tenantService, tenantId)
@@ -61,7 +61,7 @@ class ConditionHandler(
             ).resources
         } catch (e: Exception) {
             findConditionErrors.add(GraphQLException(e.message).toGraphQLError())
-            logger.error { "Condition query for tenant $tenantId contains errors" }
+            logger.error(e) { "Condition query for tenant $tenantId contains errors" }
 
             listOf()
         }
@@ -90,7 +90,7 @@ class ConditionHandler(
             logger.error { "Exception sending conditions to queue: ${e.message}" }
         }
 
-        logger.debug { "Patient results for $tenantId sent to queue" }
+        logger.info { "Condition results for $tenantId sent to queue" }
 
         // Translate for return
         return DataFetcherResult.newResult<List<ProxyServerCondition>>().data(mapEHRConditions(conditions, tenant))

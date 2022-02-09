@@ -53,13 +53,17 @@ class AuthService(private val client: HttpClient, @Value("\${seki.endpoint}") va
                     parameter("token", consumerToken)
                 }
 
-                httpResponse.receive<AuthResponse>()
+                val authResponse = httpResponse.receive<AuthResponse>()
+                logger.info { "User ${authResponse.user} successfully validated" }
+                authResponse
             } catch (e: Exception) {
                 if (e is ClientRequestException && e.response.status == HttpStatusCode.Unauthorized) {
-                    logger.warn { "Token not valid: ${e.message}" }
+                    // token is invalid, but we received a response back we could handle
+                    logger.warn(e) { "Token not valid: ${e.message}" }
                     null
                 } else {
-                    logger.error { "Could not validate token: ${e.message}" }
+                    // Seiki is throwing an error we can't handle and we won't be able to
+                    logger.error(e) { "Could not validate token: ${e.message}" }
                     throw e
                 }
             }

@@ -24,7 +24,7 @@ class AuthFilter(private val authService: AuthService) : WebFilter {
         val bearer = try { // substring can throw an exception
             exchange.request.headers.getFirst(AUTH_HEADER)?.substring(7) // strip the 'Bearer ' prefix
         } catch (e: Exception) {
-            KotlinLogging.logger {}.debug { e.message }
+            KotlinLogging.logger {}.warn(e) { e.message }
             null
         }
 

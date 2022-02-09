@@ -19,6 +19,7 @@ import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
 import java.net.URI
 import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("it")
@@ -41,9 +42,9 @@ class InteropProxyServerIntegratedAppointmentTests {
     @Test
     fun `server handles appointment query`() {
         val today = LocalDate.now()
-        val startDate = "${today.monthValue}-1-${today.year}"
-        val endDate =
-            "${if (today.monthValue == 12) 1 else today.monthValue + 1}-1-${if (today.monthValue == 12) today.year + 1 else today.year}"
+        val formatter = DateTimeFormatter.ofPattern("MM-dd-yyyy")
+        val startDate = today.minusMonths(4).format(formatter)
+        val endDate = today.plusMonths(1).format(formatter)
         val query = this::class.java.getResource("/graphql/epicAOTestAppointment.graphql")!!.readText()
             .replace("__START_DATE__", startDate).replace("__END_DATE__", endDate)
 

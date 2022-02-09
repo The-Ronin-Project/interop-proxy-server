@@ -38,7 +38,7 @@ class AppointmentHandler(
         endDate: String,
         dfe: DataFetchingEnvironment // automatically added to requests
     ): DataFetcherResult<List<ProxyServerAppointment>> {
-        logger.debug { "Processing appointment query for tenant: $tenantId" }
+        logger.info { "Processing appointment query for tenant: $tenantId" }
 
         val findAppointmentErrors = mutableListOf<GraphQLError>()
 
@@ -53,7 +53,7 @@ class AppointmentHandler(
             ).resources
         } catch (e: Exception) {
             findAppointmentErrors.add(GraphQLException(e.message).toGraphQLError())
-            logger.error { "Appointment query for tenant $tenantId contains error: ${e.message}" }
+            logger.error(e) { "Appointment query for tenant $tenantId contains error" }
             listOf()
         }
 
@@ -76,7 +76,7 @@ class AppointmentHandler(
             logger.error { "Exception sending appointments to queue: ${e.message}" }
         }
 
-        logger.debug { "Appointments for $tenantId sent to queue" }
+        logger.info { "Appointments for $tenantId sent to queue" }
 
         // translate for return
         return DataFetcherResult.newResult<List<ProxyServerAppointment>>()

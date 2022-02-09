@@ -38,7 +38,7 @@ class PatientHandler(
         birthdate: String,
         dfe: DataFetchingEnvironment // automatically added to request calls
     ): DataFetcherResult<List<ProxyServerPatient>> {
-        logger.debug { "Processing patient query for tenant: $tenantId" }
+        logger.info { "Processing patient query for tenant: $tenantId" }
 
         val findPatientErrors = mutableListOf<GraphQLError>()
 
