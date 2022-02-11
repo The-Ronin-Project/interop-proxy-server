@@ -4,6 +4,7 @@
   batchConfig:
     availableStart: "22:00:00"
     availableEnd: "06:00:00"
+  internalId: "1"
   vendor:
     type: "EPIC"
     clientId: "a3da9a08-4fd4-443b-b0f5-6226547a98db"
@@ -14,10 +15,13 @@
     release: "1.0"
     ehrUserId: "1"
     messageType: "1"
+    practitionerProviderSystem: "urn:oid:1.2.840.114350.1.13.0.1.7.2.836982"
+    practitionerUserSystem: "urn:oid:1.2.840.114350.1.13.0.1.7.2.697780"
 - mnemonic: "mdaoc"
   batchConfig:
     availableStart: "22:00:00"
     availableEnd: "06:00:00"
+  internalId: "2"
   vendor:
     type: "EPIC"
     clientId: "a3da9a08-4fd4-443b-b0f5-6226547a98db"
@@ -28,10 +32,13 @@
     release: "1.0"
     ehrUserId: "1"
     messageType: "1"
+    practitionerProviderSystem: "urn:oid:1.2.840.114350.1.13.0.1.7.2.836982"
+    practitionerUserSystem: "urn:oid:1.2.840.114350.1.13.0.1.7.2.697780"
 - mnemonic: "peeng"
   batchConfig:
     availableStart: "22:00:00"
     availableEnd: "06:00:00"
+  internalId: "3"
   vendor:
     type: "EPIC"
     clientId: "a3da9a08-4fd4-443b-b0f5-6226547a98db"
@@ -42,4 +49,6 @@
     release: "1.0"
     ehrUserId: "1"
     messageType: "1"
+    practitionerProviderSystem: "urn:oid:1.2.840.114350.1.13.0.1.7.2.836982"
+    practitionerUserSystem: "urn:oid:1.2.840.114350.1.13.0.1.7.2.697780"
 

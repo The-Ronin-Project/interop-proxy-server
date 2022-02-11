@@ -175,8 +175,6 @@ input MessagePatientInput {
 
 "The recipient of a message"
 input MessageRecipientInput {
-  "The ID of the message recipient"
-  id: String!
-  "True if this recipient represents a pool; otherwise, false."
-  poolInd: Boolean
+  "The FHIR ID of the message recipient"
+  fhirId: String!
 }

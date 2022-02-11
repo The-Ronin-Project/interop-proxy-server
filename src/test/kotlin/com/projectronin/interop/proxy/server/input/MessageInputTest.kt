@@ -8,8 +8,8 @@ class MessageInputTest {
     @Test
     fun `Ensure MessageInput can be created and accessed`() {
         val patient = MessagePatientInput("12345")
-        val recipient1 = MessageRecipientInput("1234", true)
-        val recipient2 = MessageRecipientInput("5678", false)
+        val recipient1 = MessageRecipientInput("1234")
+        val recipient2 = MessageRecipientInput("5678")
         val input = MessageInput("Message text", patient, listOf(recipient1, recipient2))
 
         assertThat(input.text, `is`("Message text"))

@@ -48,7 +48,7 @@ class AppointmentHandler(
         // request appointment list from EHR
         val appointments = try {
             val appointmentService = ehrFactory.getVendorFactory(tenant).appointmentService
-            appointmentService.findAppointments(
+            appointmentService.findPatientAppointments(
                 tenant = tenant, patientMRN = mrn, startDate = startDate, endDate = endDate
             ).resources
         } catch (e: Exception) {

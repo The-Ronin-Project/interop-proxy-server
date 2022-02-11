@@ -3,9 +3,12 @@ package com.projectronin.interop.proxy.server
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.graphql.spring.boot.test.GraphQLTestTemplate
 import com.ninjasquad.springmockk.MockkBean
+import com.projectronin.interop.aidbox.PractitionerService
 import com.projectronin.interop.ehr.factory.EHRFactory
 import com.projectronin.interop.ehr.inputs.EHRMessageInput
 import com.projectronin.interop.ehr.inputs.EHRRecipient
+import com.projectronin.interop.fhir.r4.datatype.CodeableConcept
+import com.projectronin.interop.fhir.r4.datatype.Identifier
 import com.projectronin.interop.tenant.config.TenantService
 import com.projectronin.interop.tenant.config.model.Tenant
 import io.mockk.every
@@ -30,6 +33,9 @@ class InteropProxyServerTests {
 
     @MockkBean
     private lateinit var ehrFactory: EHRFactory
+
+    @MockkBean
+    private lateinit var practitionerService: PractitionerService
 
     @Test
     fun `Server handles patient query`() {
@@ -63,7 +69,7 @@ class InteropProxyServerTests {
         every { ehrFactory.getVendorFactory(tenant) } returns mockk {
             every { appointmentService } returns mockk {
                 every {
-                    findAppointments(
+                    findPatientAppointments(
                         tenant,
                         "UUID-APPT-1",
                         "01-01-2020",
@@ -87,6 +93,12 @@ class InteropProxyServerTests {
 
     @Test
     fun `Handles message input`() {
+        every { practitionerService.getPractitionerIdentifiers("1234") } returns listOf(
+            Identifier(
+                value = "IdentifierID",
+                type = CodeableConcept(text = "EXTERNAL")
+            )
+        )
         val tenant = mockk<Tenant>()
         every { tenantService.getTenantForMnemonic("tenant") } returns tenant
 
@@ -95,7 +107,21 @@ class InteropProxyServerTests {
                 every {
                     sendMessage(
                         tenant,
-                        EHRMessageInput("This is my text", "12345", listOf(EHRRecipient("1234", false)))
+                        EHRMessageInput(
+                            "This is my text",
+                            "12345",
+                            listOf(
+                                EHRRecipient(
+                                    "1234",
+                                    listOf(
+                                        Identifier(
+                                            value = "IdentifierID",
+                                            type = CodeableConcept(text = "EXTERNAL")
+                                        )
+                                    )
+                                )
+                            )
+                        )
                     )
                 } returns "MessageID#1"
             }
@@ -112,7 +138,7 @@ class InteropProxyServerTests {
 
         val recipientsArray = messageInput.putArray("recipients")
         val recipientInput = objectMapper.createObjectNode()
-        recipientInput.put("id", "1234")
+        recipientInput.put("fhirId", "1234")
         recipientsArray.add(recipientInput)
 
         val objectNode = objectMapper.createObjectNode()

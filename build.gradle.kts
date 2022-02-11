@@ -23,22 +23,23 @@ dependencies {
     implementation("com.projectronin.interop.ehr:interop-tenant:${project.property("interopEhrVersion")}")
     implementation("com.projectronin.interop.ehr:interop-transform:${project.property("interopEhrVersion")}")
     implementation("com.projectronin.interop.fhir:interop-fhir:${project.property("interopFhirVersion")}")
+    implementation("com.projectronin.interop.publish:interop-aidbox:${project.property("interopPublishVersion")}")
     implementation("com.projectronin.interop.queue:interop-queue:${project.property("interopQueueVersion")}")
     implementation("com.projectronin.interop.queue:interop-queue-db:${project.property("interopQueueVersion")}")
 
     implementation("org.springframework.boot:spring-boot-starter-jdbc")
     implementation("mysql:mysql-connector-java:8.0.25")
 
-    implementation("com.expediagroup:graphql-kotlin-schema-generator:5.3.1")
-    implementation("com.expediagroup:graphql-kotlin-spring-server:5.3.1")
+    implementation("com.expediagroup:graphql-kotlin-schema-generator:5.3.2")
+    implementation("com.expediagroup:graphql-kotlin-spring-server:5.3.2")
 
     // Dependency on the datadog agent jar.
-    tracerAgent("com.datadoghq:dd-java-agent:0.92.0")
+    tracerAgent("com.datadoghq:dd-java-agent:0.94.1")
 
     // Runtime Dependency on each EHR implementation.
     runtimeOnly("com.projectronin.interop.ehr:interop-ehr-epic:${project.property("interopEhrVersion")}")
 
-    testImplementation("org.springframework.boot:spring-boot-starter-test:2.6.2") {
+    testImplementation("org.springframework.boot:spring-boot-starter-test:2.6.3") {
         exclude(module = "mockito-core")
     }
     testImplementation("com.ninja-squad:springmockk:3.1.0")

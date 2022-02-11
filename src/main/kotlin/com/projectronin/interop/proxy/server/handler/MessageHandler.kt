@@ -2,6 +2,7 @@ package com.projectronin.interop.proxy.server.handler
 
 import com.expediagroup.graphql.generator.annotations.GraphQLDescription
 import com.expediagroup.graphql.server.operations.Mutation
+import com.projectronin.interop.aidbox.PractitionerService
 import com.projectronin.interop.ehr.factory.EHRFactory
 import com.projectronin.interop.ehr.inputs.EHRMessageInput
 import com.projectronin.interop.ehr.inputs.EHRRecipient
@@ -15,7 +16,7 @@ import org.springframework.stereotype.Component
  * Handler for Message resources.
  */
 @Component
-class MessageHandler(private val ehrFactory: EHRFactory, private val tenantService: TenantService) : Mutation {
+class MessageHandler(private val ehrFactory: EHRFactory, private val tenantService: TenantService, private val practitionerService: PractitionerService) : Mutation {
     private val logger = KotlinLogging.logger { }
 
     @GraphQLDescription("Sends a message and returns the current status")
@@ -46,7 +47,7 @@ class MessageHandler(private val ehrFactory: EHRFactory, private val tenantServi
     }
 
     private fun mapEHRRecipient(recipientInput: MessageRecipientInput): EHRRecipient {
-        return recipientInput.poolInd?.let { EHRRecipient(recipientInput.id, it) }
-            ?: EHRRecipient(recipientInput.id, false)
+        val idList = practitionerService.getPractitionerIdentifiers(recipientInput.fhirId)
+        return EHRRecipient(id = recipientInput.fhirId, identifiers = idList)
     }
 }

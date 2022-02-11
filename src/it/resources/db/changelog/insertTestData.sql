@@ -9,6 +9,6 @@ values ( 1001, 'apposnd', 101, '22:00:00',  '06:00:00')
 GO
 
 insert into io_tenant_epic
-(io_tenant_id, service_endpoint, ehr_user_id, release_version, message_type)
-values ( 1001, 'https://apporchard.epic.com/interconnect-aocurprd-oauth', 1, '1.0', '1')
+(io_tenant_id, service_endpoint, ehr_user_id, release_version, message_type, practitioner_provider_system, practitioner_user_system)
+values ( 1001, 'https://apporchard.epic.com/interconnect-aocurprd-oauth', 1, '1.0', '1', 'urn:oid:1.2.840.114350.1.13.0.1.7.2.836982', 'urn:oid:1.2.840.114350.1.13.0.1.7.2.697780')
 GO

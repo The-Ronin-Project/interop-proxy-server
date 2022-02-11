@@ -133,7 +133,7 @@ class AppointmentHandlerTest {
         every { ehrFactory.getVendorFactory(tenant) } returns mockk {
             every { appointmentService } returns mockk {
                 every {
-                    findAppointments(
+                    findPatientAppointments(
                         tenant = tenant,
                         patientMRN = "123456789",
                         startDate = "2025-01-20T13:30:00+00:00",
@@ -212,7 +212,7 @@ class AppointmentHandlerTest {
         every { ehrFactory.getVendorFactory(tenant) } returns mockk {
             every { appointmentService } returns mockk {
                 every {
-                    findAppointments(
+                    findPatientAppointments(
                         tenant = tenant,
                         patientMRN = "123456789",
                         startDate = "2025-01-20T13:30:00+00:00",
@@ -340,7 +340,7 @@ class AppointmentHandlerTest {
         every { ehrFactory.getVendorFactory(tenant) } returns mockk {
             every { appointmentService } returns mockk {
                 every {
-                    findAppointments(
+                    findPatientAppointments(
                         tenant = tenant,
                         patientMRN = "123456789",
                         startDate = "2025-01-20T13:30:00+00:00",
@@ -442,7 +442,7 @@ class AppointmentHandlerTest {
         every { ehrFactory.getVendorFactory(tenant) } returns mockk {
             every { appointmentService } returns mockk {
                 every {
-                    findAppointments(
+                    findPatientAppointments(
                         tenant = tenant,
                         patientMRN = "123456789",
                         startDate = "2025-01-20T13:30:00+00:00",
@@ -540,7 +540,7 @@ class AppointmentHandlerTest {
         every { ehrFactory.getVendorFactory(tenant) } returns mockk {
             every { appointmentService } returns mockk {
                 every {
-                    findAppointments(
+                    findPatientAppointments(
                         tenant = tenant,
                         patientMRN = "123456789",
                         startDate = "2025-01-20T13:30:00+00:00",
@@ -613,7 +613,7 @@ class AppointmentHandlerTest {
         every { ehrFactory.getVendorFactory(tenant) } returns mockk {
             every { appointmentService } returns mockk {
                 every {
-                    findAppointments(
+                    findPatientAppointments(
                         tenant = tenant,
                         patientMRN = "123456789",
                         startDate = "2025-01-20T13:30:00+00:00",

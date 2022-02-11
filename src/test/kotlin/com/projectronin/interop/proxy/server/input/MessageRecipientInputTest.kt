@@ -7,8 +7,7 @@ import org.junit.jupiter.api.Test
 class MessageRecipientInputTest {
     @Test
     fun `Ensure MessageRecipientInput can be created and accessed`() {
-        val input = MessageRecipientInput("1234", true)
-        assertThat(input.id, `is`("1234"))
-        assertThat(input.poolInd!!, `is`(true))
+        val input = MessageRecipientInput("1234")
+        assertThat(input.fhirId, `is`("1234"))
     }
 }

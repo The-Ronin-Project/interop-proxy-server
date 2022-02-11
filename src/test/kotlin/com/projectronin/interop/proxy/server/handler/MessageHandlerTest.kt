@@ -1,8 +1,11 @@
 package com.projectronin.interop.proxy.server.handler
 
+import com.projectronin.interop.aidbox.PractitionerService
 import com.projectronin.interop.ehr.factory.EHRFactory
 import com.projectronin.interop.ehr.inputs.EHRMessageInput
 import com.projectronin.interop.ehr.inputs.EHRRecipient
+import com.projectronin.interop.fhir.r4.datatype.CodeableConcept
+import com.projectronin.interop.fhir.r4.datatype.Identifier
 import com.projectronin.interop.proxy.server.input.MessageInput
 import com.projectronin.interop.proxy.server.input.MessagePatientInput
 import com.projectronin.interop.proxy.server.input.MessageRecipientInput
@@ -19,12 +22,14 @@ class MessageHandlerTest {
     private lateinit var ehrFactory: EHRFactory
     private lateinit var tenantService: TenantService
     private lateinit var messageHandler: MessageHandler
+    private lateinit var practitionerService: PractitionerService
 
     @BeforeEach
     fun initTest() {
         ehrFactory = mockk()
         tenantService = mockk()
-        messageHandler = MessageHandler(ehrFactory, tenantService)
+        practitionerService = mockk()
+        messageHandler = MessageHandler(ehrFactory, tenantService, practitionerService)
     }
 
     @Test
@@ -44,7 +49,6 @@ class MessageHandlerTest {
         val tenant = mockk<Tenant>()
         every { tenantService.getTenantForMnemonic("TEST_TENANT") } returns tenant
 
-        val expectedEHRMessageInput = EHRMessageInput("Test Message", "MRN#1", listOf())
         every { ehrFactory.getVendorFactory(tenant) } throws IllegalStateException("Error")
 
         val messageInput = MessageInput("Test Message", MessagePatientInput("MRN#1"), listOf())
@@ -78,15 +82,15 @@ class MessageHandlerTest {
         val tenant = mockk<Tenant>()
         every { tenantService.getTenantForMnemonic("TEST_TENANT") } returns tenant
 
-        val expectedEHRMessageInput = EHRMessageInput("Test Message", "MRN#1", listOf(EHRRecipient("doc#1", false)))
+        val expectedEHRMessageInput = EHRMessageInput("Test Message", "MRN#1", listOf(EHRRecipient("doc#1", listOf())))
         every { ehrFactory.getVendorFactory(tenant) } returns mockk {
             every { messageService } returns mockk {
                 every { sendMessage(tenant, expectedEHRMessageInput) } returns ("messageId#1")
             }
         }
-
+        every { practitionerService.getPractitionerIdentifiers("doc#1") } returns listOf()
         val messageInput =
-            MessageInput("Test Message", MessagePatientInput("MRN#1"), listOf(MessageRecipientInput("doc#1", null)))
+            MessageInput("Test Message", MessagePatientInput("MRN#1"), listOf(MessageRecipientInput("doc#1")))
         val actualResponse = messageHandler.sendMessage("TEST_TENANT", messageInput)
 
         assertEquals("sent", actualResponse)
@@ -98,7 +102,17 @@ class MessageHandlerTest {
         every { tenantService.getTenantForMnemonic("TEST_TENANT") } returns tenant
 
         val expectedEHRMessageInput =
-            EHRMessageInput("Test Message", "MRN#1", listOf(EHRRecipient("doc#1", false), EHRRecipient("pool#1", true)))
+            EHRMessageInput(
+                "Test Message",
+                "MRN#1",
+                listOf(
+                    EHRRecipient(
+                        "doc#1",
+                        listOf(Identifier(value = "IdentifierID", type = CodeableConcept(text = "EXTERNAL")))
+                    ),
+                    EHRRecipient("pool#1", listOf())
+                )
+            )
         every { ehrFactory.getVendorFactory(tenant) } returns mockk {
             every { messageService } returns mockk {
                 every { sendMessage(tenant, expectedEHRMessageInput) } returns ("messageId#1")
@@ -108,8 +122,16 @@ class MessageHandlerTest {
             MessageInput(
                 "Test Message",
                 MessagePatientInput("MRN#1"),
-                listOf(MessageRecipientInput("doc#1", false), MessageRecipientInput("pool#1", true))
+                listOf(MessageRecipientInput("doc#1"), MessageRecipientInput("pool#1"))
             )
+
+        every { practitionerService.getPractitionerIdentifiers("doc#1") } returns listOf(
+            Identifier(
+                value = "IdentifierID",
+                type = CodeableConcept(text = "EXTERNAL")
+            )
+        )
+        every { practitionerService.getPractitionerIdentifiers("pool#1") } returns listOf()
         val actualResponse = messageHandler.sendMessage("TEST_TENANT", messageInput)
 
         assertEquals("sent", actualResponse)
