@@ -3,31 +3,53 @@ services:
     image: interop-proxy-server
     environment:
       - INTEROP_TENANT_CONFIG=file:/config/tenants.yaml
-      - SPRING_DATASOURCE_URL=jdbc:mysql://queue:secret@db:3306/interop
+      - SPRING_DATASOURCE_URL=jdbc:mysql://queue:secret@db-queue:3306/interop-queue
       - AO_SANDBOX_KEY=${AO_SANDBOX_KEY}
     volumes:
       - ./src/it/resources/:/config
     ports:
       - 8080:8080
     depends_on:
-      - liquibase
-      - db
+      - liquibase-queue
+      - db-queue
+      - liquibase-ehr
+      - db-ehr
       - datadog-agent
-  db:
+  db-queue:
     image: mysql/mysql-server
-    container_name: db
+    container_name: db-queue
     environment:
       MYSQL_RANDOM_ROOT_PASSWORD: 'yes'
-      MYSQL_DATABASE: interop
+      MYSQL_DATABASE: interop-queue
       MYSQL_USER: queue
       MYSQL_PASSWORD: secret
-  liquibase:
-    container_name: liquibase
+  liquibase-queue:
+    container_name: liquibase-queue
     image: interop-queue-liquibase
     environment:
-      - JDBC_URL=jdbc:mysql://queue:secret@db:3306/interop
+      - JDBC_URL=jdbc:mysql://queue:secret@db-queue:3306/interop-queue
     depends_on:
-      - db
+      - db-queue
+  db-ehr:
+    image: mysql/mysql-server
+    container_name: db-ehr
+    environment:
+      MYSQL_RANDOM_ROOT_PASSWORD: 'yes'
+      MYSQL_DATABASE: interop-ehr
+      MYSQL_USER: ehr
+      MYSQL_PASSWORD: secret
+  liquibase-ehr:
+    container_name: liquibase-ehr
+    image: interop-ehr-liquibase
+    environment:
+      - JDBC_URL=jdbc:mysql://ehr:secret@db-ehr:3306/interop-ehr
+      - DATA_LOAD=db/changelog/insertTestData.yaml
+    volumes:
+      - ./src/it/resources/db/changelog/:/liquibase/changelog/db/changelog
+    ports:
+      - 3306
+    depends_on:
+      - db-ehr
   datadog-agent:
     image: gcr.io/datadoghq/agent:7
     environment:

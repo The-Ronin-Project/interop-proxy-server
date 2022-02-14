@@ -102,9 +102,9 @@ the current list.
 
 The proxy server can also be run via docker-compose by building the [container image](#generating-container) from jib in
 combination with the [docker compose configuration](docker-compose.yml). Additionally, you will need to have the
-interop-queue-liquibase container image for database schema deployment. Follow
-the [instructions](https://github.com/projectronin/interop-queue/tree/master/interop-queue-liquibase/README.md#building-the-docker-container-image)
-to build that image locally.
+interop-queue-liquibase and interop-ehr-liquibase container images for database schema deployment. Follow
+the instructions [here](https://github.com/projectronin/interop-queue/tree/master/interop-queue-liquibase/README.md#building-the-docker-container-image)
+and [here](https://github.com/projectronin/interop-ehr/tree/master/interop-ehr-liquibase/README.md#building-the-docker-container-image) to build those images locally.
 
 Using the below command the container image and then start that container and the other dependent containers.
 
