@@ -8,10 +8,10 @@ plugins {
     id("com.projectronin.interop.gradle.ktor")
     id("com.projectronin.interop.gradle.spring")
     id("com.projectronin.interop.gradle.jackson")
+    id("com.projectronin.interop.gradle.integration")
     id("org.springframework.boot") version "2.4.5"
     id("com.expediagroup.graphql") version "4.2.0"
     id("com.google.cloud.tools.jib") version "3.1.4"
-    id("org.unbroken-dome.test-sets") version "4.0.0"
 }
 
 val tracerAgent: Configuration by configurations.creating
@@ -59,10 +59,6 @@ dependencies {
 
     // Allows us to change environment variables
     testImplementation("org.junit-pioneer:junit-pioneer:1.5.0")
-}
-
-testSets {
-    "it"()
 }
 
 // We need to exclude some dependencies from our it testSet

@@ -8,6 +8,7 @@ pluginManagement {
         id("com.projectronin.interop.gradle.ktorm") version interopGradleVersion
         id("com.projectronin.interop.gradle.mockk") version interopGradleVersion
         id("com.projectronin.interop.gradle.spring") version interopGradleVersion
+        id("com.projectronin.interop.gradle.integration") version interopGradleVersion
     }
 
     repositories {
