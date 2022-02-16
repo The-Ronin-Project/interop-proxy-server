@@ -1,0 +1,6 @@
+resourceType: "Practitioner"
+id: "3566c140-dafb-4db6-95f1-fb23a72c7b25"
+identifier:
+- value: IPMD
+  type:
+    text: EXTERNAL

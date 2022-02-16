@@ -5,7 +5,7 @@ import com.expediagroup.graphql.generator.annotations.GraphQLDescription
 @GraphQLDescription("An identifier intended for computation")
 data class Identifier(
     @GraphQLDescription("The namespace for the identifier")
-    val system: String,
+    val system: String?,
     @GraphQLDescription("The value.")
     val value: String
 )

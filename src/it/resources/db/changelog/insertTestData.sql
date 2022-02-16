@@ -12,3 +12,8 @@ insert into io_tenant_epic
 (io_tenant_id, service_endpoint, ehr_user_id, release_version, message_type, practitioner_provider_system, practitioner_user_system)
 values ( 1001, 'https://apporchard.epic.com/interconnect-aocurprd-oauth', 1, '1.0', '1', 'urn:oid:1.2.840.114350.1.13.0.1.7.2.836982', 'urn:oid:1.2.840.114350.1.13.0.1.7.2.697780')
 GO
+
+insert into io_tenant_provider_pool
+(io_tenant_provider_pool_id, io_tenant_id, provider_id, pool_id)
+values (10001 , 1001, "ProviderWithPool", "14600")
+GO

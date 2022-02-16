@@ -116,7 +116,7 @@ type HumanName {
 "An identifier intended for computation"
 type Identifier {
   "The namespace for the identifier"
-  system: String!
+  system: String
   "The value."
   value: String!
 }

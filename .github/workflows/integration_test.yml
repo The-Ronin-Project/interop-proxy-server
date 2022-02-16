@@ -25,3 +25,5 @@ jobs:
           PACKAGE_USER: ${{ secrets.PACKAGES_PAT_USER }}
           PACKAGE_TOKEN: ${{ secrets.PACKAGES_PAT }}
           AO_SANDBOX_KEY: ${{ secrets.AO_SANDBOX_KEY }}
+          AIDBOX_LICENSE_ID: ${{ secrets.ORG_AIDBOX_LICENSE_ID }}
+          AIDBOX_LICENSE_KEY: ${{ secrets.ORG_AIDBOX_LICENSE_KEY }}
