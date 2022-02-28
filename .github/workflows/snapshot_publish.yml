@@ -5,10 +5,7 @@ on:
 
 jobs:
   publish:
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      packages: write
+    runs-on: self-hosted
     steps:
       - uses: actions/checkout@v2
       - name: Set up JDK 11
@@ -22,5 +19,5 @@ jobs:
       - name: Publish snapshot package
         run: ./gradlew publish
         env:
-          PACKAGE_USER: ${{ secrets.PACKAGES_PAT_USER }}
-          PACKAGE_TOKEN: ${{ secrets.PACKAGES_PAT }}
+          NEXUS_USER: ${{ secrets.NEXUS_MAVEN_USER }}
+          NEXUS_TOKEN: ${{ secrets.NEXUS_MAVEN_TOKEN }}

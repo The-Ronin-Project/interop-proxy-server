@@ -27,6 +27,7 @@ dependencies {
     implementation("com.projectronin.interop.queue:interop-queue:${project.property("interopQueueVersion")}")
     implementation("com.projectronin.interop.queue:interop-queue-db:${project.property("interopQueueVersion")}")
 
+    implementation(platform("org.springframework.boot:spring-boot-parent:2.6.4"))
     implementation("org.springframework.boot:spring-boot-starter-jdbc")
     implementation("mysql:mysql-connector-java:8.0.25")
 
@@ -39,7 +40,7 @@ dependencies {
     // Runtime Dependency on each EHR implementation.
     runtimeOnly("com.projectronin.interop.ehr:interop-ehr-epic:${project.property("interopEhrVersion")}")
 
-    testImplementation("org.springframework.boot:spring-boot-starter-test:2.6.3") {
+    testImplementation("org.springframework.boot:spring-boot-starter-test") {
         exclude(module = "mockito-core")
     }
     testImplementation("com.ninja-squad:springmockk:3.1.0")
@@ -85,11 +86,15 @@ tasks.compileKotlin.get().finalizedBy(graphqlGenerateSDL)
 publishing {
     repositories {
         maven {
-            name = "GitHubPackages"
-            url = uri("https://maven.pkg.github.com/projectronin/package-repo")
+            name = "nexus"
             credentials {
-                username = System.getenv("PACKAGE_USER")
-                password = System.getenv("PACKAGE_TOKEN")
+                username = System.getenv("NEXUS_USER")
+                password = System.getenv("NEXUS_TOKEN")
+            }
+            url = if (project.version.toString().endsWith("SNAPSHOT")) {
+                uri("https://repo.devops.projectronin.io/repository/maven-snapshots/")
+            } else {
+                uri("https://repo.devops.projectronin.io/repository/maven-releases/")
             }
         }
     }

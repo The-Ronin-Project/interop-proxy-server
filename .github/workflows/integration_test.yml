@@ -6,8 +6,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
-
+    runs-on: self-hosted
     steps:
       - uses: actions/checkout@v2
       - name: Set up JDK 11
@@ -15,15 +14,11 @@ jobs:
         with:
           java-version: 11
           distribution: 'zulu'
-
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
-
       - name: Gradlew Integration Tests
         run: ./gradlew it
         env:
-          PACKAGE_USER: ${{ secrets.PACKAGES_PAT_USER }}
-          PACKAGE_TOKEN: ${{ secrets.PACKAGES_PAT }}
           AO_SANDBOX_KEY: ${{ secrets.AO_SANDBOX_KEY }}
           AIDBOX_LICENSE_ID: ${{ secrets.ORG_AIDBOX_LICENSE_ID }}
           AIDBOX_LICENSE_KEY: ${{ secrets.ORG_AIDBOX_LICENSE_KEY }}

@@ -4,11 +4,15 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.graphql.spring.boot.test.GraphQLTestTemplate
 import com.ninjasquad.springmockk.MockkBean
 import com.projectronin.interop.aidbox.PractitionerService
+import com.projectronin.interop.common.exceptions.VendorIdentifierNotFoundException
 import com.projectronin.interop.ehr.factory.EHRFactory
 import com.projectronin.interop.ehr.inputs.EHRMessageInput
 import com.projectronin.interop.ehr.inputs.EHRRecipient
-import com.projectronin.interop.fhir.r4.datatype.CodeableConcept
+import com.projectronin.interop.ehr.inputs.FHIRIdentifiers
+import com.projectronin.interop.ehr.inputs.IdentifierVendorIdentifier
 import com.projectronin.interop.fhir.r4.datatype.Identifier
+import com.projectronin.interop.fhir.r4.datatype.primitive.Id
+import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
 import com.projectronin.interop.tenant.config.TenantService
 import com.projectronin.interop.tenant.config.model.Tenant
 import io.mockk.every
@@ -93,12 +97,9 @@ class InteropProxyServerTests {
 
     @Test
     fun `Handles message input`() {
-        every { practitionerService.getPractitionerIdentifiers("1234") } returns listOf(
-            Identifier(
-                value = "IdentifierID",
-                type = CodeableConcept(text = "EXTERNAL")
-            )
-        )
+        val identifier = Identifier(value = "IdentifierID", system = Uri("system"))
+
+        every { practitionerService.getPractitionerIdentifiers("1234") } returns listOf(identifier)
         val tenant = mockk<Tenant>()
         every { tenantService.getTenantForMnemonic("tenant") } returns tenant
 
@@ -113,17 +114,32 @@ class InteropProxyServerTests {
                             listOf(
                                 EHRRecipient(
                                     "1234",
-                                    listOf(
-                                        Identifier(
-                                            value = "IdentifierID",
-                                            type = CodeableConcept(text = "EXTERNAL")
-                                        )
-                                    )
+                                    IdentifierVendorIdentifier(identifier)
                                 )
                             )
                         )
                     )
                 } returns "MessageID#1"
+            }
+            every { identifierService } returns mockk {
+                every {
+                    getPractitionerUserIdentifier(
+                        tenant,
+                        FHIRIdentifiers(
+                            id = Id("1234"),
+                            identifiers = listOf(identifier)
+                        )
+                    )
+                } returns (IdentifierVendorIdentifier(identifier))
+                every {
+                    getPractitionerUserIdentifier(
+                        tenant,
+                        FHIRIdentifiers(
+                            id = Id("1234"),
+                            identifiers = listOf()
+                        )
+                    )
+                } throws (VendorIdentifierNotFoundException("Error"))
             }
         }
 

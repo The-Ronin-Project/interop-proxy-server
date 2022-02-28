@@ -2,5 +2,6 @@ resourceType: "Practitioner"
 id: "c305eedb-96e4-401e-be0f-b34995638d42"
 identifier:
 - value: ProviderWithPool
+  system: urn:oid:1.2.840.114350.1.13.0.1.7.2.697780
   type:
     text: EXTERNAL
