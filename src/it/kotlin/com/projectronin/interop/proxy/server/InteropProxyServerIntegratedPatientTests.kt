@@ -33,7 +33,7 @@ class InteropProxyServerIntegratedPatientTests {
     private lateinit var restTemplate: TestRestTemplate
 
     @Autowired
-    private lateinit var dataSource: DataSource
+    private lateinit var ehrDatasource: DataSource
 
     private val httpHeaders = HttpHeaders()
 
@@ -48,7 +48,7 @@ class InteropProxyServerIntegratedPatientTests {
      */
     @Test
     fun `check private key is set correctly`() {
-        val connection = dataSource.connection
+        val connection = ehrDatasource.connection
 
         val resultSet =
             connection.createStatement().executeQuery("select private_key from io_ehr where io_ehr_id = 101;")

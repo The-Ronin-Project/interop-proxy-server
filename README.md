@@ -11,7 +11,8 @@ based off the defined Queries, Mutations and model classes.
 
 ### Project Ronin's package repo
 
-Follow the steps [here](https://projectronin.atlassian.net/wiki/spaces/ENG/pages/1645740033/GitHub) to ensure your local machine can download the Project Ronin's artifacts.
+Follow the steps [here](https://projectronin.atlassian.net/wiki/spaces/ENG/pages/1645740033/GitHub) to ensure your local
+machine can download the Project Ronin's artifacts.
 
 ### Generating GraphQL schema
 
@@ -39,6 +40,8 @@ to deploy to the chosen image location. This is not currently enabled for the pr
 ./gradlew jib --image=[IMAGE_NAME]
 ```
 
+## Dependent Configuration
+
 ### AppOrchard Sandbox Key
 
 Running integration test and running locally both require the sandbox key has to be set as an environment variable named
@@ -58,6 +61,15 @@ remove any newlines or comments from the key and save the file. The secret can b
 
 Next, restart IntelliJ to let it pick up the change. To make sure it has, open the Terminal tab at the bottom and enter
 the command "echo $AO_SANDBOX_KEY" and it should print the value of the key.
+
+### Datasources
+
+This service is also dependent on two independent databases that can be configured by the corresponding spring boot
+[data source configuration](https://docs.spring.io/spring-boot/docs/2.1.x/reference/html/howto-data-access.html). These
+databases are for the interop-ehr (tenant) and interop-queue services and require the ```spring.ehr.datasource```
+and ```spring.ehr.datasource``` prefixes, respectively.
+
+## Running the Service
 
 ### Running integration tests
 
@@ -102,9 +114,10 @@ the current list.
 
 The proxy server can also be run via docker-compose by building the [container image](#generating-container) from jib in
 combination with the [docker compose configuration](docker-compose.yml). Additionally, you will need to have the
-interop-queue-liquibase and interop-ehr-liquibase container images for database schema deployment. Follow
-the instructions [here](https://github.com/projectronin/interop-queue/tree/master/interop-queue-liquibase/README.md#building-the-docker-container-image)
-and [here](https://github.com/projectronin/interop-ehr/tree/master/interop-ehr-liquibase/README.md#building-the-docker-container-image) to build those images locally.
+interop-queue-liquibase and interop-ehr-liquibase container images for database schema deployment. Follow the
+instructions [here](https://github.com/projectronin/interop-queue/tree/master/interop-queue-liquibase/README.md#building-the-docker-container-image)
+and [here](https://github.com/projectronin/interop-ehr/tree/master/interop-ehr-liquibase/README.md#building-the-docker-container-image)
+to build those images locally.
 
 Using the below command the container image and then start that container and the other dependent containers.
 
@@ -117,4 +130,5 @@ Using the below command the container image and then start that container and th
 The current policy is that at least two approving reviews are required from the
 [codeowners](CODEOWNERS) for a PR to pass, in addition to status checks for codecov.
 
-In addition, we have set the merge policy to squash commits on a merge to master, and to automatically delete the PR branch on a succesful merge to master
+In addition, we have set the merge policy to squash commits on a merge to master, and to automatically delete the PR
+branch on a succesful merge to master
