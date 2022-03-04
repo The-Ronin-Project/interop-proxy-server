@@ -4,6 +4,7 @@ import com.projectronin.interop.common.resource.ResourceType
 import com.projectronin.interop.ehr.factory.EHRFactory
 import com.projectronin.interop.ehr.model.Appointment
 import com.projectronin.interop.ehr.model.Bundle
+import com.projectronin.interop.ehr.model.Reference
 import com.projectronin.interop.fhir.r4.valueset.AppointmentStatus
 import com.projectronin.interop.proxy.server.context.INTEROP_CONTEXT_KEY
 import com.projectronin.interop.proxy.server.context.InteropGraphQLContext
@@ -200,6 +201,22 @@ class AppointmentHandlerTest {
                     )
                     every { start } returns "2025-01-21T14:30:00+00:00"
                     every { raw } returns "raw JSON for appointment"
+                    every { participants } returns listOf(
+                        mockk {
+                            every { actor } returns mockk {
+                                every { reference } returns "test-reference"
+                                every { display } returns "test-display"
+                                every { type } returns Reference.ReferenceType.Provider
+                                every { id } returns mockk {
+                                    every { value } returns "test-id"
+                                }
+                                every { identifier } returns mockk {
+                                    every { system } returns "test-system"
+                                    every { value } returns "test-value"
+                                }
+                            }
+                        }
+                    )
                 }
             )
         }
@@ -284,6 +301,8 @@ class AppointmentHandlerTest {
         assertEquals("test-service-type", actualServiceTypeCoding.display)
         assertEquals(true, actualServiceTypeCoding.userSelected)
         assertEquals("service-type-text", actualServiceTypeCC.text)
+        assertEquals(1, actualAppointment.providers.size)
+        assertEquals("test-id", actualAppointment.providers[0].actor.id?.value)
     }
 
     @Test
@@ -328,6 +347,7 @@ class AppointmentHandlerTest {
                     )
                     every { start } returns "2025-01-21T14:30:00+00:00"
                     every { raw } returns "raw JSON for appointment"
+                    every { participants } returns listOf()
                 }
             )
         }
@@ -412,6 +432,7 @@ class AppointmentHandlerTest {
         assertEquals("test-service-type", actualServiceTypeCoding.display)
         assertEquals(true, actualServiceTypeCoding.userSelected)
         assertEquals("service-type-text", actualServiceTypeCC.text)
+        assertEquals(0, actualAppointment.providers.size)
     }
 
     @Test
@@ -430,6 +451,7 @@ class AppointmentHandlerTest {
                     every { serviceType } returns listOf()
                     every { start } returns "2025-01-21T14:30:00+00:00"
                     every { raw } returns "raw JSON for appointment"
+                    every { participants } returns listOf()
                 }
             )
         }
@@ -528,6 +550,7 @@ class AppointmentHandlerTest {
                     )
                     every { start } returns null
                     every { raw } returns "raw JSON for appointment"
+                    every { participants } returns listOf()
                 }
             )
         }
@@ -583,6 +606,7 @@ class AppointmentHandlerTest {
         assertEquals("", actualAppointment.status)
         assertEquals("", actualAppointment.start)
         assertNull(actualAppointment.appointmentType)
+        assertEquals(0, actualAppointment.providers.size)
 
         // Service Type
         val actualServiceType = actualAppointment.serviceType
@@ -635,5 +659,110 @@ class AppointmentHandlerTest {
         // Check results
         assertNotNull(actualResponse)
         assertEquals(0, actualResponse.data.size)
+    }
+
+    @Test
+    fun `ensure appointment with partial references return`() {
+        // Mock response
+        val response = mockk<Bundle<Appointment>> {
+            every { resources } returns listOf(
+                mockk {
+                    every { id } returns "APPT-ID-1"
+                    every { identifier } returns listOf()
+                    every { status } returns AppointmentStatus.BOOKED
+                    every { appointmentType } returns mockk {
+                        every { coding } returns listOf()
+                        every { text } returns "appt-type-text"
+                    }
+                    every { serviceType } returns listOf()
+                    every { start } returns "2025-01-21T14:30:00+00:00"
+                    every { raw } returns "raw JSON for appointment"
+                    every { participants } returns listOf(
+                        mockk {
+                            every { actor } returns mockk {
+                                every { reference } returns "test-reference"
+                                every { display } returns "test-display"
+                                every { type } returns Reference.ReferenceType.Provider
+                                every { id } returns null
+                                every { identifier } returns null
+                            }
+                        },
+                        mockk {
+                            every { actor } returns mockk {
+                                every { reference } returns "test-reference"
+                                every { display } returns "test-display"
+                                every { type } returns null
+                                every { id } returns null
+                                every { identifier } returns null
+                            }
+                        }
+                    )
+                }
+            )
+        }
+
+        val tenant = mockk<Tenant>()
+        every { tenant.mnemonic } returns "tenantId"
+        every { tenantService.getTenantForMnemonic("tenantId") } returns tenant
+        every { dfe.graphQlContext.get<InteropGraphQLContext>(INTEROP_CONTEXT_KEY).authzTenantId } returns "tenantId"
+
+        every { ehrFactory.getVendorFactory(tenant) } returns mockk {
+            every { appointmentService } returns mockk {
+                every {
+                    findPatientAppointments(
+                        tenant = tenant,
+                        patientMRN = "123456789",
+                        startDate = "2025-01-20T13:30:00+00:00",
+                        endDate = "2025-01-22T14:30:00+00:00"
+                    )
+                } returns response
+            }
+        }
+
+        every {
+            queueService.enqueueMessages(
+                listOf(
+                    Message(
+                        id = null,
+                        messageType = MessageType.API,
+                        resourceType = ResourceType.APPOINTMENT,
+                        tenant = "tenantId",
+                        text = "raw JSON for appointment"
+                    )
+                )
+            )
+        } just Runs
+
+        // Run test
+        val actualResponse = appointmentHandler.appointmentsByMRNAndDate(
+            tenantId = "tenantId",
+            mrn = "123456789",
+            startDate = "2025-01-20T13:30:00+00:00",
+            endDate = "2025-01-22T14:30:00+00:00",
+            dfe = dfe
+        )
+
+        // Check results
+        assertNotNull(actualResponse)
+
+        // Appointment
+        assertEquals(1, actualResponse.data.size)
+        val actualAppointment = actualResponse.data[0]
+        assertEquals("APPT-ID-1".localize(tenant), actualAppointment.id)
+        assertEquals("booked", actualAppointment.status)
+        assertEquals("2025-01-21T14:30:00+00:00", actualAppointment.start)
+        assertEquals(1, actualAppointment.providers.size)
+        assertEquals("test-display", actualAppointment.providers[0].actor.display)
+
+        // Identifier
+        assertEquals(0, actualAppointment.identifier.size)
+
+        // Appointment Type
+        val actualAppointmentType = actualAppointment.appointmentType!!
+        assertEquals(0, actualAppointmentType.coding.size)
+
+        // Service Type
+        val actualServiceType = actualAppointment.serviceType
+        assertEquals(0, actualServiceType.size)
     }
 }

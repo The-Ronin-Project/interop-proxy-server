@@ -1,7 +1,9 @@
 package com.projectronin.interop.proxy.server.handler
 
+import com.projectronin.interop.ehr.model.Reference
 import com.projectronin.interop.tenant.config.model.Tenant
 import com.projectronin.interop.transform.fhir.r4.util.localize
+import mu.KotlinLogging
 import com.projectronin.interop.ehr.model.Address as EHRAddress
 import com.projectronin.interop.ehr.model.Appointment as EHRAppointment
 import com.projectronin.interop.ehr.model.CodeableConcept as EHRCodeableConcept
@@ -10,6 +12,7 @@ import com.projectronin.interop.ehr.model.Condition as EHRCondition
 import com.projectronin.interop.ehr.model.ContactPoint as EHRContactPoint
 import com.projectronin.interop.ehr.model.HumanName as EHRHumanName
 import com.projectronin.interop.ehr.model.Identifier as EHRIdentifier
+import com.projectronin.interop.ehr.model.Participant as EHRParticipant
 import com.projectronin.interop.ehr.model.Patient as EHRPatient
 import com.projectronin.interop.proxy.server.model.Address as ProxyServerAddress
 import com.projectronin.interop.proxy.server.model.Appointment as ProxyServerAppointment
@@ -19,7 +22,9 @@ import com.projectronin.interop.proxy.server.model.Condition as ProxyServerCondi
 import com.projectronin.interop.proxy.server.model.ContactPoint as ProxyServerContactPoint
 import com.projectronin.interop.proxy.server.model.HumanName as ProxyServerHumanName
 import com.projectronin.interop.proxy.server.model.Identifier as ProxyServerIdentifier
+import com.projectronin.interop.proxy.server.model.Participant as ProxyParticipant
 import com.projectronin.interop.proxy.server.model.Patient as ProxyServerPatient
+import com.projectronin.interop.proxy.server.model.Reference as ProxyReference
 
 /**
  * Translate [EHRAppointment] to [ProxyServerAppointment].
@@ -31,7 +36,9 @@ fun EHRAppointment.toProxyServerAppointment(tenant: Tenant): ProxyServerAppointm
         start = this.start ?: "",
         status = this.status?.code ?: "",
         serviceType = this.serviceType.map { it.toProxyServerCodeableConcept() },
-        appointmentType = this.appointmentType?.toProxyServerCodeableConcept()
+        appointmentType = this.appointmentType?.toProxyServerCodeableConcept(),
+        providers = this.participants.filter { it.actor.type == Reference.ReferenceType.Provider },
+        tenant = tenant
     )
 }
 
@@ -64,7 +71,7 @@ fun EHRCoding.toProxyServerCoding(): ProxyServerCoding {
         version = this.version,
         code = this.code,
         display = this.display,
-        userSelected = this.userSelected
+        userSelected = this.userSelected,
     )
 }
 
@@ -115,6 +122,27 @@ fun EHRAddress.toProxyServerAddress(): ProxyServerAddress {
         city = this.city,
         state = this.state,
         postalCode = this.postalCode
+    )
+}
+
+fun EHRParticipant.toProxyServerParticipant(fhirIDMap: Map<EHRParticipant, String>): ProxyParticipant {
+    // use existing FHIR ID, otherwise one from map
+    val fhirID = this.actor.id?.value ?: fhirIDMap[this]
+    var reference: String? = "Provider/$fhirID"
+    // when this happens we should just return relevant information to the caller and let them decide
+    if (fhirID == null) {
+        KotlinLogging.logger {}.warn("ID for Participant not found for Identifier: ${this.actor.identifier}")
+        reference = null // this is just so we don't get "Provider/null"
+    }
+
+    return ProxyParticipant(
+        actor = ProxyReference(
+            display = this.actor.display,
+            reference = reference,
+            id = fhirID,
+            identifier = null,
+            type = Reference.ReferenceType.Provider.name
+        )
     )
 }
 

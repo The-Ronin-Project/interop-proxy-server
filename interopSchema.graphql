@@ -49,6 +49,8 @@ type Appointment {
   id: String!
   "List of appointment identifiers"
   identifier: [Identifier!]!
+  "Participants on this appointment"
+  participants: [Participant!]!
   "The specific service that is to be performed during this appointment"
   serviceType: [CodeableConcept!]!
   "When appointment is to take place. An instant in time in the format YYYY-MM-DDThh:mm:ss.sss+zz:zz (e.g. 2015-02-07T13:28:17.239+02:00 or 2017-01-01T00:00:00Z). The time SHALL specified at least to the second and SHALL include a time zone."
@@ -126,6 +128,12 @@ type Mutation {
   sendMessage(message: MessageInput!, tenantId: String!): String!
 }
 
+"A participant on an appointment"
+type Participant {
+  "The reference to the participant object"
+  actor: Reference!
+}
+
 "A patient"
 type Patient {
   "Physical address(es)"
@@ -151,6 +159,20 @@ type Query {
   conditionsByPatientAndCategory(conditionCategoryCode: ConditionCategoryCode!, patientFhirId: String!, tenantId: String!): [Condition!]!
   "Finds patient(s) by family name, given name, and birthdate (YYYY-mm-dd format)"
   patientsByNameAndDOB(birthdate: String!, family: String!, given: String!, tenantId: String!): [Patient!]!
+}
+
+"A reference to another FHIR object"
+type Reference {
+  "Text alternative for the resource"
+  display: String
+  "Unique Reference"
+  id: String
+  "Logical Reference"
+  identifier: Identifier
+  "Literal reference, Relative, internal or absolute url"
+  reference: String
+  "Type of object the reference refers to"
+  type: String
 }
 
 enum ConditionCategoryCode {
