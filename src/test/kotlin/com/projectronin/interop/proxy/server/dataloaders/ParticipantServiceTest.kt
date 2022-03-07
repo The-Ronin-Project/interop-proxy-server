@@ -2,6 +2,7 @@ package com.projectronin.interop.proxy.server.dataloaders
 
 import com.projectronin.interop.aidbox.PractitionerService
 import com.projectronin.interop.aidbox.model.SystemValue
+import com.projectronin.interop.ehr.model.ReferenceTypes
 import io.mockk.every
 import io.mockk.mockk
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -26,7 +27,7 @@ class ParticipantServiceTest {
         every { display } returns "Blah"
         every { id } returns null
         every { reference } returns null
-        every { type } returns EHRReference.ReferenceType.Provider
+        every { type } returns ReferenceTypes.PRACTITIONER
     }
 
     private val testParticipantWithIdentifier = mockk<EHRParticipant> {
@@ -42,7 +43,12 @@ class ParticipantServiceTest {
 
     @Test
     fun `service builds`() {
-        every { practitionerService.getPractitionerFHIRIds(tenantId, emptyMap<EHRParticipant, SystemValue>()) } returns emptyMap<EHRParticipant, String>()
+        every {
+            practitionerService.getPractitionerFHIRIds(
+                tenantId,
+                emptyMap<EHRParticipant, SystemValue>()
+            )
+        } returns emptyMap<EHRParticipant, String>()
         service.getParticipants(setOf(), tenantId)
         assertTrue(true)
     }
@@ -81,15 +87,20 @@ class ParticipantServiceTest {
         val testReferenceWithID = mockk<EHRReference> {
             every { identifier } returns null
             every { display } returns "Blah"
-            every { id } returns mockk { every { value } returns "ExistingID" }
+            every { id } returns "ExistingID"
             every { reference } returns null
-            every { type } returns EHRReference.ReferenceType.Provider
+            every { type } returns ReferenceTypes.PRACTITIONER
         }
 
         val testParticipantWithExitingID = mockk<EHRParticipant> {
             every { actor } returns testReferenceWithID
         }
-        every { practitionerService.getPractitionerFHIRIds(tenantId, emptyMap<EHRParticipant, SystemValue>()) } returns emptyMap<EHRParticipant, String>()
+        every {
+            practitionerService.getPractitionerFHIRIds(
+                tenantId,
+                emptyMap<EHRParticipant, SystemValue>()
+            )
+        } returns emptyMap<EHRParticipant, String>()
         val results = service.getParticipants(setOf(testParticipantWithExitingID), tenantId)
         val firstReference = results.get(testParticipantWithExitingID)?.actor
         val expectedReference = ProxyReference(
@@ -143,7 +154,7 @@ class ParticipantServiceTest {
             every { display } returns "Blah"
             every { id } returns null
             every { reference } returns null
-            every { type } returns EHRReference.ReferenceType.Provider
+            every { type } returns ReferenceTypes.PRACTITIONER
         }
 
         val testParticipantWithBlankIdentifier = mockk<EHRParticipant> {
@@ -183,7 +194,7 @@ class ParticipantServiceTest {
             every { display } returns "Blah"
             every { id } returns null
             every { reference } returns null
-            every { type } returns EHRReference.ReferenceType.Provider
+            every { type } returns ReferenceTypes.PRACTITIONER
         }
         val testParticipantWithNoIdentifier = mockk<EHRParticipant> {
             every { actor } returns testReferenceWithNoIdentifier

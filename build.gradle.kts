@@ -2,6 +2,7 @@ import com.expediagroup.graphql.plugin.gradle.tasks.GraphQLGenerateSDLTask
 import org.springframework.boot.gradle.tasks.run.BootRun
 
 plugins {
+    `java`
     `maven-publish`
     id("com.projectronin.interop.gradle.mockk")
     id("com.projectronin.interop.gradle.ktorm")
@@ -60,6 +61,12 @@ dependencies {
 
     // Allows us to change environment variables
     testImplementation("org.junit-pioneer:junit-pioneer:1.5.0")
+}
+
+tasks.withType(Test::class) {
+    testLogging {
+        events("passed", "skipped", "failed", "standardOut", "standardError")
+    }
 }
 
 // We need to exclude some dependencies from our it testSet

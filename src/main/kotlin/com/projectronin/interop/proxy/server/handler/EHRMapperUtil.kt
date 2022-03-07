@@ -1,6 +1,6 @@
 package com.projectronin.interop.proxy.server.handler
 
-import com.projectronin.interop.ehr.model.Reference
+import com.projectronin.interop.ehr.model.ReferenceTypes
 import com.projectronin.interop.tenant.config.model.Tenant
 import com.projectronin.interop.transform.fhir.r4.util.localize
 import mu.KotlinLogging
@@ -37,7 +37,7 @@ fun EHRAppointment.toProxyServerAppointment(tenant: Tenant): ProxyServerAppointm
         status = this.status?.code ?: "",
         serviceType = this.serviceType.map { it.toProxyServerCodeableConcept() },
         appointmentType = this.appointmentType?.toProxyServerCodeableConcept(),
-        providers = this.participants.filter { it.actor.type == Reference.ReferenceType.Provider },
+        providers = this.participants.filter { it.actor.type == ReferenceTypes.PRACTITIONER },
         tenant = tenant
     )
 }
@@ -127,7 +127,7 @@ fun EHRAddress.toProxyServerAddress(): ProxyServerAddress {
 
 fun EHRParticipant.toProxyServerParticipant(fhirIDMap: Map<EHRParticipant, String>): ProxyParticipant {
     // use existing FHIR ID, otherwise one from map
-    val fhirID = this.actor.id?.value ?: fhirIDMap[this]
+    val fhirID = this.actor.id ?: fhirIDMap[this]
     var reference: String? = "Provider/$fhirID"
     // when this happens we should just return relevant information to the caller and let them decide
     if (fhirID == null) {
@@ -141,7 +141,7 @@ fun EHRParticipant.toProxyServerParticipant(fhirIDMap: Map<EHRParticipant, Strin
             reference = reference,
             id = fhirID,
             identifier = null,
-            type = Reference.ReferenceType.Provider.name
+            type = ReferenceTypes.PRACTITIONER
         )
     )
 }

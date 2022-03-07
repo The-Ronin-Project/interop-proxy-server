@@ -19,7 +19,7 @@ class ParticipantService(
 
         // either the results we got from the EHR already had an ID or they didn't
         // we don't need to resolve the ones that already had an ID
-        val noIDParticipants = ehrParticipants.filter { it.actor.id?.value === null }
+        val noIDParticipants = ehrParticipants.filter { it.actor.id === null }
 
         val foundIDsMap = practitionerService.getPractitionerFHIRIds(
             tenantMnemonic = tenantId,

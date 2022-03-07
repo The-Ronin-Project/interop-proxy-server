@@ -4,7 +4,7 @@ import com.projectronin.interop.common.resource.ResourceType
 import com.projectronin.interop.ehr.factory.EHRFactory
 import com.projectronin.interop.ehr.model.Appointment
 import com.projectronin.interop.ehr.model.Bundle
-import com.projectronin.interop.ehr.model.Reference
+import com.projectronin.interop.ehr.model.ReferenceTypes
 import com.projectronin.interop.fhir.r4.valueset.AppointmentStatus
 import com.projectronin.interop.proxy.server.context.INTEROP_CONTEXT_KEY
 import com.projectronin.interop.proxy.server.context.InteropGraphQLContext
@@ -206,10 +206,8 @@ class AppointmentHandlerTest {
                             every { actor } returns mockk {
                                 every { reference } returns "test-reference"
                                 every { display } returns "test-display"
-                                every { type } returns Reference.ReferenceType.Provider
-                                every { id } returns mockk {
-                                    every { value } returns "test-id"
-                                }
+                                every { type } returns ReferenceTypes.PRACTITIONER
+                                every { id } returns "test-id"
                                 every { identifier } returns mockk {
                                     every { system } returns "test-system"
                                     every { value } returns "test-value"
@@ -302,7 +300,7 @@ class AppointmentHandlerTest {
         assertEquals(true, actualServiceTypeCoding.userSelected)
         assertEquals("service-type-text", actualServiceTypeCC.text)
         assertEquals(1, actualAppointment.providers.size)
-        assertEquals("test-id", actualAppointment.providers[0].actor.id?.value)
+        assertEquals("test-id", actualAppointment.providers[0].actor.id)
     }
 
     @Test
@@ -682,7 +680,7 @@ class AppointmentHandlerTest {
                             every { actor } returns mockk {
                                 every { reference } returns "test-reference"
                                 every { display } returns "test-display"
-                                every { type } returns Reference.ReferenceType.Provider
+                                every { type } returns ReferenceTypes.PRACTITIONER
                                 every { id } returns null
                                 every { identifier } returns null
                             }
