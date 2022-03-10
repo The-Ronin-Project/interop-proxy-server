@@ -55,9 +55,9 @@ export AO_SANDBOX_KEY=KEY_VALUE
 export SERVICE_CALL_JWT_SECRET=SECRET_VALUE
 ```
 
-The key can be found in the 1Password Interoperability vault under "Epic AO Sandbox Private Key (pkcs8)". Make sure to
-remove any newlines or comments from the key and save the file. The secret can be found in the same place under
-'Seki JWT Secret'.
+The AO_SANDBOX_KEY can be found in the 1Password Interoperability vault under "Epic AO Sandbox Private Key (pkcs8)". Make sure to
+remove any newlines or comments from the key and save the file. The secret is also in 1Password. 
+Search for 'All Keys', find 'Seki JWT Secret', and copy it.
 
 Next, restart IntelliJ to let it pick up the change. To make sure it has, open the Terminal tab at the bottom and enter
 the command "echo $AO_SANDBOX_KEY" and it should print the value of the key.
@@ -107,8 +107,9 @@ Due to the way the arguments work, note that we do need to tell this command to 
 auto-defaulted by bootRun.
 
 The proxy server implements authentication via Seki, so you will need to provide one of the tenants that exist in the
-Seki database, along with an appropriate user session Bearer token. Check the `src/it/resources/tenants.yaml` file for
-the current list.
+Seki database, along with an appropriate user session Bearer token. For a list see: 
+[/dev-env/db/changelog/insertTestData.yaml](https://github.com/projectronin/interop-mirth-channels/blob/main/dev-env/db/changelog/insertTestData.yaml) 
+
 
 ### Running locally via Docker
 
@@ -117,18 +118,16 @@ combination with the [docker compose configuration](docker-compose.yml). Additio
 interop-queue-liquibase and interop-ehr-liquibase container images for database schema deployment. Follow the
 instructions [here](https://github.com/projectronin/interop-queue/tree/master/interop-queue-liquibase/README.md#building-the-docker-container-image)
 and [here](https://github.com/projectronin/interop-ehr/tree/master/interop-ehr-liquibase/README.md#building-the-docker-container-image)
-to build those images locally.
-
-Using the below command the container image and then start that container and the other dependent containers.
+to build those images locally. Then use this command to start that container and the other dependent containers:
 
 ```shell
 ./gradlew jibDockerBuild && docker-compose up
 ```
 
-#### Code Review, Codeowners, and the PR process
+## Code Review, Codeowners, and the PR process
 
 The current policy is that at least two approving reviews are required from the
 [codeowners](CODEOWNERS) for a PR to pass, in addition to status checks for codecov.
 
 In addition, we have set the merge policy to squash commits on a merge to master, and to automatically delete the PR
-branch on a succesful merge to master
+branch on a succesful merge to master.
