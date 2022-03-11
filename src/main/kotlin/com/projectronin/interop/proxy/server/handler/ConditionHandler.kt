@@ -101,6 +101,6 @@ class ConditionHandler(
      * Translates a list of [EHRCondition]s into the appropriate list of proxy server [ProxyServerCondition]s for return.
      */
     private fun mapEHRConditions(ehrConditions: List<EHRCondition>, tenant: Tenant): List<ProxyServerCondition> {
-        return ehrConditions.map { it.toProxyServerCondition(tenant) }
+        return ehrConditions.map { ProxyServerCondition(it, tenant) }
     }
 }

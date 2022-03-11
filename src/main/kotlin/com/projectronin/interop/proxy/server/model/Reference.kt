@@ -1,5 +1,10 @@
 package com.projectronin.interop.proxy.server.model
+
 import com.expediagroup.graphql.generator.annotations.GraphQLDescription
+import com.projectronin.interop.tenant.config.model.Tenant
+import com.projectronin.interop.transform.fhir.r4.util.localize
+import com.projectronin.interop.transform.fhir.r4.util.localizeReference
+import com.projectronin.interop.ehr.model.Reference as EHRReference
 
 @GraphQLDescription("A reference to another FHIR object")
 data class Reference(
@@ -13,4 +18,15 @@ data class Reference(
     val identifier: Identifier?,
     @GraphQLDescription("Unique Reference")
     val id: String?
-)
+) {
+    companion object {
+        fun from(reference: EHRReference, tenant: Tenant): Reference =
+            Reference(
+                reference = reference.reference?.localizeReference(tenant),
+                type = reference.type,
+                display = reference.display,
+                identifier = reference.identifier?.let { Identifier(it) },
+                id = reference.id?.localize(tenant)
+            )
+    }
+}

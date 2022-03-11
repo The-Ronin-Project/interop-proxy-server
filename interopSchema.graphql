@@ -27,6 +27,15 @@ directive @specifiedBy(
     url: String!
   ) on SCALAR
 
+"Defines the available forms of abatement for a Condition"
+union Abatement = AgeAbatement | DateTimeAbatement | PeriodAbatement | RangeAbatement | StringAbatement
+
+"Defines the available forms of author for an Annotation"
+union Author = ReferenceAuthor | StringAuthor
+
+"Defines the available forms of onset for a Condition"
+union Onset = AgeOnset | DateTimeOnset | PeriodOnset | RangeOnset | StringOnset
+
 "A physical address"
 type Address {
   "Name of city, town, etc."
@@ -39,6 +48,42 @@ type Address {
   state: String
   "Purpose of address - home | work | temp | old | billing"
   use: String
+}
+
+"An age quantity"
+type Age {
+  "Coded form of the unit"
+  code: String
+  "< | <= | >= | > - how to understand the value"
+  comparator: String
+  "System that defines coded unit form"
+  system: String
+  "Unit representation"
+  unit: String
+  "Numerical value (with implicit precision)"
+  value: Float
+}
+
+"Age representation of the Abatement"
+type AgeAbatement {
+  "Age of abatement"
+  value: Age!
+}
+
+"Age representation of the Onset"
+type AgeOnset {
+  "Age of onset"
+  value: Age!
+}
+
+"A text note which also contains information about who made the statement and when."
+type Annotation {
+  "Individual responsible for the annotation"
+  author: Author
+  "The annotation - text content (as markdown)"
+  text: String!
+  "When the annotation was made"
+  time: String
 }
 
 "An appointment in a clinical setting"
@@ -54,9 +99,9 @@ type Appointment {
   "The specific service that is to be performed during this appointment"
   serviceType: [CodeableConcept!]!
   "When appointment is to take place. An instant in time in the format YYYY-MM-DDThh:mm:ss.sss+zz:zz (e.g. 2015-02-07T13:28:17.239+02:00 or 2017-01-01T00:00:00Z). The time SHALL specified at least to the second and SHALL include a time zone."
-  start: String!
+  start: String
   "Current status of the meeting"
-  status: String!
+  status: String
 }
 
 "A CodeableConcept represents a value that is usually supplied by providing a reference to one or more terminologies or ontologies but may also be defined by the provision of text."
@@ -83,16 +128,42 @@ type Coding {
 
 "A patient condition"
 type Condition {
+  "When in resolution/remission"
+  abatement: Abatement
+  "Person who asserts this condition"
+  asserter: Reference
+  "Anatomical location, if relevant"
+  bodySite: [CodeableConcept!]!
   "The category of this condition (e.g. probelm-list-item, encounter-diagnosis, etc)"
   category: [CodeableConcept!]!
   "The clinical status of this condition (e.g. active, relapse, recurrence, etc)"
   clinicalStatus: CodeableConcept
   "Identification of the condition, problem or diagnosis"
-  code: CodeableConcept!
+  code: CodeableConcept
+  "Encounter created as part of"
+  encounter: Reference
+  "Supporting evidence"
+  evidence: [Evidence!]!
   "The internal identifier for this condition"
   id: String!
   "List of external identifiers for this condition"
   identifier: [Identifier!]!
+  "Additional information about the Condition"
+  note: [Annotation!]!
+  "Estimated or actual date, date-time, or age"
+  onset: Onset
+  "Date record was first recorded"
+  recordedDate: String
+  "Who recorded the condition"
+  recorder: Reference
+  "Subjective severity of condition"
+  severity: CodeableConcept
+  "Stage/grade, usually assessed formally"
+  stage: [Stage!]!
+  "Who has the condition?"
+  subject: Reference!
+  "The verification status of this condition (e.g. confirmed, differential, unconfirmed, etc"
+  verificationStatus: CodeableConcept
 }
 
 "Detail about an available form of contact with a patient"
@@ -103,6 +174,26 @@ type ContactPoint {
   use: String
   "The actual contact value"
   value: String
+}
+
+"Date-time representation of the Abatement"
+type DateTimeAbatement {
+  "The string representation of the date/time. The format is YYYY, YYYY-MM, YYYY-MM-DD or YYYY-MM-DDThh:mm:ss+zz:zz"
+  value: String!
+}
+
+"Date-time representation of the Onset"
+type DateTimeOnset {
+  "The string representation of the date/time. The format is YYYY, YYYY-MM, YYYY-MM-DD or YYYY-MM-DDThh:mm:ss+zz:zz"
+  value: String!
+}
+
+"Supporting evidence"
+type Evidence {
+  "Manifestation/symptom"
+  code: [CodeableConcept!]!
+  "Supporting information found elsewhere"
+  detail: [Reference!]!
 }
 
 "The name of a person"
@@ -152,6 +243,26 @@ type Patient {
   telecom: [ContactPoint!]!
 }
 
+"Time range defined by start and end date/time"
+type Period {
+  "End time with inclusive boundary, if not ongoing"
+  end: String
+  "Starting time with inclusive boundary"
+  start: String
+}
+
+"Period representation of the Abatement"
+type PeriodAbatement {
+  "Period of abatement"
+  value: Period!
+}
+
+"Period representation of the Onset"
+type PeriodOnset {
+  "Period of onset"
+  value: Period!
+}
+
 type Query {
   "Finds appointments for a given MRN and date range"
   appointmentsByMRNAndDate(endDate: String!, mrn: String!, startDate: String!, tenantId: String!): [Appointment!]!
@@ -159,6 +270,26 @@ type Query {
   conditionsByPatientAndCategory(conditionCategoryCode: ConditionCategoryCode!, patientFhirId: String!, tenantId: String!): [Condition!]!
   "Finds patient(s) by family name, given name, and birthdate (YYYY-mm-dd format)"
   patientsByNameAndDOB(birthdate: String!, family: String!, given: String!, tenantId: String!): [Patient!]!
+}
+
+"Set of values bounded by low and high"
+type Range {
+  "High limit"
+  high: SimpleQuantity
+  "Low limit"
+  low: SimpleQuantity
+}
+
+"Range representation of the Abatement"
+type RangeAbatement {
+  "Range of abatement"
+  value: Range!
+}
+
+"Range representation of the Onset"
+type RangeOnset {
+  "Range of onset"
+  value: Range!
 }
 
 "A reference to another FHIR object"
@@ -173,6 +304,52 @@ type Reference {
   reference: String
   "Type of object the reference refers to"
   type: String
+}
+
+"Reference representation of the Author"
+type ReferenceAuthor {
+  "Reference to the author"
+  value: Reference!
+}
+
+"A simple quantity"
+type SimpleQuantity {
+  "Coded form of the unit"
+  code: String
+  "System that defines coded unit form"
+  system: String
+  "Unit representation"
+  unit: String
+  "Numerical value (with implicit precision)"
+  value: Float
+}
+
+"Stage/grade, usually assessed formally"
+type Stage {
+  "Formal record of assessment"
+  assessment: [Reference!]!
+  "Simple summary (disease specific)"
+  summary: CodeableConcept
+  "Kind of staging"
+  type: CodeableConcept
+}
+
+"String representation of the Abatement"
+type StringAbatement {
+  "The abatement"
+  value: String!
+}
+
+"String representation of the Author"
+type StringAuthor {
+  "The author"
+  value: String!
+}
+
+"String representation of the Onset"
+type StringOnset {
+  "The onset"
+  value: String!
 }
 
 enum ConditionCategoryCode {

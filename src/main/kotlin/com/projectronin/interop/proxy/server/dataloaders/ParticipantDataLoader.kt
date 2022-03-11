@@ -9,10 +9,12 @@ import java.util.concurrent.CompletableFuture
 import com.projectronin.interop.proxy.server.model.Participant as ProxyParticipant
 
 @Component
-class ParticipantDataLoader(private val service: ParticipantService) : KotlinDataLoader<TenantParticipant, ProxyParticipant> {
+class ParticipantDataLoader(private val service: ParticipantService) :
+    KotlinDataLoader<TenantParticipant, ProxyParticipant> {
     companion object {
         const val name = "ParticipantDataLoader"
     }
+
     override val dataLoaderName = name
 
     override fun getDataLoader(): DataLoader<TenantParticipant, ProxyParticipant> {
@@ -20,7 +22,7 @@ class ParticipantDataLoader(private val service: ParticipantService) : KotlinDat
         return DataLoaderFactory.newMappedDataLoader { tenantProviders ->
             val tenant = tenantProviders.first().tenant
             val providers = tenantProviders.map { it.participant }.toSet()
-            val serviceResults = service.getParticipants(providers, tenant.mnemonic)
+            val serviceResults = service.getParticipants(providers, tenant)
             val results = tenantProviders.associateWith { serviceResults[it.participant] }
             CompletableFuture.completedStage(results)
         }

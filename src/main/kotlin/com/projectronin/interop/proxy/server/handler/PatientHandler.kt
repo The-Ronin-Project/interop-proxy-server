@@ -89,6 +89,6 @@ class PatientHandler(
      * Translates a list of [EHRPatient]s into the appropriate list of proxy server [ProxyServerPatient]s for return.
      */
     private fun mapEHRPatients(ehrPatients: List<EHRPatient>, tenant: Tenant): List<ProxyServerPatient> {
-        return ehrPatients.map { it.toProxyServerPatient(tenant) }
+        return ehrPatients.map { ProxyServerPatient(it, tenant) }
     }
 }

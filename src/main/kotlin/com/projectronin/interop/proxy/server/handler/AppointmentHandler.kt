@@ -91,6 +91,6 @@ class AppointmentHandler(
         ehrAppointments: List<EHRAppointment>,
         tenant: Tenant
     ): List<ProxyServerAppointment> {
-        return ehrAppointments.map { it.toProxyServerAppointment(tenant) }
+        return ehrAppointments.map { ProxyServerAppointment(it, tenant) }
     }
 }

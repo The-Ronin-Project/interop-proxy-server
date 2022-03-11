@@ -1,6 +1,7 @@
 package com.projectronin.interop.proxy.server.dataloaders
 
 import com.projectronin.interop.proxy.server.model.TenantParticipant
+import com.projectronin.interop.tenant.config.model.Tenant
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.spyk
@@ -19,11 +20,13 @@ class ParticipantDataLoaderTest {
     fun initTest() {
         participantService = mockk()
     }
+
     @Test
     fun `get name works`() {
         participantDataLoader = ParticipantDataLoader(participantService)
         assertEquals("ParticipantDataLoader", participantDataLoader.dataLoaderName)
     }
+
     @Test
     fun `get data loader works`() {
         participantDataLoader = ParticipantDataLoader(participantService)
@@ -33,8 +36,11 @@ class ParticipantDataLoaderTest {
     @Test
     fun `load data works`() {
         val testEHRParticipant = mockk<EHRParticipant>()
+        val testTenant = mockk<Tenant> {
+            every { mnemonic } returns "tenantId"
+        }
         val testTenantParticipant = mockk<TenantParticipant>() {
-            every { tenant.mnemonic } returns "tenantId"
+            every { tenant } returns testTenant
             every { participant } returns testEHRParticipant
         }
 
@@ -45,7 +51,7 @@ class ParticipantDataLoaderTest {
         }
 
         val participantService = spyk(ParticipantService(mockk()))
-        every { participantService.getParticipants(testParticipants, "tenantId") } returns serviceResults
+        every { participantService.getParticipants(testParticipants, testTenant) } returns serviceResults
         participantDataLoader = ParticipantDataLoader(participantService)
         val dl = participantDataLoader.getDataLoader()
         val loader = dl.loadMany(listOf(testTenantParticipant))

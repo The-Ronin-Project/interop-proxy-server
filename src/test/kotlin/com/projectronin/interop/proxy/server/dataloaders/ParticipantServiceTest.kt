@@ -3,6 +3,7 @@ package com.projectronin.interop.proxy.server.dataloaders
 import com.projectronin.interop.aidbox.PractitionerService
 import com.projectronin.interop.aidbox.model.SystemValue
 import com.projectronin.interop.ehr.model.ReferenceTypes
+import com.projectronin.interop.tenant.config.model.Tenant
 import io.mockk.every
 import io.mockk.mockk
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -33,7 +34,10 @@ class ParticipantServiceTest {
     private val testParticipantWithIdentifier = mockk<EHRParticipant> {
         every { actor } returns testReferenceWithIdentifier
     }
-    private val tenantId = "tenantId"
+    private val tenantMnemonic = "tenantId"
+    private val testTenant = mockk<Tenant> {
+        every { mnemonic } returns tenantMnemonic
+    }
 
     @BeforeEach
     fun initTest() {
@@ -45,11 +49,11 @@ class ParticipantServiceTest {
     fun `service builds`() {
         every {
             practitionerService.getPractitionerFHIRIds(
-                tenantId,
+                tenantMnemonic,
                 emptyMap<EHRParticipant, SystemValue>()
             )
         } returns emptyMap<EHRParticipant, String>()
-        service.getParticipants(setOf(), tenantId)
+        service.getParticipants(setOf(), testTenant)
         assertTrue(true)
     }
 
@@ -63,12 +67,12 @@ class ParticipantServiceTest {
         )
         every {
             practitionerService.getPractitionerFHIRIds(
-                tenantId,
+                tenantMnemonic,
                 testIdentifierSearch
 
             )
         } returns mapOf(testParticipantWithIdentifier to "FHIR_ID")
-        val results = service.getParticipants(setOf(testParticipantWithIdentifier), tenantId)
+        val results = service.getParticipants(setOf(testParticipantWithIdentifier), testTenant)
         val firstReference = results[testParticipantWithIdentifier]?.actor
         val expectedReference = ProxyReference(
             identifier = null,
@@ -97,17 +101,17 @@ class ParticipantServiceTest {
         }
         every {
             practitionerService.getPractitionerFHIRIds(
-                tenantId,
+                tenantMnemonic,
                 emptyMap<EHRParticipant, SystemValue>()
             )
         } returns emptyMap<EHRParticipant, String>()
-        val results = service.getParticipants(setOf(testParticipantWithExitingID), tenantId)
+        val results = service.getParticipants(setOf(testParticipantWithExitingID), testTenant)
         val firstReference = results.get(testParticipantWithExitingID)?.actor
         val expectedReference = ProxyReference(
             identifier = null,
             display = "Blah",
-            id = "ExistingID",
-            reference = "Provider/ExistingID",
+            id = "$tenantMnemonic-ExistingID",
+            reference = "Provider/$tenantMnemonic-ExistingID",
             type = "Provider"
         )
         assertEquals(expectedReference.display, firstReference?.display)
@@ -125,11 +129,11 @@ class ParticipantServiceTest {
         )
         every {
             practitionerService.getPractitionerFHIRIds(
-                tenantId,
+                tenantMnemonic,
                 testIdentifierSearch
             )
         } returns emptyMap()
-        val results = service.getParticipants(setOf(testParticipantWithIdentifier), tenantId)
+        val results = service.getParticipants(setOf(testParticipantWithIdentifier), testTenant)
         val firstReference = results[testParticipantWithIdentifier]?.actor
         val expectedReference = ProxyReference(
             identifier = null,
@@ -169,11 +173,11 @@ class ParticipantServiceTest {
 
         every {
             practitionerService.getPractitionerFHIRIds(
-                tenantId,
+                tenantMnemonic,
                 testIdentifierSearch
             )
         } returns emptyMap()
-        val results = service.getParticipants(setOf(testParticipantWithBlankIdentifier), tenantId)
+        val results = service.getParticipants(setOf(testParticipantWithBlankIdentifier), testTenant)
         val firstReference = results[testParticipantWithBlankIdentifier]?.actor
         val expectedReference = ProxyReference(
             identifier = null,
@@ -208,12 +212,12 @@ class ParticipantServiceTest {
 
         every {
             practitionerService.getPractitionerFHIRIds(
-                tenantId,
+                tenantMnemonic,
                 testIdentifierSearch
             )
         } returns emptyMap()
 
-        val results = service.getParticipants(setOf(testParticipantWithNoIdentifier), tenantId)
+        val results = service.getParticipants(setOf(testParticipantWithNoIdentifier), testTenant)
         val firstReference = results[testParticipantWithNoIdentifier]?.actor
         val expectedReference = ProxyReference(
             identifier = null,

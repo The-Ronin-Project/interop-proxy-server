@@ -1,22 +1,57 @@
 package com.projectronin.interop.proxy.server.model
 
+import com.projectronin.interop.fhir.r4.valueset.ContactPointSystem
+import com.projectronin.interop.fhir.r4.valueset.ContactPointUse
+import com.projectronin.interop.proxy.server.util.relaxedMockk
+import io.mockk.every
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
+import com.projectronin.interop.ehr.model.ContactPoint as EHRContactPoint
 
 class ContactPointTest {
     @Test
-    fun `check defaults`() {
-        val contactDetail = ContactPoint()
-        assertEquals(null, contactDetail.system)
-        assertEquals(null, contactDetail.use)
-        assertEquals(null, contactDetail.value)
+    fun `can get system`() {
+        val ehrContactPoint = relaxedMockk<EHRContactPoint> {
+            every { system } returns ContactPointSystem.EMAIL
+        }
+        val contactPoint = ContactPoint(ehrContactPoint)
+        assertEquals("email", contactPoint.system)
     }
 
     @Test
-    fun `check getters`() {
-        val contactDetail = ContactPoint("phone", "home", "123-456-7890")
-        assertEquals("phone", contactDetail.system)
-        assertEquals("home", contactDetail.use)
-        assertEquals("123-456-7890", contactDetail.value)
+    fun `can get null system`() {
+        val ehrContactPoint = relaxedMockk<EHRContactPoint> {
+            every { system } returns null
+        }
+        val contactPoint = ContactPoint(ehrContactPoint)
+        assertNull(contactPoint.system)
+    }
+
+    @Test
+    fun `can get use`() {
+        val ehrContactPoint = relaxedMockk<EHRContactPoint> {
+            every { use } returns ContactPointUse.WORK
+        }
+        val contactPoint = ContactPoint(ehrContactPoint)
+        assertEquals("work", contactPoint.use)
+    }
+
+    @Test
+    fun `can get null use`() {
+        val ehrContactPoint = relaxedMockk<EHRContactPoint> {
+            every { use } returns null
+        }
+        val contactPoint = ContactPoint(ehrContactPoint)
+        assertNull(contactPoint.use)
+    }
+
+    @Test
+    fun `can get value`() {
+        val ehrContactPoint = relaxedMockk<EHRContactPoint> {
+            every { value } returns "value"
+        }
+        val contactPoint = ContactPoint(ehrContactPoint)
+        assertEquals("value", contactPoint.value)
     }
 }

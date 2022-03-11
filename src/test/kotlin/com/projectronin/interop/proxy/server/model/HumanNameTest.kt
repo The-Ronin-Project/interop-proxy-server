@@ -1,22 +1,47 @@
 package com.projectronin.interop.proxy.server.model
 
+import com.projectronin.interop.fhir.r4.valueset.NameUse
+import com.projectronin.interop.proxy.server.util.relaxedMockk
+import io.mockk.every
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
+import com.projectronin.interop.ehr.model.HumanName as EHRHumanName
 
 class HumanNameTest {
     @Test
-    fun `check defaults`() {
-        val humanName = HumanName()
-        assertEquals(null, humanName.use)
-        assertEquals(null, humanName.family)
-        assertEquals(listOf<String>(), humanName.given)
+    fun `can get use`() {
+        val ehrHumanName = relaxedMockk<EHRHumanName> {
+            every { use } returns NameUse.USUAL
+        }
+        val humanName = HumanName(ehrHumanName)
+        assertEquals("usual", humanName.use)
     }
 
     @Test
-    fun `check getters`() {
-        val humanName = HumanName("official", "Last", listOf("First"))
-        assertEquals("official", humanName.use)
-        assertEquals("Last", humanName.family)
-        assertEquals(listOf("First"), humanName.given)
+    fun `can get null use`() {
+        val ehrHumanName = relaxedMockk<EHRHumanName> {
+            every { use } returns null
+        }
+        val humanName = HumanName(ehrHumanName)
+        assertNull(humanName.use)
+    }
+
+    @Test
+    fun `can get family`() {
+        val ehrHumanName = relaxedMockk<EHRHumanName> {
+            every { family } returns "Public"
+        }
+        val humanName = HumanName(ehrHumanName)
+        assertEquals("Public", humanName.family)
+    }
+
+    @Test
+    fun `can get given`() {
+        val ehrHumanName = relaxedMockk<EHRHumanName> {
+            every { given } returns listOf("John", "Q")
+        }
+        val humanName = HumanName(ehrHumanName)
+        assertEquals(listOf("John", "Q"), humanName.given)
     }
 }
