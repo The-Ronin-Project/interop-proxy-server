@@ -1,8 +1,6 @@
 package com.projectronin.interop.proxy.server
 
-import com.beust.klaxon.JsonArray
-import com.beust.klaxon.JsonObject
-import com.beust.klaxon.Parser
+import com.projectronin.interop.common.jackson.JacksonManager.Companion.objectMapper
 import com.projectronin.interop.proxy.server.model.ConditionCategoryCode
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -47,11 +45,11 @@ class InteropProxyServerIntegratedConditionTests {
         val responseEntity =
             restTemplate.postForEntity(URI("http://localhost:$port/graphql"), httpEntity, String::class.java)
 
-        val resultJSONObject = Parser.default().parse(StringBuilder(responseEntity.body)) as JsonObject
+        val resultJSONObject = objectMapper.readTree(responseEntity.body)
 
         assertEquals(HttpStatus.OK, responseEntity.statusCode)
-        assertFalse(resultJSONObject.map.containsKey("errors"))
-        assertTrue(resultJSONObject.size > 0)
+        assertFalse(resultJSONObject.has("errors"))
+        assertTrue(resultJSONObject.size() > 0)
     }
 
     @Test
@@ -74,10 +72,10 @@ class InteropProxyServerIntegratedConditionTests {
 
         val responseEntity =
             restTemplate.postForEntity(URI("http://localhost:$port/graphql"), httpEntity, String::class.java)
-        val resultJSONObject = Parser.default().parse(StringBuilder(responseEntity.body)) as JsonObject
+        val resultJSONObject = objectMapper.readTree(responseEntity.body)
 
         assertEquals(HttpStatus.OK, responseEntity.statusCode)
-        assertTrue(resultJSONObject.map.containsKey("errors"))
+        assertTrue(resultJSONObject.has("errors"))
     }
 
     @Test
@@ -98,10 +96,10 @@ class InteropProxyServerIntegratedConditionTests {
 
         val responseEntity =
             restTemplate.postForEntity(URI("http://localhost:$port/graphql"), httpEntity, String::class.java)
-        val resultJSONObject = Parser.default().parse(StringBuilder(responseEntity.body)) as JsonObject
+        val resultJSONObject = objectMapper.readTree(responseEntity.body)
 
         assertEquals(HttpStatus.OK, responseEntity.statusCode)
-        assertTrue(resultJSONObject.map.containsKey("errors"))
+        assertTrue(resultJSONObject.has("errors"))
     }
 
     @Test
@@ -124,12 +122,11 @@ class InteropProxyServerIntegratedConditionTests {
 
         val responseEntity =
             restTemplate.postForEntity(URI("http://localhost:$port/graphql"), httpEntity, String::class.java)
-        val resultJSONObject = Parser.default().parse(StringBuilder(responseEntity.body)) as JsonObject
-        val dataJSONObject = (resultJSONObject["data"] as JsonObject)
-        val conditionSearchJSONArray = dataJSONObject["conditionsByPatientAndCategory"] as JsonArray<*>
+        val resultJSONObject = objectMapper.readTree(responseEntity.body)
+        val conditionSearchJSONArray = resultJSONObject["data"]["conditionsByPatientAndCategory"]
 
         assertEquals(HttpStatus.OK, responseEntity.statusCode)
-        assertFalse(resultJSONObject.map.containsKey("errors"))
-        assertEquals(0, conditionSearchJSONArray.size)
+        assertFalse(resultJSONObject.has("errors"))
+        assertEquals(0, conditionSearchJSONArray.size())
     }
 }

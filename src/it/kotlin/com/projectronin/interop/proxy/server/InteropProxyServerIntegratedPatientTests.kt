@@ -1,8 +1,6 @@
 package com.projectronin.interop.proxy.server
 
-import com.beust.klaxon.JsonArray
-import com.beust.klaxon.JsonObject
-import com.beust.klaxon.Parser
+import com.projectronin.interop.common.jackson.JacksonManager.Companion.objectMapper
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -67,13 +65,13 @@ class InteropProxyServerIntegratedPatientTests {
         val responseEntity =
             restTemplate.postForEntity(URI("http://localhost:$port/graphql"), httpEntity, String::class.java)
 
-        val resultJSONObject = Parser.default().parse(StringBuilder(responseEntity.body)) as JsonObject
-        // val expectedJSONObject = Parser.default().parse(StringBuilder(expectedJSON)) as JsonObject
+        val resultJSONObject = objectMapper.readTree(responseEntity.body)
+        // val expectedJSONObject = objectMapper.readTree(expectedJSON)
         // let's bring this back when we have a more stable test server
 
         assertEquals(HttpStatus.OK, responseEntity.statusCode)
-        assertFalse(resultJSONObject.map.containsKey("errors"))
-        assertTrue(resultJSONObject.size > 0)
+        assertFalse(resultJSONObject.has("errors"))
+        assertTrue(resultJSONObject.size() > 0)
     }
 
     @Test
@@ -93,10 +91,10 @@ class InteropProxyServerIntegratedPatientTests {
 
         val responseEntity =
             restTemplate.postForEntity(URI("http://localhost:$port/graphql"), httpEntity, String::class.java)
-        val resultJSONObject = Parser.default().parse(StringBuilder(responseEntity.body)) as JsonObject
+        val resultJSONObject = objectMapper.readTree(responseEntity.body)
 
         assertEquals(HttpStatus.OK, responseEntity.statusCode)
-        assertTrue(resultJSONObject.map.containsKey("errors"))
+        assertTrue(resultJSONObject.has("errors"))
     }
 
     @Test
@@ -115,10 +113,10 @@ class InteropProxyServerIntegratedPatientTests {
 
         val responseEntity =
             restTemplate.postForEntity(URI("http://localhost:$port/graphql"), httpEntity, String::class.java)
-        val resultJSONObject = Parser.default().parse(StringBuilder(responseEntity.body)) as JsonObject
+        val resultJSONObject = objectMapper.readTree(responseEntity.body)
 
         assertEquals(HttpStatus.OK, responseEntity.statusCode)
-        assertTrue(resultJSONObject.map.containsKey("errors"))
+        assertTrue(resultJSONObject.has("errors"))
     }
 
     @Test
@@ -138,12 +136,11 @@ class InteropProxyServerIntegratedPatientTests {
 
         val response = restTemplate.postForEntity(URI("http://localhost:$port/graphql"), httpEntity, String::class.java)
 
-        val resultJSONObject = Parser.default().parse(StringBuilder(response.body)) as JsonObject
-        val dataJSONObject = (resultJSONObject["data"] as JsonObject)
-        val patientSearchJSONArray = dataJSONObject["patientsByNameAndDOB"] as JsonArray<*>
+        val resultJSONObject = objectMapper.readTree(response.body)
+        val patientSearchJSONArray = resultJSONObject["data"]["patientsByNameAndDOB"]
 
         assertEquals(HttpStatus.OK, response.statusCode)
-        assertFalse(resultJSONObject.map.containsKey("errors"))
-        assertEquals(0, patientSearchJSONArray.size)
+        assertFalse(resultJSONObject.has("errors"))
+        assertEquals(0, patientSearchJSONArray.size())
     }
 }

@@ -1,10 +1,8 @@
 package com.projectronin.interop.proxy.server
 
-import com.beust.klaxon.JsonArray
-import com.beust.klaxon.JsonObject
-import com.beust.klaxon.Parser
 import com.projectronin.interop.aidbox.testcontainer.AidboxData
 import com.projectronin.interop.aidbox.testcontainer.BaseAidboxTest
+import com.projectronin.interop.common.jackson.JacksonManager.Companion.objectMapper
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -84,11 +82,11 @@ class InteropProxyServerIntegratedMessageTests : BaseAidboxTest() {
         val responseEntity =
             restTemplate.postForEntity(URI("http://localhost:$port/graphql"), httpEntity, String::class.java)
 
-        val resultJSONObject = Parser.default().parse(StringBuilder(responseEntity.body)) as JsonObject
-        val expectedJSONObject = Parser.default().parse(StringBuilder(expectedJSON)) as JsonObject
+        val resultJSONObject = objectMapper.readTree(responseEntity.body)
+        val expectedJSONObject = objectMapper.readTree(expectedJSON)
 
         assertEquals(HttpStatus.OK, responseEntity.statusCode)
-        assertFalse(resultJSONObject.map.containsKey("errors"))
+        assertFalse(resultJSONObject.has("errors"))
         assertEquals(expectedJSONObject, resultJSONObject)
     }
 
@@ -125,11 +123,11 @@ class InteropProxyServerIntegratedMessageTests : BaseAidboxTest() {
         val responseEntity =
             restTemplate.postForEntity(URI("http://localhost:$port/graphql"), httpEntity, String::class.java)
 
-        val resultJSONObject = Parser.default().parse(StringBuilder(responseEntity.body)) as JsonObject
-        val expectedJSONObject = Parser.default().parse(StringBuilder(expectedJSON)) as JsonObject
+        val resultJSONObject = objectMapper.readTree(responseEntity.body)
+        val expectedJSONObject = objectMapper.readTree(expectedJSON)
 
         assertEquals(HttpStatus.OK, responseEntity.statusCode)
-        assertFalse(resultJSONObject.map.containsKey("errors"))
+        assertFalse(resultJSONObject.has("errors"))
         assertEquals(expectedJSONObject, resultJSONObject)
     }
 
@@ -172,11 +170,11 @@ class InteropProxyServerIntegratedMessageTests : BaseAidboxTest() {
         val responseEntity =
             restTemplate.postForEntity(URI("http://localhost:$port/graphql"), httpEntity, String::class.java)
 
-        val resultJSONObject = Parser.default().parse(StringBuilder(responseEntity.body)) as JsonObject
-        val expectedJSONObject = Parser.default().parse(StringBuilder(expectedJSON)) as JsonObject
+        val resultJSONObject = objectMapper.readTree(responseEntity.body)
+        val expectedJSONObject = objectMapper.readTree(expectedJSON)
 
         assertEquals(HttpStatus.OK, responseEntity.statusCode)
-        assertFalse(resultJSONObject.map.containsKey("errors"))
+        assertFalse(resultJSONObject.has("errors"))
         assertEquals(expectedJSONObject, resultJSONObject)
     }
 
@@ -212,11 +210,11 @@ class InteropProxyServerIntegratedMessageTests : BaseAidboxTest() {
         val responseEntity =
             restTemplate.postForEntity(URI("http://localhost:$port/graphql"), httpEntity, String::class.java)
 
-        val resultJSONObject = Parser.default().parse(StringBuilder(responseEntity.body)) as JsonObject
-        val errorJSONObject = (resultJSONObject["errors"] as JsonArray<*>)[0] as JsonObject
+        val resultJSONObject = objectMapper.readTree(responseEntity.body)
+        val errorJSONObject = resultJSONObject["errors"][0]
 
         assertEquals(HttpStatus.OK, responseEntity.statusCode)
-        assertTrue(errorJSONObject["message"].toString().contains("Tenant not found: $tenantId"))
+        assertTrue(errorJSONObject["message"].asText().contains("Tenant not found: $tenantId"))
     }
 
     @Test
@@ -251,10 +249,10 @@ class InteropProxyServerIntegratedMessageTests : BaseAidboxTest() {
         val responseEntity =
             restTemplate.postForEntity(URI("http://localhost:$port/graphql"), httpEntity, String::class.java)
 
-        val resultJSONObject = Parser.default().parse(StringBuilder(responseEntity.body)) as JsonObject
+        val resultJSONObject = objectMapper.readTree(responseEntity.body)
 
         assertEquals(HttpStatus.OK, responseEntity.statusCode)
-        assertTrue(resultJSONObject.map.containsKey("errors"))
+        assertTrue(resultJSONObject.has("errors"))
     }
 
     @Test
@@ -287,9 +285,9 @@ class InteropProxyServerIntegratedMessageTests : BaseAidboxTest() {
         val responseEntity =
             restTemplate.postForEntity(URI("http://localhost:$port/graphql"), httpEntity, String::class.java)
 
-        val resultJSONObject = Parser.default().parse(StringBuilder(responseEntity.body)) as JsonObject
+        val resultJSONObject = objectMapper.readTree(responseEntity.body)
 
         assertEquals(HttpStatus.OK, responseEntity.statusCode)
-        assertTrue(resultJSONObject.map.containsKey("errors"))
+        assertTrue(resultJSONObject.has("errors"))
     }
 }

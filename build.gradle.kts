@@ -55,12 +55,12 @@ dependencies {
 
     testImplementation("com.projectronin.interop.ehr:interop-ehr-epic:${project.property("interopEhrVersion")}")
 
-    testImplementation("com.beust:klaxon:5.5")
-
     testImplementation("com.squareup.okhttp3:mockwebserver")
 
     // Allows us to change environment variables
     testImplementation("org.junit-pioneer:junit-pioneer:1.5.0")
+
+    itImplementation("com.projectronin.interop:interop-common-jackson:${project.property("interopCommonVersion")}")
 }
 
 tasks.withType(Test::class) {
