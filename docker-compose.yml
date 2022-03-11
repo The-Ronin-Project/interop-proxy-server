@@ -17,6 +17,8 @@ services:
       - liquibase-ehr
       - db-ehr
       - datadog-agent
+
+  # Queue Database
   db-queue:
     image: mysql/mysql-server
     container_name: db-queue
@@ -25,13 +27,21 @@ services:
       MYSQL_DATABASE: interop-queue
       MYSQL_USER: queue
       MYSQL_PASSWORD: secret
+    healthcheck:
+      test: [ "CMD", "mysqladmin" ,"ping", "-h", "localhost", "-u", "ehr", "-psecret" ]
+      timeout: 5s
+      retries: 10
+  # Queue Migration
   liquibase-queue:
     container_name: liquibase-queue
     image: interop-queue-liquibase
     environment:
       - JDBC_URL=jdbc:mysql://queue:secret@db-queue:3306/interop-queue
     depends_on:
-      - db-queue
+      db-queue:
+        condition: service_healthy
+
+  # EHR Database
   db-ehr:
     image: mysql/mysql-server
     container_name: db-ehr
@@ -40,18 +50,25 @@ services:
       MYSQL_DATABASE: interop-ehr
       MYSQL_USER: ehr
       MYSQL_PASSWORD: secret
+    healthcheck:
+      test: [ "CMD", "mysqladmin" ,"ping", "-h", "localhost", "-u", "ehr", "-psecret" ]
+      timeout: 5s
+      retries: 10
+  # EHR Migration
   liquibase-ehr:
     container_name: liquibase-ehr
     image: interop-ehr-liquibase
     environment:
       - JDBC_URL=jdbc:mysql://ehr:secret@db-ehr:3306/interop-ehr
       - DATA_LOAD=db/changelog/insertTestData.yaml
+      - AO_SANDBOX_KEY
     volumes:
       - ./src/it/resources/db/changelog/:/liquibase/changelog/db/changelog
-    ports:
-      - 3306
     depends_on:
-      - db-ehr
+      db-ehr:
+        condition: service_healthy
+
+  # Data Dog
   datadog-agent:
     image: gcr.io/datadoghq/agent:7
     environment:
