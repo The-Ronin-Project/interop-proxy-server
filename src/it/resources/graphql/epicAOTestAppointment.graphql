@@ -27,5 +27,17 @@
         }
         start
         status
+        participants {
+            actor {
+                display
+                id
+                identifier {
+                    system
+                    value
+                }
+                reference
+                type
+            }
+        }
     }
 }

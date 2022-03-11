@@ -1,5 +1,7 @@
 package com.projectronin.interop.proxy.server
 
+import com.projectronin.interop.aidbox.testcontainer.AidboxData
+import com.projectronin.interop.aidbox.testcontainer.BaseAidboxTest
 import com.projectronin.interop.common.jackson.JacksonManager.Companion.objectMapper
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -15,6 +17,8 @@ import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
+import org.springframework.test.context.DynamicPropertyRegistry
+import org.springframework.test.context.DynamicPropertySource
 import java.net.URI
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -23,7 +27,17 @@ import java.time.format.DateTimeFormatter
 @ActiveProfiles("it")
 @ContextConfiguration(initializers = [(InteropProxyServerAuthInitializer::class)])
 @SetEnvironmentVariable(key = "SERVICE_CALL_JWT_SECRET", value = "abc") // prevent Exception in AuthService.kt
-class InteropProxyServerIntegratedAppointmentTests {
+@AidboxData("aidbox/practitioners.yaml")
+class InteropProxyServerIntegratedAppointmentTests : BaseAidboxTest() {
+    companion object {
+        // allows us to dynamically change the aidbox port to the testcontainer instance
+        @JvmStatic
+        @DynamicPropertySource
+        fun aidboxUrlProperties(registry: DynamicPropertyRegistry) {
+            registry.add("aidbox.url") { aidbox.baseUrl() }
+        }
+    }
+
     @LocalServerPort
     private var port = 0
 
@@ -51,16 +65,35 @@ class InteropProxyServerIntegratedAppointmentTests {
         val responseEntity =
             restTemplate.postForEntity(URI("http://localhost:$port/graphql"), httpEntity, String::class.java)
 
-        val resultJSONObject = objectMapper.readTree(responseEntity.body)
-        val appointmentsJSONObject = resultJSONObject["data"]["appointmentsByMRNAndDate"]
+        val resultJSONNode = objectMapper.readTree(responseEntity.body)
+        val appointmentsJSONNode = resultJSONNode["data"]["appointmentsByMRNAndDate"]
 
-        /**
+        /*
          * Appointments in the sandbox keep changing, so instead of checking for a specific response we're checking
-         * that appointments were returned and there were no errors.
+         * that appointments were returned with participants, and there were no errors.
          */
         assertEquals(HttpStatus.OK, responseEntity.statusCode)
-        assertFalse(resultJSONObject.has("errors"))
-        assertTrue(appointmentsJSONObject.size() > 0)
+        assertFalse(resultJSONNode.has("errors"))
+        assertTrue(appointmentsJSONNode.size() > 0)
+
+        // Check participants on each appointment
+        appointmentsJSONNode.forEach { appointment ->
+            val participants = appointment["participants"]
+            assertTrue(participants.size() > 0)
+
+            participants.forEach { participant ->
+                val actor = participant["actor"]
+
+                // This is the only practitioner loaded in Aidbox, the rest should have nulls for id and reference
+                if (actor["display"].asText() == "Physician Family Medicine, MD") {
+                    assertEquals("fhirId1", actor["id"].textValue())
+                    assertEquals("Provider/fhirId1", actor["reference"].textValue())
+                } else {
+                    assertTrue(actor["id"].isNull)
+                    assertTrue(actor["reference"].isNull)
+                }
+            }
+        }
     }
 
     @Test
