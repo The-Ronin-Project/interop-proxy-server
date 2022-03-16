@@ -13,9 +13,7 @@ class InteropGraphQLContextFactory : SpringGraphQLContextFactory<InteropGraphQLC
 
     override suspend fun generateContextMap(request: ServerRequest): Map<*, Any>? {
         val authzTenantId = request.headers().firstHeader(AUTHZ_TENANT_HEADER) // populated in AuthFilter.kt
-        val aidboxAuth = request.headers().firstHeader("AIDBOX_AUTH")
-        val ehrFhirAuth = request.headers().firstHeader("EHR_AUTH")
-        return mapOf(INTEROP_CONTEXT_KEY to InteropGraphQLContext(aidboxAuth, ehrFhirAuth, authzTenantId, request))
+        return mapOf(INTEROP_CONTEXT_KEY to InteropGraphQLContext(authzTenantId, request))
     }
 
     // IDE requires this to be implemented, but it's deprecated.
