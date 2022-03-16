@@ -1,0 +1,6 @@
+io_ehr:
+  - io_ehr_id: 101
+    name: "EPIC"
+    client_id: "12345"
+    public_key: "public"
+    private_key: "private"
