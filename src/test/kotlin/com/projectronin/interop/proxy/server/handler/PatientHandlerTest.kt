@@ -21,6 +21,7 @@ import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import java.time.LocalDate
 import com.projectronin.interop.ehr.model.Patient as EHRPatient
 
 class PatientHandlerTest {
@@ -142,7 +143,7 @@ class PatientHandlerTest {
                 every {
                     findPatient(
                         tenant = tenant,
-                        birthDate = "1984-08-31",
+                        birthDate = LocalDate.of(1984, 8, 31),
                         familyName = "Smith",
                         givenName = "Josh"
                     )
@@ -216,7 +217,7 @@ class PatientHandlerTest {
                 every {
                     findPatient(
                         tenant = tenant,
-                        birthDate = "1984-08-31",
+                        birthDate = LocalDate.of(1984, 8, 31),
                         familyName = "Smith",
                         givenName = "Josh"
                     )
@@ -306,7 +307,7 @@ class PatientHandlerTest {
                 every {
                     findPatient(
                         tenant = tenant,
-                        birthDate = "1984-08-31",
+                        birthDate = LocalDate.of(1984, 8, 31),
                         familyName = "Smith",
                         givenName = "Josh"
                     )
@@ -361,7 +362,7 @@ class PatientHandlerTest {
                 every {
                     findPatient(
                         tenant = tenant,
-                        birthDate = "1984-08-31",
+                        birthDate = LocalDate.of(1984, 8, 31),
                         familyName = "Smith",
                         givenName = "Josh"
                     )

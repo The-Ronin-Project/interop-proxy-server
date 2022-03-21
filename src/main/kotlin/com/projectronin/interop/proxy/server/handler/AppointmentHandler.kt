@@ -5,6 +5,7 @@ import com.expediagroup.graphql.server.extensions.toGraphQLError
 import com.expediagroup.graphql.server.operations.Query
 import com.projectronin.interop.common.resource.ResourceType
 import com.projectronin.interop.ehr.factory.EHRFactory
+import com.projectronin.interop.proxy.server.util.DateUtil
 import com.projectronin.interop.queue.QueueService
 import com.projectronin.interop.queue.model.Message
 import com.projectronin.interop.queue.model.MessageType
@@ -29,6 +30,7 @@ class AppointmentHandler(
     private val queueService: QueueService
 ) : Query {
     private val logger = KotlinLogging.logger { }
+    private val dateFormatter = DateUtil()
 
     @GraphQLDescription("Finds appointments for a given MRN and date range")
     fun appointmentsByMRNAndDate(
@@ -49,7 +51,10 @@ class AppointmentHandler(
         val appointments = try {
             val appointmentService = ehrFactory.getVendorFactory(tenant).appointmentService
             appointmentService.findPatientAppointments(
-                tenant = tenant, patientMRN = mrn, startDate = startDate, endDate = endDate
+                tenant = tenant,
+                patientMRN = mrn,
+                startDate = dateFormatter.parseDateString(startDate),
+                endDate = dateFormatter.parseDateString(endDate)
             ).resources
         } catch (e: Exception) {
             findAppointmentErrors.add(GraphQLException(e.message).toGraphQLError())

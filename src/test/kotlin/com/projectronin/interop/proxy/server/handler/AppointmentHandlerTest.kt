@@ -21,6 +21,7 @@ import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import java.time.LocalDate
 import com.projectronin.interop.ehr.model.Appointment as EHRAppointment
 
 class AppointmentHandlerTest {
@@ -49,8 +50,8 @@ class AppointmentHandlerTest {
             appointmentHandler.appointmentsByMRNAndDate(
                 tenantId = "tenantId",
                 mrn = "123456789",
-                startDate = "2025-01-20T13:30:00+00:00",
-                endDate = "2025-01-22T14:30:00+00:00",
+                startDate = "2025-01-20",
+                endDate = "2025-01-22",
                 dfe = dfe
             )
         }
@@ -68,8 +69,8 @@ class AppointmentHandlerTest {
             appointmentHandler.appointmentsByMRNAndDate(
                 tenantId = "tenantId",
                 mrn = "123456789",
-                startDate = "2025-01-20T13:30:00+00:00",
-                endDate = "2025-01-22T14:30:00+00:00",
+                startDate = "2025-01-20",
+                endDate = "2025-01-22",
                 dfe = dfe
             )
         }
@@ -88,8 +89,8 @@ class AppointmentHandlerTest {
             appointmentHandler.appointmentsByMRNAndDate(
                 tenantId = "tenantId",
                 mrn = "123456789",
-                startDate = "2025-01-20T13:30:00+00:00",
-                endDate = "2025-01-22T14:30:00+00:00",
+                startDate = "2025-01-20",
+                endDate = "2025-01-22",
                 dfe = dfe
             )
         }
@@ -112,8 +113,8 @@ class AppointmentHandlerTest {
         val result = appointmentHandler.appointmentsByMRNAndDate(
             tenantId = "tenantId",
             mrn = "123456789",
-            startDate = "2025-01-20T13:30:00+00:00",
-            endDate = "2025-01-22T14:30:00+00:00",
+            startDate = "2025-01-20",
+            endDate = "2025-01-22",
             dfe = dfe
         )
 
@@ -134,8 +135,8 @@ class AppointmentHandlerTest {
                     findPatientAppointments(
                         tenant = tenant,
                         patientMRN = "123456789",
-                        startDate = "2025-01-20T13:30:00+00:00",
-                        endDate = "2025-01-22T14:30:00+00:00"
+                        startDate = LocalDate.of(2025, 1, 20),
+                        endDate = LocalDate.of(2025, 1, 22)
                     )
                 } throws (IllegalStateException("Error"))
             }
@@ -147,8 +148,8 @@ class AppointmentHandlerTest {
         val result = appointmentHandler.appointmentsByMRNAndDate(
             tenantId = "tenantId",
             mrn = "123456789",
-            startDate = "2025-01-20T13:30:00+00:00",
-            endDate = "2025-01-22T14:30:00+00:00",
+            startDate = "2025-01-20",
+            endDate = "2025-01-22",
             dfe = dfe
         )
 
@@ -194,7 +195,7 @@ class AppointmentHandlerTest {
                     every { text } returns "service-type-text"
                 }
             )
-            every { start } returns "2025-01-21T14:30:00+00:00"
+            every { start } returns "2025-01-21"
             every { raw } returns "raw JSON for appointment"
             every { participants } returns listOf(
                 mockk {
@@ -226,8 +227,8 @@ class AppointmentHandlerTest {
                     findPatientAppointments(
                         tenant = tenant,
                         patientMRN = "123456789",
-                        startDate = "2025-01-20T13:30:00+00:00",
-                        endDate = "2025-01-22T14:30:00+00:00"
+                        startDate = LocalDate.of(2025, 1, 20),
+                        endDate = LocalDate.of(2025, 1, 22)
                     )
                 } returns response
             }
@@ -251,8 +252,8 @@ class AppointmentHandlerTest {
         val actualResponse = appointmentHandler.appointmentsByMRNAndDate(
             tenantId = "tenantId",
             mrn = "123456789",
-            startDate = "2025-01-20T13:30:00+00:00",
-            endDate = "2025-01-22T14:30:00+00:00",
+            startDate = "2025-01-20",
+            endDate = "2025-01-22",
             dfe = dfe
         )
 
@@ -302,7 +303,7 @@ class AppointmentHandlerTest {
                     every { text } returns "service-type-text"
                 }
             )
-            every { start } returns "2025-01-21T14:30:00+00:00"
+            every { start } returns "2025-01-21"
             every { raw } returns "raw JSON for appointment"
             every { participants } returns listOf()
         }
@@ -321,8 +322,8 @@ class AppointmentHandlerTest {
                     findPatientAppointments(
                         tenant = tenant,
                         patientMRN = "123456789",
-                        startDate = "2025-01-20T13:30:00+00:00",
-                        endDate = "2025-01-22T14:30:00+00:00"
+                        startDate = LocalDate.of(2025, 1, 20),
+                        endDate = LocalDate.of(2025, 1, 22)
                     )
                 } returns response
             }
@@ -346,8 +347,8 @@ class AppointmentHandlerTest {
         val actualResponse = appointmentHandler.appointmentsByMRNAndDate(
             tenantId = "tenantId",
             mrn = "123456789",
-            startDate = "2025-01-20T13:30:00+00:00",
-            endDate = "2025-01-22T14:30:00+00:00",
+            startDate = "2025-01-20",
+            endDate = "2025-01-22",
             dfe = dfe
         )
 
@@ -377,8 +378,8 @@ class AppointmentHandlerTest {
                     findPatientAppointments(
                         tenant = tenant,
                         patientMRN = "123456789",
-                        startDate = "2025-01-20T13:30:00+00:00",
-                        endDate = "2025-01-22T14:30:00+00:00"
+                        startDate = LocalDate.of(2025, 1, 20),
+                        endDate = LocalDate.of(2025, 1, 22)
                     )
                 } returns response
             }
@@ -388,8 +389,8 @@ class AppointmentHandlerTest {
         val actualResponse = appointmentHandler.appointmentsByMRNAndDate(
             tenantId = "tenantId",
             mrn = "123456789",
-            startDate = "2025-01-20T13:30:00+00:00",
-            endDate = "2025-01-22T14:30:00+00:00",
+            startDate = "2025-01-20",
+            endDate = "2025-01-22",
             dfe = dfe
         )
 

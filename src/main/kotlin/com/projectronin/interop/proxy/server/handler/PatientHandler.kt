@@ -5,6 +5,7 @@ import com.expediagroup.graphql.server.extensions.toGraphQLError
 import com.expediagroup.graphql.server.operations.Query
 import com.projectronin.interop.common.resource.ResourceType
 import com.projectronin.interop.ehr.factory.EHRFactory
+import com.projectronin.interop.proxy.server.util.DateUtil
 import com.projectronin.interop.queue.QueueService
 import com.projectronin.interop.queue.model.Message
 import com.projectronin.interop.queue.model.MessageType
@@ -29,6 +30,7 @@ class PatientHandler(
     private val queueService: QueueService
 ) : Query {
     private val logger = KotlinLogging.logger { }
+    private val dateFormatter = DateUtil()
 
     @GraphQLDescription("Finds patient(s) by family name, given name, and birthdate (YYYY-mm-dd format)")
     fun patientsByNameAndDOB(
@@ -50,7 +52,7 @@ class PatientHandler(
             val patientService = ehrFactory.getVendorFactory(tenant).patientService
 
             patientService.findPatient(
-                tenant = tenant, familyName = family, givenName = given, birthDate = birthdate
+                tenant = tenant, familyName = family, givenName = given, birthDate = dateFormatter.parseDateString(birthdate)
             ).resources
         } catch (e: Exception) {
             findPatientErrors.add(GraphQLException(e.message).toGraphQLError())

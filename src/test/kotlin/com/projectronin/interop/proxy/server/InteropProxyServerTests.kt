@@ -24,6 +24,7 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment
 import org.springframework.http.HttpStatus
 import org.springframework.test.context.ActiveProfiles
+import java.time.LocalDate
 
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
@@ -51,7 +52,7 @@ class InteropProxyServerTests {
                 every {
                     findPatient(
                         tenant,
-                        "1980-12-20",
+                        LocalDate.of(1980, 12, 20),
                         "First",
                         "Last"
                     )
@@ -76,8 +77,8 @@ class InteropProxyServerTests {
                     findPatientAppointments(
                         tenant,
                         "UUID-APPT-1",
-                        "01-01-2020",
-                        "01-01-2021"
+                        LocalDate.of(2020, 1, 1),
+                        LocalDate.of(2021, 1, 1)
                     )
                 } returns mockk {
                     every { resources } returns listOf()
