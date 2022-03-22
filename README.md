@@ -55,9 +55,9 @@ export AO_SANDBOX_KEY=KEY_VALUE
 export SERVICE_CALL_JWT_SECRET=SECRET_VALUE
 ```
 
-The AO_SANDBOX_KEY can be found in the 1Password Interoperability vault under "Epic AO Sandbox Private Key (pkcs8)". Make sure to
-remove any newlines or comments from the key and save the file. The secret is also in 1Password. 
-Search for 'All Keys', find 'Seki JWT Secret', and copy it.
+The AO_SANDBOX_KEY can be found in the 1Password Interoperability vault under "Epic AO Sandbox Private Key (pkcs8)".
+Make sure to remove any newlines or comments from the key and save the file. The secret is also in 1Password. Search
+for 'All Keys', find 'Seki JWT Secret', and copy it.
 
 Next, restart IntelliJ to let it pick up the change. To make sure it has, open the Terminal tab at the bottom and enter
 the command "echo $AO_SANDBOX_KEY" and it should print the value of the key.
@@ -81,35 +81,6 @@ Finally, you can start running the integration tests. From the command line, run
 
 From within IntelliJ, integration tests are stored in src/it. Open one of them up and click the green arrow to run it,
 similar to a unit test.
-
-### Running locally
-
-Running locally builds on the configuration used for running integration tests, so ensure that the `AO_SANDBOX_KEY` is
-properly configured in your environment.
-
-From the command line, running the following command will start the server at http://localhost:8080/graphql:
-
-```shell
-./gradlew bootRun
-````
-
-Note that the process will stay alive in your terminal until you kill it. It is recommended to run it directly from your
-Mac terminal, where you can use `Command + .` to kill the process.
-
-If port 8080 is being occupied on your machine, you can also start the server using this command, supplying your
-preferred port number:
-
-```shell
-./gradlew bootRun --args='--spring.profiles.active=it --server.port=[PORT]'
-```
-
-Due to the way the arguments work, note that we do need to tell this command to use our "it" profile that is usually
-auto-defaulted by bootRun.
-
-The proxy server implements authentication via Seki, so you will need to provide one of the tenants that exist in the
-Seki database, along with an appropriate user session Bearer token. For a list see: 
-[/dev-env/db/changelog/insertTestData.yaml](https://github.com/projectronin/interop-mirth-channels/blob/main/dev-env/db/changelog/insertTestData.yaml) 
-
 
 ### Running locally via Docker
 

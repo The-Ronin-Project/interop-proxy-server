@@ -1,5 +1,4 @@
 import com.expediagroup.graphql.plugin.gradle.tasks.GraphQLGenerateSDLTask
-import org.springframework.boot.gradle.tasks.run.BootRun
 
 plugins {
     `java`
@@ -20,7 +19,6 @@ val tracerAgent: Configuration by configurations.creating
 dependencies {
     implementation("com.projectronin.interop:interop-common:${project.property("interopCommonVersion")}")
     implementation("com.projectronin.interop.ehr:interop-ehr:${project.property("interopEhrVersion")}")
-    implementation("com.projectronin.interop.ehr:interop-ehr-factory:${project.property("interopEhrVersion")}")
     implementation("com.projectronin.interop.ehr:interop-tenant:${project.property("interopEhrVersion")}")
     implementation("com.projectronin.interop.ehr:interop-transform:${project.property("interopEhrVersion")}")
     implementation("com.projectronin.interop.fhir:interop-fhir:${project.property("interopFhirVersion")}")
@@ -72,14 +70,6 @@ tasks.withType(Test::class) {
 // We need to exclude some dependencies from our it testSet
 configurations.getByName("itImplementation") {
     exclude(module = "graphql-spring-boot-starter-test")
-}
-
-tasks.getByName<BootRun>("bootRun") {
-    // Set the classpath to match our integration tests
-    classpath = sourceSets.getByName("it").runtimeClasspath
-
-    // Activate the "it" profile so that we can access the application setup
-    args("--spring.profiles.active=it")
 }
 
 val graphqlGenerateSDL by tasks.getting(GraphQLGenerateSDLTask::class) {
