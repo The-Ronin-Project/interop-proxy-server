@@ -32,7 +32,7 @@ class PatientHandler(
     private val logger = KotlinLogging.logger { }
     private val dateFormatter = DateUtil()
 
-    @GraphQLDescription("Finds patient(s) by family name, given name, and birthdate (YYYY-mm-dd format)")
+    @GraphQLDescription("Finds patient(s) by family name, given name, and birthdate (YYYY-mm-dd format).")
     fun patientsByNameAndDOB(
         tenantId: String,
         family: String,
@@ -45,14 +45,17 @@ class PatientHandler(
         val findPatientErrors = mutableListOf<GraphQLError>()
 
         // make sure requested tenant is valid
-        val tenant = findAndValidateTenant(dfe, tenantService, tenantId)
+        val tenant = findAndValidateTenant(dfe, tenantService, tenantId, false)
 
         // Call patient service
         val patients = try {
             val patientService = ehrFactory.getVendorFactory(tenant).patientService
 
             patientService.findPatient(
-                tenant = tenant, familyName = family, givenName = given, birthDate = dateFormatter.parseDateString(birthdate)
+                tenant = tenant,
+                familyName = family,
+                givenName = given,
+                birthDate = dateFormatter.parseDateString(birthdate)
             ).resources
         } catch (e: Exception) {
             findPatientErrors.add(GraphQLException(e.message).toGraphQLError())

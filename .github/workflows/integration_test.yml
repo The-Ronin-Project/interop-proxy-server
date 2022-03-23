@@ -6,7 +6,7 @@ on:
 
 jobs:
   build:
-    runs-on: self-hosted-azure
+    runs-on: self-hosted
     steps:
       - uses: actions/checkout@v2
       - name: Set up JDK 17

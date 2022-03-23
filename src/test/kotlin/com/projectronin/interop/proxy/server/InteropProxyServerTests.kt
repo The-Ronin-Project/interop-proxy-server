@@ -13,10 +13,13 @@ import com.projectronin.interop.ehr.inputs.IdentifierVendorIdentifier
 import com.projectronin.interop.fhir.r4.datatype.Identifier
 import com.projectronin.interop.fhir.r4.datatype.primitive.Id
 import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
-import com.projectronin.interop.tenant.config.TenantService
+import com.projectronin.interop.proxy.server.handler.findAndValidateTenant
 import com.projectronin.interop.tenant.config.model.Tenant
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.mockkStatic
+import io.mockk.unmockkStatic
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -28,13 +31,9 @@ import java.time.LocalDate
 
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
-
 class InteropProxyServerTests {
     @Autowired
     private lateinit var graphQLTestTemplate: GraphQLTestTemplate
-
-    @MockkBean
-    private lateinit var tenantService: TenantService
 
     @MockkBean
     private lateinit var ehrFactory: EHRFactory
@@ -45,7 +44,8 @@ class InteropProxyServerTests {
     @Test
     fun `Server handles patient query`() {
         val tenant = mockk<Tenant>()
-        every { tenantService.getTenantForMnemonic("tenant") } returns tenant
+        mockkStatic("com.projectronin.interop.proxy.server.handler.TenantUtilKt")
+        every { findAndValidateTenant(any(), any(), any()) } returns tenant
 
         every { ehrFactory.getVendorFactory(tenant) } returns mockk {
             every { patientService } returns mockk {
@@ -69,7 +69,8 @@ class InteropProxyServerTests {
     @Test
     fun `Server handles appointment query`() {
         val tenant = mockk<Tenant>()
-        every { tenantService.getTenantForMnemonic("tenant") } returns tenant
+        mockkStatic("com.projectronin.interop.proxy.server.handler.TenantUtilKt")
+        every { findAndValidateTenant(any(), any(), any()) } returns tenant
 
         every { ehrFactory.getVendorFactory(tenant) } returns mockk {
             every { appointmentService } returns mockk {
@@ -92,17 +93,21 @@ class InteropProxyServerTests {
 
     @Test
     fun `Server handles condition query`() {
+
         val response = graphQLTestTemplate.postForResource("graphql/conditionsByPatientAndCategory.graphql")
         assertEquals(HttpStatus.OK, response.statusCode)
     }
 
     @Test
     fun `Handles message input`() {
+
         val identifier = Identifier(value = "IdentifierID", system = Uri("system"))
 
         every { practitionerService.getPractitionerIdentifiers("1234") } returns listOf(identifier)
         val tenant = mockk<Tenant>()
-        every { tenantService.getTenantForMnemonic("tenant") } returns tenant
+
+        mockkStatic("com.projectronin.interop.proxy.server.handler.TenantUtilKt")
+        every { findAndValidateTenant(any(), any(), any()) } returns tenant
 
         every { ehrFactory.getVendorFactory(tenant) } returns mockk {
             every { messageService } returns mockk {
@@ -161,7 +166,13 @@ class InteropProxyServerTests {
         val objectNode = objectMapper.createObjectNode()
         objectNode.put("message", messageInput)
 
-        val response = graphQLTestTemplate.perform("graphql/sendMessage.graphql", objectNode)
+        val response = graphQLTestTemplate.withAdditionalHeader("AuthorizedTenant", "tenant")
+            .perform("graphql/sendMessage.graphql", objectNode)
         assertEquals("""{"data":{"sendMessage":"sent"}}""", response.rawResponse.body)
+    }
+
+    @AfterEach
+    fun after() {
+        unmockkStatic("com.projectronin.interop.proxy.server.handler.TenantUtilKt")
     }
 }

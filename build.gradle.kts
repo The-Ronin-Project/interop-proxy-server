@@ -27,6 +27,9 @@ dependencies {
     implementation("com.projectronin.interop.queue:interop-queue-db:${project.property("interopQueueVersion")}")
 
     implementation(platform("org.springframework.boot:spring-boot-parent:2.6.4"))
+    // Pull in just the security dependencies we need, as we are not using the full security suite.
+    implementation("org.springframework.security:spring-security-oauth2-core")
+    implementation("org.springframework.security:spring-security-oauth2-jose")
     implementation("org.springframework.boot:spring-boot-starter-jdbc")
     implementation("mysql:mysql-connector-java:8.0.25")
 

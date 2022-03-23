@@ -13,7 +13,7 @@ import org.junit.jupiter.api.assertThrows
 import org.junitpioneer.jupiter.ClearEnvironmentVariable
 import org.junitpioneer.jupiter.SetEnvironmentVariable
 
-class AuthServiceTest {
+class UserAuthServiceTest {
     private val mockWebServer = MockWebServer()
 
     private val validAuthServiceResponse = this::class.java.getResource("/ExampleAuthResponse.json")!!.readText()
@@ -34,8 +34,8 @@ class AuthServiceTest {
             MockResponse().setBody(validAuthServiceResponse).setHeader("Content-Type", "application/json").setResponseCode(200)
         )
         mockWebServer.start()
-        val authService = AuthService(getClient(), mockWebServer.url("/auth").toString())
-        val responseBody = authService.validateToken("fake token")
+        val userAuthService = UserAuthService(getClient(), mockWebServer.url("/auth").toString())
+        val responseBody = userAuthService.validateToken("fake token")
 
         assertEquals(expectedResponse, responseBody)
     }
@@ -47,8 +47,8 @@ class AuthServiceTest {
             MockResponse().setBody("Unauthorized").setHeader("Content-Type", "application/json").setResponseCode(401)
         )
         mockWebServer.start()
-        val authService = AuthService(getClient(), mockWebServer.url("/auth").toString())
-        val responseBody = authService.validateToken("fake token")
+        val userAuthService = UserAuthService(getClient(), mockWebServer.url("/auth").toString())
+        val responseBody = userAuthService.validateToken("fake token")
 
         assertNull(responseBody)
     }
@@ -60,10 +60,10 @@ class AuthServiceTest {
             MockResponse().setHeader("Content-Type", "application/json").setResponseCode(500)
         )
         mockWebServer.start()
-        val authService = AuthService(getClient(), mockWebServer.url("/auth").toString())
+        val userAuthService = UserAuthService(getClient(), mockWebServer.url("/auth").toString())
 
         assertThrows<ServerResponseException> {
-            authService.validateToken("fake token")
+            userAuthService.validateToken("fake token")
         }
     }
 
@@ -74,10 +74,10 @@ class AuthServiceTest {
             MockResponse().setBody(validAuthServiceResponse).setHeader("Content-Type", "application/json").setResponseCode(200)
         )
         mockWebServer.start()
-        val authService = AuthService(getClient(), mockWebServer.url("/auth").toString())
+        val userAuthService = UserAuthService(getClient(), mockWebServer.url("/auth").toString())
 
         assertThrows<IllegalStateException> {
-            authService.validateToken("fake token")
+            userAuthService.validateToken("fake token")
         }
     }
 

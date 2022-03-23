@@ -1,5 +1,6 @@
 package com.projectronin.interop.proxy.server
 
+import com.ninjasquad.springmockk.MockkBean
 import com.projectronin.interop.common.jackson.JacksonManager.Companion.objectMapper
 import com.projectronin.interop.proxy.server.model.ConditionCategoryCode
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -14,6 +15,7 @@ import org.springframework.boot.web.server.LocalServerPort
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
+import org.springframework.security.oauth2.jwt.JwtDecoder
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
 import java.net.URI
@@ -28,6 +30,9 @@ class InteropProxyServerIntegratedConditionTests {
 
     @Autowired
     private lateinit var restTemplate: TestRestTemplate
+
+    @MockkBean
+    private lateinit var m2mJwtDecoder: JwtDecoder
 
     private val httpHeaders = HttpHeaders()
 
@@ -76,6 +81,10 @@ class InteropProxyServerIntegratedConditionTests {
 
         assertEquals(HttpStatus.OK, responseEntity.statusCode)
         assertTrue(resultJSONObject.has("errors"))
+        assertEquals(
+            "Exception while fetching data (/conditionsByPatientAndCategory) : 403 Requested Tenant 'fake' does not match authorized Tenant 'apposnd'",
+            resultJSONObject["errors"][0]["message"].asText()
+        )
     }
 
     @Test

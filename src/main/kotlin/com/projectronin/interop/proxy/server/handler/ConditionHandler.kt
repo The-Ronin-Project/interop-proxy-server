@@ -35,7 +35,7 @@ class ConditionHandler(
      * Returns only active [ProxyServerCondition]s for the given [patientFhirId] and [conditionCategoryCode]
      * See [Jira](https://projectronin.atlassian.net/browse/INT-284?focusedCommentId=24692)
      */
-    @GraphQLDescription("Finds active patient conditions for a given patient and category. Only conditions registered within the category will be returned.")
+    @GraphQLDescription("Finds active patient conditions for a given patient and category. Only conditions registered within the category will be returned. Requires User Auth.")
     fun conditionsByPatientAndCategory(
         tenantId: String,
         patientFhirId: String,

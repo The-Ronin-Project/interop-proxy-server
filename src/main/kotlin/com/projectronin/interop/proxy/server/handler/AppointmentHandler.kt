@@ -32,7 +32,7 @@ class AppointmentHandler(
     private val logger = KotlinLogging.logger { }
     private val dateFormatter = DateUtil()
 
-    @GraphQLDescription("Finds appointments for a given MRN and date range")
+    @GraphQLDescription("Finds appointments for a given MRN and date range. Requires User Auth.")
     fun appointmentsByMRNAndDate(
         tenantId: String,
         mrn: String,

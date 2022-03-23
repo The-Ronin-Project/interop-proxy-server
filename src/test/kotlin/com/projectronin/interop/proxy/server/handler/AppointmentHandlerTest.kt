@@ -21,6 +21,7 @@ import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import org.springframework.web.client.HttpClientErrorException
 import java.time.LocalDate
 import com.projectronin.interop.ehr.model.Appointment as EHRAppointment
 
@@ -46,7 +47,7 @@ class AppointmentHandlerTest {
         every { dfe.graphQlContext.get<InteropGraphQLContext>(INTEROP_CONTEXT_KEY).authzTenantId } returns "tenantId"
 
         // Run Test
-        val exception = assertThrows<IllegalArgumentException> {
+        val exception = assertThrows<HttpClientErrorException> {
             appointmentHandler.appointmentsByMRNAndDate(
                 tenantId = "tenantId",
                 mrn = "123456789",
@@ -55,7 +56,7 @@ class AppointmentHandlerTest {
                 dfe = dfe
             )
         }
-        assertEquals("Invalid Tenant: tenantId", exception.message)
+        assertEquals("404 Invalid Tenant: tenantId", exception.message)
     }
 
     @Test
@@ -65,7 +66,7 @@ class AppointmentHandlerTest {
         every { dfe.graphQlContext.get<InteropGraphQLContext>(INTEROP_CONTEXT_KEY).authzTenantId } returns null
 
         // Run Test
-        val exception = assertThrows<IllegalArgumentException> {
+        val exception = assertThrows<HttpClientErrorException> {
             appointmentHandler.appointmentsByMRNAndDate(
                 tenantId = "tenantId",
                 mrn = "123456789",
@@ -75,7 +76,7 @@ class AppointmentHandlerTest {
             )
         }
 
-        assertEquals("No Tenants authorized for request.", exception.message)
+        assertEquals("403 No Tenants authorized for request.", exception.message)
     }
 
     @Test
@@ -85,7 +86,7 @@ class AppointmentHandlerTest {
         every { dfe.graphQlContext.get<InteropGraphQLContext>(INTEROP_CONTEXT_KEY).authzTenantId } returns "differentTenantId"
 
         // Run Test
-        val exception = assertThrows<IllegalArgumentException> {
+        val exception = assertThrows<HttpClientErrorException> {
             appointmentHandler.appointmentsByMRNAndDate(
                 tenantId = "tenantId",
                 mrn = "123456789",
@@ -96,7 +97,7 @@ class AppointmentHandlerTest {
         }
 
         assertEquals(
-            "Requested Tenant 'tenantId' does not match authorized Tenant 'differentTenantId'",
+            "403 Requested Tenant 'tenantId' does not match authorized Tenant 'differentTenantId'",
             exception.message
         )
     }

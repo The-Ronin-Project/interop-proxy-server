@@ -1,8 +1,14 @@
 package com.projectronin.interop.proxy.server
 
+import com.nimbusds.jose.PlainHeader
+import com.nimbusds.jwt.JWTClaimsSet
+import com.nimbusds.jwt.PlainJWT
+import com.ninjasquad.springmockk.MockkBean
 import com.projectronin.interop.aidbox.testcontainer.AidboxData
 import com.projectronin.interop.aidbox.testcontainer.BaseAidboxTest
 import com.projectronin.interop.common.jackson.JacksonManager.Companion.objectMapper
+import io.mockk.every
+import io.mockk.mockk
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -15,6 +21,8 @@ import org.springframework.boot.web.server.LocalServerPort
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
+import org.springframework.security.oauth2.jwt.Jwt
+import org.springframework.security.oauth2.jwt.JwtDecoder
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.DynamicPropertyRegistry
@@ -32,6 +40,9 @@ class InteropProxyServerIntegratedMessageTests : BaseAidboxTest() {
 
     @Autowired
     private lateinit var restTemplate: TestRestTemplate
+
+    @MockkBean
+    private lateinit var m2mJwtDecoder: JwtDecoder
 
     private val httpHeaders = HttpHeaders()
 
@@ -212,9 +223,13 @@ class InteropProxyServerIntegratedMessageTests : BaseAidboxTest() {
 
         val resultJSONObject = objectMapper.readTree(responseEntity.body)
         val errorJSONObject = resultJSONObject["errors"][0]
+        println(errorJSONObject)
 
         assertEquals(HttpStatus.OK, responseEntity.statusCode)
-        assertTrue(errorJSONObject["message"].asText().contains("Tenant not found: $tenantId"))
+        assertTrue(
+            errorJSONObject["message"].asText()
+                .contains("Requested Tenant '$tenantId' does not match authorized Tenant 'apposnd'")
+        )
     }
 
     @Test
@@ -289,5 +304,54 @@ class InteropProxyServerIntegratedMessageTests : BaseAidboxTest() {
 
         assertEquals(HttpStatus.OK, responseEntity.statusCode)
         assertTrue(resultJSONObject.has("errors"))
+    }
+
+    @Test
+    fun `server rejects valid m2m auth`() {
+        val tenantId = "apposnd"
+        val mrn = "202497"
+        val id = "3566c140-dafb-4db6-95f1-fb23a72c7b25"
+        val message = "Test message"
+        val mutation =
+            """mutation sendMessage (${'$'}message: MessageInput!, ${'$'}tenantId: String!) {sendMessage (message: ${'$'}message, tenantId: ${'$'}tenantId)}"""
+
+        val query = """
+            |{
+            |   "variables": {
+            |      "message": {
+            |          "patient": {
+            |              "mrn": "$mrn"
+            |          },
+            |         "recipients": {
+            |             "fhirId": "$id"
+            |         },
+            |         "text": "$message"
+            |      },
+            |      "tenantId": "$tenantId"
+            |   },
+            |   "query": "$mutation"
+            |}
+        """.trimMargin()
+
+        val m2mHeaders = HttpHeaders()
+
+        val header = PlainHeader.Builder().contentType("JWT").build()
+        val payload = JWTClaimsSet.Builder().issuer("https://dev-euweyz5a.us.auth0.com/").audience("proxy").build()
+        val jwtM2M = PlainJWT(header, payload).serialize()
+
+        m2mHeaders.set("Content-Type", "application/graphql")
+        m2mHeaders.set("Authorization", "Bearer $jwtM2M")
+
+        every { m2mJwtDecoder.decode(jwtM2M) } returns (mockk<Jwt>())
+
+        val httpEntity = HttpEntity(query, m2mHeaders)
+
+        val responseEntity =
+            restTemplate.postForEntity(URI("http://localhost:$port/graphql"), httpEntity, String::class.java)
+
+        val resultJSONObject = objectMapper.readTree(responseEntity.body)
+        assertEquals(HttpStatus.OK, responseEntity.statusCode)
+        assertTrue(resultJSONObject.has("errors"))
+        println(resultJSONObject.toPrettyString())
     }
 }

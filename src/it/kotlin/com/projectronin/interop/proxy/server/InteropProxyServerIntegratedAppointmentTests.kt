@@ -1,5 +1,6 @@
 package com.projectronin.interop.proxy.server
 
+import com.ninjasquad.springmockk.MockkBean
 import com.projectronin.interop.aidbox.testcontainer.AidboxData
 import com.projectronin.interop.aidbox.testcontainer.BaseAidboxTest
 import com.projectronin.interop.common.jackson.JacksonManager.Companion.objectMapper
@@ -15,6 +16,7 @@ import org.springframework.boot.web.server.LocalServerPort
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
+import org.springframework.security.oauth2.jwt.JwtDecoder
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.DynamicPropertyRegistry
@@ -43,6 +45,9 @@ class InteropProxyServerIntegratedAppointmentTests : BaseAidboxTest() {
 
     @Autowired
     private lateinit var restTemplate: TestRestTemplate
+
+    @MockkBean
+    private lateinit var m2mJwtDecoder: JwtDecoder
 
     private val httpHeaders = HttpHeaders()
 
@@ -118,7 +123,10 @@ class InteropProxyServerIntegratedAppointmentTests : BaseAidboxTest() {
         val errorJSONObject = resultJSONObject["errors"].get(0)
 
         assertEquals(HttpStatus.OK, responseEntity.statusCode)
-        assertEquals("Exception while fetching data (/appointmentsByMRNAndDate) : Requested Tenant 'fake' does not match authorized Tenant 'apposnd'", errorJSONObject["message"].asText())
+        assertEquals(
+            "Exception while fetching data (/appointmentsByMRNAndDate) : 403 Requested Tenant 'fake' does not match authorized Tenant 'apposnd'",
+            errorJSONObject["message"].asText()
+        )
     }
 
     @Test

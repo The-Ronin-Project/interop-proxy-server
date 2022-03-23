@@ -215,7 +215,7 @@ type Identifier {
 }
 
 type Mutation {
-  "Sends a message and returns the current status"
+  "Sends a message and returns the current status. Requires User Auth."
   sendMessage(message: MessageInput!, tenantId: String!): String!
 }
 
@@ -264,11 +264,11 @@ type PeriodOnset {
 }
 
 type Query {
-  "Finds appointments for a given MRN and date range"
+  "Finds appointments for a given MRN and date range. Requires User Auth."
   appointmentsByMRNAndDate(endDate: String!, mrn: String!, startDate: String!, tenantId: String!): [Appointment!]!
-  "Finds active patient conditions for a given patient and category. Only conditions registered within the category will be returned."
+  "Finds active patient conditions for a given patient and category. Only conditions registered within the category will be returned. Requires User Auth."
   conditionsByPatientAndCategory(conditionCategoryCode: ConditionCategoryCode!, patientFhirId: String!, tenantId: String!): [Condition!]!
-  "Finds patient(s) by family name, given name, and birthdate (YYYY-mm-dd format)"
+  "Finds patient(s) by family name, given name, and birthdate (YYYY-mm-dd format)."
   patientsByNameAndDOB(birthdate: String!, family: String!, given: String!, tenantId: String!): [Patient!]!
 }
 

@@ -22,6 +22,7 @@ import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import org.springframework.web.client.HttpClientErrorException
 import com.projectronin.interop.ehr.model.Condition as EHRCondition
 
 class ConditionHandlerTest {
@@ -48,7 +49,7 @@ class ConditionHandlerTest {
         every { dfe.graphQlContext.get<InteropGraphQLContext>(INTEROP_CONTEXT_KEY).authzTenantId } returns "tenantId"
 
         // Run Test
-        val exception = assertThrows<IllegalArgumentException> {
+        val exception = assertThrows<HttpClientErrorException> {
             conditionHandler.conditionsByPatientAndCategory(
                 tenantId = "tenantId",
                 patientFhirId = "123456789",
@@ -56,7 +57,7 @@ class ConditionHandlerTest {
                 dfe = dfe
             )
         }
-        assertEquals("Invalid Tenant: tenantId", exception.message)
+        assertEquals("404 Invalid Tenant: tenantId", exception.message)
     }
 
     @Test
@@ -65,7 +66,7 @@ class ConditionHandlerTest {
         every { dfe.graphQlContext.get<InteropGraphQLContext>(INTEROP_CONTEXT_KEY).authzTenantId } returns null
 
         // Run Test
-        val exception = assertThrows<IllegalArgumentException> {
+        val exception = assertThrows<HttpClientErrorException> {
             conditionHandler.conditionsByPatientAndCategory(
                 tenantId = "tenantId",
                 patientFhirId = "123456789",
@@ -74,7 +75,7 @@ class ConditionHandlerTest {
             )
         }
 
-        assertEquals("No Tenants authorized for request.", exception.message)
+        assertEquals("403 No Tenants authorized for request.", exception.message)
     }
 
     @Test

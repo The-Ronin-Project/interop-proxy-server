@@ -12,6 +12,7 @@ import com.projectronin.interop.proxy.server.input.MessageInput
 import com.projectronin.interop.proxy.server.input.MessageRecipientInput
 import com.projectronin.interop.tenant.config.TenantService
 import com.projectronin.interop.tenant.config.model.Tenant
+import graphql.schema.DataFetchingEnvironment
 import mu.KotlinLogging
 import org.springframework.stereotype.Component
 
@@ -26,16 +27,11 @@ class MessageHandler(
 ) : Mutation {
     private val logger = KotlinLogging.logger { }
 
-    @GraphQLDescription("Sends a message and returns the current status")
-    fun sendMessage(tenantId: String, message: MessageInput): String {
+    @GraphQLDescription("Sends a message and returns the current status. Requires User Auth.")
+    fun sendMessage(tenantId: String, message: MessageInput, dfe: DataFetchingEnvironment): String {
         logger.info { "Sending message to $tenantId" }
 
-        val tenant =
-            tenantService.getTenantForMnemonic(tenantId)
-        if (tenant == null) {
-            logger.error { "No tenant found for $tenantId" }
-            throw IllegalArgumentException("Tenant not found: $tenantId")
-        }
+        val tenant = findAndValidateTenant(dfe, tenantService, tenantId)
 
         val messageService = ehrFactory.getVendorFactory(tenant).messageService
         // For now there is only one possible vendor/service
