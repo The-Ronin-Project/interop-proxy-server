@@ -48,6 +48,7 @@ dependencies {
     }
     testImplementation("com.projectronin.interop.publish:interop-aidbox-testcontainer:${project.property("interopPublishVersion")}")
     testImplementation("com.projectronin.interop:interop-common-test-db:${project.property("interopCommonVersion")}")
+    testImplementation("com.projectronin.interop:interop-common-jackson:${project.property("interopCommonVersion")}")
     testImplementation("com.projectronin.interop.ehr:interop-ehr-liquibase:${project.property("interopEhrVersion")}")
     testImplementation("com.projectronin.interop.queue:interop-queue-liquibase:${project.property("interopQueueVersion")}")
 
