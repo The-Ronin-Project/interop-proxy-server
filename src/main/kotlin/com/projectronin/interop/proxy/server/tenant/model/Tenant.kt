@@ -1,4 +1,4 @@
-package com.projectronin.interop.proxy.server.model
+package com.projectronin.interop.proxy.server.tenant.model
 
 import java.time.LocalTime
 

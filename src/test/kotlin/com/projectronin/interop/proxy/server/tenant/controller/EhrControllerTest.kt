@@ -1,7 +1,7 @@
-package com.projectronin.interop.proxy.server.controller
+package com.projectronin.interop.proxy.server.tenant.controller
 
 import com.projectronin.interop.common.vendor.VendorType
-import com.projectronin.interop.proxy.server.model.Ehr
+import com.projectronin.interop.proxy.server.tenant.model.Ehr
 import com.projectronin.interop.tenant.config.data.EhrDAO
 import com.projectronin.interop.tenant.config.data.model.EhrDO
 import io.mockk.every

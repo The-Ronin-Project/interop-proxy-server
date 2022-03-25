@@ -1,6 +1,6 @@
-package com.projectronin.interop.proxy.server.controller
+package com.projectronin.interop.proxy.server.tenant.controller
 
-import com.projectronin.interop.proxy.server.model.ProviderPool
+import com.projectronin.interop.proxy.server.tenant.model.ProviderPool
 import com.projectronin.interop.tenant.config.data.ProviderPoolDAO
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping

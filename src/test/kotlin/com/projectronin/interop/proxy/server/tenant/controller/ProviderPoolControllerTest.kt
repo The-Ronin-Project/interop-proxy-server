@@ -1,6 +1,6 @@
-package com.projectronin.interop.proxy.server.controller
+package com.projectronin.interop.proxy.server.tenant.controller
 
-import com.projectronin.interop.proxy.server.model.ProviderPool
+import com.projectronin.interop.proxy.server.tenant.model.ProviderPool
 import com.projectronin.interop.tenant.config.data.ProviderPoolDAO
 import io.mockk.mockk
 import org.junit.jupiter.api.Assertions.assertEquals

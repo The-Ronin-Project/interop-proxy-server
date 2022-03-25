@@ -1,7 +1,7 @@
-package com.projectronin.interop.proxy.server.controller
+package com.projectronin.interop.proxy.server.tenant.controller
 
-import com.projectronin.interop.proxy.server.model.Epic
-import com.projectronin.interop.proxy.server.model.Tenant
+import com.projectronin.interop.proxy.server.tenant.model.Epic
+import com.projectronin.interop.proxy.server.tenant.model.Tenant
 import com.projectronin.interop.tenant.config.TenantService
 import io.mockk.mockk
 import org.junit.jupiter.api.Test

@@ -1,4 +1,4 @@
-package com.projectronin.interop.proxy.server.model
+package com.projectronin.interop.proxy.server.tenant.model
 
 import com.projectronin.interop.common.vendor.VendorType
 import org.junit.jupiter.api.Assertions.assertEquals

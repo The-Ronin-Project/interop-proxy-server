@@ -1,4 +1,4 @@
-package com.projectronin.interop.proxy.server.model
+package com.projectronin.interop.proxy.server.tenant.model
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.projectronin.interop.common.jackson.JacksonManager.Companion.objectMapper

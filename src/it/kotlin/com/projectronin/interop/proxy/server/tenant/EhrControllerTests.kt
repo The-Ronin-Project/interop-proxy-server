@@ -1,6 +1,7 @@
-package com.projectronin.interop.proxy.server
+package com.projectronin.interop.proxy.server.tenant
 
-import com.projectronin.interop.proxy.server.model.Ehr
+import com.projectronin.interop.proxy.server.InteropProxyServerAuthInitializer
+import com.projectronin.interop.proxy.server.tenant.model.Ehr
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import org.junitpioneer.jupiter.SetEnvironmentVariable

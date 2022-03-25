@@ -1,7 +1,8 @@
-package com.projectronin.interop.proxy.server
+package com.projectronin.interop.proxy.server.tenant
 
-import com.projectronin.interop.proxy.server.model.Epic
-import com.projectronin.interop.proxy.server.model.Tenant
+import com.projectronin.interop.proxy.server.InteropProxyServerAuthInitializer
+import com.projectronin.interop.proxy.server.tenant.model.Epic
+import com.projectronin.interop.proxy.server.tenant.model.Tenant
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junitpioneer.jupiter.SetEnvironmentVariable
