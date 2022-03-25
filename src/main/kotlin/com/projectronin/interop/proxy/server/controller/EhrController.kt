@@ -1,6 +1,5 @@
 package com.projectronin.interop.proxy.server.controller
 
-import com.projectronin.interop.common.vendor.VendorType
 import com.projectronin.interop.proxy.server.model.Ehr
 import com.projectronin.interop.tenant.config.data.EhrDAO
 import com.projectronin.interop.tenant.config.data.model.EhrDO
@@ -17,31 +16,32 @@ class EhrController(private val ehrDAO: EhrDAO) {
 
     @GetMapping
     fun read(): List<Ehr> {
-        // TODO
         val ehrDOList = ehrDAO.read()
         return ehrDOList.map { ehrDOtoEhr(it) }
     }
 
     @PostMapping
-    fun insert(@RequestBody ehr: Ehr): Ehr {
-        // TODO
-        return Ehr(
-            VendorType.EPIC,
-            "clientID",
-            "public",
-            "private"
-        )
+    fun insert(@RequestBody ehr: Ehr): Ehr? {
+        val insertObj = EhrDO {
+            vendorType = ehr.vendorType
+            clientId = ehr.clientId
+            publicKey = ehr.publicKey
+            privateKey = ehr.privateKey
+        }
+        val insertedEhr = ehrDAO.insert(insertObj)
+        return insertedEhr?.let { ehrDOtoEhr(it) }
     }
 
     @PutMapping
-    fun update(@RequestBody ehr: Ehr): Ehr {
-        // TODO
-        return Ehr(
-            VendorType.EPIC,
-            "UpdatedClientID",
-            "public",
-            "private"
-        )
+    fun update(@RequestBody ehr: Ehr): Ehr? {
+        val updateObj = EhrDO {
+            vendorType = ehr.vendorType
+            clientId = ehr.clientId
+            publicKey = ehr.publicKey
+            privateKey = ehr.privateKey
+        }
+        val updatedEhr = ehrDAO.update(updateObj)
+        return updatedEhr?.let { ehrDOtoEhr(it) }
     }
 
     private fun ehrDOtoEhr(ehrDO: EhrDO): Ehr {
