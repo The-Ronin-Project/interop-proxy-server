@@ -25,7 +25,7 @@ the tenant authorized for the User.
 ##### Machine to Machine (Auth0) authentication
 
 For select [calls](interopSchema.graphql), where user authentication is not required, machine to machine authentication
-is accepted. A signed Auth0 Bearer token must be supplied in the request's Authentication header. The token must have
+is accepted. A signed Auth0 Bearer token must be supplied in the request's 'Authorization' header. The token must have
 been issued, issuer on the JWT, by the auth endpoint corresponding to the environment, the audience must be "proxy", and
 the token must not be expired at time of processing.
 

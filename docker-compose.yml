@@ -5,6 +5,8 @@ services:
       - INTEROP_TENANT_CONFIG=file:/config/tenants.yaml
       - SPRING_QUEUE_DATASOURCE_JDBCURL=jdbc:mysql://queue:secret@db-queue:3306/interop-queue
       - SPRING_EHR_DATASOURCE_JDBCURL=jdbc:mysql://ehr:secret@db-ehr:3306/interop-ehr
+      - RONIN_SERVER_AUTH_M2M_ISSUER=https://ronin-dev.auth0.com/
+      - RONIN_SERVER_AUTH_M2M_AUDIENCE=proxy
       - AO_SANDBOX_KEY
       - SERVICE_CALL_JWT_SECRET
     volumes:
