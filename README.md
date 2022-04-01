@@ -45,7 +45,7 @@ at [interopSchema.graphql](interopSchema.graphql). This is currently done automa
 
 This project uses [Jib](https://github.com/GoogleContainerTools/jib) to build containers. This can be used with or
 without Docker installed on your system. Currently, we have not assigned a specific name to the created image, so it
-will need to be supplied on the command line. 
+will need to be supplied on the command line.
 
 To build with Docker installed, run the following, which will build the server into a Docker repository and make it
 available on your local Docker daemon.
@@ -102,7 +102,7 @@ locally.
 
 ```shell
 export RONIN_SERVER_AUTH_M2M_ISSUER=AUTH0_INSTANCE
-export RONIN_SERVER_AUTH_M2M_AUDIENCE=proxy
+export RONIN_SERVER_AUTH_M2M_AUDIENCE=PROXY_ENDPOINT
 ```
 
 ### Datasources
@@ -111,6 +111,16 @@ This service is also dependent on two independent databases that can be configur
 [data source configuration](https://docs.spring.io/spring-boot/docs/2.1.x/reference/html/howto-data-access.html). These
 databases are for the interop-ehr (tenant) and interop-queue services and require the ```spring.ehr.datasource```
 and ```spring.ehr.datasource``` prefixes, respectively.
+
+### Aidbox
+
+Proxy server also has a dependency on Aidbox and therefore requires Aidbox credentials. For the moment aidbox is
+maintained by the Data Platform team and new clients and permissions are managed manually.
+
+```shell
+export AIDBOX_CLIENT_ID=CLIENT_ID
+export AIDBOX_CLIENT_SECRET=SECRET_VALUE
+```
 
 ## Running the Service
 
