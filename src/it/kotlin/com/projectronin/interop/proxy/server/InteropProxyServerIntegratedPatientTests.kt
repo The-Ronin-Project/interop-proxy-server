@@ -6,12 +6,15 @@ import com.nimbusds.jwt.JWTClaimsSet
 import com.nimbusds.jwt.PlainJWT
 import com.ninjasquad.springmockk.MockkBean
 import com.projectronin.interop.common.jackson.JacksonManager.Companion.objectMapper
+import com.projectronin.interop.mock.ehr.testcontainer.BaseMockEHRTest
 import io.mockk.every
 import io.mockk.mockk
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInstance
 import org.junitpioneer.jupiter.SetEnvironmentVariable
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
@@ -33,7 +36,8 @@ import javax.sql.DataSource
 @ActiveProfiles("it")
 @ContextConfiguration(initializers = [(InteropProxyServerAuthInitializer::class)])
 @SetEnvironmentVariable(key = "SERVICE_CALL_JWT_SECRET", value = "abc") // prevent Exception in AuthService.kt
-class InteropProxyServerIntegratedPatientTests {
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+class InteropProxyServerIntegratedPatientTests : BaseMockEHRTest() {
     @LocalServerPort
     private var port = 0
 
@@ -51,6 +55,18 @@ class InteropProxyServerIntegratedPatientTests {
     init {
         httpHeaders.set("Content-Type", "application/graphql")
         httpHeaders.set("Authorization", "Fake Token")
+    }
+
+    @BeforeAll
+    internal fun beforeClass() {
+        // we need to change the service address of "Epic" after instantiation since the Testcontainer has a dynamic port
+        val connection = ehrDatasource.connection
+        val statement = connection.createStatement()
+        statement.execute("update io_tenant_epic set service_endpoint = '${getURL()}/epic' where io_tenant_id = 1001;")
+
+        // insert testing patient to MockEHR
+        val createPat = this::class.java.getResource("/mockEHR/r4Patient.json")!!.readText()
+        addR4Resource("Patient", createPat, "eJzlzKe3KPzAV5TtkxmNivQ3")
     }
 
     /**
@@ -71,7 +87,7 @@ class InteropProxyServerIntegratedPatientTests {
     @Test
     fun `server handles patient query`() {
         val query = this::class.java.getResource("/graphql/epicAOTestPatient.graphql")!!.readText()
-        // val expectedJSON = this::class.java.getResource("/epicAOTestPatientGraphQLResults.json")!!.readText()
+        val expectedJSON = this::class.java.getResource("/epicAOTestPatientGraphQLResults.json")!!.readText()
 
         val httpEntity = HttpEntity(query, httpHeaders)
 
@@ -79,12 +95,11 @@ class InteropProxyServerIntegratedPatientTests {
             restTemplate.postForEntity(URI("http://localhost:$port/graphql"), httpEntity, String::class.java)
 
         val resultJSONObject = objectMapper.readTree(responseEntity.body)
-        // val expectedJSONObject = objectMapper.readTree(expectedJSON)
-        // let's bring this back when we have a more stable test server
+        val expectedJSONObject = objectMapper.readTree(expectedJSON)
 
         assertEquals(HttpStatus.OK, responseEntity.statusCode)
         assertFalse(resultJSONObject.has("errors"))
-        assertTrue(resultJSONObject.size() > 0)
+        assertEquals(expectedJSONObject.toString(), resultJSONObject.toString())
     }
 
     @Test
@@ -160,7 +175,7 @@ class InteropProxyServerIntegratedPatientTests {
     @Test
     fun `server handles patient query with m2m auth`() {
         val query = this::class.java.getResource("/graphql/epicAOTestPatient.graphql")!!.readText()
-        // val expectedJSON = this::class.java.getResource("/epicAOTestPatientGraphQLResults.json")!!.readText()
+        val expectedJSON = this::class.java.getResource("/epicAOTestPatientGraphQLResults.json")!!.readText()
 
         val m2mHeaders = HttpHeaders()
 
@@ -179,12 +194,11 @@ class InteropProxyServerIntegratedPatientTests {
             restTemplate.postForEntity(URI("http://localhost:$port/graphql"), httpEntity, String::class.java)
 
         val resultJSONObject = objectMapper.readTree(responseEntity.body)
-        // val expectedJSONObject = objectMapper.readTree(expectedJSON)
-        // let's bring this back when we have a more stable test server
+        val expectedJSONObject = objectMapper.readTree(expectedJSON)
 
         assertEquals(HttpStatus.OK, responseEntity.statusCode)
         assertFalse(resultJSONObject.has("errors"))
-        assertTrue(resultJSONObject.size() > 0)
+        assertEquals(expectedJSONObject.toString(), resultJSONObject.toString())
     }
 
     @Test
