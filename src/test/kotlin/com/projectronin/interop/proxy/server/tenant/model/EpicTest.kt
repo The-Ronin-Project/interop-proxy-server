@@ -16,6 +16,7 @@ internal class EpicTest {
             messageType = "messageType",
             practitionerProviderSystem = "practitionerProviderSystem",
             practitionerUserSystem = "practitionerUserSystem",
+            mrnSystem = "mrnSystem",
             hsi = "hsi"
         )
 
@@ -26,6 +27,7 @@ internal class EpicTest {
         assertEquals("messageType", epic.messageType)
         assertEquals("practitionerProviderSystem", epic.practitionerProviderSystem)
         assertEquals("practitionerUserSystem", epic.practitionerUserSystem)
+        assertEquals("mrnSystem", epic.mrnSystem)
         assertEquals("hsi", epic.hsi)
     }
 
@@ -38,6 +40,7 @@ internal class EpicTest {
             messageType = "messageType",
             practitionerProviderSystem = "practitionerProviderSystem",
             practitionerUserSystem = "practitionerUserSystem",
+            mrnSystem = "mrnSystem",
             hsi = "hsi"
         )
         val json = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(epic)
@@ -52,6 +55,7 @@ internal class EpicTest {
               "messageType" : "messageType",
               "practitionerProviderSystem" : "practitionerProviderSystem",
               "practitionerUserSystem" : "practitionerUserSystem",
+              "mrnSystem" : "mrnSystem",
               "hsi" : "hsi",
               "vendorType" : "EPIC"
             }
@@ -71,6 +75,7 @@ internal class EpicTest {
             messageType = "messageType",
             practitionerProviderSystem = "practitionerProviderSystem",
             practitionerUserSystem = "practitionerUserSystem",
+            mrnSystem = "mrnSystem",
             hsi = null
         )
         val json = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(epic)
@@ -85,6 +90,7 @@ internal class EpicTest {
               "messageType" : "messageType",
               "practitionerProviderSystem" : "practitionerProviderSystem",
               "practitionerUserSystem" : "practitionerUserSystem",
+              "mrnSystem" : "mrnSystem",
               "vendorType" : "EPIC"
             }
         """.trimIndent()

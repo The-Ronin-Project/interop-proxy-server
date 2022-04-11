@@ -14,6 +14,7 @@ data class Epic(
     val messageType: String,
     val practitionerProviderSystem: String,
     val practitionerUserSystem: String,
+    val mrnSystem: String,
     val hsi: String?,
 ) : Vendor {
     override val vendorType: VendorType = VendorType.EPIC

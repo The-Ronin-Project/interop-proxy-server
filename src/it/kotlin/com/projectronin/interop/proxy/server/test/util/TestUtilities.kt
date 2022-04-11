@@ -27,6 +27,7 @@ fun restoreTables(dataSource: DataSource, tables: List<String>) {
     val sqlStatement = connection.createStatement()
 
     tables.map { sqlStatement.addBatch("DELETE from $it;") }
+    sqlStatement.executeBatch() // blow up on the deletes if there is a table you missed as a dependency
     tables.reversed().map { sqlStatement.addBatch("INSERT INTO $it SELECT * FROM ${it}_backup;") }
     sqlStatement.executeBatch()
 

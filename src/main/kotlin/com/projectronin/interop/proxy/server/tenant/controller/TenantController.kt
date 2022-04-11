@@ -1,8 +1,12 @@
 package com.projectronin.interop.proxy.server.tenant.controller
-
-import com.projectronin.interop.proxy.server.tenant.model.Epic
 import com.projectronin.interop.proxy.server.tenant.model.Tenant
 import com.projectronin.interop.tenant.config.TenantService
+import com.projectronin.interop.tenant.config.exception.NoEHRFoundException
+import com.projectronin.interop.tenant.config.exception.NoTenantFoundException
+import mu.KotlinLogging
+import org.springframework.http.HttpStatus
+import org.springframework.http.ResponseEntity
+import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
@@ -10,59 +14,57 @@ import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
-import java.time.LocalTime
 
 @RestController
 @RequestMapping("tenants")
 class TenantController(private val tenantService: TenantService) {
+    private val logger = KotlinLogging.logger { }
     @GetMapping
-    fun read(): List<Tenant> {
-        // TODO implement this
-        return listOf(tenant1, tenant2)
+    fun read(): ResponseEntity<List<Tenant>> {
+        logger.info { "Retrieving all tenants" }
+        val tenants = tenantService.getAllTenants().map { it.toProxyTenant() }
+        return ResponseEntity(tenants, HttpStatus.OK)
     }
 
     @GetMapping("/{mnemonic}")
-    fun read(@PathVariable("mnemonic") tenantMnemonic: String): Tenant? {
-        // TODO implement this
-        return tenant1
+    fun read(@PathVariable("mnemonic") tenantMnemonic: String): ResponseEntity<Tenant> {
+        logger.info { "Retrieving tenant with mnemonic $tenantMnemonic" }
+        val tenant = tenantService.getTenantForMnemonic(tenantMnemonic) ?: return ResponseEntity(HttpStatus.NOT_FOUND)
+        return ResponseEntity(tenant.toProxyTenant(), HttpStatus.OK)
     }
 
     @PostMapping
-    fun insert(@RequestBody tenant: Tenant): Tenant {
-        // TODO implement this
-        return tenant
+    fun insert(@RequestBody tenant: Tenant): ResponseEntity<Tenant> {
+        logger.info { "Inserting new tenant with mnemonic ${tenant.mnemonic}" }
+        val newTenant = tenantService.insertTenant(tenant.toTenantServerTenant())
+        return ResponseEntity(newTenant.toProxyTenant(), HttpStatus.CREATED)
     }
 
     @PutMapping("/{mnemonic}")
-    fun update(@PathVariable("mnemonic") tenantMnemonic: String, @RequestBody tenant: Tenant): Int {
-        // TODO implement this
-        return 1
+    fun update(@PathVariable("mnemonic") tenantMnemonic: String, @RequestBody tenant: Tenant): ResponseEntity<Tenant> {
+        logger.info { "Updating tenant with mnemonic ${tenant.mnemonic}" }
+        val newTenant = tenantService.updateTenant(tenant.toTenantServerTenant())
+        return ResponseEntity(newTenant.toProxyTenant(), HttpStatus.OK)
     }
 
-    // These are only used for stubbing return values and can be deleted once this class is implemented.
-    private val vendor = Epic(
-        release = "release",
-        serviceEndpoint = "serviceEndpoint",
-        ehrUserId = "ehrUserId",
-        messageType = "messageType",
-        practitionerProviderSystem = "practitionerProviderSystem",
-        practitionerUserSystem = "practitionerUserSystem",
-        hsi = "hsi"
-    )
+    @ExceptionHandler
+    fun handleException(e: Exception): ResponseEntity<String> {
+        logger.error(e) { "Unspecified error occurred during TenantController" }
+        return ResponseEntity(e.message, HttpStatus.INTERNAL_SERVER_ERROR)
+    }
 
-    private val tenant1 = Tenant(
-        id = 1,
-        mnemonic = "mnemonic1",
-        availableStart = LocalTime.of(22, 0),
-        availableEnd = LocalTime.of(23, 0),
-        vendor = vendor
-    )
+    // this should only happen when we've been able to serialize the object (i.e. it's a valid VendorType enum)
+    // but we can't find that type in the DB. It's really hard for that to be the caller's fault
+    @ExceptionHandler(value = [(NoEHRFoundException::class)])
+    fun handleEHRException(e: NoEHRFoundException): ResponseEntity<String> {
+        logger.error(e) { "Unable to find EHR" }
+        return ResponseEntity("Unable to find EHR", HttpStatus.INTERNAL_SERVER_ERROR)
+    }
 
-    private val tenant2 = Tenant(
-        id = 2,
-        mnemonic = "mnemonic2",
-        availableStart = LocalTime.of(22, 0),
-        availableEnd = LocalTime.of(23, 0),
-        vendor = vendor
-    )
+    // likely the callers fault getting a wrong ID on an update
+    @ExceptionHandler(value = [(NoTenantFoundException::class)])
+    fun handleTenantException(e: NoTenantFoundException): ResponseEntity<String> {
+        logger.warn(e) { "Unable to find tenant" }
+        return ResponseEntity("Unable to find tenant", HttpStatus.NOT_FOUND)
+    }
 }

@@ -8,7 +8,7 @@ import java.time.LocalTime
 data class Tenant(
     val id: Int,
     val mnemonic: String,
-    val availableStart: LocalTime,
-    val availableEnd: LocalTime,
+    val availableStart: LocalTime?,
+    val availableEnd: LocalTime?,
     val vendor: Vendor,
 )

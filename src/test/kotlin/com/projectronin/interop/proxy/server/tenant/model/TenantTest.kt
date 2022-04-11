@@ -21,6 +21,7 @@ class TenantTest {
                 messageType = "messageType",
                 practitionerProviderSystem = "practitionerProviderSystem",
                 practitionerUserSystem = "practitionerUserSystem",
+                mrnSystem = "mrnSystem",
                 hsi = null
             )
         )
@@ -45,6 +46,7 @@ class TenantTest {
                 messageType = "messageType",
                 practitionerProviderSystem = "practitionerProviderSystem",
                 practitionerUserSystem = "practitionerUserSystem",
+                mrnSystem = "mrnSystem",
                 hsi = null
             )
         )
@@ -64,6 +66,7 @@ class TenantTest {
                 "messageType" : "messageType",
                 "practitionerProviderSystem" : "practitionerProviderSystem",
                 "practitionerUserSystem" : "practitionerUserSystem",
+                "mrnSystem" : "mrnSystem",
                 "vendorType" : "EPIC"
               }
             }
