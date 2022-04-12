@@ -6,7 +6,7 @@ import com.nimbusds.jwt.JWTClaimsSet
 import com.nimbusds.jwt.PlainJWT
 import com.ninjasquad.springmockk.MockkBean
 import com.projectronin.interop.common.jackson.JacksonManager.Companion.objectMapper
-import com.projectronin.interop.mock.ehr.testcontainer.BaseMockEHRTest
+import com.projectronin.interop.mock.ehr.testcontainer.MockEHRTestcontainer
 import io.mockk.every
 import io.mockk.mockk
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -37,9 +37,12 @@ import javax.sql.DataSource
 @ContextConfiguration(initializers = [(InteropProxyServerAuthInitializer::class)])
 @SetEnvironmentVariable(key = "SERVICE_CALL_JWT_SECRET", value = "abc") // prevent Exception in AuthService.kt
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class InteropProxyServerIntegratedPatientTests : BaseMockEHRTest() {
+class InteropProxyServerIntegratedPatientTests {
     @LocalServerPort
     private var port = 0
+
+    @Autowired
+    private lateinit var mockEHR: MockEHRTestcontainer
 
     @MockkBean
     private lateinit var m2mJwtDecoder: JwtDecoder
@@ -62,11 +65,11 @@ class InteropProxyServerIntegratedPatientTests : BaseMockEHRTest() {
         // we need to change the service address of "Epic" after instantiation since the Testcontainer has a dynamic port
         val connection = ehrDatasource.connection
         val statement = connection.createStatement()
-        statement.execute("update io_tenant_epic set service_endpoint = '${getURL()}/epic' where io_tenant_id = 1001;")
+        statement.execute("update io_tenant_epic set service_endpoint = '${mockEHR.getURL()}/epic' where io_tenant_id = 1001;")
 
         // insert testing patient to MockEHR
         val createPat = this::class.java.getResource("/mockEHR/r4Patient.json")!!.readText()
-        addR4Resource("Patient", createPat, "eJzlzKe3KPzAV5TtkxmNivQ3")
+        mockEHR.addR4Resource("Patient", createPat, "eJzlzKe3KPzAV5TtkxmNivQ3")
     }
 
     /**

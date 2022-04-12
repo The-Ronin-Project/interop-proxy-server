@@ -5,6 +5,7 @@ import com.projectronin.interop.tenant.config.data.ProviderPoolDAO
 import com.projectronin.interop.tenant.config.data.model.ProviderPoolDO
 import com.projectronin.interop.tenant.config.data.model.TenantDO
 import mu.KotlinLogging
+import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.DeleteMapping
@@ -16,7 +17,6 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
-import java.sql.SQLIntegrityConstraintViolationException
 
 @RestController
 @RequestMapping("/tenants/{tenantId}/pools")
@@ -58,7 +58,7 @@ class ProviderPoolController(private val providerPoolDAO: ProviderPoolDAO) {
             providerPoolDAO.insert(insertProviderPoolDO).let {
                 ResponseEntity(ProviderPool(it.id, it.providerId, it.poolId), HttpStatus.OK)
             }
-        } catch (e: SQLIntegrityConstraintViolationException) {
+        } catch (e: DataIntegrityViolationException) {
             logger.warn { "Constraint violation on insert provider pool $insertProviderPoolDO" }
             ResponseEntity(HttpStatus.UNPROCESSABLE_ENTITY)
         } catch (e: Exception) {
@@ -91,7 +91,7 @@ class ProviderPoolController(private val providerPoolDAO: ProviderPoolDAO) {
 
         val rowsUpdated = try {
             providerPoolDAO.update(updateProviderPoolDO)
-        } catch (e: SQLIntegrityConstraintViolationException) {
+        } catch (e: DataIntegrityViolationException) {
             logger.warn { "Constraint violation on update provider pool $providerPoolId and $tenantId" }
             return ResponseEntity("Update violates data integrity constraint.", HttpStatus.BAD_REQUEST)
         }
@@ -112,7 +112,7 @@ class ProviderPoolController(private val providerPoolDAO: ProviderPoolDAO) {
     fun delete(@PathVariable tenantId: Int, @PathVariable providerPoolId: Long): ResponseEntity<String> {
         val rowsUpdated = try {
             providerPoolDAO.delete(providerPoolId)
-        } catch (e: SQLIntegrityConstraintViolationException) {
+        } catch (e: DataIntegrityViolationException) {
             logger.error { "Constraint violation on delete provider pool $providerPoolId for $tenantId" }
             return ResponseEntity("Update violates data integrity constraint.", HttpStatus.BAD_REQUEST)
         }

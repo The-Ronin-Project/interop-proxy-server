@@ -9,8 +9,8 @@ import io.mockk.mockk
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.http.HttpStatus
-import java.sql.SQLIntegrityConstraintViolationException
 
 class ProviderPoolControllerTest {
     private lateinit var dao: ProviderPoolDAO
@@ -113,7 +113,7 @@ class ProviderPoolControllerTest {
         }
         val providerPool = ProviderPool(providerPoolId.toLong(), providerId, poolId)
 
-        every { dao.insert(providerPoolDO) } throws SQLIntegrityConstraintViolationException("error")
+        every { dao.insert(providerPoolDO) } throws DataIntegrityViolationException("error")
         val response = controller.insert(providerPoolId, providerPool)
 
         assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, response.statusCode)
@@ -219,7 +219,7 @@ class ProviderPoolControllerTest {
             this.poolId = poolId
         }
 
-        every { dao.update(providerPoolDO) } throws SQLIntegrityConstraintViolationException("error")
+        every { dao.update(providerPoolDO) } throws DataIntegrityViolationException("error")
         val response = controller.update(tenantId, providerPoolId, ProviderPool(providerPoolId.toLong(), providerId, poolId))
 
         assertEquals(HttpStatus.BAD_REQUEST, response.statusCode)
@@ -269,7 +269,7 @@ class ProviderPoolControllerTest {
 
     @Test
     fun `handles non-successful delete that violates integrity`() {
-        every { dao.delete(1) } throws SQLIntegrityConstraintViolationException("error")
+        every { dao.delete(1) } throws DataIntegrityViolationException("error")
         val response = controller.delete(1, 1)
 
         assertEquals(HttpStatus.BAD_REQUEST, response.statusCode)

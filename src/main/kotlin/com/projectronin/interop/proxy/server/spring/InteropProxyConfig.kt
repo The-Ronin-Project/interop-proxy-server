@@ -6,9 +6,13 @@ import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.boot.jdbc.DataSourceBuilder
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.jdbc.datasource.DataSourceTransactionManager
+import org.springframework.transaction.PlatformTransactionManager
+import org.springframework.transaction.annotation.EnableTransactionManagement
 import javax.sql.DataSource
 
 @Configuration
+@EnableTransactionManagement
 class InteropProxyConfig {
     /**
      * The returns [DataSource] for the interop-queue.  Datasource config need to be prefixed by "spring.queue.datasource".
@@ -42,5 +46,9 @@ class InteropProxyConfig {
      */
     @Bean
     @Qualifier("ehr")
-    fun ehrDatabase(@Qualifier("ehr") ehrDatasource: DataSource): Database = Database.connect(ehrDatasource)
+    fun ehrDatabase(@Qualifier("ehr") ehrDatasource: DataSource): Database = Database.connectWithSpringSupport(ehrDatasource)
+
+    @Bean
+    @Qualifier("ehr")
+    fun txManager(@Qualifier("ehr") ehrDatasource: DataSource): PlatformTransactionManager = DataSourceTransactionManager(ehrDatasource)
 }
