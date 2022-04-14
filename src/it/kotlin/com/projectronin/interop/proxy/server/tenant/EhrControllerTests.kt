@@ -4,7 +4,6 @@ import com.projectronin.interop.proxy.server.InteropProxyServerAuthInitializer
 import com.projectronin.interop.proxy.server.tenant.model.Ehr
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
-import org.junitpioneer.jupiter.SetEnvironmentVariable
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.web.client.TestRestTemplate
@@ -21,7 +20,6 @@ import javax.sql.DataSource
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("it")
 @ContextConfiguration(initializers = [(InteropProxyServerAuthInitializer::class)])
-@SetEnvironmentVariable(key = "SERVICE_CALL_JWT_SECRET", value = "abc") // prevent Exception in AuthService.kt
 class EhrControllerTests {
     @LocalServerPort
     private var port = 0
@@ -159,10 +157,12 @@ class EhrControllerTests {
     private fun populateDb() {
         val connection = ehrDatasource.connection
         val AOSandboxKey = System.getenv("AO_SANDBOX_KEY")
-        val query1 = """insert into io_ehr values (101, 'EPIC', 'a3da9a08-4fd4-443b-b0f5-6226547a98db', 'public', '$AOSandboxKey') """
+        val query1 =
+            """insert into io_ehr values (101, 'EPIC', 'a3da9a08-4fd4-443b-b0f5-6226547a98db', 'public', '$AOSandboxKey') """
         val query2 = """insert into io_tenant values (1001, 'apposnd', 101, '22:00:00', '06:00:00')"""
         val query3 = """insert into io_tenant_provider_pool values (10001, 1001, 'ProviderWithPool', '14600')"""
-        val query4 = """insert into io_tenant_epic values (1001, '1.0', 'https://apporchard.epic.com/interconnect-aocurprd-oauth', '1', '1', 'urn:oid:1.2.840.114350.1.13.0.1.7.2.836982', 'urn:oid:1.2.840.114350.1.13.0.1.7.2.697780', 'urn:oid:1.2.840.114350.1.13.0.1.7.5.737384.14', NULL)"""
+        val query4 =
+            """insert into io_tenant_epic values (1001, '1.0', 'https://apporchard.epic.com/interconnect-aocurprd-oauth', '1', '1', 'urn:oid:1.2.840.114350.1.13.0.1.7.2.836982', 'urn:oid:1.2.840.114350.1.13.0.1.7.2.697780', 'urn:oid:1.2.840.114350.1.13.0.1.7.5.737384.14', NULL, 'https://apporchard.epic.com/interconnect-aocurprd-oauth/oauth2/token')"""
 
         val sql = listOf(query1, query2, query3, query4)
         val sqlStatement = connection.createStatement()

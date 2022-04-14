@@ -10,6 +10,7 @@ import com.projectronin.interop.common.vendor.VendorType
 data class Epic(
     val release: String,
     val serviceEndpoint: String,
+    val authEndpoint: String,
     val ehrUserId: String,
     val messageType: String,
     val practitionerProviderSystem: String,

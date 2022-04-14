@@ -52,6 +52,9 @@ databaseChangeLog:
                   name: service_endpoint
                   value: "https://apporchard.epic.com/interconnect-aocurprd-oauth"
               - column:
+                  name: auth_endpoint
+                  value: "https://apporchard.epic.com/interconnect-aocurprd-oauth/oauth2/token"
+              - column:
                   name: ehr_user_id
                   value: "1"
               - column:

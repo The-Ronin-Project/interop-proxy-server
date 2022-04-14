@@ -1,8 +1,5 @@
 package com.projectronin.interop.proxy.server.auth
 
-import com.auth0.jwt.JWT
-import com.auth0.jwt.algorithms.Algorithm
-import com.projectronin.interop.proxy.server.util.getKeyFromEnv
 import io.ktor.client.HttpClient
 import io.ktor.client.call.receive
 import io.ktor.client.features.ClientRequestException
@@ -26,9 +23,6 @@ class UserAuthService(private val client: HttpClient, @Value("\${seki.endpoint}"
 
     // We'll have to change these once Seki is live and the final config is done
     private val authURLPart = "/session/validate"
-    private val issuer = "Banken"
-    private val audience = "Seki"
-    private val serviceCallJWTSecret = getKeyFromEnv("SERVICE_CALL_JWT_SECRET")
 
     /**
      * Sends token to authentication service and returns the [AuthResponse].  Returns null if the token is not valid,
@@ -37,18 +31,12 @@ class UserAuthService(private val client: HttpClient, @Value("\${seki.endpoint}"
     fun validateToken(consumerToken: String): AuthResponse? {
         val authURL = authServiceEndPoint + authURLPart
 
-        logger.debug { "Setting up authentication for $authURL" }
-
-        serviceCallJWTSecret ?: throw IllegalStateException("Could not load JWT secret")
-        val jwtAuthString = JWT.create().withAudience(audience).withIssuer(issuer).sign(Algorithm.HMAC256(serviceCallJWTSecret))
-
         logger.debug { "Calling authentication for $authURL" }
         return runBlocking {
             try {
                 val httpResponse: HttpResponse = client.get(authServiceEndPoint + authURLPart) {
                     headers {
                         append(HttpHeaders.ContentType, "application/json")
-                        append("X-JWT", jwtAuthString)
                     }
                     parameter("token", consumerToken)
                 }

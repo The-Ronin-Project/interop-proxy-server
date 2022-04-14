@@ -17,6 +17,7 @@ class TenantTest {
             vendor = Epic(
                 release = "release",
                 serviceEndpoint = "serviceEndpoint",
+                authEndpoint = "authEndpoint",
                 ehrUserId = "ehrUserId",
                 messageType = "messageType",
                 practitionerProviderSystem = "practitionerProviderSystem",
@@ -42,6 +43,7 @@ class TenantTest {
             vendor = Epic(
                 release = "release",
                 serviceEndpoint = "serviceEndpoint",
+                authEndpoint = "authEndpoint",
                 ehrUserId = "ehrUserId",
                 messageType = "messageType",
                 practitionerProviderSystem = "practitionerProviderSystem",
@@ -62,6 +64,7 @@ class TenantTest {
                 "type" : "EPIC",
                 "release" : "release",
                 "serviceEndpoint" : "serviceEndpoint",
+                "authEndpoint" : "authEndpoint",
                 "ehrUserId" : "ehrUserId",
                 "messageType" : "messageType",
                 "practitionerProviderSystem" : "practitionerProviderSystem",

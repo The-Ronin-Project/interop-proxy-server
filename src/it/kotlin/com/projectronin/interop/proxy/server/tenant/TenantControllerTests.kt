@@ -13,7 +13,6 @@ import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
-import org.junitpioneer.jupiter.SetEnvironmentVariable
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.web.client.TestRestTemplate
@@ -31,7 +30,6 @@ import javax.sql.DataSource
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("it")
 @ContextConfiguration(initializers = [(InteropProxyServerAuthInitializer::class)])
-@SetEnvironmentVariable(key = "SERVICE_CALL_JWT_SECRET", value = "abc") // prevent Exception in AuthService.kt
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class TenantControllerTests {
     @LocalServerPort
@@ -73,7 +71,6 @@ class TenantControllerTests {
 
     @Test
     fun `can read all tenants`() {
-        // TODO once controller implemented
         val httpEntity = HttpEntity<HttpHeaders>(httpHeaders)
         val responseEntity = restTemplate.exchange(
             "http://localhost:$port/tenants",
@@ -126,6 +123,7 @@ class TenantControllerTests {
         val vendor = Epic(
             release = "1.0",
             serviceEndpoint = "https://apporchard.epic.com/interconnect-aocurprd-oauth",
+            authEndpoint = "https://apporchard.epic.com/interconnect-aocurprd-oauth/oauth2/token",
             ehrUserId = "1",
             messageType = "1",
             practitionerProviderSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.2.836982",
@@ -160,6 +158,7 @@ class TenantControllerTests {
         val vendor = Epic(
             release = "2.0",
             serviceEndpoint = "https://apporchard.epic.com/interconnect-aocurprd-oauth",
+            authEndpoint = "https://apporchard.epic.com/interconnect-aocurprd-oauth/oauth2/token",
             ehrUserId = "1",
             messageType = "1",
             practitionerProviderSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.2.836982",
@@ -186,7 +185,6 @@ class TenantControllerTests {
         val tenant = responseEntity.body!!
 
         assertEquals(HttpStatus.OK, responseEntity.statusCode)
-        assertEquals(updatedTenant.mnemonic, tenant.mnemonic)
-        assertEquals(vendor.release, (tenant.vendor as Epic).release)
+        assertEquals(updatedTenant, tenant)
     }
 }

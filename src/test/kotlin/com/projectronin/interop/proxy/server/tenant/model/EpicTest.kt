@@ -12,6 +12,7 @@ internal class EpicTest {
         val epic = Epic(
             release = "release",
             serviceEndpoint = "serviceEndpoint",
+            authEndpoint = "authEndpoint",
             ehrUserId = "ehrUserId",
             messageType = "messageType",
             practitionerProviderSystem = "practitionerProviderSystem",
@@ -23,6 +24,7 @@ internal class EpicTest {
         assertEquals(VendorType.EPIC, epic.vendorType)
         assertEquals("release", epic.release)
         assertEquals("serviceEndpoint", epic.serviceEndpoint)
+        assertEquals("authEndpoint", epic.authEndpoint)
         assertEquals("ehrUserId", epic.ehrUserId)
         assertEquals("messageType", epic.messageType)
         assertEquals("practitionerProviderSystem", epic.practitionerProviderSystem)
@@ -36,6 +38,7 @@ internal class EpicTest {
         val epic = Epic(
             release = "release",
             serviceEndpoint = "serviceEndpoint",
+            authEndpoint = "authEndpoint",
             ehrUserId = "ehrUserId",
             messageType = "messageType",
             practitionerProviderSystem = "practitionerProviderSystem",
@@ -51,6 +54,7 @@ internal class EpicTest {
               "type" : "EPIC",
               "release" : "release",
               "serviceEndpoint" : "serviceEndpoint",
+              "authEndpoint" : "authEndpoint",
               "ehrUserId" : "ehrUserId",
               "messageType" : "messageType",
               "practitionerProviderSystem" : "practitionerProviderSystem",
@@ -71,6 +75,7 @@ internal class EpicTest {
         val epic = Epic(
             release = "release",
             serviceEndpoint = "serviceEndpoint",
+            authEndpoint = "authEndpoint",
             ehrUserId = "ehrUserId",
             messageType = "messageType",
             practitionerProviderSystem = "practitionerProviderSystem",
@@ -86,6 +91,7 @@ internal class EpicTest {
               "type" : "EPIC",
               "release" : "release",
               "serviceEndpoint" : "serviceEndpoint",
+              "authEndpoint" : "authEndpoint",
               "ehrUserId" : "ehrUserId",
               "messageType" : "messageType",
               "practitionerProviderSystem" : "practitionerProviderSystem",

@@ -21,10 +21,8 @@ fun ProxyTenant.toTenantServerTenant(): TenantServiceTenant {
     return TenantServiceTenant(
         internalId = id,
         mnemonic = mnemonic,
-        batchConfig = availableStart?.let {
-            start ->
-            availableEnd?.let {
-                end ->
+        batchConfig = availableStart?.let { start ->
+            availableEnd?.let { end ->
                 BatchConfig(start, end)
             }
         },
@@ -43,7 +41,7 @@ fun ProxyEpic.toTenantServerEpic(): TenantServiceEpic {
         mrnSystem = mrnSystem,
         hsi = hsi,
         clientId = "",
-        authenticationConfig = AuthenticationConfig("", "")
+        authenticationConfig = AuthenticationConfig(authEndpoint, "", "")
     )
 }
 
@@ -51,6 +49,7 @@ fun TenantServiceEpic.toProxyEpic(): ProxyEpic {
     return ProxyEpic(
         release = release,
         serviceEndpoint = serviceEndpoint,
+        authEndpoint = authenticationConfig.authEndpoint,
         ehrUserId = ehrUserId,
         messageType = messageType,
         practitionerProviderSystem = practitionerProviderSystem,

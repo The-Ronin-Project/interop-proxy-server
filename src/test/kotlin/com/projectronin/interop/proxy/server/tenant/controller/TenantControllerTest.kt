@@ -25,6 +25,7 @@ class TenantControllerTest {
     private val proxyVendor = ProxyEpic(
         release = "release",
         serviceEndpoint = "serviceEndpoint",
+        authEndpoint = "authEndpoint",
         ehrUserId = "ehrUserId",
         messageType = "messageType",
         practitionerProviderSystem = "providerSystemExample",
@@ -35,6 +36,7 @@ class TenantControllerTest {
     private val tenantServiceVendor = TenantServiceEpic(
         clientId = "shouldn'tmatter",
         authenticationConfig = TenantServiceAuthenticationConfig(
+            authEndpoint = "authEndpoint",
             publicKey = "doesn'tmatter",
             privateKey = "doesn'tmatter"
         ),

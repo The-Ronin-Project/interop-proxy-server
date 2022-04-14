@@ -12,7 +12,6 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
-import org.junitpioneer.jupiter.SetEnvironmentVariable
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.web.client.TestRestTemplate
@@ -29,7 +28,6 @@ import javax.sql.DataSource
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("it")
 @ContextConfiguration(initializers = [(InteropProxyServerAuthInitializer::class)])
-@SetEnvironmentVariable(key = "SERVICE_CALL_JWT_SECRET", value = "abc") // prevent Exception in AuthService.kt
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class ProviderPoolControllerTests {
     @LocalServerPort
