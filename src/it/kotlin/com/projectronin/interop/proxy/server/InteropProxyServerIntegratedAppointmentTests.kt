@@ -4,9 +4,11 @@ import com.ninjasquad.springmockk.MockkBean
 import com.projectronin.interop.aidbox.testcontainer.AidboxData
 import com.projectronin.interop.aidbox.testcontainer.BaseAidboxTest
 import com.projectronin.interop.common.jackson.JacksonManager.Companion.objectMapper
+import com.projectronin.interop.mock.ehr.testcontainer.MockEHRTestcontainer
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
@@ -21,8 +23,9 @@ import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.DynamicPropertyRegistry
 import org.springframework.test.context.DynamicPropertySource
 import java.net.URI
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
+import javax.sql.DataSource
+
+private var setupDone = false
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("it")
@@ -37,6 +40,12 @@ class InteropProxyServerIntegratedAppointmentTests : BaseAidboxTest() {
             registry.add("aidbox.url") { aidbox.baseUrl() }
         }
     }
+
+    @Autowired
+    private lateinit var mockEHR: MockEHRTestcontainer
+
+    @Autowired
+    private lateinit var ehrDatasource: DataSource
 
     @LocalServerPort
     private var port = 0
@@ -54,14 +63,28 @@ class InteropProxyServerIntegratedAppointmentTests : BaseAidboxTest() {
         httpHeaders.set("Authorization", "Fake Token")
     }
 
+    @BeforeEach
+    fun setup() {
+        if (!setupDone) {
+            // we need to change the service address of "Epic" after instantiation since the Testcontainer has a dynamic port
+            val connection = ehrDatasource.connection
+            val statement = connection.createStatement()
+            statement.execute("update io_tenant_epic set service_endpoint = '${mockEHR.getURL()}/epic' where io_tenant_id = 1001;")
+            statement.execute("update io_tenant_epic set auth_endpoint = '${mockEHR.getURL()}/epic/oauth2/token' where io_tenant_id = 1001;")
+
+            // insert testing data to MockEHR
+            val createAppt = this::class.java.getResource("/mockEHR/r4Appointment.json")!!.readText()
+            mockEHR.addR4Resource("Appointment", createAppt, "06d7feb3-3326-4276-9535-83a622d8e216")
+            val createPat = this::class.java.getResource("/mockEHR/r4Patient.json")!!.readText()
+            mockEHR.addR4Resource("Patient", createPat, "eJzlzKe3KPzAV5TtkxmNivQ3")
+            setupDone = true
+        }
+    }
+
     @Test
     fun `server handles appointment query`() {
-        val today = LocalDate.now()
-        val formatter = DateTimeFormatter.ofPattern("MM-dd-yyyy")
-        val startDate = today.minusMonths(4).format(formatter)
-        val endDate = today.plusMonths(1).format(formatter)
         val query = this::class.java.getResource("/graphql/epicAOTestAppointment.graphql")!!.readText()
-            .replace("__START_DATE__", startDate).replace("__END_DATE__", endDate)
+            .replace("__START_DATE__", "01-01-2021").replace("__END_DATE__", "01-01-2023")
 
         val httpEntity = HttpEntity(query, httpHeaders)
 

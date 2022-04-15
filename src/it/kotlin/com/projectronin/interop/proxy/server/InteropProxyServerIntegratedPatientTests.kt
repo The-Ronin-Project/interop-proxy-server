@@ -12,9 +12,8 @@ import io.mockk.mockk
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
-import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.TestInstance
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment
@@ -31,10 +30,11 @@ import org.springframework.test.context.ContextConfiguration
 import java.net.URI
 import javax.sql.DataSource
 
+private var setupDone = false
+
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("it")
 @ContextConfiguration(initializers = [(InteropProxyServerAuthInitializer::class)])
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class InteropProxyServerIntegratedPatientTests {
     @LocalServerPort
     private var port = 0
@@ -58,16 +58,20 @@ class InteropProxyServerIntegratedPatientTests {
         httpHeaders.set("Authorization", "Fake Token")
     }
 
-    @BeforeAll
-    internal fun beforeClass() {
-        // we need to change the service address of "Epic" after instantiation since the Testcontainer has a dynamic port
-        val connection = ehrDatasource.connection
-        val statement = connection.createStatement()
-        statement.execute("update io_tenant_epic set service_endpoint = '${mockEHR.getURL()}/epic' where io_tenant_id = 1001;")
+    @BeforeEach
+    fun beforeEach() {
+        if (!setupDone) { // if you hate this, you are not alone. blame kotlin, junit5, or spring (not me though)
 
-        // insert testing patient to MockEHR
-        val createPat = this::class.java.getResource("/mockEHR/r4Patient.json")!!.readText()
-        mockEHR.addR4Resource("Patient", createPat, "eJzlzKe3KPzAV5TtkxmNivQ3")
+            // we need to change the service address of "Epic" after instantiation since the Testcontainer has a dynamic port
+            val connection = ehrDatasource.connection
+            val statement = connection.createStatement()
+            statement.execute("update io_tenant_epic set service_endpoint = '${mockEHR.getURL()}/epic' where io_tenant_id = 1001;")
+            statement.execute("update io_tenant_epic set auth_endpoint = '${mockEHR.getURL()}/epic/oauth2/token' where io_tenant_id = 1001;")
+            // insert testing patient to MockEHR
+            val createPat = this::class.java.getResource("/mockEHR/r4Patient.json")!!.readText()
+            mockEHR.addR4Resource("Patient", createPat, "eJzlzKe3KPzAV5TtkxmNivQ3")
+            setupDone = true
+        }
     }
 
     /**

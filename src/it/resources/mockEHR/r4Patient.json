@@ -26,10 +26,10 @@
   "identifier": [
     {
       "system": "MRN",
-      "value": "E273111"
+      "value": "202497"
     },
     {
-      "system": "urn:oid:1.2.840.114350.1.13.0.1.7.2.698084",
+      "system": "external",
       "value": "Z4572"
     },
     {

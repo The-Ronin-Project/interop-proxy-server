@@ -12,6 +12,7 @@ import io.mockk.mockk
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
@@ -27,6 +28,9 @@ import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.DynamicPropertyRegistry
 import org.springframework.test.context.DynamicPropertySource
 import java.net.URI
+import javax.sql.DataSource
+
+private var setupDone = false
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("it")
@@ -42,6 +46,9 @@ class InteropProxyServerIntegratedMessageTests : BaseAidboxTest() {
     @MockkBean
     private lateinit var m2mJwtDecoder: JwtDecoder
 
+    @Autowired
+    private lateinit var ehrDatasource: DataSource
+
     private val httpHeaders = HttpHeaders()
 
     init {
@@ -55,6 +62,18 @@ class InteropProxyServerIntegratedMessageTests : BaseAidboxTest() {
         @DynamicPropertySource
         fun aidboxUrlProperties(registry: DynamicPropertyRegistry) {
             registry.add("aidbox.url") { "http://localhost:${aidbox.port()}" }
+        }
+    }
+
+    @BeforeEach
+    fun setup() {
+        if (!setupDone) {
+            // we need to change the service address of "Epic" after instantiation since the Testcontainer has a dynamic port
+            val connection = ehrDatasource.connection
+            val statement = connection.createStatement()
+            statement.execute("update io_tenant_epic set service_endpoint = 'https://apporchard.epic.com/interconnect-aocurprd-oauth' where io_tenant_id = 1001;")
+            statement.execute("update io_tenant_epic set auth_endpoint = 'https://apporchard.epic.com/interconnect-aocurprd-oauth/oauth2/token' where io_tenant_id = 1001;")
+            setupDone = true
         }
     }
 
