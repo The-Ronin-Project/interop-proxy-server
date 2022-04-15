@@ -1,0 +1,55 @@
+{
+  "data": {
+    "conditionsByPatientAndCategory": [
+      {
+        "category": [
+          {
+            "coding": [
+              {
+                "code": "problem-list-item",
+                "display": "Problem List Item",
+                "system": "http://terminology.hl7.org/CodeSystem/condition-category",
+                "userSelected": null,
+                "version": null
+              },
+              {
+                "code": "439401001",
+                "display": "Diagnosis",
+                "system": "http://snomed.info/sct",
+                "userSelected": null,
+                "version": null
+              }
+            ],
+            "text": null
+          }
+        ],
+        "clinicalStatus": {
+          "coding": [
+            {
+              "code": "active",
+              "display": null,
+              "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+              "userSelected": null,
+              "version": null
+            }
+          ],
+          "text": null
+        },
+        "code": {
+          "coding": [
+            {
+              "code": "39065001",
+              "display": "Burn of ear",
+              "system": "http://snomed.info/sct",
+              "userSelected": null,
+              "version": null
+            }
+          ],
+          "text": "Burnt Ear"
+        },
+        "id": "apposnd-39bb2850-50e2-4bb0-a5ae-3a98bbaf199f",
+        "identifier": []
+      }
+    ]
+  }
+}
