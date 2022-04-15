@@ -9,61 +9,57 @@ plugins {
     id("com.projectronin.interop.gradle.spring")
     id("com.projectronin.interop.gradle.jackson")
     id("com.projectronin.interop.gradle.integration")
-    id("org.springframework.boot") version "2.4.5"
-    id("com.expediagroup.graphql") version "4.2.0"
-    id("com.google.cloud.tools.jib") version "3.2.0"
+    id("org.springframework.boot")
+    id("com.expediagroup.graphql")
+    id("com.google.cloud.tools.jib")
 }
 
 val tracerAgent: Configuration by configurations.creating
 
 dependencies {
-    implementation("com.projectronin.interop:interop-common:${project.property("interopCommonVersion")}")
-    implementation("com.projectronin.interop.ehr:interop-ehr:${project.property("interopEhrVersion")}")
-    implementation("com.projectronin.interop.ehr:interop-tenant:${project.property("interopEhrVersion")}")
-    implementation("com.projectronin.interop.ehr:interop-transform:${project.property("interopEhrVersion")}")
-    implementation("com.projectronin.interop.fhir:interop-fhir:${project.property("interopFhirVersion")}")
-    implementation("com.projectronin.interop.publish:interop-aidbox:${project.property("interopPublishVersion")}")
-    implementation("com.projectronin.interop.queue:interop-queue:${project.property("interopQueueVersion")}")
-    implementation("com.projectronin.interop.queue:interop-queue-db:${project.property("interopQueueVersion")}")
+    implementation(libs.interop.aidbox)
+    implementation(libs.interop.common)
+    implementation(libs.interop.ehr.api)
+    implementation(libs.interop.fhir)
+    implementation(libs.interop.queue.api)
+    implementation(libs.interop.tenant)
+    implementation(libs.interop.transform)
 
-    implementation(platform("org.springframework.boot:spring-boot-parent:2.6.4"))
+    implementation(platform(libs.spring.boot.parent))
     // Pull in just the security dependencies we need, as we are not using the full security suite.
-    implementation("org.springframework.security:spring-security-oauth2-core")
-    implementation("org.springframework.security:spring-security-oauth2-jose")
+    implementation(libs.bundles.spring.security)
     implementation("org.springframework.boot:spring-boot-starter-jdbc")
-    implementation("mysql:mysql-connector-java:8.0.25")
 
-    implementation("com.expediagroup:graphql-kotlin-schema-generator:5.3.2")
-    implementation("com.expediagroup:graphql-kotlin-spring-server:5.3.2")
+    implementation(libs.bundles.graphql)
+
+    implementation(libs.mysql.connector.java)
 
     // Dependency on the datadog agent jar.
-    tracerAgent("com.datadoghq:dd-java-agent:0.94.1")
+    tracerAgent(libs.datadog.java.agent)
 
     // Runtime Dependency on each EHR implementation.
-    runtimeOnly("com.projectronin.interop.ehr:interop-ehr-epic:${project.property("interopEhrVersion")}")
+    runtimeOnly(libs.bundles.ehr.impls)
 
     testImplementation("org.springframework.boot:spring-boot-starter-test") {
         exclude(module = "mockito-core")
     }
-    testImplementation("com.ninja-squad:springmockk:3.1.0")
-    testImplementation("com.graphql-java-kickstart:graphql-spring-boot-starter-test:12.0.0") {
+    testImplementation(libs.spring.mockk)
+    testImplementation(libs.graphql.spring.boot.starter.test) {
         exclude(module = "mockito-core")
     }
-    testImplementation("com.projectronin.interop.mock:interop-mock-ehr-testcontainer:${project.property("interopMockVersion")}")
-    testImplementation("com.projectronin.interop.publish:interop-aidbox-testcontainer:${project.property("interopPublishVersion")}")
-    testImplementation("com.projectronin.interop:interop-common-test-db:${project.property("interopCommonVersion")}")
-    testImplementation("com.projectronin.interop:interop-common-jackson:${project.property("interopCommonVersion")}")
-    testImplementation("com.projectronin.interop.ehr:interop-ehr-liquibase:${project.property("interopEhrVersion")}")
-    testImplementation("com.projectronin.interop.queue:interop-queue-liquibase:${project.property("interopQueueVersion")}")
 
-    testImplementation("com.projectronin.interop.ehr:interop-ehr-epic:${project.property("interopEhrVersion")}")
+    testImplementation(libs.interop.commonJackson)
+    testImplementation(libs.interop.commonTestDb)
+    testImplementation(libs.interop.ehr.liquibase)
+    testImplementation(libs.interop.queue.liquibase)
+    testImplementation(libs.interop.queue.db)
+    testImplementation(libs.interop.testcontainer.aidbox)
+    testImplementation(libs.interop.testcontainer.mockehr)
 
     testImplementation("com.squareup.okhttp3:mockwebserver")
 
     // Allows us to change environment variables
-    testImplementation("org.junit-pioneer:junit-pioneer:1.5.0")
-
-    itImplementation("com.projectronin.interop:interop-common-jackson:${project.property("interopCommonVersion")}")
+    testImplementation(libs.junit.pioneer)
 }
 
 tasks.withType(Test::class) {

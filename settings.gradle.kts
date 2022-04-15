@@ -1,7 +1,7 @@
 rootProject.name = "interop-proxy-server"
 
 pluginManagement {
-    val interopGradleVersion: String by settings
+    val interopGradleVersion = "1.0.0-SNAPSHOT"
     plugins {
         id("com.projectronin.interop.gradle.jackson") version interopGradleVersion
         id("com.projectronin.interop.gradle.ktor") version interopGradleVersion
@@ -9,6 +9,10 @@ pluginManagement {
         id("com.projectronin.interop.gradle.mockk") version interopGradleVersion
         id("com.projectronin.interop.gradle.spring") version interopGradleVersion
         id("com.projectronin.interop.gradle.integration") version interopGradleVersion
+
+        id("org.springframework.boot") version "2.6.6"
+        id("com.expediagroup.graphql") version "5.3.2"
+        id("com.google.cloud.tools.jib") version "3.2.1"
     }
 
     repositories {
