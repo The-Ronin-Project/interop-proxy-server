@@ -39,6 +39,7 @@ dependencies {
 
     // Runtime Dependency on each EHR implementation.
     runtimeOnly(libs.bundles.ehr.impls)
+    runtimeOnly(libs.interop.queue.db)
 
     testImplementation("org.springframework.boot:spring-boot-starter-test") {
         exclude(module = "mockito-core")
@@ -52,7 +53,6 @@ dependencies {
     testImplementation(libs.interop.commonTestDb)
     testImplementation(libs.interop.ehr.liquibase)
     testImplementation(libs.interop.queue.liquibase)
-    testImplementation(libs.interop.queue.db)
     testImplementation(libs.interop.testcontainer.aidbox)
     testImplementation(libs.interop.testcontainer.mockehr)
 
