@@ -7,6 +7,7 @@ import com.ninjasquad.springmockk.MockkBean
 import com.projectronin.interop.aidbox.testcontainer.AidboxData
 import com.projectronin.interop.aidbox.testcontainer.BaseAidboxTest
 import com.projectronin.interop.common.jackson.JacksonManager.Companion.objectMapper
+import com.projectronin.interop.mock.ehr.testcontainer.MockEHRTestcontainer
 import io.mockk.every
 import io.mockk.mockk
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -41,6 +42,9 @@ class InteropProxyServerIntegratedMessageTests : BaseAidboxTest() {
     private var port = 0
 
     @Autowired
+    private lateinit var mockEHR: MockEHRTestcontainer
+
+    @Autowired
     private lateinit var restTemplate: TestRestTemplate
 
     @MockkBean
@@ -71,8 +75,11 @@ class InteropProxyServerIntegratedMessageTests : BaseAidboxTest() {
             // we need to change the service address of "Epic" after instantiation since the Testcontainer has a dynamic port
             val connection = ehrDatasource.connection
             val statement = connection.createStatement()
-            statement.execute("update io_tenant_epic set service_endpoint = 'https://apporchard.epic.com/interconnect-aocurprd-oauth' where io_tenant_id = 1001;")
-            statement.execute("update io_tenant_epic set auth_endpoint = 'https://apporchard.epic.com/interconnect-aocurprd-oauth/oauth2/token' where io_tenant_id = 1001;")
+            statement.execute("update io_tenant_epic set service_endpoint = '${mockEHR.getURL()}/epic' where io_tenant_id = 1001;")
+            statement.execute("update io_tenant_epic set auth_endpoint = '${mockEHR.getURL()}/epic/oauth2/token' where io_tenant_id = 1001;")
+
+            val createPat = this::class.java.getResource("/mockEHR/r4Patient.json")!!.readText()
+            mockEHR.addR4Resource("Patient", createPat, "eJzlzKe3KPzAV5TtkxmNivQ3")
             setupDone = true
         }
     }
