@@ -144,7 +144,7 @@ similar to a unit test.
 
 ### Running locally via Docker
 
-The proxy server can also be run via docker-compose by building the [container image](#generating-container) from jib in
+The proxy server can also be run via docker compose by building the [container image](#generating-container) from jib in
 combination with the [docker compose configuration](docker-compose.yml). Additionally, you will need to have the
 interop-queue-liquibase and interop-ehr-liquibase container images for database schema deployment. Follow the
 instructions [here](https://github.com/projectronin/interop-queue/tree/master/interop-queue-liquibase/README.md#building-the-docker-container-image)
@@ -152,7 +152,7 @@ and [here](https://github.com/projectronin/interop-ehr/tree/master/interop-ehr-l
 to build those images locally. Then use this command to start that container and the other dependent containers:
 
 ```shell
-./gradlew jibDockerBuild && docker-compose up
+./gradlew jibDockerBuild && docker compose up
 ```
 
 ## Code Review, Codeowners, and the PR process
