@@ -34,6 +34,9 @@ dependencies {
 
     implementation(libs.mysql.connector.java)
 
+    // Needed to format logs for DataDog
+    implementation(libs.logstash.logback.encoder)
+
     // Dependency on the datadog agent jar.
     tracerAgent(libs.datadog.java.agent)
 

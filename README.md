@@ -122,6 +122,13 @@ export AIDBOX_CLIENT_ID=CLIENT_ID
 export AIDBOX_CLIENT_SECRET=SECRET_VALUE
 ```
 
+### DataDog
+If you want to send logs to DataDog while running locally for testing, you need to set an API key environment variable.
+```shell
+export DD_API_KEY=API_KEY
+```
+Once you have a DataDog account, API keys can be found [here](https://app.datadoghq.com/organization-settings/api-keys).
+
 ## Running the Service
 
 ### Running integration tests
