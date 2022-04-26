@@ -44,7 +44,7 @@ class AuthFilter(private val userAuthService: UserAuthService, private val m2MAu
         }
 
         //  Evaluate User (Seki) token
-        val authResponse = userAuthService.validateToken(bearer)
+        val authResponse = kotlin.runCatching { userAuthService.validateToken(bearer) }.getOrNull()
         return if (authResponse != null) {
             // mutate the exchange to inject the returned tenant ID from the Auth service for comparison later
             val mutatedRequest =

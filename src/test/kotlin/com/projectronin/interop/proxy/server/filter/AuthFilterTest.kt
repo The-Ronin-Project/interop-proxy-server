@@ -22,7 +22,7 @@ import reactor.core.publisher.Mono
 class AuthFilterTest {
 
     @Test
-    fun `bad user auth returns forbidden error`() {
+    fun `null bearer token returns forbidden error`() {
         val http = mockk<HttpClient>()
         val chain = mockk<WebFilterChain>()
         val userAuthService = UserAuthService(http, "/auth")
@@ -33,6 +33,40 @@ class AuthFilterTest {
                 MockServerHttpRequest.get("/graphql")
                     .header("Authorization", "")
             )
+        authFilter.filter(exchange, chain)
+        assertEquals(HttpStatus.FORBIDDEN, exchange.response.statusCode)
+    }
+
+    @Test
+    fun `null user auth returns forbidden`() {
+        val chain = mockk<WebFilterChain>()
+        val userAuthService = mockk<UserAuthService>()
+        val m2MAuthService = mockk<M2MAuthService>()
+        val exchange = MockServerWebExchange
+            .from(
+                MockServerHttpRequest.get("/graphql")
+                    .header("Authorization", "Bearer 12345")
+            )
+        val authFilter = AuthFilter(userAuthService, m2MAuthService)
+        every { m2MAuthService.isM2MToken("12345") } returns false
+        every { userAuthService.validateToken("12345") } returns null
+        authFilter.filter(exchange, chain)
+        assertEquals(HttpStatus.FORBIDDEN, exchange.response.statusCode)
+    }
+
+    @Test
+    fun `error user auth returns forbidden`() {
+        val chain = mockk<WebFilterChain>()
+        val userAuthService = mockk<UserAuthService>()
+        val m2MAuthService = mockk<M2MAuthService>()
+        val exchange = MockServerWebExchange
+            .from(
+                MockServerHttpRequest.get("/graphql")
+                    .header("Authorization", "Bearer 12345")
+            )
+        val authFilter = AuthFilter(userAuthService, m2MAuthService)
+        every { m2MAuthService.isM2MToken("12345") } returns false
+        every { userAuthService.validateToken("12345") } throws Exception()
         authFilter.filter(exchange, chain)
         assertEquals(HttpStatus.FORBIDDEN, exchange.response.statusCode)
     }
