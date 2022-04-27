@@ -2,7 +2,8 @@ package com.projectronin.interop.proxy.server.tenant
 
 import com.projectronin.interop.proxy.server.InteropProxyServerAuthInitializer
 import com.projectronin.interop.proxy.server.tenant.model.Ehr
-import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
@@ -43,8 +44,8 @@ class EhrControllerTests {
         val responseEntity =
             restTemplate.exchange("http://localhost:$port/ehrs", HttpMethod.GET, httpEntity, Array<Ehr>::class.java)
         val responseObject = responseEntity.body
-        Assertions.assertEquals(HttpStatus.OK, responseEntity.statusCode)
-        Assertions.assertTrue(responseObject!!.isNotEmpty())
+        assertEquals(HttpStatus.OK, responseEntity.statusCode)
+        assertTrue(responseObject!!.isNotEmpty())
     }
 
     @Test
@@ -54,8 +55,8 @@ class EhrControllerTests {
         val responseEntity =
             restTemplate.exchange("http://localhost:$port/ehrs", HttpMethod.GET, httpEntity, Array<Ehr>::class.java)
         val responseObject = responseEntity.body
-        Assertions.assertEquals(HttpStatus.OK, responseEntity.statusCode)
-        Assertions.assertTrue(responseObject!!.isEmpty())
+        assertEquals(HttpStatus.OK, responseEntity.statusCode)
+        assertTrue(responseObject!!.isEmpty())
 
         populateDb()
     }
@@ -73,9 +74,13 @@ class EhrControllerTests {
         """.trimIndent()
         val httpEntity = HttpEntity(query, httpHeaders)
         val responseEntity =
-            restTemplate.postForEntity(URI("http://localhost:$port/ehrs"), httpEntity, Ehr::class.java)
-        Assertions.assertEquals(HttpStatus.OK, responseEntity.statusCode)
-        Assertions.assertTrue(responseEntity.body!!.clientId == "clientID")
+            restTemplate.postForEntity(
+                URI("http://localhost:$port/ehrs"),
+                httpEntity,
+                Ehr::class.java
+            )
+        assertEquals(HttpStatus.CREATED, responseEntity.statusCode)
+        assertTrue(responseEntity.body!!.clientId == "clientID")
 
         emptyDb()
         populateDb()
@@ -93,9 +98,12 @@ class EhrControllerTests {
         """.trimIndent()
         val httpEntity = HttpEntity(query, httpHeaders)
         val responseEntity =
-            restTemplate.postForEntity(URI("http://localhost:$port/ehrs"), httpEntity, Ehr::class.java)
-        Assertions.assertEquals(HttpStatus.OK, responseEntity.statusCode)
-        Assertions.assertNull(responseEntity.body)
+            restTemplate.postForEntity(
+                URI("http://localhost:$port/ehrs"),
+                httpEntity,
+                String::class.java
+            )
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, responseEntity.statusCode)
     }
 
     @Test
@@ -110,9 +118,14 @@ class EhrControllerTests {
         """.trimIndent()
         val httpEntity = HttpEntity(query, httpHeaders)
         val responseEntity =
-            restTemplate.exchange("http://localhost:$port/ehrs", HttpMethod.PUT, httpEntity, Ehr::class.java)
-        Assertions.assertEquals(HttpStatus.OK, responseEntity.statusCode)
-        Assertions.assertTrue(responseEntity.body!!.clientId == "UpdatedClientID")
+            restTemplate.exchange(
+                "http://localhost:$port/ehrs",
+                HttpMethod.PUT,
+                httpEntity,
+                Ehr::class.java
+            )
+        assertEquals(HttpStatus.OK, responseEntity.statusCode)
+        assertTrue(responseEntity.body!!.clientId == "UpdatedClientID")
 
         emptyDb()
         populateDb()
@@ -132,9 +145,13 @@ class EhrControllerTests {
         """.trimIndent()
         val httpEntity = HttpEntity(query, httpHeaders)
         val responseEntity =
-            restTemplate.exchange("http://localhost:$port/ehrs", HttpMethod.PUT, httpEntity, Ehr::class.java)
-        Assertions.assertEquals(HttpStatus.OK, responseEntity.statusCode)
-        Assertions.assertNull(responseEntity.body)
+            restTemplate.exchange(
+                "http://localhost:$port/ehrs",
+                HttpMethod.PUT,
+                httpEntity,
+                String::class.java
+            )
+        assertEquals(HttpStatus.NOT_FOUND, responseEntity.statusCode)
 
         populateDb()
     }
@@ -149,7 +166,7 @@ class EhrControllerTests {
 
         val sqlStatement = connection.createStatement()
         for (i in sql.indices) {
-            val sqlStatement = sqlStatement.addBatch(sql[i])
+            sqlStatement.addBatch(sql[i])
         }
         sqlStatement.executeBatch()
     }
@@ -167,7 +184,7 @@ class EhrControllerTests {
         val sql = listOf(query1, query2, query3, query4)
         val sqlStatement = connection.createStatement()
         for (i in sql.indices) {
-            val sqlStatement = sqlStatement.addBatch(sql[i])
+            sqlStatement.addBatch(sql[i])
         }
         sqlStatement.executeBatch()
     }

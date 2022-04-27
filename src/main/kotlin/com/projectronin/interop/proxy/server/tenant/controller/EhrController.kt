@@ -3,6 +3,11 @@ package com.projectronin.interop.proxy.server.tenant.controller
 import com.projectronin.interop.proxy.server.tenant.model.Ehr
 import com.projectronin.interop.tenant.config.data.EhrDAO
 import com.projectronin.interop.tenant.config.data.model.EhrDO
+import com.projectronin.interop.tenant.config.exception.NoEHRFoundException
+import mu.KotlinLogging
+import org.springframework.http.HttpStatus
+import org.springframework.http.ResponseEntity
+import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.PutMapping
@@ -13,43 +18,54 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 @RequestMapping("ehrs")
 class EhrController(private val ehrDAO: EhrDAO) {
+    private val logger = KotlinLogging.logger { }
 
     @GetMapping
-    fun read(): List<Ehr> {
+    fun read(): ResponseEntity<List<Ehr>> {
         val ehrDOList = ehrDAO.read()
-        return ehrDOList.map { ehrDOtoEhr(it) }
+        return ResponseEntity(ehrDOList.map { it.toEhr() }, HttpStatus.OK)
     }
 
     @PostMapping
-    fun insert(@RequestBody ehr: Ehr): Ehr? {
-        val insertObj = EhrDO {
-            vendorType = ehr.vendorType
-            clientId = ehr.clientId
-            publicKey = ehr.publicKey
-            privateKey = ehr.privateKey
-        }
-        val insertedEhr = ehrDAO.insert(insertObj)
-        return insertedEhr?.let { ehrDOtoEhr(it) }
+    fun insert(@RequestBody ehr: Ehr): ResponseEntity<Ehr> {
+        val insertedEhr = ehrDAO.insert(ehr.toEhrDO())
+        return ResponseEntity(insertedEhr.toEhr(), HttpStatus.CREATED)
     }
 
     @PutMapping
-    fun update(@RequestBody ehr: Ehr): Ehr? {
-        val updateObj = EhrDO {
-            vendorType = ehr.vendorType
-            clientId = ehr.clientId
-            publicKey = ehr.publicKey
-            privateKey = ehr.privateKey
-        }
-        val updatedEhr = ehrDAO.update(updateObj)
-        return updatedEhr?.let { ehrDOtoEhr(it) }
+    fun update(@RequestBody ehr: Ehr): ResponseEntity<Ehr> {
+        val updatedEhr = ehrDAO.update(ehr.toEhrDO())
+        return ResponseEntity(updatedEhr.toEhr(), HttpStatus.OK)
     }
 
-    private fun ehrDOtoEhr(ehrDO: EhrDO): Ehr {
+    @ExceptionHandler
+    fun handleException(e: Exception): ResponseEntity<String> {
+        logger.error(e) { "Unspecified error occurred during EhrController" }
+        return ResponseEntity(e.message, HttpStatus.INTERNAL_SERVER_ERROR)
+    }
+
+    // likely the callers fault getting a wrong vendorType on a put
+    @ExceptionHandler(value = [(NoEHRFoundException::class)])
+    fun handleEHRException(e: NoEHRFoundException): ResponseEntity<String> {
+        logger.warn(e) { "Unable to find EHR" }
+        return ResponseEntity("Unable to find EHR", HttpStatus.NOT_FOUND)
+    }
+
+    fun EhrDO.toEhr(): Ehr {
         return Ehr(
-            vendorType = ehrDO.vendorType,
-            clientId = ehrDO.clientId,
-            publicKey = ehrDO.publicKey,
-            privateKey = ehrDO.privateKey
+            vendorType = this.vendorType,
+            clientId = this.clientId,
+            publicKey = this.publicKey,
+            privateKey = this.privateKey
         )
+    }
+
+    fun Ehr.toEhrDO(): EhrDO {
+        return EhrDO {
+            vendorType = this@toEhrDO.vendorType
+            clientId = this@toEhrDO.clientId
+            publicKey = this@toEhrDO.publicKey
+            privateKey = this@toEhrDO.privateKey
+        }
     }
 }
