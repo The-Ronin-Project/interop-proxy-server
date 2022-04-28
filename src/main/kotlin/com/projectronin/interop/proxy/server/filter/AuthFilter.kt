@@ -26,7 +26,7 @@ class AuthFilter(private val userAuthService: UserAuthService, private val m2MAu
         val bearer =
             kotlin.runCatching { exchange.request.headers.getFirst(AUTH_HEADER)!!.substring(7) /* strip 'Bearer '*/ }
                 .getOrElse {
-                    logger.warn(it) { it.message }
+                    logger.warn(it) { "Invalid or missing bearer token" }
                     return handleForbidden(exchange, "Invalid Bearer token")
                 }
 

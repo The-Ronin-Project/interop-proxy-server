@@ -38,6 +38,21 @@ class AuthFilterTest {
     }
 
     @Test
+    fun `no bearer token returns forbidden error`() {
+        val http = mockk<HttpClient>()
+        val chain = mockk<WebFilterChain>()
+        val userAuthService = UserAuthService(http, "/auth")
+        val m2MAuthService = mockk<M2MAuthService>()
+        val authFilter = AuthFilter(userAuthService, m2MAuthService)
+        val exchange = MockServerWebExchange
+            .from(
+                MockServerHttpRequest.get("/graphql")
+            )
+        authFilter.filter(exchange, chain)
+        assertEquals(HttpStatus.FORBIDDEN, exchange.response.statusCode)
+    }
+
+    @Test
     fun `null user auth returns forbidden`() {
         val chain = mockk<WebFilterChain>()
         val userAuthService = mockk<UserAuthService>()
