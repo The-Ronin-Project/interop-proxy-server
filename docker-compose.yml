@@ -9,6 +9,9 @@ services:
       - RONIN_SERVER_AUTH_M2M_AUDIENCE=https://interop-proxy-server.dev.projectronin.io
       - AO_SANDBOX_KEY
       - SERVICE_CALL_JWT_SECRET
+      - DD_AGENT_HOST=datadog-agent
+      - DD_TRACE_SAMPLE_RATE=1
+      - DD_PROFILING_ENABLED=true
     volumes:
       - ./src/it/resources/:/config
     ports:

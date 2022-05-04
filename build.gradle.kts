@@ -1,7 +1,7 @@
 import com.expediagroup.graphql.plugin.gradle.tasks.GraphQLGenerateSDLTask
 
 plugins {
-    `java`
+    java
     `maven-publish`
     id("com.projectronin.interop.gradle.mockk")
     id("com.projectronin.interop.gradle.ktorm")
@@ -135,10 +135,7 @@ jib {
         jvmFlags = listOf("-javaagent:/opt/tracer/${tracerAgent.files.first().name}")
         environment = mapOf(
             "DD_SERVICE" to project.name,
-            "DD_VERSION" to "$project.version",
-            "DD_APM_ENABLED" to "false",
-            // automatically include dd.correlation_id and dd.span_id in log MDC
-            "DD_LOGS_INJECTION" to "true"
+            "DD_VERSION" to "${project.version}"
         )
     }
 }
