@@ -31,10 +31,12 @@ class TenantControllerTest {
         practitionerProviderSystem = "providerSystemExample",
         practitionerUserSystem = "userSystemExample",
         mrnSystem = "mrnSystemExample",
-        hsi = null
+        hsi = null,
+        instanceName = "instanceName"
     )
     private val tenantServiceVendor = TenantServiceEpic(
         clientId = "shouldn'tmatter",
+        instanceName = "instanceName",
         authenticationConfig = TenantServiceAuthenticationConfig(
             authEndpoint = "authEndpoint",
             publicKey = "doesn'tmatter",

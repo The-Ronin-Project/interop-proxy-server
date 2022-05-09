@@ -29,6 +29,7 @@ class EhrControllerTest {
         ehrDO = mockk {
             every { id } returns 1
             every { vendorType } returns VendorType.EPIC
+            every { instanceName } returns "instanceName1"
             every { clientId } returns "clientId1"
             every { publicKey } returns "publicKey1"
             every { privateKey } returns "privateKey1"
@@ -36,6 +37,7 @@ class EhrControllerTest {
         ehrDO2 = mockk {
             every { id } returns 2
             every { vendorType } returns VendorType.EPIC
+            every { instanceName } returns "instanceName2"
             every { clientId } returns "clientId2"
             every { publicKey } returns "publicKey2"
             every { privateKey } returns "privateKey3"
@@ -65,6 +67,7 @@ class EhrControllerTest {
     fun `insert test`() {
         val ehr = Ehr(
             VendorType.EPIC,
+            "instanceName",
             "clientId1",
             "publicKey1",
             "privateKey1"
@@ -79,6 +82,7 @@ class EhrControllerTest {
     fun `update test`() {
         val ehr = Ehr(
             VendorType.EPIC,
+            "instanceName",
             "clientId2",
             "publicKey2",
             "privateKey2"

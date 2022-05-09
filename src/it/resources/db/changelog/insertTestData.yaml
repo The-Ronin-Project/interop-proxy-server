@@ -11,6 +11,9 @@ databaseChangeLog:
                   name: io_ehr_id
                   value: "101"
               - column:
+                  name: instance_name
+                  value: "Epic Sandbox"
+              - column:
                   name: name
                   value: "EPIC"
               - column:

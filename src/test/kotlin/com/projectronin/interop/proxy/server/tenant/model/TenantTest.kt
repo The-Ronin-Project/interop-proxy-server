@@ -23,7 +23,8 @@ class TenantTest {
                 practitionerProviderSystem = "practitionerProviderSystem",
                 practitionerUserSystem = "practitionerUserSystem",
                 mrnSystem = "mrnSystem",
-                hsi = null
+                hsi = null,
+                instanceName = "instanceName"
             )
         )
 
@@ -49,7 +50,8 @@ class TenantTest {
                 practitionerProviderSystem = "practitionerProviderSystem",
                 practitionerUserSystem = "practitionerUserSystem",
                 mrnSystem = "mrnSystem",
-                hsi = null
+                hsi = null,
+                instanceName = "Epic Sandbox"
             )
         )
         val json = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(tenant)
@@ -70,6 +72,7 @@ class TenantTest {
                 "practitionerProviderSystem" : "practitionerProviderSystem",
                 "practitionerUserSystem" : "practitionerUserSystem",
                 "mrnSystem" : "mrnSystem",
+                "instanceName" : "Epic Sandbox",
                 "vendorType" : "EPIC"
               }
             }

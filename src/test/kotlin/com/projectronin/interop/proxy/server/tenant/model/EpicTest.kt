@@ -18,7 +18,8 @@ internal class EpicTest {
             practitionerProviderSystem = "practitionerProviderSystem",
             practitionerUserSystem = "practitionerUserSystem",
             mrnSystem = "mrnSystem",
-            hsi = "hsi"
+            hsi = "hsi",
+            instanceName = "instanceName"
         )
 
         assertEquals(VendorType.EPIC, epic.vendorType)
@@ -31,6 +32,7 @@ internal class EpicTest {
         assertEquals("practitionerUserSystem", epic.practitionerUserSystem)
         assertEquals("mrnSystem", epic.mrnSystem)
         assertEquals("hsi", epic.hsi)
+        assertEquals("instanceName", epic.instanceName)
     }
 
     @Test
@@ -44,7 +46,8 @@ internal class EpicTest {
             practitionerProviderSystem = "practitionerProviderSystem",
             practitionerUserSystem = "practitionerUserSystem",
             mrnSystem = "mrnSystem",
-            hsi = "hsi"
+            hsi = "hsi",
+            instanceName = "instanceName"
         )
         val json = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(epic)
 
@@ -61,6 +64,7 @@ internal class EpicTest {
               "practitionerUserSystem" : "practitionerUserSystem",
               "mrnSystem" : "mrnSystem",
               "hsi" : "hsi",
+              "instanceName" : "instanceName",
               "vendorType" : "EPIC"
             }
         """.trimIndent()
@@ -81,7 +85,8 @@ internal class EpicTest {
             practitionerProviderSystem = "practitionerProviderSystem",
             practitionerUserSystem = "practitionerUserSystem",
             mrnSystem = "mrnSystem",
-            hsi = null
+            hsi = null,
+            instanceName = "instanceName"
         )
         val json = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(epic)
 
@@ -97,6 +102,7 @@ internal class EpicTest {
               "practitionerProviderSystem" : "practitionerProviderSystem",
               "practitionerUserSystem" : "practitionerUserSystem",
               "mrnSystem" : "mrnSystem",
+              "instanceName" : "instanceName",
               "vendorType" : "EPIC"
             }
         """.trimIndent()

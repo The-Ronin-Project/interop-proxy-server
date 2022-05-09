@@ -3,6 +3,7 @@ package com.projectronin.interop.proxy.server.tenant.controller
 import com.projectronin.interop.proxy.server.tenant.model.MirthTenantConfig
 import com.projectronin.interop.tenant.config.TenantService
 import com.projectronin.interop.tenant.config.data.MirthTenantConfigDAO
+import com.projectronin.interop.tenant.config.data.binding.EhrDOs.instanceName
 import com.projectronin.interop.tenant.config.data.model.MirthTenantConfigDO
 import com.projectronin.interop.tenant.config.data.model.TenantDO
 import com.projectronin.interop.tenant.config.exception.NoTenantFoundException
@@ -43,6 +44,7 @@ class MirthTenantConfigControllerTest {
         every { practitionerUserSystem } returns "123"
         every { mrnSystem } returns "123"
         every { hsi } returns null
+        every { instanceName } returns "Epic Instance"
     }
     private val mockTenantServiceTenant = mockk<Tenant> {
         every { internalId } returns 1
@@ -64,6 +66,7 @@ class MirthTenantConfigControllerTest {
         val results = controller.get("first")
         assertEquals(results.body?.locationIds?.size, 3)
     }
+
     @Test
     fun `get fails with bad mnemonic`() {
         every { dao.getByTenantMnemonic("first") } returns null
@@ -74,7 +77,7 @@ class MirthTenantConfigControllerTest {
     fun `insert works`() {
         every { tenantService.getTenantForMnemonic("first") } returns mockTenantServiceTenant
         every { dao.insertConfig(any()) } returns configDO
-        val mirthTenantConfig = MirthTenantConfig(listOf("bleep", "blorp", "bloop",))
+        val mirthTenantConfig = MirthTenantConfig(listOf("bleep", "blorp", "bloop"))
         val result = controller.insert("first", mirthTenantConfig)
         assertEquals(HttpStatus.CREATED, result.statusCode)
         assertEquals(mirthTenantConfig, result.body)
@@ -91,7 +94,7 @@ class MirthTenantConfigControllerTest {
     fun `update works`() {
         every { tenantService.getTenantForMnemonic("first") } returns mockTenantServiceTenant
         every { dao.updateConfig(any()) } returns 1
-        val mirthTenantConfig = MirthTenantConfig(listOf("bleep", "blorp", "bloop",))
+        val mirthTenantConfig = MirthTenantConfig(listOf("bleep", "blorp", "bloop"))
         val result = controller.update("first", mirthTenantConfig)
         assertEquals(HttpStatus.OK, result.statusCode)
     }
@@ -100,18 +103,20 @@ class MirthTenantConfigControllerTest {
     fun `update yells when constraint is broken in database`() {
         every { tenantService.getTenantForMnemonic("first") } returns mockTenantServiceTenant
         every { dao.updateConfig(any()) } returns 2
-        val mirthTenantConfig = MirthTenantConfig(listOf("bleep", "blorp", "bloop",))
+        val mirthTenantConfig = MirthTenantConfig(listOf("bleep", "blorp", "bloop"))
         val result = controller.update("first", mirthTenantConfig)
         assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, result.statusCode)
     }
+
     @Test
     fun `update yells when nothing is in the database`() {
         every { tenantService.getTenantForMnemonic("first") } returns mockTenantServiceTenant
         every { dao.updateConfig(any()) } returns 0
-        val mirthTenantConfig = MirthTenantConfig(listOf("bleep", "blorp", "bloop",))
+        val mirthTenantConfig = MirthTenantConfig(listOf("bleep", "blorp", "bloop"))
         val result = controller.update("first", mirthTenantConfig)
         assertEquals(HttpStatus.NOT_FOUND, result.statusCode)
     }
+
     @Test
     fun `put fails with bad mnemonic`() {
         every { tenantService.getTenantForMnemonic("first") } returns null

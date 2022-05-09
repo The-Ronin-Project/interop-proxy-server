@@ -1,5 +1,6 @@
 package com.projectronin.interop.proxy.server.tenant.controller
 
+import com.projectronin.interop.tenant.config.data.binding.EhrDOs.clientId
 import com.projectronin.interop.tenant.config.model.AuthenticationConfig
 import com.projectronin.interop.tenant.config.model.BatchConfig
 import com.projectronin.interop.proxy.server.tenant.model.Epic as ProxyEpic
@@ -41,6 +42,7 @@ fun ProxyEpic.toTenantServerEpic(): TenantServiceEpic {
         mrnSystem = mrnSystem,
         hsi = hsi,
         clientId = "",
+        instanceName = instanceName,
         authenticationConfig = AuthenticationConfig(authEndpoint, "", "")
     )
 }
@@ -55,6 +57,8 @@ fun TenantServiceEpic.toProxyEpic(): ProxyEpic {
         practitionerProviderSystem = practitionerProviderSystem,
         practitionerUserSystem = practitionerUserSystem,
         mrnSystem = mrnSystem,
-        hsi = hsi
+        hsi = hsi,
+        instanceName = instanceName
+
     )
 }

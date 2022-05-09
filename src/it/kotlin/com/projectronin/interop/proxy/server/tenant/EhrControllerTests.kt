@@ -62,11 +62,12 @@ class EhrControllerTests {
     }
 
     @Test
-    fun `post`() {
+    fun `post ehr when none exists`() {
         emptyDb()
         val query = """
             {
                 "vendorType": "EPIC", 
+                "instanceName": "Epic Sandbox",
                 "clientId": "clientID",
                 "publicKey": "public",
                 "privateKey": "private"
@@ -87,10 +88,11 @@ class EhrControllerTests {
     }
 
     @Test
-    fun `post fails`() {
+    fun `post fails when ehr exists`() {
         val query = """
             {
                 "vendorType": "EPIC", 
+                "instanceName": "Epic Sandbox",
                 "clientId": "clientID",
                 "publicKey": "public",
                 "privateKey": "private"
@@ -107,10 +109,11 @@ class EhrControllerTests {
     }
 
     @Test
-    fun `put`() {
+    fun `put updates existing ehr`() {
         val query = """
             {
-                "vendorType": "EPIC", 
+                "vendorType": "EPIC",
+                "instanceName": "Epic Sandbox",
                 "clientId": "UpdatedClientID",
                 "publicKey": "public",
                 "privateKey": "private"
@@ -132,12 +135,13 @@ class EhrControllerTests {
     }
 
     @Test
-    fun `put fails`() {
+    fun `put fails when ehr does not exist`() {
         emptyDb()
 
         val query = """
             {
                 "vendorType": "EPIC", 
+                "instanceName": "Epic Sandbox",
                 "clientId": "UpdatedClientID",
                 "publicKey": "public",
                 "privateKey": "private"
@@ -151,6 +155,7 @@ class EhrControllerTests {
                 httpEntity,
                 String::class.java
             )
+        println(responseEntity)
         assertEquals(HttpStatus.NOT_FOUND, responseEntity.statusCode)
 
         populateDb()
@@ -175,7 +180,7 @@ class EhrControllerTests {
         val connection = ehrDatasource.connection
         val AOSandboxKey = System.getenv("AO_SANDBOX_KEY")
         val query1 =
-            """insert into io_ehr values (101, 'EPIC', 'a3da9a08-4fd4-443b-b0f5-6226547a98db', 'public', '$AOSandboxKey') """
+            """insert into io_ehr values (101, 'EPIC', 'a3da9a08-4fd4-443b-b0f5-6226547a98db', 'public', '$AOSandboxKey', 'Epic Sandbox') """
         val query2 = """insert into io_tenant values (1001, 'apposnd', 101, '22:00:00', '06:00:00')"""
         val query3 = """insert into io_tenant_provider_pool values (10001, 1001, 'ProviderWithPool', '14600')"""
         val query4 =

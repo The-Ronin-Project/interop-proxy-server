@@ -54,6 +54,7 @@ class EhrController(private val ehrDAO: EhrDAO) {
     fun EhrDO.toEhr(): Ehr {
         return Ehr(
             vendorType = this.vendorType,
+            instanceName = this.instanceName,
             clientId = this.clientId,
             publicKey = this.publicKey,
             privateKey = this.privateKey
@@ -63,6 +64,7 @@ class EhrController(private val ehrDAO: EhrDAO) {
     fun Ehr.toEhrDO(): EhrDO {
         return EhrDO {
             vendorType = this@toEhrDO.vendorType
+            instanceName = this@toEhrDO.instanceName
             clientId = this@toEhrDO.clientId
             publicKey = this@toEhrDO.publicKey
             privateKey = this@toEhrDO.privateKey

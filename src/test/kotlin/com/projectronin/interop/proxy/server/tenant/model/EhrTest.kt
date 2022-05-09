@@ -10,6 +10,7 @@ class EhrTest {
         val ehr =
             Ehr(
                 VendorType.EPIC,
+                "instanceName",
                 "clientId",
                 "public",
                 "private"

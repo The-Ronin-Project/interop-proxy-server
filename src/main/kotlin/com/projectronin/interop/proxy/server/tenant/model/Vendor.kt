@@ -17,4 +17,5 @@ import com.projectronin.interop.common.vendor.VendorType
 )
 interface Vendor {
     val vendorType: VendorType
+    val instanceName: String
 }

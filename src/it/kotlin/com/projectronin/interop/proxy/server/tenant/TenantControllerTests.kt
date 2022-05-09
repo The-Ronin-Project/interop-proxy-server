@@ -129,7 +129,8 @@ class TenantControllerTests {
             practitionerProviderSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.2.836982",
             practitionerUserSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.2.697780",
             mrnSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.5.737384.14",
-            hsi = null
+            hsi = null,
+            instanceName = "Epic Sandbox"
         )
 
         val newTenant = Tenant(
@@ -164,7 +165,8 @@ class TenantControllerTests {
             practitionerProviderSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.2.836982",
             practitionerUserSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.2.697780",
             mrnSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.5.737384.14",
-            hsi = null
+            hsi = null,
+            instanceName = "Epic Sandbox"
         )
 
         val updatedTenant = Tenant(
