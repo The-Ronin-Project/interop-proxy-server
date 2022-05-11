@@ -67,7 +67,7 @@ services:
   # EHR Migration
   liquibase-ehr:
     container_name: liquibase-ehr
-    image: docker-repo.devops.projectronin.io/interop-ehr-liquibase:1.0.0
+    image: docker-repo.devops.projectronin.io/interop-ehr-liquibase:1.1.0
     environment:
       - JDBC_URL=jdbc:mysql://ehr:secret@db-ehr:3306/interop-ehr
       - DATA_LOAD=db/changelog/insertTestData.yaml
