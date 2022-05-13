@@ -217,6 +217,8 @@ type Identifier {
 type Mutation {
   "Sends a message and returns the current status. Requires User Auth."
   sendMessage(message: MessageInput!, tenantId: String!): String!
+  "Takes in note from product and processes it for downstream services"
+  sendNote(noteInput: NoteInput!, tenantId: String!): String!
 }
 
 "A participant on an appointment"
@@ -376,4 +378,14 @@ input MessagePatientInput {
 input MessageRecipientInput {
   "The FHIR ID of the message recipient"
   fhirId: String!
+}
+
+"A message that contains note information from product for HL7 downstream writebacks"
+input NoteInput {
+  "The text of the note that should be sent"
+  noteText: String!
+  "The FHIR ID of the patient"
+  patientFhirId: String!
+  "The FHIR ID of the practitioner authoring the note"
+  practitionerFhirId: String!
 }
