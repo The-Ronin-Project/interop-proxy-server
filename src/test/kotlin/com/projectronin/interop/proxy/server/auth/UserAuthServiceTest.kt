@@ -2,8 +2,9 @@ package com.projectronin.interop.proxy.server.auth
 
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.cio.CIO
-import io.ktor.client.features.ServerResponseException
-import io.ktor.client.features.json.JsonFeature
+import io.ktor.client.plugins.ServerResponseException
+import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.serialization.jackson.jackson
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -65,7 +66,10 @@ class UserAuthServiceTest {
 
     private fun getClient(): HttpClient {
         return HttpClient(CIO) {
-            install(JsonFeature)
+            install(ContentNegotiation) {
+                jackson()
+            }
+            expectSuccess = true
         }
     }
 }

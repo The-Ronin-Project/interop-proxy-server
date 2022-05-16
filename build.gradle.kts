@@ -3,11 +3,7 @@ import com.expediagroup.graphql.plugin.gradle.tasks.GraphQLGenerateSDLTask
 plugins {
     java
     `maven-publish`
-    id("com.projectronin.interop.gradle.mockk")
-    id("com.projectronin.interop.gradle.ktorm")
-    id("com.projectronin.interop.gradle.ktor")
     id("com.projectronin.interop.gradle.spring")
-    id("com.projectronin.interop.gradle.jackson")
     id("com.projectronin.interop.gradle.integration")
     id("org.springframework.boot")
     id("com.expediagroup.graphql")
@@ -17,6 +13,7 @@ plugins {
 val tracerAgent: Configuration by configurations.creating
 
 dependencies {
+    implementation("io.ktor:ktor-client-logging:2.0.1")
     implementation(libs.interop.aidbox)
     implementation(libs.interop.common)
     implementation(libs.interop.ehr.api)
@@ -25,24 +22,27 @@ dependencies {
     implementation(libs.interop.tenant)
     implementation(libs.interop.transform)
 
-    implementation(platform(libs.spring.boot.parent))
+    implementation(platform(libs.kotlinx.coroutines.bom))
+
+    implementation(platform(libs.spring.boot.parent)) {
+        exclude(group = "org.jetbrains.kotlinx")
+    }
     // Pull in just the security dependencies we need, as we are not using the full security suite.
     implementation(libs.bundles.spring.security)
     implementation("org.springframework.boot:spring-boot-starter-jdbc")
 
+    implementation(libs.ktor.client.core)
     implementation(libs.bundles.graphql)
-
-    implementation(libs.mysql.connector.java)
-
-    // Needed to format logs for DataDog
-    implementation(libs.logstash.logback.encoder)
 
     // Dependency on the datadog agent jar.
     tracerAgent(libs.datadog.java.agent)
 
-    // Runtime Dependency on each EHR implementation.
     runtimeOnly(libs.bundles.ehr.impls)
     runtimeOnly(libs.interop.queue.db)
+    runtimeOnly(libs.mysql.connector.java)
+
+    // Needed to format logs for DataDog
+    runtimeOnly(libs.logstash.logback.encoder)
 
     testImplementation("org.springframework.boot:spring-boot-starter-test") {
         exclude(module = "mockito-core")
@@ -59,6 +59,9 @@ dependencies {
     testImplementation(libs.interop.testcontainer.aidbox)
     testImplementation(libs.interop.testcontainer.mockehr)
 
+    testImplementation(libs.ktor.client.cio)
+    testImplementation(libs.ktor.client.content.negotiation)
+    testImplementation(libs.ktor.serialization.jackson)
     testImplementation("com.squareup.okhttp3:mockwebserver")
 
     // Allows us to change environment variables

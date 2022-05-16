@@ -1,8 +1,8 @@
 package com.projectronin.interop.proxy.server.auth
 
 import io.ktor.client.HttpClient
-import io.ktor.client.call.receive
-import io.ktor.client.features.ClientRequestException
+import io.ktor.client.call.body
+import io.ktor.client.plugins.ClientRequestException
 import io.ktor.client.request.get
 import io.ktor.client.request.headers
 import io.ktor.client.request.parameter
@@ -41,7 +41,7 @@ class UserAuthService(private val client: HttpClient, @Value("\${seki.endpoint}"
                     parameter("token", consumerToken)
                 }
 
-                val authResponse = httpResponse.receive<AuthResponse>()
+                val authResponse = httpResponse.body<AuthResponse>()
                 logger.info { "User ${authResponse.user} successfully validated" }
                 authResponse
             } catch (e: Exception) {
