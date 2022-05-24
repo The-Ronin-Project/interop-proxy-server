@@ -37,6 +37,7 @@ dependencies {
     // Dependency on the datadog agent jar.
     tracerAgent(libs.datadog.java.agent)
 
+    runtimeOnly(libs.interop.commonHttp)
     runtimeOnly(libs.bundles.ehr.impls)
     runtimeOnly(libs.interop.queue.db)
     runtimeOnly(libs.mysql.connector.java)
