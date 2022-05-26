@@ -7,8 +7,7 @@ import com.projectronin.interop.proxy.server.context.INTEROP_CONTEXT_KEY
 import com.projectronin.interop.proxy.server.context.InteropGraphQLContext
 import com.projectronin.interop.proxy.server.model.Appointment
 import com.projectronin.interop.queue.QueueService
-import com.projectronin.interop.queue.model.Message
-import com.projectronin.interop.queue.model.MessageType
+import com.projectronin.interop.queue.model.ApiMessage
 import com.projectronin.interop.tenant.config.TenantService
 import com.projectronin.interop.tenant.config.model.Tenant
 import graphql.schema.DataFetchingEnvironment
@@ -238,9 +237,8 @@ class AppointmentHandlerTest {
         every {
             queueService.enqueueMessages(
                 listOf(
-                    Message(
+                    ApiMessage(
                         id = null,
-                        messageType = MessageType.API,
                         resourceType = ResourceType.APPOINTMENT,
                         tenant = "tenantId",
                         text = "raw JSON for appointment"
@@ -333,9 +331,8 @@ class AppointmentHandlerTest {
         every {
             queueService.enqueueMessages(
                 listOf(
-                    Message(
+                    ApiMessage(
                         id = null,
-                        messageType = MessageType.API,
                         resourceType = ResourceType.APPOINTMENT,
                         tenant = "tenantId",
                         text = "raw JSON for appointment"

@@ -7,8 +7,7 @@ import com.projectronin.interop.common.resource.ResourceType
 import com.projectronin.interop.ehr.factory.EHRFactory
 import com.projectronin.interop.proxy.server.util.DateUtil
 import com.projectronin.interop.queue.QueueService
-import com.projectronin.interop.queue.model.Message
-import com.projectronin.interop.queue.model.MessageType
+import com.projectronin.interop.queue.model.ApiMessage
 import com.projectronin.interop.tenant.config.TenantService
 import com.projectronin.interop.tenant.config.model.Tenant
 import graphql.GraphQLError
@@ -68,9 +67,8 @@ class AppointmentHandler(
         if (appointments.isNotEmpty()) try {
             queueService.enqueueMessages(
                 appointments.map {
-                    Message(
+                    ApiMessage(
                         id = null,
-                        messageType = MessageType.API,
                         resourceType = ResourceType.APPOINTMENT,
                         tenant = tenantId,
                         text = it.raw
