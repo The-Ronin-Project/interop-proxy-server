@@ -1,0 +1,1091 @@
+{
+	"info": {
+		"_postman_id": "dd9fe546-5ab8-47c9-b858-7488db824c6f",
+		"name": "Proxy Server Dev Validation Tests",
+		"description": "**Overview**\n\nThis is a collection of tests that can be used to validate proxy server is running in the dev environment by running the \"happy path\" for each end point.\n\n**Usage**\n\n1.  Select the `Proxy Server-dev` environment.\n2.  With `Proxy Server Dev Validation Tests` selected, click Run in the top right corner.\n3.  Click the big, blue run button.\n    \n\n**Notes**\n\nThe Seki token in the `Proxy Server-dev` environment only has a 60 day lifetime. New tokens can be found [here](https://dev.projectronin.io/seki/admin/tenants). The Seki team is working on a way to automate generating a new one for us if one isn't available, but until then just ask them when it expires.\n\nFor the Tenant Config tests, we're currently not testing inserts unless the end point has a delete, because the database is persisted and I don't want to fill it with junk. For the same reason, all updates set the row to itself to avoid changing things.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "18425757"
+	},
+	"item": [
+		{
+			"name": "Patient Search",
+			"item": [
+				{
+					"name": "Can Find Patient",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonResponse = pm.response.json()",
+									"",
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"At least 1 patient returned\", function () {",
+									"    var patients = jsonResponse.data.patientsByNameAndDOB",
+									"    pm.expect(patients.length).greaterThan(0)",
+									"});",
+									"",
+									"pm.test(\"No errors returned\", function () {",
+									"    pm.expect(jsonResponse.errors == undefined);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "query($tenantId: String!, $family: String!, $given: String!, $birthDate: String!) {\n  patientsByNameAndDOB(\n      tenantId: $tenantId, \n        family: $family, \n        given: $given, \n        birthdate: $birthDate\n    ) {\n    name{\n        given\n        family\n    }\n    birthDate\n    gender\n    address{\n        use\n        line\n        city\n    }\n    identifier{\n        system\n        value\n    }\n  }\n}",
+								"variables": "{\n    \"tenantId\": \"apposnd\",\n    \"family\": \"Mychart\",\n    \"given\": \"Allison\",\n    \"birthDate\": \"1987-01-15\"\n}"
+							}
+						},
+						"url": {
+							"raw": "{{proxy_url}}/graphql",
+							"host": [
+								"{{proxy_url}}"
+							],
+							"path": [
+								"graphql"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "patientsByNameAndDOB",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "graphql"
+								},
+								"url": {
+									"raw": "{{proxy_url}}/graphql",
+									"host": [
+										"{{proxy_url}}"
+									],
+									"path": [
+										"graphql"
+									]
+								}
+							},
+							"_postman_previewlanguage": "Text",
+							"header": [],
+							"cookie": [],
+							"body": ""
+						}
+					]
+				},
+				{
+					"name": "Can't Find Patient",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonResponse = pm.response.json()",
+									"",
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"No patients returned\", function () {",
+									"    var patients = jsonResponse.data.patientsByNameAndDOB",
+									"    pm.expect(patients.length).equal(0)",
+									"});",
+									"",
+									"pm.test(\"No errors returned\", function () {",
+									"    pm.expect(jsonResponse.errors == undefined);",
+									"});",
+									"",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "query($tenantId: String!, $family: String!, $given: String!, $birthDate: String!) {\n  patientsByNameAndDOB(\n      tenantId: $tenantId, \n        family: $family, \n        given: $given, \n        birthdate: $birthDate\n    ) {\n    name{\n        given\n        family\n    }\n    birthDate\n    gender\n    address{\n        use\n        line\n        city\n    }\n    identifier{\n        system\n        value\n    }\n  }\n}",
+								"variables": "{\n    \"tenantId\": \"apposnd\",\n    \"family\": \"Fake\",\n    \"given\": \"Fake\",\n    \"birthDate\": \"1901-01-01\"\n\n}"
+							}
+						},
+						"url": {
+							"raw": "{{proxy_url}}/graphql",
+							"host": [
+								"{{proxy_url}}"
+							],
+							"path": [
+								"graphql"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "patientsByNameAndDOB",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "graphql"
+								},
+								"url": {
+									"raw": "{{proxy_url}}/graphql",
+									"host": [
+										"{{proxy_url}}"
+									],
+									"path": [
+										"graphql"
+									]
+								}
+							},
+							"_postman_previewlanguage": "Text",
+							"header": [],
+							"cookie": [],
+							"body": ""
+						}
+					]
+				},
+				{
+					"name": "Can Find Patient - M2M Auth",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonResponse = pm.response.json();",
+									"",
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"At least 1 patient returned\", function () {",
+									"    var patients = jsonResponse.data.patientsByNameAndDOB",
+									"    pm.expect(patients.length).greaterThan(0)",
+									"});",
+									"",
+									"pm.test(\"No errors returned\", function () {",
+									"    pm.expect(jsonResponse.errors == undefined);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"var now = new Date();",
+									"var expirationTime = ",
+									"    !!pm.collectionVariables.get(\"m2m_auth_expiration\")",
+									"    ? Date.parse(pm.collectionVariables.get(\"m2m_auth_expiration\"))",
+									"    : now;",
+									"var tokenAge = Math.floor((now - expirationTime) / 1000);",
+									"",
+									"// If token is within 60 seconds of expiring, get a new one",
+									"if (tokenAge > -60) {",
+									"    console.log(\"Getting a new m2m auth token\")",
+									"",
+									"    pm.sendRequest({",
+									"        url: pm.environment.get(\"auth_url\"),",
+									"        method: \"POST\",",
+									"        header: {",
+									"            \"Accept\": \"application/json\",",
+									"            \"Content-Type\": \"application/x-www-form-urlencoded\"",
+									"        },",
+									"        body: {",
+									"            mode: \"urlencoded\",",
+									"            urlencoded: [",
+									"                { key: \"client_id\", value: pm.environment.get(\"client_id\"), disabled: false },",
+									"                { key: \"client_secret\", value: pm.environment.get(\"client_secret\"), disabled: false },",
+									"                { key: \"audience\", value: pm.environment.get(\"audience\"), disabled: false },",
+									"                { key: \"grant_type\", value: \"client_credentials\", disabled: false }",
+									"            ]",
+									"        }",
+									"    }, (error, response) => {",
+									"        if (error) {",
+									"            console.log(\"Error: \" + error);",
+									"        } else if (response) {",
+									"            pm.collectionVariables.set(\"m2m_auth_token\", response.json().access_token)",
+									"            pm.collectionVariables.set(\"m2m_auth_expiration\", new Date().addSeconds(response.json().expires_in));",
+									"            console.log(\"New token expires: \" + new Date().addSeconds(response.json().expires_in));",
+									"        }",
+									"    })",
+									"} else {",
+									"    console.log(\"Current token is good\")",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{m2m_auth_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "query($tenantId: String!, $family: String!, $given: String!, $birthDate: String!) {\n  patientsByNameAndDOB(\n      tenantId: $tenantId, \n        family: $family, \n        given: $given, \n        birthdate: $birthDate\n    ) {\n    name{\n        given\n        family\n    }\n    birthDate\n    gender\n    address{\n        use\n        line\n        city\n    }\n    identifier{\n        system\n        value\n    }\n  }\n}",
+								"variables": "{\n    \"tenantId\": \"apposnd\",\n    \"family\": \"Mychart\",\n    \"given\": \"Allison\",\n    \"birthDate\": \"1987-01-15\"\n\n}"
+							}
+						},
+						"url": {
+							"raw": "{{proxy_url}}/graphql",
+							"host": [
+								"{{proxy_url}}"
+							],
+							"path": [
+								"graphql"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "patientsByNameAndDOB",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "graphql"
+								},
+								"url": {
+									"raw": "{{proxy_url}}/graphql",
+									"host": [
+										"{{proxy_url}}"
+									],
+									"path": [
+										"graphql"
+									]
+								}
+							},
+							"_postman_previewlanguage": "Text",
+							"header": [],
+							"cookie": [],
+							"body": ""
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Appointment Search",
+			"item": [
+				{
+					"name": "Can Find Appointment",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonResponse = pm.response.json();",
+									"",
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"At least 1 appointment returned\", function () {",
+									"    var appointments = pm.response.json().data.appointmentsByMRNAndDate",
+									"    pm.expect(appointments.length).greaterThan(0)",
+									"});",
+									"",
+									"pm.test(\"No errors returned\", function () {",
+									"    pm.expect(jsonResponse.errors == undefined);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"// Set dates from 60 days ago to today",
+									"var endDate = new Date()",
+									"var startDate = new Date()",
+									"startDate.setDate(endDate.getDate() - 60)",
+									"",
+									"var dateOptions = { year: 'numeric', month: '2-digit', day: '2-digit' };",
+									"pm.variables.set(\"endDate\", endDate.toLocaleDateString(\"en-US\", dateOptions));",
+									"pm.variables.set(\"startDate\", startDate.toLocaleDateString(\"en-US\", dateOptions));",
+									"",
+									"console.log(\"start date: \" + pm.variables.get(\"startDate\"))",
+									"console.log(\"end date: \" + pm.variables.get(\"endDate\"))"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "query($tenantId: String!, $mrn: String!, $startDate: String!, $endDate: String!) {\n    appointmentsByMRNAndDate (endDate: $endDate, mrn: $mrn, startDate: $startDate, tenantId: $tenantId) {\n        appointmentType {\n            coding {\n                code\n                display\n                system\n                userSelected\n                version\n            }\n            text\n        }\n        id\n        identifier {\n            system\n            value\n        }\n        serviceType {\n            coding {\n                code\n                display\n                system\n                userSelected\n                version\n            }\n            text\n        }\n        start\n        status\n        participants {\n            actor {\n                display\n                id\n                identifier {\n                    system\n                    value\n                }\n                reference\n                type\n            }\n        }\n    }\n}\n",
+								"variables": "{\n    \"tenantId\": \"apposnd\",\n    \"mrn\": \"202497\",\n    \"startDate\": \"{{startDate}}\",\n    \"endDate\": \"{{endDate}}\"\n}"
+							}
+						},
+						"url": {
+							"raw": "{{proxy_url}}/graphql",
+							"host": [
+								"{{proxy_url}}"
+							],
+							"path": [
+								"graphql"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "patientsByNameAndDOB",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "graphql"
+								},
+								"url": {
+									"raw": "{{proxy_url}}/graphql",
+									"host": [
+										"{{proxy_url}}"
+									],
+									"path": [
+										"graphql"
+									]
+								}
+							},
+							"_postman_previewlanguage": "Text",
+							"header": [],
+							"cookie": [],
+							"body": ""
+						}
+					]
+				},
+				{
+					"name": "Can't Find Appointment",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonResponse = pm.response.json();",
+									"",
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"No appointments returned\", function () {",
+									"    var appointments = jsonResponse.data.appointmentsByMRNAndDate",
+									"    pm.expect(appointments.length).equals(0)",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "query($tenantId: String!, $mrn: String!, $startDate: String!, $endDate: String!) {\n    appointmentsByMRNAndDate (endDate: $endDate, mrn: $mrn, startDate: $startDate, tenantId: $tenantId) {\n        appointmentType {\n            coding {\n                code\n                display\n                system\n                userSelected\n                version\n            }\n            text\n        }\n        id\n        identifier {\n            system\n            value\n        }\n        serviceType {\n            coding {\n                code\n                display\n                system\n                userSelected\n                version\n            }\n            text\n        }\n        start\n        status\n        participants {\n            actor {\n                display\n                id\n                identifier {\n                    system\n                    value\n                }\n                reference\n                type\n            }\n        }\n    }\n}\n",
+								"variables": "{\n    \"tenantId\": \"apposnd\",\n    \"mrn\": \"202497\",\n    \"startDate\": \"01/01/1901\",\n    \"endDate\": \"01/02/1901\"\n}"
+							}
+						},
+						"url": {
+							"raw": "{{proxy_url}}/graphql",
+							"host": [
+								"{{proxy_url}}"
+							],
+							"path": [
+								"graphql"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "patientsByNameAndDOB",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "graphql"
+								},
+								"url": {
+									"raw": "{{proxy_url}}/graphql",
+									"host": [
+										"{{proxy_url}}"
+									],
+									"path": [
+										"graphql"
+									]
+								}
+							},
+							"_postman_previewlanguage": "Text",
+							"header": [],
+							"cookie": [],
+							"body": ""
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Condition Search",
+			"item": [
+				{
+					"name": "Can Find Conditions",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonResponse = pm.response.json();",
+									"",
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"At least 1 condition returned\", function () {",
+									"    var conditions = jsonResponse.data.conditionsByPatientAndCategory",
+									"    pm.expect(conditions.length).greaterThan(0)",
+									"});",
+									"",
+									"pm.test(\"No errors returned\", function () {",
+									"    pm.expect(jsonResponse.errors == undefined);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "query($tenantId: String!, $patientFhirId: String!, $conditionCategoryCode: ConditionCategoryCode!) {\n    conditionsByPatientAndCategory(\n        tenantId: $tenantId, \n        patientFhirId: $patientFhirId, \n        conditionCategoryCode: $conditionCategoryCode\n    ){\n        category{\n            coding {\n                code,\n                display,\n                system,\n                userSelected,\n                version\n            },\n            text\n        }\n        clinicalStatus{\n            coding{\n                code,\n                display,\n                system,\n                userSelected,\n                version\n            },\n            text\n        },\n        code {\n            coding{\n                code,\n                display,\n                system,\n                userSelected,\n                version\n            },\n            text\n        },\n        id,\n        identifier{\n            system,\n            value\n        }\n    }\n}",
+								"variables": "{\n    \"tenantId\": \"apposnd\",\n    \"patientFhirId\": \"eovSKnwDlsv-8MsEzCJO3BA3\",\n    \"conditionCategoryCode\": \"PROBLEM_LIST_ITEM\"\n}"
+							}
+						},
+						"url": {
+							"raw": "{{proxy_url}}/graphql",
+							"host": [
+								"{{proxy_url}}"
+							],
+							"path": [
+								"graphql"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"description": "We don't have a reliable test patient without conditions in AppOrchard, so there's no test for not being able to find conditions."
+		},
+		{
+			"name": "Send Message",
+			"item": [
+				{
+					"name": "Can Send Message",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonResponse = pm.response.json()",
+									"",
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Message returned\", function () {",
+									"    pm.expect(jsonResponse.data.sendMessage).equals(\"sent\")",
+									"});",
+									"",
+									"pm.test(\"No errors returned\", function () {",
+									"    pm.expect(jsonResponse.errors == undefined);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "mutation sendMessage($message: MessageInput!, $tenantId: String!) {\n    sendMessage(message: $message, tenantId: $tenantId)\n}",
+								"variables": "{\n    \"message\": {\n        \"patient\": {\n            \"mrn\": \"202497\"\n        },\n        \"recipients\": {\n            \"fhirId\": \"roninPSJPractitioner04Test\"\n        },\n        \"text\": \"test message\"\n    },\n    \"tenantId\": \"apposnd\"\n}"
+							}
+						},
+						"url": {
+							"raw": "{{proxy_url}}/graphql",
+							"host": [
+								"{{proxy_url}}"
+							],
+							"path": [
+								"graphql"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"description": "The only way send message can fail is if the provider or patient doesn't exist, and in that case we log a warning so it wouldn't be considered the \"happy path\"."
+		},
+		{
+			"name": "Tenant Config",
+			"item": [
+				{
+					"name": "EHRs",
+					"item": [
+						{
+							"name": "Get EHRs",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"var jsonResponse = pm.response.json();",
+											"",
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											"",
+											"pm.test(\"At least 1 EHR returned\", function () {",
+											"    pm.expect(jsonResponse.length).greaterThan(0)",
+											"});",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{proxy_url}}/ehrs",
+									"host": [
+										"{{proxy_url}}"
+									],
+									"path": [
+										"ehrs"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Update EHR",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"var jsonResponse = pm.response.json();",
+											"",
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											"",
+											"pm.test(\"EHR returned\", function () {",
+											"    pm.expect(jsonResponse.instanceName).equals(\"EPIC\")",
+											"});",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"vendorType\": \"EPIC\",\n    \"instanceName\": \"EPIC\",\n    \"clientId\": \"a3da9a08-4fd4-443b-b0f5-6226547a98db\",\n    \"publicKey\": \"public\",\n    \"privateKey\": \"MIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQCW6+IZzMwVDsq08psxYkVpAta1IZnbnHk2FiOFgogzBvmwmG3n8tLYK/ApWPHzBYnVxar5reCw1pAORFvDwbgkWjAGvCv8H8/kaIV+LSwEaFQJRb4t1aCFWTVenbGIp2cJHI+bmaJ4CkgH4avg1Hl2+My8gVLDguFYHYV3FXWOAxUW46mEDGqq3VBtBXJ7dQbSo0yXV+8Y3PyYldflim6ksuGBxKnP4B41Vp4J1v/OIYYio5xJvAeGc7wSaUy3V8oAOXhXNNqyBGy8Ar3ROIPgfHrrdro2KWOV9qLKgL2KodxIRIETg22tHGms7NcuLFfuzY/kcKaOZ2twSvWyJ0/PAgMBAAECggEAT45qsrT9g8A3ZOlam860ziVb70GWLGkwkC1dbjyf9V4g81F25kVfleqbgABOEpCB1zmK5nEdN7rzV0H7qZaNrkQIexRoj1Bps3rRm/DN+kjQu86S8PBi3Mho1MaF1oaATxJKNXjoZyTsUZNJmowGt4txyZDWgw+UIHH3cA3U2RXBokAI6/yoS7disnH7XnbdRO7WslHIvd79Xkg1XZCv4FrjilNvkS4QQssKidpQNYESJRNLGCKrszr+Z6hGgrSmFweqdtNrvSc+eodHUVDvBv84E69UTXlXO1NbzxDZcc3OqBBG44yBhkKcKJr03E5hKkaq1ls5+10mF5SRXneayQKBgQDG5wFGncy/kfKYvuRM37Lt+pZDOY4Wcl/3CliTD1yt9kXRwnbD8ev0J/tZpY7WYJScndAwodhlyx9Y13lPsBeZC6nU+5vp570tvr/jE7l8VFyMGDmfnUqfcIq6xCc8oAKoyQia34zDWRag3a8Cgqo8TFU9uYxbXQgvjLzsbOpJOwKBgQDCPtcuS1WUBOtK3NxM15Q3EHETs9E4DyUAaxiN0kIihJFMUvPdZmaB+aaLfGVQJcXxkpkhdFDjjqflU4EuuKKC3re3WMwWxyijI8f46uOimUpzukr/g6wY8290b/wHENllvTS4FzOe/gqGGfNEEqgHoxf80vvxzoTf1YPY+lvKfQKBgHP41SGbeHpqWoz9IJhCBk4DwgFIWbR008dy3NpCJsO3yFXZkO4G7JDbjw5iHbqZbY0z5uO0OjyABrMCT9VK0zeFOWzZl7r2R7OYeMGqCoiXl66HoXGTgKMeN4VWQZpzoZlQPhgvKB/unecF2rkX/rJRv5HR0iijQdaXtMAVcTVpAoGAYsWri6nZCVx6/OVTzGsuvdVJephMQfJJgW3z3WHWKVE5xRLFWIaSh3MYAgOuTNP4VH+UCFPqMdw/ebg9jzFpyZxQ1RV9KfP5sQMn02Y1fF/wYOqQ6l7dKw7WVOIAyOMDeN1+KkH6CNXrKgeWEL5f3QpMz03FuU6neF5NHg8oj80CgYAD7+YVRe5k4yJHHYrkgG4tJLBlDnqjnsCo6oPnUrOblHlLMe6duhZ7EIb6mzXrTU2UQCqsxqF1T/Z/ztdk7W5nNsNkfZHAeO77D/HyAZtXZgeSpQ2R9ZKn6+m2Yp93e5WtSXnsvN9K3pvlolPtsfboaWNMAYph8pJ1Vk6fGZgpAQ==\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{proxy_url}}/ehrs",
+									"host": [
+										"{{proxy_url}}"
+									],
+									"path": [
+										"ehrs"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Tenants",
+					"item": [
+						{
+							"name": "Get Tenants",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"var jsonResponse = pm.response.json();",
+											"",
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											"",
+											"pm.test(\"At least 1 tenant returned\", function () {",
+											"    pm.expect(jsonResponse.length).greaterThan(0)",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{proxy_url}}/tenants",
+									"host": [
+										"{{proxy_url}}"
+									],
+									"path": [
+										"tenants"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get Tenant",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"var jsonResponse = pm.response.json();",
+											"",
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											"",
+											"pm.test(\"Apposnd returned\", function () {",
+											"    pm.expect(jsonResponse.mnemonic).equals(\"apposnd\")",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{proxy_url}}/tenants/apposnd",
+									"host": [
+										"{{proxy_url}}"
+									],
+									"path": [
+										"tenants",
+										"apposnd"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Update Tenant",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"var jsonResponse = pm.response.json();",
+											"",
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											"",
+											"pm.test(\"Apposnd returned\", function () {",
+											"    pm.expect(jsonResponse.mnemonic).equals(\"apposnd\")",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"id\": 1001,\n    \"mnemonic\": \"apposnd\",\n    \"availableStart\": \"22:00:00\",\n    \"availableEnd\": \"06:00:00\",\n    \"vendor\": {\n        \"type\": \"EPIC\",\n        \"release\": \"1.0\",\n        \"serviceEndpoint\": \"https://apporchard.epic.com/interconnect-aocurprd-oauth\",\n        \"authEndpoint\": \"https://apporchard.epic.com/interconnect-aocurprd-oauth/oauth2/token\",\n        \"ehrUserId\": \"1\",\n        \"messageType\": \"1\",\n        \"practitionerProviderSystem\": \"urn:oid:1.2.840.114350.1.13.0.1.7.2.836982\",\n        \"practitionerUserSystem\": \"urn:oid:1.2.840.114350.1.13.0.1.7.2.697780\",\n        \"mrnSystem\": \"urn:oid:1.2.840.114350.1.13.0.1.7.5.737384.14\",\n        \"hsi\": null,\n        \"instanceName\": \"EPIC\",\n        \"vendorType\": \"EPIC\"\n    }\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{proxy_url}}/tenants/apposnd",
+									"host": [
+										"{{proxy_url}}"
+									],
+									"path": [
+										"tenants",
+										"apposnd"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Provider Pools",
+					"item": [
+						{
+							"name": "Get Provider Pools",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"var jsonResponse = pm.response.json();",
+											"",
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											"",
+											"pm.test(\"At least one pool returned\", function () {",
+											"    pm.expect(jsonResponse.length).greaterThan(0)",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{proxy_url}}/tenants/1001/pools?providerIds=ProviderWithPool",
+									"host": [
+										"{{proxy_url}}"
+									],
+									"path": [
+										"tenants",
+										"1001",
+										"pools"
+									],
+									"query": [
+										{
+											"key": "providerIds",
+											"value": "ProviderWithPool"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Update Provider Pool",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"providerPoolId\": 10001,\n    \"providerId\": \"ProviderWithPool\",\n    \"poolId\": \"14600\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{proxy_url}}/tenants/1001/pools/10001",
+									"host": [
+										"{{proxy_url}}"
+									],
+									"path": [
+										"tenants",
+										"1001",
+										"pools",
+										"10001"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Insert Provider Pool",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"var jsonResponse = pm.response.json();",
+											"",
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											"",
+											"pm.test(\"FakeProvider returned\", function () {",
+											"    pm.expect(jsonResponse.providerId).equals(\"FakeProvider\")",
+											"});",
+											"",
+											"// Save providerPoolId for DEL",
+											"pm.collectionVariables.set(\"lastProviderPoolId\", jsonResponse.providerPoolId)"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"providerPoolId\": 12345,\n    \"providerId\": \"FakeProvider\",\n    \"poolId\": \"14600\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{proxy_url}}/tenants/1001/pools",
+									"host": [
+										"{{proxy_url}}"
+									],
+									"path": [
+										"tenants",
+										"1001",
+										"pools"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Delete Provider Pool",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{proxy_url}}/tenants/1001/pools/{{lastProviderPoolId}}",
+									"host": [
+										"{{proxy_url}}"
+									],
+									"path": [
+										"tenants",
+										"1001",
+										"pools",
+										"{{lastProviderPoolId}}"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Mirth Configs",
+					"item": [
+						{
+							"name": "Get Mirth Config",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"var jsonResponse = pm.response.json();",
+											"",
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											"",
+											"pm.test(\"At least 1 locationId is returned\", function () {",
+											"    pm.expect(jsonResponse.locationIds.length).greaterThan(0)",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{proxy_url}}/tenants/apposnd/mirth-config",
+									"host": [
+										"{{proxy_url}}"
+									],
+									"path": [
+										"tenants",
+										"apposnd",
+										"mirth-config"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Update Mirth Config",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"locationIds\": [\n        \"1\",\n        \"2\",\n        \"3\"\n    ]\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{proxy_url}}/tenants/apposnd/mirth-config",
+									"host": [
+										"{{proxy_url}}"
+									],
+									"path": [
+										"tenants",
+										"apposnd",
+										"mirth-config"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				}
+			]
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{seki_token}}",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "m2m_auth_token",
+			"value": ""
+		},
+		{
+			"key": "m2m_auth_expiration",
+			"value": ""
+		},
+		{
+			"key": "lastProviderPoolId",
+			"value": ""
+		}
+	]
+}
