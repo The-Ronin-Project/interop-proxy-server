@@ -13,7 +13,7 @@ plugins {
 val tracerAgent: Configuration by configurations.creating
 
 dependencies {
-    implementation("io.ktor:ktor-client-logging:2.0.1")
+    implementation("io.ktor:ktor-client-logging:2.0.2")
     implementation(libs.interop.aidbox)
     implementation(libs.interop.common)
     implementation(libs.interop.ehr.api)
