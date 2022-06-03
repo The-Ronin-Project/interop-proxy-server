@@ -91,3 +91,69 @@ databaseChangeLog:
               - column:
                   name: pool_id
                   value: "14600"
+        - insert:
+            dbms: 'mysql'
+            tableName: io_tenant
+            columns:
+              - column:
+                  name: io_tenant_id
+                  value: "1002"
+              - column:
+                  name: mnemonic
+                  value: "ronin"
+              - column:
+                  name: io_ehr_id
+                  value: "101"
+              - column:
+                  name: available_batch_start
+                  value: "22:00:00"
+              - column:
+                  name: available_batch_end
+                  value: "06:00:00"
+        - insert:
+            dbms: 'mysql'
+            tableName: io_tenant_epic
+            columns:
+              - column:
+                  name: io_tenant_id
+                  value: "1002"
+              - column:
+                  name: service_endpoint
+                  value: "http://localhost:8081/epic"
+              - column:
+                  name: auth_endpoint
+                  value: "http://localhost:8081/epic/oauth2/token"
+              - column:
+                  name: ehr_user_id
+                  value: "1"
+              - column:
+                  name: release_version
+                  value: "1.0"
+              - column:
+                  name: message_type
+                  value: "1"
+              - column:
+                  name: practitioner_provider_system
+                  value: "urn:oid:1.2.840.114350.1.13.0.1.7.2.836982"
+              - column:
+                  name: practitioner_user_system
+                  value: "urn:oid:1.2.840.114350.1.13.0.1.7.2.697780"
+              - column:
+                  name: mrn_system
+                  value: "urn:oid:1.2.840.114350.1.13.0.1.7.5.737384.14"
+        - insert:
+            dbms: 'mysql'
+            tableName: io_tenant_provider_pool
+            columns:
+              - column:
+                  name: io_tenant_provider_pool_id
+                  value: "10002"
+              - column:
+                  name: io_tenant_id
+                  value: "1002"
+              - column:
+                  name: provider_id
+                  value: "ProviderWithPool"
+              - column:
+                  name: pool_id
+                  value: "14600"

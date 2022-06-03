@@ -2,8 +2,14 @@ package com.projectronin.interop.proxy.server.tenant
 
 import com.projectronin.interop.proxy.server.InteropProxyServerAuthInitializer
 import com.projectronin.interop.proxy.server.tenant.model.Ehr
+import com.projectronin.interop.proxy.server.test.util.backupTables
+import com.projectronin.interop.proxy.server.test.util.removeBackupTables
+import com.projectronin.interop.proxy.server.test.util.restoreTables
+import com.projectronin.interop.proxy.server.test.util.truncateTables
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
@@ -38,6 +44,16 @@ class EhrControllerTests {
         httpHeaders.set("Authorization", "Fake Token")
     }
 
+    @BeforeEach
+    fun setup() {
+        backupTables(ehrDatasource, listOf("io_tenant_epic", "io_tenant_provider_pool", "io_tenant", "io_ehr"))
+    }
+
+    @AfterEach
+    fun tearDown() {
+        populateDb()
+    }
+
     @Test
     fun `get`() {
         val httpEntity = HttpEntity("", httpHeaders)
@@ -57,8 +73,6 @@ class EhrControllerTests {
         val responseObject = responseEntity.body
         assertEquals(HttpStatus.OK, responseEntity.statusCode)
         assertTrue(responseObject!!.isEmpty())
-
-        populateDb()
     }
 
     @Test
@@ -84,7 +98,6 @@ class EhrControllerTests {
         assertTrue(responseEntity.body!!.clientId == "clientID")
 
         emptyDb()
-        populateDb()
     }
 
     @Test
@@ -131,7 +144,6 @@ class EhrControllerTests {
         assertTrue(responseEntity.body!!.clientId == "UpdatedClientID")
 
         emptyDb()
-        populateDb()
     }
 
     @Test
@@ -157,40 +169,18 @@ class EhrControllerTests {
             )
         println(responseEntity)
         assertEquals(HttpStatus.NOT_FOUND, responseEntity.statusCode)
-
-        populateDb()
     }
 
     private fun emptyDb() {
-        val connection = ehrDatasource.connection
-        val query1 = """delete from io_tenant_epic where io_tenant_id = 1001"""
-        val query2 = """delete from io_tenant_provider_pool where io_tenant_provider_pool_id = 10001"""
-        val query3 = """delete from io_tenant where io_tenant_id = 1001"""
-        val query4 = """delete from io_ehr where public_key = "public""""
-        val sql = listOf(query1, query2, query3, query4)
-
-        val sqlStatement = connection.createStatement()
-        for (i in sql.indices) {
-            sqlStatement.addBatch(sql[i])
-        }
-        sqlStatement.executeBatch()
+        truncateTables(ehrDatasource, listOf("io_tenant_epic", "io_tenant_provider_pool", "io_tenant", "io_ehr"))
     }
 
     private fun populateDb() {
-        val connection = ehrDatasource.connection
-        val AOSandboxKey = System.getenv("AO_SANDBOX_KEY")
-        val query1 =
-            """insert into io_ehr values (101, 'EPIC', 'a3da9a08-4fd4-443b-b0f5-6226547a98db', 'public', '$AOSandboxKey', 'Epic Sandbox') """
-        val query2 = """insert into io_tenant values (1001, 'apposnd', 101, '22:00:00', '06:00:00')"""
-        val query3 = """insert into io_tenant_provider_pool values (10001, 1001, 'ProviderWithPool', '14600')"""
-        val query4 =
-            """insert into io_tenant_epic values (1001, '1.0', 'https://apporchard.epic.com/interconnect-aocurprd-oauth', '1', '1', 'urn:oid:1.2.840.114350.1.13.0.1.7.2.836982', 'urn:oid:1.2.840.114350.1.13.0.1.7.2.697780', 'urn:oid:1.2.840.114350.1.13.0.1.7.5.737384.14', NULL, 'https://apporchard.epic.com/interconnect-aocurprd-oauth/oauth2/token')"""
+        restoreTables(ehrDatasource, listOf("io_tenant_epic", "io_tenant_provider_pool", "io_tenant", "io_ehr"))
+        removeBackups()
+    }
 
-        val sql = listOf(query1, query2, query3, query4)
-        val sqlStatement = connection.createStatement()
-        for (i in sql.indices) {
-            sqlStatement.addBatch(sql[i])
-        }
-        sqlStatement.executeBatch()
+    private fun removeBackups() {
+        removeBackupTables(ehrDatasource, listOf("io_tenant_epic", "io_tenant_provider_pool", "io_tenant", "io_ehr"))
     }
 }

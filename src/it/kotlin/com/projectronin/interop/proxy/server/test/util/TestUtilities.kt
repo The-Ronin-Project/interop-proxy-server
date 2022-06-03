@@ -16,6 +16,19 @@ fun backupTables(dataSource: DataSource, tables: List<String>) {
 }
 
 /**
+ * Truncates the supplied [tables]
+ */
+fun truncateTables(dataSource: DataSource, tables: List<String>) {
+    val connection = dataSource.connection
+    val sqlStatement = connection.createStatement()
+
+    tables.map { sqlStatement.addBatch("DELETE FROM $it") }
+    sqlStatement.executeBatch()
+
+    connection.close()
+}
+
+/**
  * Restores data to the tables listed in [tables] by deleting what's currently there and replacing it with the data
  * from their backup table created with backupTables().  All the deletes will be executed first in the order they are in
  * [tables].  Then all of the inserts will be done in reverse order.

@@ -81,9 +81,11 @@ class TenantControllerTests {
         val tenantArray = responseEntity.body!!
 
         assertEquals(HttpStatus.OK, responseEntity.statusCode)
-        assertEquals(1, tenantArray.size)
+        assertEquals(2, tenantArray.size)
         assertEquals(1001, tenantArray[0].id)
         assertEquals("apposnd", tenantArray[0].mnemonic)
+        assertEquals(1002, tenantArray[1].id)
+        assertEquals("ronin", tenantArray[1].mnemonic)
     }
 
     @Test
