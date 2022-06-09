@@ -232,6 +232,7 @@ class AppointmentHandlerTest {
                     )
                 } returns response
             }
+            every { serializeObject(appointment1) } returns "serializedAppt"
         }
 
         every {
@@ -241,7 +242,7 @@ class AppointmentHandlerTest {
                         id = null,
                         resourceType = ResourceType.APPOINTMENT,
                         tenant = "tenantId",
-                        text = "raw JSON for appointment"
+                        text = "serializedAppt"
                     )
                 )
             )
@@ -326,6 +327,7 @@ class AppointmentHandlerTest {
                     )
                 } returns response
             }
+            every { serializeObject(appointment1) } returns "serializedAppt"
         }
 
         every {
@@ -335,7 +337,7 @@ class AppointmentHandlerTest {
                         id = null,
                         resourceType = ResourceType.APPOINTMENT,
                         tenant = "tenantId",
-                        text = "raw JSON for appointment"
+                        text = "serializedAppt"
                     )
                 )
             )

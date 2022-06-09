@@ -71,7 +71,7 @@ class AppointmentHandler(
                         id = null,
                         resourceType = ResourceType.APPOINTMENT,
                         tenant = tenantId,
-                        text = it.raw
+                        text = ehrFactory.getVendorFactory(tenant).serializeObject(it)
                     )
                 }
             )
