@@ -109,9 +109,12 @@ publishing {
     }
 }
 
+val ddJavaAgentName = "dd-java-agent.jar"
+
 val copyTraceAgent by tasks.register<Copy>("copyTraceAgent") {
-    // Copy the tracer agent jar from the repo to a project folder.
+    // Copy the tracer agent jar from the repo to a project folder and rename it without version.
     from(tracerAgent.asPath)
+    rename { _ -> ddJavaAgentName }
     into("$buildDir/tracer")
 }
 
@@ -135,7 +138,7 @@ jib {
         }
     }
     container {
-        jvmFlags = listOf("-javaagent:/opt/tracer/${tracerAgent.files.first().name}")
+        jvmFlags = listOf("-javaagent:/opt/tracer/$ddJavaAgentName")
         environment = mapOf(
             "DD_SERVICE" to project.name,
             "DD_VERSION" to "${project.version}"
