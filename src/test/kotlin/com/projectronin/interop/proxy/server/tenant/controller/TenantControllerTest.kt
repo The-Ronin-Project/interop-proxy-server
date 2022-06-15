@@ -48,7 +48,9 @@ class TenantControllerTest {
         messageType = "messageType",
         practitionerProviderSystem = "providerSystemExample",
         practitionerUserSystem = "userSystemExample",
-        mrnSystem = "mrnSystemExample"
+        patientMRNSystem = "mrnSystemExample",
+        // TODO: Add reference to patientInternalSystem
+        patientInternalSystem = ""
     )
 
     private val proxyTenant = ProxyTenant(

@@ -75,6 +75,9 @@ databaseChangeLog:
               - column:
                   name: mrn_system
                   value: "urn:oid:1.2.840.114350.1.13.0.1.7.5.737384.14"
+              - column:
+                  name: patient_internal_system
+                  value: "urn:oid:1.2.840.114350.1.13.0.1.7.2.698084"
         - insert:
             dbms: 'mysql'
             tableName: io_tenant_provider_pool
@@ -141,6 +144,9 @@ databaseChangeLog:
               - column:
                   name: mrn_system
                   value: "urn:oid:1.2.840.114350.1.13.0.1.7.5.737384.14"
+              - column:
+                  name: patient_internal_system
+                  value: "urn:oid:1.2.840.114350.1.13.0.1.7.2.698084"
         - insert:
             dbms: 'mysql'
             tableName: io_tenant_provider_pool

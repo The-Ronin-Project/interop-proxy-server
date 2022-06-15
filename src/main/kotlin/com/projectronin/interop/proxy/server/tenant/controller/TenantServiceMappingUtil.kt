@@ -1,6 +1,5 @@
 package com.projectronin.interop.proxy.server.tenant.controller
 
-import com.projectronin.interop.tenant.config.data.binding.EhrDOs.clientId
 import com.projectronin.interop.tenant.config.model.AuthenticationConfig
 import com.projectronin.interop.tenant.config.model.BatchConfig
 import com.projectronin.interop.proxy.server.tenant.model.Epic as ProxyEpic
@@ -39,11 +38,13 @@ fun ProxyEpic.toTenantServerEpic(): TenantServiceEpic {
         messageType = messageType,
         practitionerProviderSystem = practitionerProviderSystem,
         practitionerUserSystem = practitionerUserSystem,
-        mrnSystem = mrnSystem,
+        patientMRNSystem = mrnSystem,
         hsi = hsi,
         clientId = "",
         instanceName = instanceName,
-        authenticationConfig = AuthenticationConfig(authEndpoint, "", "")
+        authenticationConfig = AuthenticationConfig(authEndpoint, "", ""),
+        // TODO: Add reference to patientInternalSystem
+        patientInternalSystem = ""
     )
 }
 
@@ -56,7 +57,7 @@ fun TenantServiceEpic.toProxyEpic(): ProxyEpic {
         messageType = messageType,
         practitionerProviderSystem = practitionerProviderSystem,
         practitionerUserSystem = practitionerUserSystem,
-        mrnSystem = mrnSystem,
+        mrnSystem = patientMRNSystem,
         hsi = hsi,
         instanceName = instanceName
 

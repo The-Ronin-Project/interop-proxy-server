@@ -42,7 +42,7 @@ class MirthTenantConfigControllerTest {
         every { messageType } returns "123"
         every { practitionerProviderSystem } returns "123"
         every { practitionerUserSystem } returns "123"
-        every { mrnSystem } returns "123"
+        every { patientMRNSystem } returns "123"
         every { hsi } returns null
         every { instanceName } returns "Epic Instance"
     }
