@@ -36,7 +36,7 @@ private var setupDone = false
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("it")
 @ContextConfiguration(initializers = [(InteropProxyServerAuthInitializer::class)])
-@AidboxData("aidbox/practitioner1.yaml", "aidbox/practitionerPool.yaml")
+@AidboxData("aidbox/practitioner1.yaml", "aidbox/practitioner2.yaml", "aidbox/practitionerPool.yaml")
 class InteropProxyServerIntegratedMessageTests : BaseAidboxTest() {
     @LocalServerPort
     private var port = 0
@@ -377,5 +377,48 @@ class InteropProxyServerIntegratedMessageTests : BaseAidboxTest() {
         assertEquals(HttpStatus.OK, responseEntity.statusCode)
         assertTrue(resultJSONObject.has("errors"))
         println(resultJSONObject.toPrettyString())
+    }
+
+    @Test
+    fun `server handles provider tenant mismatch`() {
+        val tenantId = "apposnd"
+        val mrn = "202497"
+        val id = "7e52ab01-0393-4e97-afd8-5b0649ab49e2"
+        val message = "Test message"
+        val mutation =
+            """mutation sendMessage (${'$'}message: MessageInput!, ${'$'}tenantId: String!) {sendMessage (message: ${'$'}message, tenantId: ${'$'}tenantId)}"""
+
+        val query = """
+            |{
+            |   "variables": {
+            |      "message": {
+            |          "patient": {
+            |              "mrn": "$mrn"
+            |          },
+            |         "recipients": {
+            |             "fhirId": "$id"
+            |         },
+            |         "text": "$message"
+            |      },
+            |      "tenantId": "$tenantId"
+            |   },
+            |   "query": "$mutation"
+            |}
+        """.trimMargin()
+
+        val httpEntity = HttpEntity(query, httpHeaders)
+
+        val responseEntity =
+            restTemplate.postForEntity(URI("http://localhost:$port/graphql"), httpEntity, String::class.java)
+
+        val resultJSONObject = objectMapper.readTree(responseEntity.body)
+        val errorJSONObject = resultJSONObject["errors"][0]
+        println(errorJSONObject)
+
+        assertEquals(HttpStatus.OK, responseEntity.statusCode)
+        assertTrue(
+            errorJSONObject["message"].asText()
+                .contains("No practitioner user identifier with system 'urn:oid:1.2.840.114350.1.13.0.1.7.2.697780' found for resource with FHIR id '7e52ab01-0393-4e97-afd8-5b0649ab49e2")
+        )
     }
 }

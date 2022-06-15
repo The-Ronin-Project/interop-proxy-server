@@ -50,7 +50,8 @@ class MessageHandler(
     }
 
     private fun mapEHRRecipient(tenant: Tenant, recipientInput: MessageRecipientInput): EHRRecipient {
-        val practitionerIdentifiers = practitionerService.getPractitionerIdentifiers(recipientInput.fhirId)
+        val practitionerIdentifiers =
+            practitionerService.getPractitionerIdentifiers(tenant.mnemonic, recipientInput.fhirId)
         val vendorIdentifier = ehrFactory.getVendorFactory(tenant).identifierService.getPractitionerUserIdentifier(
             tenant,
             FHIRIdentifiers(

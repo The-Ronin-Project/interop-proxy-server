@@ -103,8 +103,9 @@ class InteropProxyServerTests {
 
         val identifier = Identifier(value = "IdentifierID", system = Uri("system"))
 
-        every { practitionerService.getPractitionerIdentifiers("1234") } returns listOf(identifier)
+        every { practitionerService.getPractitionerIdentifiers("tenant", "1234") } returns listOf(identifier)
         val tenant = mockk<Tenant>()
+        every { tenant.mnemonic } returns "tenant"
 
         mockkStatic("com.projectronin.interop.proxy.server.handler.TenantUtilKt")
         every { findAndValidateTenant(any(), any(), any()) } returns tenant

@@ -96,6 +96,7 @@ class MessageHandlerTest {
     fun `ensure message with one recipient can be sent`() {
         every { dfe.graphQlContext.get<InteropGraphQLContext>(INTEROP_CONTEXT_KEY).authzTenantId } returns "TEST_TENANT"
         val tenant = mockk<Tenant>()
+        every { tenant.mnemonic } returns "TEST_TENANT"
         every { tenantService.getTenantForMnemonic("TEST_TENANT") } returns tenant
 
         val expectedEHRMessageInput =
@@ -119,7 +120,7 @@ class MessageHandlerTest {
                 every { getPractitionerUserIdentifier(tenant, fhirIdentifiers) } returns (identifierVendorIdentifier)
             }
         }
-        every { practitionerService.getPractitionerIdentifiers("doc1") } returns listOf(identifier)
+        every { practitionerService.getPractitionerIdentifiers("TEST_TENANT", "doc1") } returns listOf(identifier)
 
         val messageInput =
             MessageInput("Test Message", MessagePatientInput("MRN#1"), listOf(MessageRecipientInput("doc1")))
@@ -132,6 +133,7 @@ class MessageHandlerTest {
     fun `ensure message with multiple recipients can be sent`() {
         every { dfe.graphQlContext.get<InteropGraphQLContext>(INTEROP_CONTEXT_KEY).authzTenantId } returns "TEST_TENANT"
         val tenant = mockk<Tenant>()
+        every { tenant.mnemonic } returns "TEST_TENANT"
         every { tenantService.getTenantForMnemonic("TEST_TENANT") } returns tenant
 
         val expectedEHRMessageInput =
@@ -179,8 +181,8 @@ class MessageHandlerTest {
                 listOf(MessageRecipientInput("doc1"), MessageRecipientInput("pool1"))
             )
 
-        every { practitionerService.getPractitionerIdentifiers("doc1") } returns listOf(identifier)
-        every { practitionerService.getPractitionerIdentifiers("pool1") } returns listOf(identifier)
+        every { practitionerService.getPractitionerIdentifiers("TEST_TENANT", "doc1") } returns listOf(identifier)
+        every { practitionerService.getPractitionerIdentifiers("TEST_TENANT", "pool1") } returns listOf(identifier)
         val actualResponse = messageHandler.sendMessage("TEST_TENANT", messageInput, dfe)
 
         assertEquals("sent", actualResponse)
