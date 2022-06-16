@@ -95,7 +95,7 @@ jobs:
 
   argocd_dev:
     uses: projectronin/github/.github/workflows/argocd_deploy.yml@master
-    needs: [image-push]
+    needs: [image-push-latest]
     with:
       environment: dev
       image-tag: ${{ github.sha }}
