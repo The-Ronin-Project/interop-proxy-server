@@ -8,6 +8,7 @@ import io.mockk.mockk
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.springframework.http.HttpStatus
 import java.sql.SQLIntegrityConstraintViolationException
 import java.time.LocalTime
@@ -30,7 +31,9 @@ class TenantControllerTest {
         messageType = "messageType",
         practitionerProviderSystem = "providerSystemExample",
         practitionerUserSystem = "userSystemExample",
-        mrnSystem = "mrnSystemExample",
+        patientMRNSystem = "mrnSystemExample",
+        patientInternalSystem = "internalSystemExample",
+        patientMRNTypeText = "patientMRNTypeText",
         hsi = null,
         instanceName = "instanceName"
     )
@@ -49,8 +52,8 @@ class TenantControllerTest {
         practitionerProviderSystem = "providerSystemExample",
         practitionerUserSystem = "userSystemExample",
         patientMRNSystem = "mrnSystemExample",
-        // TODO: Add reference to patientInternalSystem
-        patientInternalSystem = ""
+        patientInternalSystem = "internalSystemExample",
+        patientMRNTypeText = "patientMRNTypeText",
     )
 
     private val proxyTenant = ProxyTenant(
@@ -167,10 +170,19 @@ class TenantControllerTest {
 
     @Test
     fun `can update a tenant`() {
+        every { tenantService.getTenantForMnemonic(tenantServiceTenant.mnemonic) } returns tenantServiceTenant
         every { tenantService.updateTenant(any()) } returns tenantServiceTenant
         val response = tenantController.update("mnemonic1", proxyTenant)
         assertEquals(HttpStatus.OK, response.statusCode)
         assertEquals(proxyTenant, response.body)
+    }
+
+    @Test
+    fun `update fails due to no tenant found`() {
+        every { tenantService.getTenantForMnemonic(tenantServiceTenant.mnemonic) } returns null
+        assertThrows<NoTenantFoundException> {
+            tenantController.update("mnemonic1", proxyTenant)
+        }
     }
 
     @Test

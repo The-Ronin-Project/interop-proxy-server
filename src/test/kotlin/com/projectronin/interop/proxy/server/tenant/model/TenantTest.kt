@@ -23,7 +23,9 @@ class TenantTest {
                 messageType = "messageType",
                 practitionerProviderSystem = "practitionerProviderSystem",
                 practitionerUserSystem = "practitionerUserSystem",
-                mrnSystem = "mrnSystem",
+                patientMRNSystem = "patientMRNSystem",
+                patientInternalSystem = "patientInternalSystem",
+                patientMRNTypeText = "patientMRNTypeText",
                 hsi = null,
                 instanceName = "instanceName"
             )
@@ -31,6 +33,7 @@ class TenantTest {
 
         assertEquals(1, tenant.id)
         assertEquals("mnemonic1", tenant.mnemonic)
+        assertEquals("test tenant", tenant.name)
         assertEquals(LocalTime.of(22, 0), tenant.availableStart)
         assertEquals(LocalTime.of(23, 0), tenant.availableEnd)
     }
@@ -51,7 +54,9 @@ class TenantTest {
                 messageType = "messageType",
                 practitionerProviderSystem = "practitionerProviderSystem",
                 practitionerUserSystem = "practitionerUserSystem",
-                mrnSystem = "mrnSystem",
+                patientMRNSystem = "patientMRNSystem",
+                patientInternalSystem = "patientInternalSystem",
+                patientMRNTypeText = "patientMRNTypeText",
                 hsi = null,
                 instanceName = "Epic Sandbox"
             )
@@ -74,7 +79,9 @@ class TenantTest {
                 "messageType" : "messageType",
                 "practitionerProviderSystem" : "practitionerProviderSystem",
                 "practitionerUserSystem" : "practitionerUserSystem",
-                "mrnSystem" : "mrnSystem",
+                "patientMRNSystem" : "patientMRNSystem",
+                "patientInternalSystem" : "patientInternalSystem",
+                "patientMRNTypeText" : "patientMRNTypeText",
                 "instanceName" : "Epic Sandbox",
                 "vendorType" : "EPIC"
               }

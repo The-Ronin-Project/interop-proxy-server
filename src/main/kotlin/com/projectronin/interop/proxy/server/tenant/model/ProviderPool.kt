@@ -7,7 +7,7 @@ package com.projectronin.interop.proxy.server.tenant.model
  * @property poolId The ID of the pool the provider is associated with
  */
 data class ProviderPool(
-    val providerPoolId: Long,
+    val providerPoolId: Int,
     val providerId: String,
     val poolId: String
 )

@@ -17,7 +17,9 @@ internal class EpicTest {
             messageType = "messageType",
             practitionerProviderSystem = "practitionerProviderSystem",
             practitionerUserSystem = "practitionerUserSystem",
-            mrnSystem = "mrnSystem",
+            patientMRNSystem = "patientMrnSystem",
+            patientInternalSystem = "patientInternalSystem",
+            patientMRNTypeText = "patientMRNTypeText",
             hsi = "hsi",
             instanceName = "instanceName"
         )
@@ -30,7 +32,8 @@ internal class EpicTest {
         assertEquals("messageType", epic.messageType)
         assertEquals("practitionerProviderSystem", epic.practitionerProviderSystem)
         assertEquals("practitionerUserSystem", epic.practitionerUserSystem)
-        assertEquals("mrnSystem", epic.mrnSystem)
+        assertEquals("patientMrnSystem", epic.patientMRNSystem)
+        assertEquals("patientInternalSystem", epic.patientInternalSystem)
         assertEquals("hsi", epic.hsi)
         assertEquals("instanceName", epic.instanceName)
     }
@@ -45,7 +48,9 @@ internal class EpicTest {
             messageType = "messageType",
             practitionerProviderSystem = "practitionerProviderSystem",
             practitionerUserSystem = "practitionerUserSystem",
-            mrnSystem = "mrnSystem",
+            patientMRNSystem = "patientMrnSystem",
+            patientInternalSystem = "patientInternalSystem",
+            patientMRNTypeText = "patientMRNTypeText",
             hsi = "hsi",
             instanceName = "instanceName"
         )
@@ -62,7 +67,9 @@ internal class EpicTest {
               "messageType" : "messageType",
               "practitionerProviderSystem" : "practitionerProviderSystem",
               "practitionerUserSystem" : "practitionerUserSystem",
-              "mrnSystem" : "mrnSystem",
+              "patientMRNSystem" : "patientMrnSystem",
+              "patientInternalSystem" : "patientInternalSystem",
+              "patientMRNTypeText" : "patientMRNTypeText",
               "hsi" : "hsi",
               "instanceName" : "instanceName",
               "vendorType" : "EPIC"
@@ -84,7 +91,9 @@ internal class EpicTest {
             messageType = "messageType",
             practitionerProviderSystem = "practitionerProviderSystem",
             practitionerUserSystem = "practitionerUserSystem",
-            mrnSystem = "mrnSystem",
+            patientMRNSystem = "patientMrnSystem",
+            patientInternalSystem = "patientInternalSystem",
+            patientMRNTypeText = "patientMRNTypeText",
             hsi = null,
             instanceName = "instanceName"
         )
@@ -101,7 +110,9 @@ internal class EpicTest {
               "messageType" : "messageType",
               "practitionerProviderSystem" : "practitionerProviderSystem",
               "practitionerUserSystem" : "practitionerUserSystem",
-              "mrnSystem" : "mrnSystem",
+              "patientMRNSystem" : "patientMrnSystem",
+              "patientInternalSystem" : "patientInternalSystem",
+              "patientMRNTypeText" : "patientMRNTypeText",
               "instanceName" : "instanceName",
               "vendorType" : "EPIC"
             }

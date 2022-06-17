@@ -44,7 +44,7 @@ services:
   # Queue Migration
   liquibase-queue:
     container_name: liquibase-queue
-    image: docker-repo.devops.projectronin.io/interop-queue-liquibase:1.0.0
+    image: docker-repo.devops.projectronin.io/interop-queue-liquibase:2.0.0
     environment:
       - JDBC_URL=jdbc:mysql://queue:secret@db-queue:3306/interop-queue
     depends_on:

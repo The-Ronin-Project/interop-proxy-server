@@ -42,6 +42,8 @@ class ProviderPoolControllerTests {
     private val httpHeaders = HttpHeaders()
     private val modifiedTables = listOf("io_tenant_provider_pool")
 
+    private val tenantMnemonic = "apposnd"
+
     init {
         httpHeaders.set("Content-Type", "application/json")
         httpHeaders.set("Authorization", "Fake Token")
@@ -64,12 +66,11 @@ class ProviderPoolControllerTests {
 
     @Test
     fun `get provider pools`() {
-        val tenantId = 1001
         val providerIds = "ProviderWithPool"
         val httpEntity = HttpEntity<HttpHeaders>(httpHeaders)
 
         val responseEntity = restTemplate.exchange(
-            "http://localhost:$port/tenants/$tenantId/pools?providerIds=$providerIds",
+            "http://localhost:$port/tenants/$tenantMnemonic/pools?providerIds=$providerIds",
             HttpMethod.GET,
             httpEntity,
             Array<ProviderPool>::class.java
@@ -86,11 +87,10 @@ class ProviderPoolControllerTests {
 
     @Test
     fun `get all provider pools`() {
-        val tenantId = 1001
         val httpEntity = HttpEntity<HttpHeaders>(httpHeaders)
 
         val responseEntity = restTemplate.exchange(
-            "http://localhost:$port/tenants/$tenantId/pools",
+            "http://localhost:$port/tenants/$tenantMnemonic/pools",
             HttpMethod.GET,
             httpEntity,
             Array<ProviderPool>::class.java
@@ -107,12 +107,11 @@ class ProviderPoolControllerTests {
 
     @Test
     fun `get provider pools for bad provider`() {
-        val tenantId = 1001
         val providerIds = "FakeProvider"
         val httpEntity = HttpEntity<HttpHeaders>(httpHeaders)
 
         val responseEntity = restTemplate.exchange(
-            "http://localhost:$port/tenants/$tenantId/pools?providerIds=$providerIds",
+            "http://localhost:$port/tenants/$tenantMnemonic/pools?providerIds=$providerIds",
             HttpMethod.GET,
             httpEntity,
             Array<ProviderPool>::class.java
@@ -126,12 +125,11 @@ class ProviderPoolControllerTests {
 
     @Test
     fun `get provider pools for good and bad providers`() {
-        val tenantId = 1001
         val providerIds = listOf("FakeProvider", "ProviderWithPool").joinToString(",")
         val httpEntity = HttpEntity<HttpHeaders>(httpHeaders)
 
         val responseEntity = restTemplate.exchange(
-            "http://localhost:$port/tenants/$tenantId/pools?providerIds=$providerIds",
+            "http://localhost:$port/tenants/$tenantMnemonic/pools?providerIds=$providerIds",
             HttpMethod.GET,
             httpEntity,
             Array<ProviderPool>::class.java
@@ -148,7 +146,6 @@ class ProviderPoolControllerTests {
 
     @Test
     fun `insert provider pool`() {
-        val tenantId = 1001
         val insertProviderPool = ProviderPool(
             providerPoolId = 0,
             providerId = "NewProviderId",
@@ -157,7 +154,7 @@ class ProviderPoolControllerTests {
         val httpEntity = HttpEntity(insertProviderPool, httpHeaders)
 
         val responseEntity = restTemplate.postForEntity(
-            URI("http://localhost:$port/tenants/$tenantId/pools"),
+            URI("http://localhost:$port/tenants/$tenantMnemonic/pools"),
             httpEntity,
             ProviderPool::class.java
         )
@@ -172,7 +169,6 @@ class ProviderPoolControllerTests {
 
     @Test
     fun `insert duplicate provider for tenant`() {
-        val tenantId = 1001
         val insertProviderPool = ProviderPool(
             providerPoolId = 0,
             providerId = "ProviderWithPool",
@@ -181,9 +177,9 @@ class ProviderPoolControllerTests {
         val httpEntity = HttpEntity(insertProviderPool, httpHeaders)
 
         val responseEntity = restTemplate.postForEntity(
-            URI("http://localhost:$port/tenants/$tenantId/pools"),
+            URI("http://localhost:$port/tenants/$tenantMnemonic/pools"),
             httpEntity,
-            ProviderPool::class.java
+            String::class.java
         )
 
         assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, responseEntity.statusCode)
@@ -191,52 +187,49 @@ class ProviderPoolControllerTests {
 
     @Test
     fun `update existing providers pool`() {
-        val tenantId = 1001
         val providerPoolId = 10001
         val updateProviderPool = ProviderPool(
-            providerPoolId = providerPoolId.toLong(),
+            providerPoolId = providerPoolId,
             providerId = "NewProviderId",
             poolId = "NewPoolId"
         )
         val httpEntity = HttpEntity(updateProviderPool, httpHeaders)
 
         val responseEntity = restTemplate.exchange(
-            "http://localhost:$port/tenants/$tenantId/pools/$providerPoolId",
+            "http://localhost:$port/tenants/$tenantMnemonic/pools/$providerPoolId",
             HttpMethod.PUT,
             httpEntity,
-            String::class.java
+            ProviderPool::class.java
         )
 
         assertEquals(HttpStatus.OK, responseEntity.statusCode)
 
         val response = responseEntity.body!!
-        assertEquals("Success, row $providerPoolId updated", response)
+        assertEquals(updateProviderPool, response)
     }
 
     @Test
     fun `update non-existing providers pool`() {
-        val tenantId = 1001
         val providerPoolId = 54321
         val updateProviderPool = ProviderPool(
-            providerPoolId = providerPoolId.toLong(),
+            providerPoolId = providerPoolId,
             providerId = "NewProviderId",
             poolId = "NewPoolId"
         )
         val httpEntity = HttpEntity(updateProviderPool, httpHeaders)
 
         val responseEntity = restTemplate.exchange(
-            "http://localhost:$port/tenants/$tenantId/pools/$providerPoolId",
+            "http://localhost:$port/tenants/$tenantMnemonic/pools/$providerPoolId",
             HttpMethod.PUT,
             httpEntity,
             String::class.java
         )
 
-        assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, responseEntity.statusCode)
+        assertEquals(HttpStatus.NOT_FOUND, responseEntity.statusCode)
     }
 
     @Test
     fun `bad update request due to mismatched provider pool ids`() {
-        val tenantId = 1001
         val providerPoolId = 10001
         val updateProviderPool = ProviderPool(
             providerPoolId = 54321,
@@ -246,49 +239,44 @@ class ProviderPoolControllerTests {
         val httpEntity = HttpEntity(updateProviderPool, httpHeaders)
 
         val responseEntity = restTemplate.exchange(
-            "http://localhost:$port/tenants/$tenantId/pools/$providerPoolId",
+            "http://localhost:$port/tenants/$tenantMnemonic/pools/$providerPoolId",
             HttpMethod.PUT,
             httpEntity,
-            String::class.java
+            ProviderPool::class.java
         )
 
         val response = responseEntity.body!!
-        assertEquals(HttpStatus.BAD_REQUEST, responseEntity.statusCode)
-        assertEquals("Pool ID in path must match pool ID in request body.", response)
+        assertEquals(HttpStatus.OK, responseEntity.statusCode)
+        assertEquals(providerPoolId, response.providerPoolId)
     }
 
     @Test
     fun `delete existing provider pool`() {
-        val tenantId = 1001
         val providerPoolId = 10001
         val httpEntity = HttpEntity<HttpHeaders>(httpHeaders)
 
         val responseEntity = restTemplate.exchange(
-            "http://localhost:$port/tenants/$tenantId/pools/$providerPoolId",
+            "http://localhost:$port/tenants/$tenantMnemonic/pools/$providerPoolId",
             HttpMethod.DELETE,
             httpEntity,
             String::class.java
         )
 
         assertEquals(HttpStatus.OK, responseEntity.statusCode)
-
-        val response = responseEntity.body!!
-        assertEquals("Success, row $providerPoolId deleted", response)
     }
 
     @Test
     fun `delete non-existing provider pool`() {
-        val tenantId = 1001
         val providerPoolId = 54321
         val httpEntity = HttpEntity<HttpHeaders>(httpHeaders)
 
         val responseEntity = restTemplate.exchange(
-            "http://localhost:$port/tenants/$tenantId/pools/$providerPoolId",
+            "http://localhost:$port/tenants/$tenantMnemonic/pools/$providerPoolId",
             HttpMethod.DELETE,
             httpEntity,
             String::class.java
         )
 
-        assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, responseEntity.statusCode)
+        assertEquals(HttpStatus.OK, responseEntity.statusCode)
     }
 }

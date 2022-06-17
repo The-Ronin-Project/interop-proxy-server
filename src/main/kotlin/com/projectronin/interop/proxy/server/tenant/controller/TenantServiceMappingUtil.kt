@@ -11,18 +11,21 @@ fun TenantServiceTenant.toProxyTenant(): ProxyTenant {
     return ProxyTenant(
         id = internalId,
         mnemonic = mnemonic,
+        name = name,
         availableStart = batchConfig?.availableStart,
         availableEnd = batchConfig?.availableEnd,
-        vendor = (vendor as TenantServiceEpic).toProxyEpic(),
-        name = name
+        vendor = (vendor as TenantServiceEpic).toProxyEpic()
     )
 }
 
-fun ProxyTenant.toTenantServerTenant(): TenantServiceTenant {
+/**
+ * Creates a new [TenantServiceTenant], but gives it the passed [newId]
+ */
+fun ProxyTenant.toTenantServerTenant(newId: Int): TenantServiceTenant {
     return TenantServiceTenant(
-        name = name,
-        internalId = id,
+        internalId = newId,
         mnemonic = mnemonic,
+        name = name,
         batchConfig = availableStart?.let { start ->
             availableEnd?.let { end ->
                 BatchConfig(start, end)
@@ -30,6 +33,10 @@ fun ProxyTenant.toTenantServerTenant(): TenantServiceTenant {
         },
         vendor = (vendor as ProxyEpic).toTenantServerEpic()
     )
+}
+
+fun ProxyTenant.toTenantServerTenant(): TenantServiceTenant {
+    return toTenantServerTenant(id)
 }
 
 fun ProxyEpic.toTenantServerEpic(): TenantServiceEpic {
@@ -40,14 +47,13 @@ fun ProxyEpic.toTenantServerEpic(): TenantServiceEpic {
         messageType = messageType,
         practitionerProviderSystem = practitionerProviderSystem,
         practitionerUserSystem = practitionerUserSystem,
-        patientMRNSystem = mrnSystem,
+        patientMRNSystem = patientMRNSystem,
+        patientInternalSystem = patientInternalSystem,
         patientMRNTypeText = "MRN",
         hsi = hsi,
         clientId = "",
         instanceName = instanceName,
         authenticationConfig = AuthenticationConfig(authEndpoint, "", ""),
-        // TODO: Add reference to patientInternalSystem
-        patientInternalSystem = ""
     )
 }
 
@@ -60,7 +66,9 @@ fun TenantServiceEpic.toProxyEpic(): ProxyEpic {
         messageType = messageType,
         practitionerProviderSystem = practitionerProviderSystem,
         practitionerUserSystem = practitionerUserSystem,
-        mrnSystem = patientMRNSystem,
+        patientMRNSystem = patientMRNSystem,
+        patientInternalSystem = patientInternalSystem,
+        patientMRNTypeText = patientMRNTypeText,
         hsi = hsi,
         instanceName = instanceName
 

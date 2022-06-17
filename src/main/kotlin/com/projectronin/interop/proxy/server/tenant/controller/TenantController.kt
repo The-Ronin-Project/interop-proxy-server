@@ -29,7 +29,8 @@ class TenantController(private val tenantService: TenantService) {
     @GetMapping("/{mnemonic}")
     fun read(@PathVariable("mnemonic") tenantMnemonic: String): ResponseEntity<Tenant> {
         logger.info { "Retrieving tenant with mnemonic $tenantMnemonic" }
-        val tenant = tenantService.getTenantForMnemonic(tenantMnemonic) ?: return ResponseEntity(HttpStatus.NOT_FOUND)
+        val tenant = tenantService.getTenantForMnemonic(tenantMnemonic)
+            ?: return ResponseEntity(HttpStatus.NOT_FOUND)
         return ResponseEntity(tenant.toProxyTenant(), HttpStatus.OK)
     }
 
@@ -42,8 +43,12 @@ class TenantController(private val tenantService: TenantService) {
 
     @PutMapping("/{mnemonic}")
     fun update(@PathVariable("mnemonic") tenantMnemonic: String, @RequestBody tenant: Tenant): ResponseEntity<Tenant> {
-        logger.info { "Updating tenant with mnemonic ${tenant.mnemonic}" }
-        val newTenant = tenantService.updateTenant(tenant.toTenantServerTenant())
+        logger.info { "Updating tenant with mnemonic $tenantMnemonic" }
+
+        val tenantToUpdate = tenantService.getTenantForMnemonic(tenantMnemonic)
+            ?: throw NoTenantFoundException("No tenant found for mnemonic $tenantMnemonic")
+
+        val newTenant = tenantService.updateTenant(tenant.toTenantServerTenant(tenantToUpdate.internalId))
         return ResponseEntity(newTenant.toProxyTenant(), HttpStatus.OK)
     }
 

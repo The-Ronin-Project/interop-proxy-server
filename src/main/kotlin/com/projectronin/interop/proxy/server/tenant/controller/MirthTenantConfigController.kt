@@ -53,46 +53,37 @@ class MirthTenantConfigController(private val mirthTenantConfigDAO: MirthTenantC
     fun update(
         @PathVariable tenantMnemonic: String,
         @RequestBody mirthTenantConfig: MirthTenantConfig
-    ): ResponseEntity<String> {
+    ): ResponseEntity<MirthTenantConfig?> {
         val tenant = tenantService.getTenantForMnemonic(tenantMnemonic)
             ?: throw NoTenantFoundException("No Tenant With that mnemonic")
 
         val updatedMirthTenantConfig = mirthTenantConfig.toMirthTenantConfigDO(tenant.toProxyTenant())
+        val result = mirthTenantConfigDAO.updateConfig(updatedMirthTenantConfig)
+        val status = result?.let { HttpStatus.OK } ?: HttpStatus.NOT_FOUND
 
-        val numUpdated = mirthTenantConfigDAO.updateConfig(updatedMirthTenantConfig)
-        return when (numUpdated.compareTo(1)) {
-            0 -> ResponseEntity("Mirth Tenant Configurations for $tenantMnemonic updated", HttpStatus.OK)
-            // can only really happen when you try to put before inserting, since the check to tenantService will ensure
-            // we've received a valid tenantMnemonic
-            -1 -> ResponseEntity("Mirth Tenant Configurations for $tenantMnemonic not found", HttpStatus.NOT_FOUND)
-            else -> {
-                // realistically this case should never be hit. the only way to hit this is if
-                // somehow mirthTenantConfigDAO found multiple rows with the same tenant id
-                // but there's a constraint on the db preventing that
-                logger.error { "Multiple rows updated for Mirth Tenant Config" }
-                ResponseEntity(
-                    "Something bad happened because multiple Mirth Tenant Configurations " +
-                        "for $tenantMnemonic were updated.",
-                    HttpStatus.UNPROCESSABLE_ENTITY
-                )
-            }
-        }
+        return ResponseEntity(result?.toMirthTenantConfig(), status)
     }
+
     @ExceptionHandler(value = [(NoTenantFoundException::class)])
     fun handleTenantException(e: NoTenantFoundException): ResponseEntity<String> {
-        logger.warn(e) { "Unable to find tenant config with that mnemonic" }
-        return ResponseEntity("Unable to find tenant", HttpStatus.NOT_FOUND)
+        logger.warn(e) { e.message }
+        return ResponseEntity(e.message, HttpStatus.NOT_FOUND)
     }
 
     @ExceptionHandler
     fun handleException(e: Exception): ResponseEntity<String> {
-        logger.error(e) { "Unspecified error occurred during MirthTenantConfigController" }
+        logger.error(e) { "Unspecified error occurred during MirthTenantConfigController ${e.message}" }
         return ResponseEntity(e.message, HttpStatus.INTERNAL_SERVER_ERROR)
     }
 
     fun MirthTenantConfigDO.toMirthTenantConfig(): MirthTenantConfig {
         return MirthTenantConfig(
-            locationIds = this.locationIds.splitToSequence(",").toList(),
+            locationIds =
+            if (locationIds.isEmpty()) {
+                emptyList()
+            } else {
+                locationIds.split(",")
+            }
         )
     }
 

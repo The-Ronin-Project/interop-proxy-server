@@ -37,7 +37,7 @@ databaseChangeLog:
                   value: "apposnd"
               - column:
                   name: full_name
-                  value: "Test Tenant"
+                  value: "App Orchard Sandbox"
               - column:
                   name: io_ehr_id
                   value: "101"

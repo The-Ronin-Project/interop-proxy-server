@@ -21,6 +21,7 @@ import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
+import org.springframework.web.util.UriUtils
 import java.net.URI
 import javax.sql.DataSource
 
@@ -135,7 +136,7 @@ class EhrControllerTests {
         val httpEntity = HttpEntity(query, httpHeaders)
         val responseEntity =
             restTemplate.exchange(
-                "http://localhost:$port/ehrs",
+                "http://localhost:$port/ehrs/${UriUtils.encodePathSegment("Epic Sandbox", Charsets.UTF_8)}",
                 HttpMethod.PUT,
                 httpEntity,
                 Ehr::class.java
@@ -162,7 +163,7 @@ class EhrControllerTests {
         val httpEntity = HttpEntity(query, httpHeaders)
         val responseEntity =
             restTemplate.exchange(
-                "http://localhost:$port/ehrs",
+                "http://localhost:$port/ehrs/${UriUtils.encodePathSegment("Epic Sandbox", Charsets.UTF_8)}",
                 HttpMethod.PUT,
                 httpEntity,
                 String::class.java

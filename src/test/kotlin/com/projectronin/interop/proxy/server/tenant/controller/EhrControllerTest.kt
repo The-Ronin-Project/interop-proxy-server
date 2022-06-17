@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
+import org.junit.jupiter.api.assertThrows
 import org.springframework.http.HttpStatus
 import java.sql.SQLIntegrityConstraintViolationException
 
@@ -87,10 +88,27 @@ class EhrControllerTest {
             "publicKey2",
             "privateKey2"
         )
+        every { dao.getByInstance(ehr.instanceName) } returns ehrDO2
         every { dao.update(any()) } returns ehrDO2
 
-        val put = controller.update(ehr)
+        val put = controller.update(ehr.instanceName, ehr)
         assertTrue(put.body?.clientId == "clientId2")
+    }
+
+    @Test
+    fun `update fails due to missing EHR`() {
+        val ehr = Ehr(
+            VendorType.EPIC,
+            "instanceName",
+            "clientId2",
+            "publicKey2",
+            "privateKey2"
+        )
+        every { dao.getByInstance(ehr.instanceName) } returns null
+
+        assertThrows<NoEHRFoundException> {
+            controller.update(ehr.instanceName, ehr)
+        }
     }
 
     @Test

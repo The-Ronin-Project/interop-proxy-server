@@ -61,9 +61,6 @@ class TenantControllerTests {
         removeBackupTables(ehrDatasource, modifiedTables)
     }
 
-    /* Dummy values the TenantController is currently returning.  Will need to change once it's implemented.
-    */
-
     init {
         httpHeaders.set("Content-Type", "application/json")
         httpHeaders.set("Authorization", "Fake Token")
@@ -130,7 +127,9 @@ class TenantControllerTests {
             messageType = "1",
             practitionerProviderSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.2.836982",
             practitionerUserSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.2.697780",
-            mrnSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.5.737384.14",
+            patientMRNSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.5.737384.14",
+            patientInternalSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.2.698084",
+            patientMRNTypeText = "MRN",
             hsi = null,
             instanceName = "Epic Sandbox"
         )
@@ -167,7 +166,9 @@ class TenantControllerTests {
             messageType = "1",
             practitionerProviderSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.2.836982",
             practitionerUserSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.2.697780",
-            mrnSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.5.737384.14",
+            patientMRNSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.5.737384.14",
+            patientInternalSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.2.698084",
+            patientMRNTypeText = "MRN",
             hsi = null,
             instanceName = "Epic Sandbox"
         )

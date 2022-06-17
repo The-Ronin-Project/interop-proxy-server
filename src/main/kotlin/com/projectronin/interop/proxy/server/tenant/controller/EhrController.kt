@@ -9,11 +9,13 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.util.UriUtils
 
 @RestController
 @RequestMapping("ehrs")
@@ -32,9 +34,13 @@ class EhrController(private val ehrDAO: EhrDAO) {
         return ResponseEntity(insertedEhr.toEhr(), HttpStatus.CREATED)
     }
 
-    @PutMapping
-    fun update(@RequestBody ehr: Ehr): ResponseEntity<Ehr> {
-        val updatedEhr = ehrDAO.update(ehr.toEhrDO())
+    @PutMapping("/{instanceName}")
+    fun update(@PathVariable("instanceName") instanceName: String, @RequestBody ehr: Ehr): ResponseEntity<Ehr> {
+        val decodedInstanceName = UriUtils.decode(instanceName, Charsets.UTF_8)
+        val existingEhr = ehrDAO.getByInstance(decodedInstanceName)
+            ?: throw NoEHRFoundException("EHR $decodedInstanceName not found")
+
+        val updatedEhr = ehrDAO.update(ehr.toEhrDO(existingEhr.id))
         return ResponseEntity(updatedEhr.toEhr(), HttpStatus.OK)
     }
 
@@ -61,8 +67,13 @@ class EhrController(private val ehrDAO: EhrDAO) {
         )
     }
 
-    fun Ehr.toEhrDO(): EhrDO {
+    /**
+     * On inserts we don't care about the id, so let it be 0.  On updates we do, so set the new [EhrDO]s
+     * id to [newId]
+     */
+    fun Ehr.toEhrDO(newId: Int = 0): EhrDO {
         return EhrDO {
+            id = newId
             vendorType = this@toEhrDO.vendorType
             instanceName = this@toEhrDO.instanceName
             clientId = this@toEhrDO.clientId
