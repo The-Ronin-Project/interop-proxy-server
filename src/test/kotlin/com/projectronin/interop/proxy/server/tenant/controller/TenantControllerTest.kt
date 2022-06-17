@@ -58,7 +58,8 @@ class TenantControllerTest {
         mnemonic = "mnemonic1",
         availableStart = LocalTime.of(20, 0),
         availableEnd = LocalTime.of(6, 0),
-        vendor = proxyVendor
+        vendor = proxyVendor,
+        name = "test tenant"
     )
     private val tenantServiceTenant = TenantServiceTenant(
         internalId = 1,
@@ -67,20 +68,23 @@ class TenantControllerTest {
             availableStart = LocalTime.of(20, 0),
             availableEnd = LocalTime.of(6, 0)
         ),
-        vendor = tenantServiceVendor
+        vendor = tenantServiceVendor,
+        name = "test tenant"
     )
     private val proxyTenantNoTimes = ProxyTenant(
         id = 2,
         mnemonic = "mnemonic2",
         availableStart = null,
         availableEnd = null,
-        vendor = proxyVendor
+        vendor = proxyVendor,
+        name = "test tenant2"
     )
     private val tenantServiceTenantNoBatch = TenantServiceTenant(
         internalId = 2,
         mnemonic = "mnemonic2",
         batchConfig = null,
-        vendor = tenantServiceVendor
+        vendor = tenantServiceVendor,
+        name = "test tenant2"
     )
 
     @Test
@@ -136,7 +140,8 @@ class TenantControllerTest {
             mnemonic = "mnemonic2",
             availableStart = null,
             availableEnd = LocalTime.of(6, 0),
-            vendor = proxyVendor
+            vendor = proxyVendor,
+            name = "test tenant2"
         )
         every { tenantService.insertTenant(any()) } returns tenantServiceTenantNoBatch
         val response = tenantController.insert(proxyTenantNoStart)
@@ -151,7 +156,8 @@ class TenantControllerTest {
             mnemonic = "mnemonic2",
             availableStart = LocalTime.of(6, 0),
             availableEnd = null,
-            vendor = proxyVendor
+            vendor = proxyVendor,
+            name = "test tenant2"
         )
         every { tenantService.insertTenant(any()) } returns tenantServiceTenantNoBatch
         val response = tenantController.insert(proxyTenantNoEnd)

@@ -140,7 +140,8 @@ class TenantControllerTests {
             mnemonic = "CoolNewBoi",
             availableStart = LocalTime.of(22, 0),
             availableEnd = LocalTime.of(6, 0),
-            vendor = vendor
+            vendor = vendor,
+            name = "coolest boi hospital"
         )
         val httpEntity = HttpEntity(newTenant, httpHeaders)
 
@@ -176,7 +177,8 @@ class TenantControllerTests {
             mnemonic = "apposnd",
             availableStart = LocalTime.of(22, 0),
             availableEnd = LocalTime.of(6, 0),
-            vendor = vendor
+            vendor = vendor,
+            name = "App Orchard Test"
         )
         val httpEntity = HttpEntity(updatedTenant, httpHeaders)
 

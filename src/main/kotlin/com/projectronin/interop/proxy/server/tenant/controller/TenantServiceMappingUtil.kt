@@ -13,12 +13,14 @@ fun TenantServiceTenant.toProxyTenant(): ProxyTenant {
         mnemonic = mnemonic,
         availableStart = batchConfig?.availableStart,
         availableEnd = batchConfig?.availableEnd,
-        vendor = (vendor as TenantServiceEpic).toProxyEpic()
+        vendor = (vendor as TenantServiceEpic).toProxyEpic(),
+        name = name
     )
 }
 
 fun ProxyTenant.toTenantServerTenant(): TenantServiceTenant {
     return TenantServiceTenant(
+        name = name,
         internalId = id,
         mnemonic = mnemonic,
         batchConfig = availableStart?.let { start ->

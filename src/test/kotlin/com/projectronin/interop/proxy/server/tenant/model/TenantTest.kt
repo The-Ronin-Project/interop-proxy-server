@@ -14,6 +14,7 @@ class TenantTest {
             mnemonic = "mnemonic1",
             availableStart = LocalTime.of(22, 0),
             availableEnd = LocalTime.of(23, 0),
+            name = "test tenant",
             vendor = Epic(
                 release = "release",
                 serviceEndpoint = "serviceEndpoint",
@@ -41,6 +42,7 @@ class TenantTest {
             mnemonic = "mnemonic1",
             availableStart = LocalTime.of(22, 0),
             availableEnd = LocalTime.of(23, 0),
+            name = "test tenant",
             vendor = Epic(
                 release = "release",
                 serviceEndpoint = "serviceEndpoint",
@@ -60,6 +62,7 @@ class TenantTest {
             {
               "id" : 1,
               "mnemonic" : "mnemonic1",
+              "name" : "test tenant",
               "availableStart" : "22:00:00",
               "availableEnd" : "23:00:00",
               "vendor" : {

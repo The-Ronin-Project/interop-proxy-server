@@ -36,6 +36,9 @@ databaseChangeLog:
                   name: mnemonic
                   value: "apposnd"
               - column:
+                  name: full_name
+                  value: "Test Tenant"
+              - column:
                   name: io_ehr_id
                   value: "101"
               - column:
@@ -107,6 +110,9 @@ databaseChangeLog:
               - column:
                   name: mnemonic
                   value: "ronin"
+              - column:
+                  name: full_name
+                  value: "Ronin Mock Hospital"
               - column:
                   name: io_ehr_id
                   value: "101"

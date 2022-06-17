@@ -3,7 +3,6 @@ package com.projectronin.interop.proxy.server.tenant.controller
 import com.projectronin.interop.proxy.server.tenant.model.MirthTenantConfig
 import com.projectronin.interop.tenant.config.TenantService
 import com.projectronin.interop.tenant.config.data.MirthTenantConfigDAO
-import com.projectronin.interop.tenant.config.data.binding.EhrDOs.instanceName
 import com.projectronin.interop.tenant.config.data.model.MirthTenantConfigDO
 import com.projectronin.interop.tenant.config.data.model.TenantDO
 import com.projectronin.interop.tenant.config.exception.NoTenantFoundException
@@ -51,6 +50,7 @@ class MirthTenantConfigControllerTest {
         every { mnemonic } returns "first"
         every { batchConfig } returns null
         every { vendor } returns mockTenantServiceEpic
+        every { name } returns "Epic Tenant"
     }
 
     @BeforeEach
