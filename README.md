@@ -13,16 +13,21 @@ based off the defined Queries, Mutations and model classes.
 
 Our graphql schema describing the resources and data can be access here [interopSchema.graphql](interopSchema.graphql).
 
-#### Authentication options
+### Health Check
+
+A Health Check is exposed at `/actuator/health`. A successful response will look like the
+following: `{"status":"UP","components":[...]}`
+
+### Authentication options
 
 Proxy Server supports two authentication methods currently.
 
-##### User (Seki) authentication
+#### User (Seki) authentication
 
 The User Bearer token must be supplied in the request's Authentication header. Any request's tenant mnemonic must match
 the tenant authorized for the User.
 
-##### Machine to Machine (Auth0) authentication
+#### Machine to Machine (Auth0) authentication
 
 For select [calls](interopSchema.graphql), where user authentication is not required, machine to machine authentication
 is accepted. A signed Auth0 Bearer token must be supplied in the request's 'Authorization' header. The token must have
@@ -123,10 +128,13 @@ export AIDBOX_CLIENT_SECRET=SECRET_VALUE
 ```
 
 ### DataDog
+
 If you want to send logs to DataDog while running locally for testing, you need to set an API key environment variable.
+
 ```shell
 export DD_API_KEY=API_KEY
 ```
+
 Once you have a DataDog account, API keys can be found [here](https://app.datadoghq.com/organization-settings/api-keys).
 
 ## Running the Service

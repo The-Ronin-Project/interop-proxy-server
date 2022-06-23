@@ -11,6 +11,7 @@ import org.springframework.web.server.WebFilterChain
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 
+private const val ACTUATOR_PATH = "/actuator/"
 private const val AUTH_HEADER = "Authorization"
 const val AUTHZ_TENANT_HEADER = "AuthorizedTenant"
 
@@ -22,11 +23,16 @@ const val AUTHZ_TENANT_HEADER = "AuthorizedTenant"
 class AuthFilter(private val userAuthService: UserAuthService, private val m2MAuthService: M2MAuthService) : WebFilter {
     private val logger = KotlinLogging.logger { }
     override fun filter(exchange: ServerWebExchange, chain: WebFilterChain): Mono<Void> {
+        // Bypass auth for our Actuator endpoints.
+        if (exchange.request.uri.path.startsWith(ACTUATOR_PATH)) {
+            logger.debug { "Bypassing security for Actuator request" }
+            return chain.filter(exchange)
+        }
 
         val bearer =
             kotlin.runCatching { exchange.request.headers.getFirst(AUTH_HEADER)!!.substring(7) /* strip 'Bearer '*/ }
                 .getOrElse {
-                    logger.warn(it) { "Invalid or missing bearer token" }
+                    logger.warn(it) { "Invalid or missing bearer token when requesting ${exchange.request.uri}" }
                     return handleForbidden(exchange, "Invalid Bearer token")
                 }
 

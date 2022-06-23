@@ -29,6 +29,7 @@ dependencies {
     // Pull in just the security dependencies we need, as we are not using the full security suite.
     implementation(libs.bundles.spring.security)
     implementation("org.springframework.boot:spring-boot-starter-jdbc")
+    implementation("org.springframework.boot:spring-boot-starter-actuator")
 
     implementation(libs.ktor.client.core)
     implementation(libs.bundles.graphql)

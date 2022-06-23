@@ -20,6 +20,23 @@ import org.springframework.web.server.WebFilterChain
 import reactor.core.publisher.Mono
 
 class AuthFilterTest {
+    @Test
+    fun `actuator requests skip auth`() {
+        val exchange = MockServerWebExchange
+            .from(
+                MockServerHttpRequest.get("/actuator/health")
+                    .header("Authorization", "")
+            )
+
+        val mono = mockk<Mono<Void>>()
+        val chain = mockk<WebFilterChain> {
+            every { filter(exchange) } returns mono
+        }
+
+        val authFilter = AuthFilter(mockk(), mockk())
+        val response = authFilter.filter(exchange, chain)
+        assertEquals(response, mono)
+    }
 
     @Test
     fun `null bearer token returns forbidden error`() {
