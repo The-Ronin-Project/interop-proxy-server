@@ -27,11 +27,11 @@
         "id": "apposnd-eJzlzKe3KPzAV5TtkxmNivQ3",
         "identifier": [
           {
-            "system": "MRN",
+            "system": "mockEHRMRNSystem",
             "value": "202497"
           },
           {
-            "system": "external",
+            "system": "urn:oid:1.2.840.114350.1.13.0.1.7.2.698084",
             "value": "Z4572"
           },
           {
