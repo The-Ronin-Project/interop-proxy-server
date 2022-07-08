@@ -58,7 +58,7 @@ class PatientHandler(
             ).resources
         } catch (e: Exception) {
             findPatientErrors.add(GraphQLException(e.message).toGraphQLError())
-            logger.error { "Patient query for tenant $tenantId contains errors" }
+            logger.error(e) { "Patient query for tenant $tenantId contains errors" }
 
             listOf()
         }
