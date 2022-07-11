@@ -37,19 +37,15 @@ class AuthFilter(private val userAuthService: UserAuthService, private val m2MAu
                 }
 
         // Check for M2M First
-        if (m2MAuthService.isM2MToken(bearer)) {
-            // Evaluate the m2m case
-            return if (m2MAuthService.validateToken(bearer)) {
-                // M2M Case does not set the AUTHZ_TENANT_HEADER, so can only apply to some endpoints.
-                logger.debug { "Machine2Machine Authentication success" }
-                chain.filter(exchange)
-            } else {
-                logger.warn { "Machine2Machine Authentication failed" }
-                handleForbidden(exchange, "Invalid M2M Bearer token '$bearer'")
-            }
+        if (m2MAuthService.isM2MToken(bearer) && m2MAuthService.validateToken(bearer)) {
+            // M2M Case does not set the AUTHZ_TENANT_HEADER, so can only apply to some endpoints.
+            logger.debug { "Machine2Machine Authentication success" }
+            return chain.filter(exchange)
+        } else {
+            logger.warn { "Machine2Machine Authentication failed, falling back to User Auth" }
         }
 
-        //  Evaluate User (Seki) token
+        //  Evaluate User (Seki) token, when M2M has not applicable or has failedf
         val authResponse = kotlin.runCatching { userAuthService.validateToken(bearer) }.getOrNull()
         return if (authResponse != null) {
             // mutate the exchange to inject the returned tenant ID from the Auth service for comparison later
@@ -59,8 +55,8 @@ class AuthFilter(private val userAuthService: UserAuthService, private val m2MAu
             logger.debug { "User Authentication success" }
             chain.filter(mutatedExchange) // This essentially just means 'nothing wrong, please continue'
         } else {
-            logger.warn { "User Authentication failed" }
-            handleForbidden(exchange, "Invalid User Bearer token '$bearer'")
+            logger.warn { "Authentication failed" }
+            handleForbidden(exchange, "Invalid Bearer token '$bearer'")
         }
     }
 

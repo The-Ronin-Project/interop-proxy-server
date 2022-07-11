@@ -207,8 +207,9 @@ class InteropProxyServerIntegratedPatientTests {
     }
 
     @Test
-    fun `server handles invalid m2m auth`() {
+    fun `server handles invalid m2m auth by falling back to user auth`() {
         val query = this::class.java.getResource("/graphql/epicAOTestPatient.graphql")!!.readText()
+        val expectedJSON = this::class.java.getResource("/epicAOTestPatientGraphQLResults.json")!!.readText()
 
         val m2mHeaders = HttpHeaders()
 
@@ -228,6 +229,11 @@ class InteropProxyServerIntegratedPatientTests {
         val responseEntity =
             restTemplate.postForEntity(URI("http://localhost:$port/graphql"), httpEntity, String::class.java)
 
-        assertEquals(HttpStatus.FORBIDDEN, responseEntity.statusCode)
+        val resultJSONObject = objectMapper.readTree(responseEntity.body)
+        val expectedJSONObject = objectMapper.readTree(expectedJSON)
+
+        assertEquals(HttpStatus.OK, responseEntity.statusCode)
+        assertFalse(resultJSONObject.has("errors"))
+        assertEquals(expectedJSONObject.toString(), resultJSONObject.toString())
     }
 }

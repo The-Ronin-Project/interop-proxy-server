@@ -160,4 +160,47 @@ class AuthFilterTest {
         authFilter.filter(exchange, chain)
         assertEquals(HttpStatus.FORBIDDEN, exchange.response.statusCode)
     }
+
+    @Test
+    fun `bad m2m auth falls back to good user auth, adds tenant ID`() {
+        val chain = mockk<WebFilterChain>()
+        val mono = mockk<Mono<Void>>()
+        val slot = slot<ServerWebExchange>()
+        val userAuthService = mockk<UserAuthService>()
+        val m2MAuthService = mockk<M2MAuthService>()
+        val exchange = MockServerWebExchange
+            .from(
+                MockServerHttpRequest.get("/graphql")
+                    .header("Authorization", "Bearer 12345")
+            )
+        val authResponse = AuthResponse(User("tenantId"), UserSession("12345"))
+        val authFilter = AuthFilter(userAuthService, m2MAuthService)
+        every { m2MAuthService.isM2MToken("12345") } returns true
+        every { m2MAuthService.validateToken("12345") } returns false
+        every { userAuthService.validateToken("12345") } returns authResponse
+        every { chain.filter(capture(slot)) } answers { mono }
+        authFilter.filter(exchange, chain)
+        assertEquals(slot.captured.request.headers.getFirst(AUTHZ_TENANT_HEADER), authResponse.user.tenantId)
+    }
+
+    @Test
+    fun `bad m2m auth falls back to bad user auth, returns forbidden error`() {
+        val chain = mockk<WebFilterChain>()
+        val mono = mockk<Mono<Void>>()
+        val slot = slot<ServerWebExchange>()
+        val userAuthService = mockk<UserAuthService>()
+        val m2MAuthService = mockk<M2MAuthService>()
+        val exchange = MockServerWebExchange
+            .from(
+                MockServerHttpRequest.get("/graphql")
+                    .header("Authorization", "Bearer 12345")
+            )
+        val authFilter = AuthFilter(userAuthService, m2MAuthService)
+        every { m2MAuthService.isM2MToken("12345") } returns true
+        every { m2MAuthService.validateToken("12345") } returns false
+        every { userAuthService.validateToken("12345") } returns null
+        every { chain.filter(capture(slot)) } answers { mono }
+        authFilter.filter(exchange, chain)
+        assertEquals(HttpStatus.FORBIDDEN, exchange.response.statusCode)
+    }
 }
