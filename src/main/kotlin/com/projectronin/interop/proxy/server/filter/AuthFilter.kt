@@ -42,7 +42,7 @@ class AuthFilter(private val userAuthService: UserAuthService, private val m2MAu
             logger.debug { "Machine2Machine Authentication success" }
             return chain.filter(exchange)
         } else {
-            logger.warn { "Machine2Machine Authentication failed, falling back to User Auth" }
+            logger.info { "Machine2Machine Authentication failed, falling back to User Auth" }
         }
 
         //  Evaluate User (Seki) token, when M2M has not applicable or has failedf

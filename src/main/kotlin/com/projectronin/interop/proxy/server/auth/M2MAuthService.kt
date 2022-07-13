@@ -27,7 +27,7 @@ class M2MAuthService(private val properties: Auth0MachineToMachineProperties, pr
             m2mJwtDecoder.decode(token)
             true
         } catch (e: Exception) {
-            logger.warn { "M2M Auth Failed with exception: ${e.message}" }
+            logger.info { "M2M Auth Failed with exception: ${e.message}" }
             false
         }
     }
