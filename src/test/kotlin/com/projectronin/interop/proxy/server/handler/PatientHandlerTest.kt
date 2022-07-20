@@ -3,8 +3,6 @@ package com.projectronin.interop.proxy.server.handler
 import com.projectronin.interop.common.resource.ResourceType
 import com.projectronin.interop.ehr.factory.EHRFactory
 import com.projectronin.interop.ehr.model.Bundle
-import com.projectronin.interop.fhir.r4.datatype.Identifier
-import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
 import com.projectronin.interop.proxy.server.context.INTEROP_CONTEXT_KEY
 import com.projectronin.interop.proxy.server.context.InteropGraphQLContext
 import com.projectronin.interop.proxy.server.model.Patient
@@ -192,12 +190,6 @@ class PatientHandlerTest {
         every { tenantService.getTenantForMnemonic("tenantId") } returns tenant
         every { dfe.graphQlContext.get<InteropGraphQLContext>(INTEROP_CONTEXT_KEY).authzTenantId } returns "tenantId"
 
-        val roninIdentifiers = listOf(
-            Identifier(
-                system = Uri("mrnSystem"),
-                value = "1234"
-            )
-        )
         every { ehrFactory.getVendorFactory(tenant) } returns mockk {
             every { patientService } returns mockk {
                 every {
@@ -208,9 +200,6 @@ class PatientHandlerTest {
                         givenName = "Josh"
                     )
                 } returns response
-            }
-            every { patientTransformer } returns mockk {
-                every { getRoninIdentifiers(patient1, tenant) } returns roninIdentifiers
             }
         }
 
@@ -241,7 +230,7 @@ class PatientHandlerTest {
 
         val patients = actualResponse.data
         assertEquals(1, patients.size)
-        assertEquals(Patient(patient1, tenant, roninIdentifiers), patients[0])
+        assertEquals(Patient(patient1, tenant), patients[0])
     }
 
     @Test
@@ -291,12 +280,6 @@ class PatientHandlerTest {
         // M2M Auth will not provide an authzTenantId
         every { dfe.graphQlContext.get<InteropGraphQLContext>(INTEROP_CONTEXT_KEY).authzTenantId } returns null
 
-        val roninIdentifiers = listOf(
-            Identifier(
-                system = Uri("mrnSystem"),
-                value = "1234"
-            )
-        )
         every { ehrFactory.getVendorFactory(tenant) } returns mockk {
             every { patientService } returns mockk {
                 every {
@@ -307,9 +290,6 @@ class PatientHandlerTest {
                         givenName = "Josh"
                     )
                 } returns response
-            }
-            every { patientTransformer } returns mockk {
-                every { getRoninIdentifiers(patient1, tenant) } returns roninIdentifiers
             }
         }
 
@@ -340,7 +320,7 @@ class PatientHandlerTest {
 
         val patients = actualResponse.data
         assertEquals(1, patients.size)
-        assertEquals(Patient(patient1, tenant, roninIdentifiers), patients[0])
+        assertEquals(Patient(patient1, tenant), patients[0])
     }
 
     @Test
@@ -389,12 +369,6 @@ class PatientHandlerTest {
         every { tenantService.getTenantForMnemonic("tenantId") } returns tenant
         every { dfe.graphQlContext.get<InteropGraphQLContext>(INTEROP_CONTEXT_KEY).authzTenantId } returns "tenantId"
 
-        val roninIdentifiers = listOf(
-            Identifier(
-                system = Uri("mrnSystem"),
-                value = "1234"
-            )
-        )
         every { ehrFactory.getVendorFactory(tenant) } returns mockk {
             every { patientService } returns mockk {
                 every {
@@ -405,9 +379,6 @@ class PatientHandlerTest {
                         givenName = "Josh"
                     )
                 } returns response
-            }
-            every { patientTransformer } returns mockk {
-                every { getRoninIdentifiers(patient1, tenant) } returns roninIdentifiers
             }
         }
 
@@ -438,7 +409,7 @@ class PatientHandlerTest {
 
         val patients = actualResponse.data
         assertEquals(1, patients.size)
-        assertEquals(Patient(patient1, tenant, roninIdentifiers), patients[0])
+        assertEquals(Patient(patient1, tenant), patients[0])
     }
 
     @Test

@@ -6,9 +6,10 @@ import org.junit.jupiter.api.Test
 class NoteInputTest {
     @Test
     fun `NoteInput can be created and accessed`() {
-        val input = NoteInput("PatientTestId", "PractitionerTestId", "Example Note Text")
+        val input = NoteInput("PatientTestId", "PractitionerTestId", "Example Note Text", "202206201245")
         assertEquals("PatientTestId", input.patientFhirId)
         assertEquals("PractitionerTestId", input.practitionerFhirId)
         assertEquals("Example Note Text", input.noteText)
+        assertEquals("202206201245", input.datetime)
     }
 }

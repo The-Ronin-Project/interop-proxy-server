@@ -4,14 +4,9 @@ import com.expediagroup.graphql.generator.annotations.GraphQLDescription
 import com.projectronin.interop.tenant.config.model.Tenant
 import com.projectronin.interop.transform.fhir.r4.util.localize
 import com.projectronin.interop.ehr.model.Patient as EHRPatient
-import com.projectronin.interop.fhir.r4.datatype.Identifier as R4Identifier
 
 @GraphQLDescription("A patient")
-data class Patient(
-    private val patient: EHRPatient,
-    private val tenant: Tenant,
-    private val roninIdentifiers: List<R4Identifier>
-) {
+data class Patient(private val patient: EHRPatient, private val tenant: Tenant) {
     @GraphQLDescription("The internal identifier for this patient")
     val id: String by lazy {
         patient.id.localize(tenant)
@@ -19,7 +14,7 @@ data class Patient(
 
     @GraphQLDescription("List of patient known identifiers (e.g. MRN, EPI, etc.)")
     val identifier: List<Identifier> by lazy {
-        patient.identifier.map(::Identifier) + roninIdentifiers.map(::Identifier)
+        patient.identifier.map(::Identifier)
     }
 
     @GraphQLDescription("The name(s) of the patient")

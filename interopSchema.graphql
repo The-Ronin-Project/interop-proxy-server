@@ -380,11 +380,13 @@ input MessageRecipientInput {
   fhirId: String!
 }
 
-"A message that contains note information from product for HL7 downstream writebacks"
+"A message that contains note information from product for HL7v2 downstream writebacks"
 input NoteInput {
+  "Timestamp of when note was recorded, in yyyymmddhhmmss format"
+  datetime: String!
   "The text of the note that should be sent"
   noteText: String!
-  "The FHIR ID of the patient"
+  "The FHIR ID of the patient that the note is for"
   patientFhirId: String!
   "The FHIR ID of the practitioner authoring the note"
   practitionerFhirId: String!

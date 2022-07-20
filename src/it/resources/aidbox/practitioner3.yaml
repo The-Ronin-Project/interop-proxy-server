@@ -1,0 +1,32 @@
+- resourceType: "Practitioner"
+  id: "654321"
+  identifier:
+    - type:
+        text: "Tenant ID"
+        coding:
+          - system: "http://projectronin.com/id/tenantId"
+            code: "TID"
+            display: "Ronin-specified Tenant Identifier"
+      system: "http://projectronin.com/id/tenantId"
+      value: "apposnd"
+    - type:
+        text: "FHIR STU3"
+        coding:
+          - system: "http://projectronin.com/id/fhir"
+            code: "STU3"
+            display: "FHIR STU3 ID"
+      system: "http://projectronin.com/id/fhir"
+      value: "654321"
+    - use: "usual"
+      type:
+        text: "EXTERNAL"
+      system: "external-system"
+      value: "external-value"
+    - use: "usual"
+      type:
+        text: "INTERNAL"
+      system: "internal-system"
+      value: "internal-value"
+  name:
+    - family: "FAMILYNAME"
+      given: [ "GIVENNAME" ]

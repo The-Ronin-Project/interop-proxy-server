@@ -3,6 +3,8 @@ datadog-java-agent = "com.datadoghq:dd-java-agent:0.104.0"
 graphql-kotlin-schema-generator = "com.expediagroup:graphql-kotlin-schema-generator:5.4.1"
 graphql-kotlin-spring-server = "com.expediagroup:graphql-kotlin-spring-server:5.4.1"
 graphql-spring-boot-starter-test = "com.graphql-java-kickstart:graphql-spring-boot-starter-test:12.0.0"
+hapi-hl7v2-251 = "ca.uhn.hapi:hapi-structures-v251:2.3"
+hapi-hl7v2-base ="ca.uhn.hapi:hapi-base:2.3"
 interop-aidbox = "com.projectronin.interop.publish:interop-aidbox:2.1.0"
 interop-common = "com.projectronin.interop:interop-common:2.1.1"
 interop-commonHttp = "com.projectronin.interop:interop-common-http:2.1.1"
@@ -36,3 +38,4 @@ spring-security-oauth2-jose = { module = "org.springframework.security:spring-se
 ehr-impls = ["interop-ehr-epic"]
 graphql = ["graphql-kotlin-spring-server", "graphql-kotlin-schema-generator"]
 spring-security = ["spring-security-oauth2-core", "spring-security-oauth2-jose"]
+hl7v2 = ["hapi-hl7v2-251", "hapi-hl7v2-base"]

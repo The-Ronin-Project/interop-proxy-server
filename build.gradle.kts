@@ -33,6 +33,7 @@ dependencies {
 
     implementation(libs.ktor.client.core)
     implementation(libs.bundles.graphql)
+    implementation(libs.bundles.hl7v2)
 
     // Dependency on the datadog agent jar.
     tracerAgent(libs.datadog.java.agent)
@@ -73,8 +74,6 @@ tasks.withType(Test::class) {
     testLogging {
         events("passed", "skipped", "failed", "standardOut", "standardError")
     }
-
-    jvmArgs("--add-opens=java.base/java.util=ALL-UNNAMED")
 }
 
 // We need to exclude some dependencies from our it testSet

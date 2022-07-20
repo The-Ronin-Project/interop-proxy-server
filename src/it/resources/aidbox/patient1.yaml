@@ -1,0 +1,46 @@
+- resourceType: "Patient"
+  id: "654321"
+  identifier:
+    - type:
+        text: "Tenant ID"
+        coding:
+          - system: "http://projectronin.com/id/tenantId"
+            code: "TID"
+            display: "Ronin-specified Tenant Identifier"
+      system: "http://projectronin.com/id/tenantId"
+      value: "apposnd"
+    - type:
+        text: "MRN"
+        coding:
+          - system: "http://projectronin.com/id/mrn"
+            code: "MR"
+            display: "Medical Record Number"
+      system: "http://projectronin.com/id/mrn"
+      value: "123456"
+    - type:
+        text: "FHIR STU3"
+        coding:
+          - system: "http://projectronin.com/id/fhir"
+            code: "STU3"
+            display: "FHIR STU3 ID"
+      system: "http://projectronin.com/id/fhir"
+      value: "654321"
+    - system: "my-own-system"
+      value: "abcdef"
+  name:
+    - family: "FAMILYNAME"
+      given:
+        - "GIVENNAME"
+  telecom:
+    - system: "email"
+      value: "jane.doe@projectronin.com"
+      use: "work"
+  gender: "female"
+  birthDate: "1973-07-21"
+  address:
+    - text: "Address"
+  maritalStatus:
+    coding:
+      - system: "http://terminology.hl7.org/CodeSystem/v3-MaritalStatus"
+        code: "M"
+    text: "Married"
