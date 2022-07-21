@@ -331,7 +331,7 @@ class InteropProxyServerIntegratedMessageTests : BaseAidboxTest() {
     }
 
     @Test
-    fun `server rejects valid m2m auth`() {
+    fun `server accepts valid m2m auth`() {
         val tenantId = "apposnd"
         val mrn = "202497"
         val id = "3566c140-dafb-4db6-95f1-fb23a72c7b25"
@@ -356,6 +356,7 @@ class InteropProxyServerIntegratedMessageTests : BaseAidboxTest() {
             |   "query": "$mutation"
             |}
         """.trimMargin()
+        val expectedJSON = """{"data":{"sendMessage":"sent"}}"""
 
         val m2mHeaders = HttpHeaders()
 
@@ -363,7 +364,7 @@ class InteropProxyServerIntegratedMessageTests : BaseAidboxTest() {
         val payload = JWTClaimsSet.Builder().issuer("https://dev-euweyz5a.us.auth0.com/").audience("proxy").build()
         val jwtM2M = PlainJWT(header, payload).serialize()
 
-        m2mHeaders.set("Content-Type", "application/graphql")
+        m2mHeaders.set("Content-Type", "application/json")
         m2mHeaders.set("Authorization", "Bearer $jwtM2M")
 
         every { m2mJwtDecoder.decode(jwtM2M) } returns (mockk<Jwt>())
@@ -374,9 +375,11 @@ class InteropProxyServerIntegratedMessageTests : BaseAidboxTest() {
             restTemplate.postForEntity(URI("http://localhost:$port/graphql"), httpEntity, String::class.java)
 
         val resultJSONObject = objectMapper.readTree(responseEntity.body)
+        val expectedJSONObject = objectMapper.readTree(expectedJSON)
+
         assertEquals(HttpStatus.OK, responseEntity.statusCode)
-        assertTrue(resultJSONObject.has("errors"))
-        println(resultJSONObject.toPrettyString())
+        assertFalse(resultJSONObject.has("errors"))
+        assertEquals(expectedJSONObject, resultJSONObject)
     }
 
     @Test

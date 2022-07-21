@@ -27,11 +27,11 @@ class MessageHandler(
 ) : Mutation {
     private val logger = KotlinLogging.logger { }
 
-    @GraphQLDescription("Sends a message and returns the current status. Requires User Auth.")
+    @GraphQLDescription("Sends a message and returns the current status.")
     fun sendMessage(tenantId: String, message: MessageInput, dfe: DataFetchingEnvironment): String {
         logger.info { "Sending message to $tenantId" }
 
-        val tenant = findAndValidateTenant(dfe, tenantService, tenantId)
+        val tenant = findAndValidateTenant(dfe, tenantService, tenantId, false)
 
         val messageService = ehrFactory.getVendorFactory(tenant).messageService
         // For now there is only one possible vendor/service

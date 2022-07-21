@@ -108,7 +108,7 @@ class InteropProxyServerTests {
         every { tenant.mnemonic } returns "tenant"
 
         mockkStatic("com.projectronin.interop.proxy.server.handler.TenantUtilKt")
-        every { findAndValidateTenant(any(), any(), any()) } returns tenant
+        every { findAndValidateTenant(any(), any(), any(), false) } returns tenant
 
         every { ehrFactory.getVendorFactory(tenant) } returns mockk {
             every { messageService } returns mockk {

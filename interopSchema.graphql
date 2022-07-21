@@ -215,7 +215,7 @@ type Identifier {
 }
 
 type Mutation {
-  "Sends a message and returns the current status. Requires User Auth."
+  "Sends a message and returns the current status."
   sendMessage(message: MessageInput!, tenantId: String!): String!
   "Takes in note from product and processes it for downstream services"
   sendNote(noteInput: NoteInput!, tenantId: String!): String!
