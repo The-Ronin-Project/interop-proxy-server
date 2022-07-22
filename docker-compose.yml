@@ -44,7 +44,7 @@ services:
   # Queue Migration
   liquibase-queue:
     container_name: liquibase-queue
-    image: docker-repo.devops.projectronin.io/interop-queue-liquibase:2.0.0
+    image: docker-repo.devops.projectronin.io/interop-queue-liquibase:1.1.1
     environment:
       - JDBC_URL=jdbc:mysql://queue:secret@db-queue:3306/interop-queue
     depends_on:
@@ -67,7 +67,7 @@ services:
   # EHR Migration
   liquibase-ehr:
     container_name: liquibase-ehr
-    image: docker-repo.devops.projectronin.io/interop-ehr-liquibase:1.1.0
+    image: docker-repo.devops.projectronin.io/interop-ehr-liquibase:2.2.0
     environment:
       - JDBC_URL=jdbc:mysql://ehr:secret@db-ehr:3306/interop-ehr
       - DATA_LOAD=db/changelog/insertTestData.yaml
