@@ -1,17 +1,14 @@
-**Ticket:** https://projectronin.atlassian.net/browse/…
-<!-- one or multiple affected areas separated by commas(,) e.g.: authentication, graph, diagnosis, redux -->
-**Affected Areas:**
+### Description
 
-<!-- for a better description message:
-  - what was done?
-  - why was done?
-  - how it was addressed?  -->
+- [Ticket](https://projectronin.atlassian.net/browse/INT-###)
 
-## Description
+A few sentences describing how this particular merge request implements the associated ticket.
 
-A few sentences describing the overall goals of `merge request`
+<!--
+#### Related PRs:
 
-**PR Author Checklist**
+1.  [Repo Name](https://github.com/projectronin/)
 
-- [ ] HOTFIX prefix in PR name (ie. HOTFIX-PIR88) for any change that must be deployed as soon as possible
-- [ ] BUG prefix in PR name (ie. BUG-PIR88) for any change that is addressing a software defect
+2.  [Repo Name](https://github.com/projectronin/)
+
+-->
