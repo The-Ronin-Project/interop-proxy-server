@@ -74,6 +74,8 @@ tasks.withType(Test::class) {
     testLogging {
         events("passed", "skipped", "failed", "standardOut", "standardError")
     }
+
+    jvmArgs("--add-opens=java.base/java.util=ALL-UNNAMED")
 }
 
 // We need to exclude some dependencies from our it testSet
