@@ -49,7 +49,7 @@ fun ProxyEpic.toTenantServerEpic(): TenantServiceEpic {
         practitionerUserSystem = practitionerUserSystem,
         patientMRNSystem = patientMRNSystem,
         patientInternalSystem = patientInternalSystem,
-        patientMRNTypeText = "MRN",
+        patientMRNTypeText = patientMRNTypeText,
         hsi = hsi,
         clientId = "",
         instanceName = instanceName,

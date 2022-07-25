@@ -65,6 +65,14 @@
           {
             "system": "https://open.epic.com/FHIR/StructureDefinition/PayerMemberId",
             "value": "BC654"
+          },
+          {
+            "system": "http://projectronin.com/id/fhir",
+            "value": "eJzlzKe3KPzAV5TtkxmNivQ3"
+          },
+          {
+            "system": "http://projectronin.com/id/mrn",
+            "value": "202497"
           }
         ],
         "name": [

@@ -157,6 +157,45 @@ class TenantControllerTests {
     }
 
     @Test
+    fun `can insert a tenant with custom MRN`() {
+        val vendor = Epic(
+            release = "1.0",
+            serviceEndpoint = "https://apporchard.epic.com/interconnect-aocurprd-oauth",
+            authEndpoint = "https://apporchard.epic.com/interconnect-aocurprd-oauth/oauth2/token",
+            ehrUserId = "1",
+            messageType = "1",
+            practitionerProviderSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.2.836982",
+            practitionerUserSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.2.697780",
+            patientMRNSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.5.737384.14",
+            patientInternalSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.2.698084",
+            patientMRNTypeText = "Custom MRN",
+            hsi = null,
+            instanceName = "Epic Sandbox"
+        )
+
+        val newTenant = Tenant(
+            id = 0,
+            mnemonic = "CoolNewBoi",
+            availableStart = LocalTime.of(22, 0),
+            availableEnd = LocalTime.of(6, 0),
+            vendor = vendor,
+            name = "coolest boi hospital"
+        )
+        val httpEntity = HttpEntity(newTenant, httpHeaders)
+
+        val responseEntity = restTemplate.postForEntity(
+            URI("http://localhost:$port/tenants"),
+            httpEntity,
+            Tenant::class.java
+        )
+        val tenant = responseEntity.body!!
+
+        assertEquals(HttpStatus.CREATED, responseEntity.statusCode)
+        assertEquals(newTenant.mnemonic, tenant.mnemonic)
+        assertEquals(newTenant.vendor, tenant.vendor)
+    }
+
+    @Test
     fun `can update a tenant`() {
         val vendor = Epic(
             release = "2.0",
@@ -169,6 +208,45 @@ class TenantControllerTests {
             patientMRNSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.5.737384.14",
             patientInternalSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.2.698084",
             patientMRNTypeText = "MRN",
+            hsi = null,
+            instanceName = "Epic Sandbox"
+        )
+
+        val updatedTenant = Tenant(
+            id = 1001,
+            mnemonic = "apposnd",
+            availableStart = LocalTime.of(22, 0),
+            availableEnd = LocalTime.of(6, 0),
+            vendor = vendor,
+            name = "App Orchard Test"
+        )
+        val httpEntity = HttpEntity(updatedTenant, httpHeaders)
+
+        val responseEntity = restTemplate.exchange(
+            "http://localhost:$port/tenants/${updatedTenant.mnemonic}",
+            HttpMethod.PUT,
+            httpEntity,
+            Tenant::class.java
+        )
+        val tenant = responseEntity.body!!
+
+        assertEquals(HttpStatus.OK, responseEntity.statusCode)
+        assertEquals(updatedTenant, tenant)
+    }
+
+    @Test
+    fun `can update a tenant with custom MRN`() {
+        val vendor = Epic(
+            release = "2.0",
+            serviceEndpoint = "https://apporchard.epic.com/interconnect-aocurprd-oauth",
+            authEndpoint = "https://apporchard.epic.com/interconnect-aocurprd-oauth/oauth2/token",
+            ehrUserId = "1",
+            messageType = "1",
+            practitionerProviderSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.2.836982",
+            practitionerUserSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.2.697780",
+            patientMRNSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.5.737384.14",
+            patientInternalSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.2.698084",
+            patientMRNTypeText = "Custom MRN",
             hsi = null,
             instanceName = "Epic Sandbox"
         )

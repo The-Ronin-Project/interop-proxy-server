@@ -92,6 +92,14 @@ class PatientHandler(
      * Translates a list of [EHRPatient]s into the appropriate list of proxy server [ProxyServerPatient]s for return.
      */
     private fun mapEHRPatients(ehrPatients: List<EHRPatient>, tenant: Tenant): List<ProxyServerPatient> {
-        return ehrPatients.map { ProxyServerPatient(it, tenant) }
+        if (ehrPatients.isEmpty()) {
+            return emptyList()
+        }
+
+        val patientTransformer = ehrFactory.getVendorFactory(tenant).patientTransformer
+        return ehrPatients.map {
+            val roninIdentifiers = patientTransformer.getRoninIdentifiers(it, tenant)
+            ProxyServerPatient(it, tenant, roninIdentifiers)
+        }
     }
 }

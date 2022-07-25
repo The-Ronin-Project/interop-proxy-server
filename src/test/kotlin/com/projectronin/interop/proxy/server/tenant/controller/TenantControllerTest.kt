@@ -37,6 +37,7 @@ class TenantControllerTest {
         hsi = null,
         instanceName = "instanceName"
     )
+    private val proxyVendorWithCustomMrn = proxyVendor.copy(patientMRNTypeText = "Custom MRN")
     private val tenantServiceVendor = TenantServiceEpic(
         clientId = "shouldn'tmatter",
         instanceName = "instanceName",
@@ -55,6 +56,7 @@ class TenantControllerTest {
         patientInternalSystem = "internalSystemExample",
         patientMRNTypeText = "patientMRNTypeText",
     )
+    private val tenantServiceVendorWithCustomMrn = tenantServiceVendor.copy(patientMRNTypeText = "Custom MRN")
 
     private val proxyTenant = ProxyTenant(
         id = 1,
@@ -64,6 +66,7 @@ class TenantControllerTest {
         vendor = proxyVendor,
         name = "test tenant"
     )
+    private val proxyTenantWithCustomMrn = proxyTenant.copy(vendor = proxyVendorWithCustomMrn)
     private val tenantServiceTenant = TenantServiceTenant(
         internalId = 1,
         mnemonic = "mnemonic1",
@@ -74,6 +77,7 @@ class TenantControllerTest {
         vendor = tenantServiceVendor,
         name = "test tenant"
     )
+    private val tenantServiceTenantWithCustomMrn = tenantServiceTenant.copy(vendor = tenantServiceVendorWithCustomMrn)
     private val proxyTenantNoTimes = ProxyTenant(
         id = 2,
         mnemonic = "mnemonic2",
@@ -137,6 +141,14 @@ class TenantControllerTest {
     }
 
     @Test
+    fun `can insert a tenant with custom MRN`() {
+        every { tenantService.insertTenant(any()) } returns tenantServiceTenantWithCustomMrn
+        val response = tenantController.insert(proxyTenantWithCustomMrn)
+        assertEquals(HttpStatus.CREATED, response.statusCode)
+        assertEquals(proxyTenantWithCustomMrn, response.body)
+    }
+
+    @Test
     fun `insert with just a start doesn't create batch config`() {
         val proxyTenantNoStart = ProxyTenant(
             id = 2,
@@ -175,6 +187,15 @@ class TenantControllerTest {
         val response = tenantController.update("mnemonic1", proxyTenant)
         assertEquals(HttpStatus.OK, response.statusCode)
         assertEquals(proxyTenant, response.body)
+    }
+
+    @Test
+    fun `can update a tenant with custom MRN`() {
+        every { tenantService.getTenantForMnemonic(tenantServiceTenant.mnemonic) } returns tenantServiceTenant
+        every { tenantService.updateTenant(any()) } returns tenantServiceTenantWithCustomMrn
+        val response = tenantController.update("mnemonic1", proxyTenantWithCustomMrn)
+        assertEquals(HttpStatus.OK, response.statusCode)
+        assertEquals(proxyTenantWithCustomMrn, response.body)
     }
 
     @Test
