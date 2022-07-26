@@ -1,6 +1,7 @@
 name: Deployment to ArgoCD + Nexus Image Push
 
 on:
+  workflow_dispatch:
   workflow_run:
     workflows: [Tests]
     types: [completed]
@@ -17,10 +18,13 @@ jobs:
       PACKAGE_USER: ${{ secrets.PACKAGES_PAT_USER }}
       PACKAGE_TOKEN: ${{ secrets.PACKAGES_PAT }}
 
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    # if: ${{ github.event.workflow_run.conclusion == 'success' }}
     steps:
       - name: Check out code
         uses: actions/checkout@v2.1.0
+
+      - name: Wait for upstream workflows to be successful
+        uses: ahmadnassri/action-workflow-run-wait@v1
 
       - name: ACR setup
         uses: azure/docker-login@v1
@@ -32,7 +36,7 @@ jobs:
       - name: Set up JDK 17
         uses: actions/setup-java@v2
         with:
-          java-version: '17'
+          java-version: "17"
           distribution: "zulu"
 
       - name: Grant execute permission for gradlew
@@ -60,10 +64,13 @@ jobs:
       PACKAGE_USER: ${{ secrets.PACKAGES_PAT_USER }}
       PACKAGE_TOKEN: ${{ secrets.PACKAGES_PAT }}
 
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    # if: ${{ github.event.workflow_run.conclusion == 'success' }}
     steps:
       - name: Check out code
         uses: actions/checkout@v2.1.0
+
+      - name: Wait for upstream workflows to be successful
+        uses: ahmadnassri/action-workflow-run-wait@v1
 
       - name: ACR setup
         uses: azure/docker-login@v1
@@ -75,7 +82,7 @@ jobs:
       - name: Set up JDK 17
         uses: actions/setup-java@v2
         with:
-          java-version: '17'
+          java-version: "17"
           distribution: "zulu"
 
       - name: Grant execute permission for gradlew
