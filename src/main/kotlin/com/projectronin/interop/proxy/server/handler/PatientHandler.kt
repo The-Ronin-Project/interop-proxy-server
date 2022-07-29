@@ -3,6 +3,7 @@ package com.projectronin.interop.proxy.server.handler
 import com.expediagroup.graphql.generator.annotations.GraphQLDescription
 import com.expediagroup.graphql.server.extensions.toGraphQLError
 import com.expediagroup.graphql.server.operations.Query
+import com.projectronin.interop.common.logmarkers.getLogMarker
 import com.projectronin.interop.common.resource.ResourceType
 import com.projectronin.interop.ehr.factory.EHRFactory
 import com.projectronin.interop.proxy.server.util.DateUtil
@@ -58,8 +59,7 @@ class PatientHandler(
             ).resources
         } catch (e: Exception) {
             findPatientErrors.add(GraphQLException(e.message).toGraphQLError())
-            logger.error(e) { "Patient query for tenant $tenantId contains errors" }
-
+            logger.error(e.getLogMarker(), e) { "Patient query for tenant $tenantId contains errors" }
             listOf()
         }
 

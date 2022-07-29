@@ -6,6 +6,7 @@ import com.projectronin.interop.aidbox.PatientService
 import com.projectronin.interop.aidbox.PractitionerService
 import com.projectronin.interop.common.hl7.EventType
 import com.projectronin.interop.common.hl7.MessageType
+import com.projectronin.interop.common.logmarkers.getLogMarker
 import com.projectronin.interop.proxy.server.hl7.MDMService
 import com.projectronin.interop.proxy.server.hl7.model.MDMPatientFields
 import com.projectronin.interop.proxy.server.hl7.model.MDMPractitionerFields
@@ -58,7 +59,7 @@ class NoteHandler(
                 )
             )
         } catch (e: Exception) {
-            logger.error { "Exception sending note to queue: ${e.message}" }
+            logger.error(e.getLogMarker(), e) { "Exception sending note to queue: ${e.message}" }
         }
         return hl7.second
     }

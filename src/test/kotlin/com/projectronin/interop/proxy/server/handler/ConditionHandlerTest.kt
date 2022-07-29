@@ -1,5 +1,9 @@
 package com.projectronin.interop.proxy.server.handler
 
+import ch.qos.logback.classic.spi.ILoggingEvent
+import ch.qos.logback.core.read.ListAppender
+import com.projectronin.interop.common.exceptions.ServiceUnavailableException
+import com.projectronin.interop.common.logmarkers.LogMarkers
 import com.projectronin.interop.common.resource.ResourceType
 import com.projectronin.interop.ehr.factory.EHRFactory
 import com.projectronin.interop.ehr.model.Bundle
@@ -18,12 +22,19 @@ import io.mockk.just
 import io.mockk.mockk
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInstance
+import org.junit.jupiter.api.TestInstance.Lifecycle
 import org.junit.jupiter.api.assertThrows
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.web.client.HttpClientErrorException
 import com.projectronin.interop.ehr.model.Condition as EHRCondition
 
+@TestInstance(Lifecycle.PER_CLASS)
 class ConditionHandlerTest {
     private lateinit var tenant: Tenant
     private lateinit var ehrFactory: EHRFactory
@@ -31,6 +42,15 @@ class ConditionHandlerTest {
     private lateinit var queueService: QueueService
     private lateinit var conditionHandler: ConditionHandler
     private lateinit var dfe: DataFetchingEnvironment
+
+    private val logger = LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME) as ch.qos.logback.classic.Logger
+    private val logAppender = ListAppender<ILoggingEvent>()
+
+    @BeforeAll
+    fun initAllTests() {
+        logger.addAppender(logAppender)
+        logAppender.start()
+    }
 
     @BeforeEach
     fun initTest() {
@@ -108,6 +128,41 @@ class ConditionHandlerTest {
 
         assertNotNull(result)
         assertEquals("Error", result.errors[0].message)
+        assertNull(logAppender.list.last().marker)
+    }
+
+    @Test
+    fun `ensure findConditions service unavailable exception sets log marker`() {
+        every { tenant.mnemonic } returns "tenantId"
+        every { tenantService.getTenantForMnemonic("tenantId") } returns tenant
+        every { dfe.graphQlContext.get<InteropGraphQLContext>(INTEROP_CONTEXT_KEY).authzTenantId } returns "tenantId"
+
+        every { ehrFactory.getVendorFactory(tenant) } returns mockk {
+            every { conditionService } returns mockk {
+                every {
+                    findConditions(
+                        tenant = tenant,
+                        patientFhirId = "123456789",
+                        conditionCategoryCode = ConditionCategoryCode.PROBLEM_LIST_ITEM.code,
+                        clinicalStatus = "active"
+                    )
+                } throws (ServiceUnavailableException("Service", "Error"))
+            }
+        }
+
+        every { queueService.enqueueMessages(listOf()) } just Runs
+
+        // Run Test
+        val result = conditionHandler.conditionsByPatientAndCategory(
+            tenantId = "tenantId",
+            patientFhirId = "123456789",
+            conditionCategoryCode = ConditionCategoryCode.PROBLEM_LIST_ITEM,
+            dfe = dfe
+        )
+
+        assertNotNull(result)
+        assertEquals("Service: Error", result.errors[0].message)
+        assertEquals(logAppender.list.last().marker, LogMarkers.SERVICE_UNAVAILABLE)
     }
 
     @Test
