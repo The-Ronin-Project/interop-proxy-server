@@ -10,14 +10,17 @@ import org.springframework.web.reactive.function.server.ServerRequest
  */
 @Component
 class InteropGraphQLContextFactory : SpringGraphQLContextFactory<InteropGraphQLContext>() {
-
-    override suspend fun generateContextMap(request: ServerRequest): Map<*, Any>? {
+    override suspend fun generateContextMap(request: ServerRequest): Map<*, Any> {
         val authzTenantId = request.headers().firstHeader(AUTHZ_TENANT_HEADER) // populated in AuthFilter.kt
         return mapOf(INTEROP_CONTEXT_KEY to InteropGraphQLContext(authzTenantId, request))
     }
 
     // IDE requires this to be implemented, but it's deprecated.
+    @Deprecated(
+        "The generic context object is deprecated in favor of the context map",
+        replaceWith = ReplaceWith("generateContextMap(request)")
+    )
     override suspend fun generateContext(request: ServerRequest): InteropGraphQLContext? {
-        return generateContextMap(request)?.get(INTEROP_CONTEXT_KEY) as InteropGraphQLContext
+        return generateContextMap(request)[INTEROP_CONTEXT_KEY] as InteropGraphQLContext
     }
 }

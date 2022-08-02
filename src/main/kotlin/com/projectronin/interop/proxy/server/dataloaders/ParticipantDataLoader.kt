@@ -1,6 +1,6 @@
 package com.projectronin.interop.proxy.server.dataloaders
 
-import com.expediagroup.graphql.server.execution.KotlinDataLoader
+import com.expediagroup.graphql.dataloader.KotlinDataLoader
 import com.projectronin.interop.proxy.server.model.TenantParticipant
 import org.dataloader.DataLoader
 import org.dataloader.DataLoaderFactory

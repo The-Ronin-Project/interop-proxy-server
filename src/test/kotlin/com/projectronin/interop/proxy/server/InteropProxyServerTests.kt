@@ -157,7 +157,7 @@ class InteropProxyServerTests {
 
         val patientInput = objectMapper.createObjectNode()
         patientInput.put("mrn", "12345")
-        messageInput.put("patient", patientInput)
+        messageInput.replace("patient", patientInput)
 
         val recipientsArray = messageInput.putArray("recipients")
         val recipientInput = objectMapper.createObjectNode()
@@ -165,7 +165,7 @@ class InteropProxyServerTests {
         recipientsArray.add(recipientInput)
 
         val objectNode = objectMapper.createObjectNode()
-        objectNode.put("message", messageInput)
+        objectNode.replace("message", messageInput)
 
         val response = graphQLTestTemplate.withAdditionalHeader("AuthorizedTenant", "tenant")
             .perform("graphql/sendMessage.graphql", objectNode)
