@@ -48,8 +48,7 @@ class InteropProxyServerIntegratedNoteTests : BaseAidboxTest() {
     }
 
     @Test
-    fun `server handles note mutation`() {
-
+    fun `server handles note mutation with patient FHIR Id`() {
         val notetext = "Test Note"
         val patientid = "654321"
         val practitionerid = "654321"
@@ -61,7 +60,40 @@ class InteropProxyServerIntegratedNoteTests : BaseAidboxTest() {
             |   "variables": {
             |      "noteInput": {
             |         "datetime": "202206011250",
-            |         "patientFhirId":  "$patientid",
+            |         "patientId":  "$patientid",
+            |         "patientIdType":  "FHIR",
+            |         "practitionerFhirId": "$practitionerid",
+            |         "noteText": "$notetext"
+            |      },
+            |      "tenantId": "$tenantId"
+            |   }
+            |}
+        """.trimMargin()
+        val httpEntity = HttpEntity(query, httpHeaders)
+        val responseEntity =
+            restTemplate.postForEntity(URI("http://localhost:$port/graphql"), httpEntity, String::class.java)
+        val dateformat = SimpleDateFormat("yyyyMMdd")
+        val docId = "RoninNote" + dateformat.format(java.util.Date())
+        val resultJSONObject = JacksonManager.objectMapper.readTree(responseEntity.body)
+        assertEquals(HttpStatus.OK, responseEntity.statusCode)
+        assertFalse(resultJSONObject.has("errors"))
+        assertTrue(resultJSONObject["data"]["sendNote"].asText().startsWith(docId))
+    }
+    @Test
+    fun `server handles note mutation with patient MRN`() {
+        val notetext = "Test Note"
+        val patientid = "123456"
+        val practitionerid = "654321"
+        val tenantId = "apposnd"
+        val mutation = """mutation sendNote(${'$'}noteInput: NoteInput!, ${'$'}tenantId: String!) {sendNote(noteInput: ${'$'}noteInput, tenantId: ${'$'}tenantId)}"""
+        val query = """
+            |{
+            |   "query": "$mutation",
+            |   "variables": {
+            |      "noteInput": {
+            |         "datetime": "202206011250",
+            |         "patientId":  "$patientid",
+            |         "patientIdType":  "MRN",
             |         "practitionerFhirId": "$practitionerid",
             |         "noteText": "$notetext"
             |      },
@@ -93,7 +125,8 @@ class InteropProxyServerIntegratedNoteTests : BaseAidboxTest() {
             |   "variables": {
             |      "noteInput": {
             |         "datetime": "202206011250",
-            |         "patientFhirId":  "$patientid",
+            |         "patientId":  "$patientid",
+            |         "patientIdType":  "FHIR",
             |         "practitionerFhirId": "$practitionerid",
             |         "noteText": "$notetext"
             |      },
@@ -128,7 +161,8 @@ class InteropProxyServerIntegratedNoteTests : BaseAidboxTest() {
             |   "variables": {
             |      "noteInput": {
             |         "datetime": "202206011250",
-            |         "patientFhirId":  "$patientid",
+            |         "patientId":  "$patientid",
+            |         "patientIdType":  "FHIR",
             |         "practitionerFhirId": "$practitionerid",
             |         "noteText": "$notetext"
             |      },

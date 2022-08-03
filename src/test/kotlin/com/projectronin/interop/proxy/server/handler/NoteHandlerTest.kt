@@ -2,6 +2,8 @@ package com.projectronin.interop.proxy.server.handler
 
 import com.projectronin.interop.aidbox.PatientService
 import com.projectronin.interop.aidbox.PractitionerService
+import com.projectronin.interop.aidbox.model.SystemValue
+import com.projectronin.interop.fhir.r4.CodeSystem
 import com.projectronin.interop.fhir.r4.datatype.Address
 import com.projectronin.interop.fhir.r4.datatype.ContactPoint
 import com.projectronin.interop.fhir.r4.datatype.HumanName
@@ -13,6 +15,7 @@ import com.projectronin.interop.fhir.r4.ronin.resource.OncologyPractitioner
 import com.projectronin.interop.fhir.r4.valueset.AdministrativeGender
 import com.projectronin.interop.fhir.r4.valueset.ContactPointUse
 import com.projectronin.interop.proxy.server.input.NoteInput
+import com.projectronin.interop.proxy.server.input.PatientIdType
 import com.projectronin.interop.proxy.server.util.relaxedMockk
 import com.projectronin.interop.queue.QueueService
 import io.mockk.every
@@ -69,10 +72,22 @@ class NoteHandlerTest {
     }
 
     @Test
-    fun `accepts note`() {
+    fun `accepts note with patient FHIR Id`() {
         every { practitionerService.getOncologyPractitioner("apposnd", "PractitionerTestId") } returns oncologyPractitioner
         every { patientService.getOncologyPatient("apposnd", "PatientTestId") } returns oncologyPatient
-        val noteInput = NoteInput("PatientTestId", "PractitionerTestId", "Example Note Text", "202206011250")
+        val noteInput = NoteInput("PatientTestId", PatientIdType.FHIR, "PractitionerTestId", "Example Note Text", "202206011250")
+        val response = noteHandler.sendNote(noteInput, "apposnd")
+        val dateformat = SimpleDateFormat("yyyyMMdd")
+        val docId = "RoninNote" + dateformat.format(java.util.Date())
+        assertTrue(response.startsWith(docId))
+    }
+
+    @Test
+    fun `accepts note with patient MRN`() {
+        every { practitionerService.getOncologyPractitioner("apposnd", "PractitionerTestId") } returns oncologyPractitioner
+        val noteInput = NoteInput("PatientMRNId", PatientIdType.MRN, "PractitionerTestId", "Example Note Text", "202206011250")
+        every { patientService.getPatientFHIRIds("apposnd", mapOf("key" to SystemValue(system = CodeSystem.MRN.uri.value, value = noteInput.patientId))).getValue("key") } returns "PatientFhirId"
+        every { patientService.getOncologyPatient("apposnd", "PatientFhirId") } returns oncologyPatient
         val response = noteHandler.sendNote(noteInput, "apposnd")
         val dateformat = SimpleDateFormat("yyyyMMdd")
         val docId = "RoninNote" + dateformat.format(java.util.Date())

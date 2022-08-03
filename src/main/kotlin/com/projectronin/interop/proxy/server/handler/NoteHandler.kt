@@ -4,13 +4,16 @@ import com.expediagroup.graphql.generator.annotations.GraphQLDescription
 import com.expediagroup.graphql.server.operations.Mutation
 import com.projectronin.interop.aidbox.PatientService
 import com.projectronin.interop.aidbox.PractitionerService
+import com.projectronin.interop.aidbox.model.SystemValue
 import com.projectronin.interop.common.hl7.EventType
 import com.projectronin.interop.common.hl7.MessageType
 import com.projectronin.interop.common.logmarkers.getLogMarker
+import com.projectronin.interop.fhir.r4.CodeSystem
 import com.projectronin.interop.proxy.server.hl7.MDMService
 import com.projectronin.interop.proxy.server.hl7.model.MDMPatientFields
 import com.projectronin.interop.proxy.server.hl7.model.MDMPractitionerFields
 import com.projectronin.interop.proxy.server.input.NoteInput
+import com.projectronin.interop.proxy.server.input.PatientIdType
 import com.projectronin.interop.queue.QueueService
 import com.projectronin.interop.queue.model.HL7Message
 import mu.KotlinLogging
@@ -28,9 +31,18 @@ class NoteHandler(
      */
     @GraphQLDescription("Takes in note from product and processes it for downstream services")
     fun sendNote(noteInput: NoteInput, tenantId: String): String {
-        logger.info { "Receiving Note for patient ${noteInput.patientFhirId} from Practitioner ${noteInput.practitionerFhirId}" }
+        logger.info { "Receiving Note for patient ${noteInput.patientIdType}: ${noteInput.patientId} from Practitioner ${noteInput.practitionerFhirId}" }
         val oncologyPractitioner = practitionerService.getOncologyPractitioner(tenantId, noteInput.practitionerFhirId)
-        val oncologyPatient = patientService.getOncologyPatient(tenantId, noteInput.patientFhirId)
+        val mdmPractitionerFields = MDMPractitionerFields(
+            oncologyPractitioner.name,
+            oncologyPractitioner.identifier
+        )
+
+        val oncologyPatient = when (noteInput.patientIdType) {
+            PatientIdType.FHIR -> patientService.getOncologyPatient(tenantId, noteInput.patientId)
+            PatientIdType.MRN -> patientService.getOncologyPatient(tenantId, patientService.getPatientFHIRIds(tenantId, mapOf("key" to SystemValue(system = CodeSystem.MRN.uri.value, value = noteInput.patientId))).getValue("key"))
+        }
+
         val mdmPatientFields = MDMPatientFields(
             oncologyPatient.identifier,
             oncologyPatient.name,
@@ -38,10 +50,6 @@ class NoteHandler(
             oncologyPatient.gender,
             oncologyPatient.address,
             oncologyPatient.telecom
-        )
-        val mdmPractitionerFields = MDMPractitionerFields(
-            oncologyPractitioner.name,
-            oncologyPractitioner.identifier
         )
         val hl7 = MDMService().generateMDM(tenantId, mdmPatientFields, mdmPractitionerFields, noteInput.noteText, noteInput.datetime)
 

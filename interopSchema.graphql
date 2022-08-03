@@ -358,6 +358,11 @@ enum ConditionCategoryCode {
   PROBLEM_LIST_ITEM
 }
 
+enum PatientIdType {
+  FHIR
+  MRN @deprecated(reason : "Deprecated ID Type")
+}
+
 "A message that should be submitted to one or more recipients"
 input MessageInput {
   "The patient for whom the message is being sent"
@@ -386,8 +391,10 @@ input NoteInput {
   datetime: String!
   "The text of the note that should be sent"
   noteText: String!
-  "The FHIR ID of the patient that the note is for"
-  patientFhirId: String!
+  "The identifier of the patient that the note is for"
+  patientId: String!
+  "The patient identifier type"
+  patientIdType: PatientIdType!
   "The FHIR ID of the practitioner authoring the note"
   practitionerFhirId: String!
 }
