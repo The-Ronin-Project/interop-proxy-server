@@ -2,7 +2,7 @@ package com.projectronin.interop.proxy.server.handler
 
 import ch.qos.logback.classic.spi.ILoggingEvent
 import ch.qos.logback.core.read.ListAppender
-import com.projectronin.interop.common.exceptions.ServiceUnavailableException
+import com.projectronin.interop.common.http.exceptions.ServiceUnavailableException
 import com.projectronin.interop.common.logmarkers.LogMarkers
 import com.projectronin.interop.common.resource.ResourceType
 import com.projectronin.interop.ehr.factory.EHRFactory
@@ -16,6 +16,7 @@ import com.projectronin.interop.queue.model.ApiMessage
 import com.projectronin.interop.tenant.config.TenantService
 import com.projectronin.interop.tenant.config.model.Tenant
 import graphql.schema.DataFetchingEnvironment
+import io.ktor.http.HttpStatusCode
 import io.mockk.Runs
 import io.mockk.every
 import io.mockk.just
@@ -146,7 +147,7 @@ class ConditionHandlerTest {
                         conditionCategoryCode = ConditionCategoryCode.PROBLEM_LIST_ITEM.code,
                         clinicalStatus = "active"
                     )
-                } throws (ServiceUnavailableException("Service", "Error"))
+                } throws (ServiceUnavailableException(HttpStatusCode.ServiceUnavailable, "Proxy"))
             }
         }
 
@@ -161,7 +162,7 @@ class ConditionHandlerTest {
         )
 
         assertNotNull(result)
-        assertEquals("Service: Error", result.errors[0].message)
+        assertEquals("Received 503 Service Unavailable when calling Proxy", result.errors[0].message)
         assertEquals(logAppender.list.last().marker, LogMarkers.SERVICE_UNAVAILABLE)
     }
 

@@ -143,7 +143,7 @@ class InteropProxyServerIntegratedNoteTests : BaseAidboxTest() {
         val errorJSONObject = resultJSONObject["errors"][0]
         assertTrue(
             errorJSONObject["message"].asText()
-                .contains("Resource Practitioner/$practitionerid not found")
+                .contains("404 Not Found")
         )
     }
 
@@ -179,7 +179,7 @@ class InteropProxyServerIntegratedNoteTests : BaseAidboxTest() {
         val errorJSONObject = resultJSONObject["errors"][0]
         assertTrue(
             errorJSONObject["message"].asText()
-                .contains("Resource Patient/$patientid not found")
+                .contains("404 Not Found")
         )
     }
 }

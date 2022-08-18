@@ -15,6 +15,7 @@ val tracerAgent: Configuration by configurations.creating
 dependencies {
     implementation(libs.interop.aidbox)
     implementation(libs.interop.common)
+    implementation(libs.interop.commonHttp)
     implementation(libs.interop.ehr.api)
     implementation(libs.interop.fhir)
     implementation(libs.interop.queue.api)
@@ -38,7 +39,6 @@ dependencies {
     // Dependency on the datadog agent jar.
     tracerAgent(libs.datadog.java.agent)
 
-    runtimeOnly(libs.interop.commonHttp)
     runtimeOnly(libs.bundles.ehr.impls)
     runtimeOnly(libs.interop.queue.db)
     runtimeOnly(libs.mysql.connector.java)
@@ -55,6 +55,9 @@ dependencies {
     }
 
     testImplementation(libs.interop.commonJackson)
+    testImplementation(platform(libs.testcontainers.bom))
+    testImplementation("org.testcontainers:testcontainers")
+    testImplementation("org.testcontainers:junit-jupiter")
     testImplementation(libs.interop.commonTestDb)
     testImplementation(libs.interop.ehr.liquibase)
     testImplementation(libs.interop.queue.liquibase)
