@@ -18,7 +18,7 @@ jobs:
       PACKAGE_USER: ${{ secrets.PACKAGES_PAT_USER }}
       PACKAGE_TOKEN: ${{ secrets.PACKAGES_PAT }}
 
-    # if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     steps:
       - name: Check out code
         uses: actions/checkout@v2.1.0
@@ -64,7 +64,7 @@ jobs:
       PACKAGE_USER: ${{ secrets.PACKAGES_PAT_USER }}
       PACKAGE_TOKEN: ${{ secrets.PACKAGES_PAT }}
 
-    # if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     steps:
       - name: Check out code
         uses: actions/checkout@v2.1.0
@@ -127,9 +127,5 @@ jobs:
     secrets:
       argocd-svc-automation: ${{ secrets.ARGOCD_SVC_AUTOMATION }}
 
-  tag_stage_deploy:
-    uses: projectronin/github/.github/workflows/tag_commit_w_stamp.yml@master
-    needs: [argocd_stage]
-    with:
-      deploy-env: stage
+
 
