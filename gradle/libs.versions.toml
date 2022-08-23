@@ -1,5 +1,5 @@
 [libraries]
-datadog-java-agent = "com.datadoghq:dd-java-agent:0.106.0"
+datadog-java-agent = "com.datadoghq:dd-java-agent:0.107.0"
 graphql-kotlin-schema-generator = "com.expediagroup:graphql-kotlin-schema-generator:6.1.0"
 graphql-kotlin-spring-server = "com.expediagroup:graphql-kotlin-spring-server:6.1.0"
 graphql-spring-boot-starter-test = "com.graphql-java-kickstart:graphql-spring-boot-starter-test:13.0.0"
