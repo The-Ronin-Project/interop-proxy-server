@@ -1,17 +1,17 @@
 package com.projectronin.interop.proxy.server.model
 
-import com.projectronin.interop.ehr.model.enums.QuantityComparator
+import com.projectronin.interop.fhir.r4.valueset.QuantityComparator
 import com.projectronin.interop.proxy.server.util.relaxedMockk
 import io.mockk.every
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
-import com.projectronin.interop.ehr.model.Age as EHRAge
+import com.projectronin.interop.fhir.r4.datatype.Age as R4Age
 
 internal class AgeTest {
     @Test
     fun `can get value`() {
-        val ehrAge = relaxedMockk<EHRAge> {
+        val ehrAge = relaxedMockk<R4Age> {
             every { value } returns 21.0
         }
         val age = Age(ehrAge)
@@ -20,7 +20,7 @@ internal class AgeTest {
 
     @Test
     fun `can get comparator`() {
-        val ehrAge = relaxedMockk<EHRAge> {
+        val ehrAge = relaxedMockk<R4Age> {
             every { comparator } returns QuantityComparator.LESS_THAN
         }
         val age = Age(ehrAge)
@@ -29,7 +29,7 @@ internal class AgeTest {
 
     @Test
     fun `can get null comparator`() {
-        val ehrAge = relaxedMockk<EHRAge> {
+        val ehrAge = relaxedMockk<R4Age> {
             every { comparator } returns null
         }
         val age = Age(ehrAge)
@@ -38,7 +38,7 @@ internal class AgeTest {
 
     @Test
     fun `can get unit`() {
-        val ehrAge = relaxedMockk<EHRAge> {
+        val ehrAge = relaxedMockk<R4Age> {
             every { unit } returns "unit"
         }
         val age = Age(ehrAge)
@@ -47,19 +47,37 @@ internal class AgeTest {
 
     @Test
     fun `can get system`() {
-        val ehrAge = relaxedMockk<EHRAge> {
-            every { system } returns "system"
+        val ehrAge = relaxedMockk<R4Age> {
+            every { system?.value } returns "system"
         }
         val age = Age(ehrAge)
         assertEquals("system", age.system)
     }
 
     @Test
+    fun `null system`() {
+        val ehrAge = relaxedMockk<R4Age> {
+            every { system } returns null
+        }
+        val age = Age(ehrAge)
+        assertNull(age.system)
+    }
+
+    @Test
     fun `can get code`() {
-        val ehrAge = relaxedMockk<EHRAge> {
-            every { code } returns "code"
+        val ehrAge = relaxedMockk<R4Age> {
+            every { code?.value } returns "code"
         }
         val age = Age(ehrAge)
         assertEquals("code", age.code)
+    }
+
+    @Test
+    fun `null code`() {
+        val ehrAge = relaxedMockk<R4Age> {
+            every { code } returns null
+        }
+        val age = Age(ehrAge)
+        assertNull(age.code)
     }
 }

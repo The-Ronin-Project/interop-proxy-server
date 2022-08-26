@@ -7,6 +7,7 @@ import com.projectronin.interop.ehr.factory.EHRFactory
 import com.projectronin.interop.ehr.inputs.EHRMessageInput
 import com.projectronin.interop.ehr.inputs.EHRRecipient
 import com.projectronin.interop.ehr.inputs.FHIRIdentifiers
+import com.projectronin.interop.ehr.inputs.IdentifierVendorIdentifier
 import com.projectronin.interop.fhir.r4.datatype.primitive.Id
 import com.projectronin.interop.proxy.server.input.MessageInput
 import com.projectronin.interop.proxy.server.input.MessageRecipientInput
@@ -60,6 +61,6 @@ class MessageHandler(
             )
         )
 
-        return EHRRecipient(id = recipientInput.fhirId, identifier = vendorIdentifier)
+        return EHRRecipient(id = recipientInput.fhirId, identifier = IdentifierVendorIdentifier(vendorIdentifier))
     }
 }

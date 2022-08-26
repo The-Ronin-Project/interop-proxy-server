@@ -56,9 +56,7 @@ class InteropProxyServerTests {
                         "First",
                         "Last"
                     )
-                } returns mockk {
-                    every { resources } returns listOf()
-                }
+                } returns listOf()
             }
         }
 
@@ -81,9 +79,7 @@ class InteropProxyServerTests {
                         LocalDate.of(2020, 1, 1),
                         LocalDate.of(2021, 1, 1)
                     )
-                } returns mockk {
-                    every { resources } returns listOf()
-                }
+                } returns listOf()
             }
         }
 
@@ -137,7 +133,7 @@ class InteropProxyServerTests {
                             identifiers = listOf(identifier)
                         )
                     )
-                } returns (IdentifierVendorIdentifier(identifier))
+                } returns identifier
                 every {
                     getPractitionerUserIdentifier(
                         tenant,

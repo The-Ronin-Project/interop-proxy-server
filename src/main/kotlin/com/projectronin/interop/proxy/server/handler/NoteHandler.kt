@@ -26,21 +26,28 @@ class NoteHandler(
     private val queueService: QueueService
 ) : Mutation {
     private val logger = KotlinLogging.logger { }
+
     /**
      * Handler for Notes going to downstream EHRs. Sends notes to the queue to be sent to the tenant's EHR system based on tenant Id and noteInput
      */
     @GraphQLDescription("Takes in note from product and processes it for downstream services")
     fun sendNote(noteInput: NoteInput, tenantId: String): String {
         logger.info { "Receiving Note for patient ${noteInput.patientIdType}: ${noteInput.patientId} from Practitioner ${noteInput.practitionerFhirId}" }
-        val oncologyPractitioner = practitionerService.getOncologyPractitioner(tenantId, noteInput.practitionerFhirId)
+        val oncologyPractitioner = practitionerService.getPractitioner(tenantId, noteInput.practitionerFhirId)
         val mdmPractitionerFields = MDMPractitionerFields(
             oncologyPractitioner.name,
             oncologyPractitioner.identifier
         )
 
         val oncologyPatient = when (noteInput.patientIdType) {
-            PatientIdType.FHIR -> patientService.getOncologyPatient(tenantId, noteInput.patientId)
-            PatientIdType.MRN -> patientService.getOncologyPatient(tenantId, patientService.getPatientFHIRIds(tenantId, mapOf("key" to SystemValue(system = CodeSystem.MRN.uri.value, value = noteInput.patientId))).getValue("key"))
+            PatientIdType.FHIR -> patientService.getPatient(tenantId, noteInput.patientId)
+            PatientIdType.MRN -> patientService.getPatient(
+                tenantId,
+                patientService.getPatientFHIRIds(
+                    tenantId,
+                    mapOf("key" to SystemValue(system = CodeSystem.MRN.uri.value, value = noteInput.patientId))
+                ).getValue("key")
+            )
         }
 
         val mdmPatientFields = MDMPatientFields(
@@ -51,7 +58,13 @@ class NoteHandler(
             oncologyPatient.address,
             oncologyPatient.telecom
         )
-        val hl7 = MDMService().generateMDM(tenantId, mdmPatientFields, mdmPractitionerFields, noteInput.noteText, noteInput.datetime)
+        val hl7 = MDMService().generateMDM(
+            tenantId,
+            mdmPatientFields,
+            mdmPractitionerFields,
+            noteInput.noteText,
+            noteInput.datetime
+        )
 
         // Send generated MDM message to queue service
         try {

@@ -1,7 +1,9 @@
 package com.projectronin.interop.proxy.server
 
 import com.projectronin.interop.aidbox.testcontainer.AidboxData
-import com.projectronin.interop.aidbox.testcontainer.BaseAidboxTest
+import com.projectronin.interop.aidbox.testcontainer.AidboxTest
+import com.projectronin.interop.aidbox.testcontainer.container.AidboxContainer
+import com.projectronin.interop.aidbox.testcontainer.container.AidboxDatabaseContainer
 import com.projectronin.interop.common.jackson.JacksonManager
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -10,7 +12,7 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.web.client.TestRestTemplate
-import org.springframework.boot.web.server.LocalServerPort
+import org.springframework.boot.test.web.server.LocalServerPort
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
@@ -18,6 +20,7 @@ import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.DynamicPropertyRegistry
 import org.springframework.test.context.DynamicPropertySource
+import org.testcontainers.junit.jupiter.Container
 import java.net.URI
 import java.text.SimpleDateFormat
 
@@ -25,8 +28,15 @@ import java.text.SimpleDateFormat
 @ActiveProfiles("it")
 @ContextConfiguration(initializers = [(InteropProxyServerAuthInitializer::class)])
 @AidboxData("aidbox/practitioner3.yaml", "aidbox/patient1.yaml")
-class InteropProxyServerIntegratedNoteTests : BaseAidboxTest() {
+@AidboxTest
+class InteropProxyServerIntegratedNoteTests {
     companion object {
+        @Container
+        val aidboxDatabaseContainer = AidboxDatabaseContainer()
+
+        @Container
+        val aidbox = AidboxContainer(aidboxDatabaseContainer, version = "2206-lts")
+
         // allows us to dynamically change the aidbox port to the testcontainer instance
         @JvmStatic
         @DynamicPropertySource
@@ -34,6 +44,7 @@ class InteropProxyServerIntegratedNoteTests : BaseAidboxTest() {
             registry.add("aidbox.url") { "http://localhost:${aidbox.port()}" }
         }
     }
+
     @LocalServerPort
     private var port = 0
 
@@ -53,7 +64,8 @@ class InteropProxyServerIntegratedNoteTests : BaseAidboxTest() {
         val patientid = "654321"
         val practitionerid = "654321"
         val tenantId = "apposnd"
-        val mutation = """mutation sendNote(${'$'}noteInput: NoteInput!, ${'$'}tenantId: String!) {sendNote(noteInput: ${'$'}noteInput, tenantId: ${'$'}tenantId)}"""
+        val mutation =
+            """mutation sendNote(${'$'}noteInput: NoteInput!, ${'$'}tenantId: String!) {sendNote(noteInput: ${'$'}noteInput, tenantId: ${'$'}tenantId)}"""
         val query = """
             |{
             |   "query": "$mutation",
@@ -79,13 +91,15 @@ class InteropProxyServerIntegratedNoteTests : BaseAidboxTest() {
         assertFalse(resultJSONObject.has("errors"))
         assertTrue(resultJSONObject["data"]["sendNote"].asText().startsWith(docId))
     }
+
     @Test
     fun `server handles note mutation with patient MRN`() {
         val notetext = "Test Note"
         val patientid = "123456"
         val practitionerid = "654321"
         val tenantId = "apposnd"
-        val mutation = """mutation sendNote(${'$'}noteInput: NoteInput!, ${'$'}tenantId: String!) {sendNote(noteInput: ${'$'}noteInput, tenantId: ${'$'}tenantId)}"""
+        val mutation =
+            """mutation sendNote(${'$'}noteInput: NoteInput!, ${'$'}tenantId: String!) {sendNote(noteInput: ${'$'}noteInput, tenantId: ${'$'}tenantId)}"""
         val query = """
             |{
             |   "query": "$mutation",
@@ -118,7 +132,8 @@ class InteropProxyServerIntegratedNoteTests : BaseAidboxTest() {
         val patientid = "654321"
         val practitionerid = "123456"
         val tenantId = "apposnd"
-        val mutation = """mutation sendNote(${'$'}noteInput: NoteInput!, ${'$'}tenantId: String!) {sendNote(noteInput: ${'$'}noteInput, tenantId: ${'$'}tenantId)}"""
+        val mutation =
+            """mutation sendNote(${'$'}noteInput: NoteInput!, ${'$'}tenantId: String!) {sendNote(noteInput: ${'$'}noteInput, tenantId: ${'$'}tenantId)}"""
         val query = """
             |{
             |   "query": "$mutation",

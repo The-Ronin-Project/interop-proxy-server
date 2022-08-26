@@ -19,6 +19,7 @@ internal class EpicTest {
             practitionerUserSystem = "practitionerUserSystem",
             patientMRNSystem = "patientMrnSystem",
             patientInternalSystem = "patientInternalSystem",
+            encounterCSNSystem = "encounterCSNSystem",
             patientMRNTypeText = "patientMRNTypeText",
             hsi = "hsi",
             instanceName = "instanceName"
@@ -50,6 +51,7 @@ internal class EpicTest {
             practitionerUserSystem = "practitionerUserSystem",
             patientMRNSystem = "patientMrnSystem",
             patientInternalSystem = "patientInternalSystem",
+            encounterCSNSystem = "encounterCSNSystem",
             patientMRNTypeText = "patientMRNTypeText",
             hsi = "hsi",
             instanceName = "instanceName"
@@ -69,6 +71,7 @@ internal class EpicTest {
               "practitionerUserSystem" : "practitionerUserSystem",
               "patientMRNSystem" : "patientMrnSystem",
               "patientInternalSystem" : "patientInternalSystem",
+              "encounterCSNSystem" : "encounterCSNSystem",
               "patientMRNTypeText" : "patientMRNTypeText",
               "hsi" : "hsi",
               "instanceName" : "instanceName",
@@ -93,6 +96,7 @@ internal class EpicTest {
             practitionerUserSystem = "practitionerUserSystem",
             patientMRNSystem = "patientMrnSystem",
             patientInternalSystem = "patientInternalSystem",
+            encounterCSNSystem = "encounterCSNSystem",
             patientMRNTypeText = "patientMRNTypeText",
             hsi = null,
             instanceName = "instanceName"
@@ -112,6 +116,7 @@ internal class EpicTest {
               "practitionerUserSystem" : "practitionerUserSystem",
               "patientMRNSystem" : "patientMrnSystem",
               "patientInternalSystem" : "patientInternalSystem",
+              "encounterCSNSystem" : "encounterCSNSystem",
               "patientMRNTypeText" : "patientMRNTypeText",
               "instanceName" : "instanceName",
               "vendorType" : "EPIC"

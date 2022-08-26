@@ -6,11 +6,14 @@ import com.projectronin.interop.common.http.exceptions.ServiceUnavailableExcepti
 import com.projectronin.interop.common.logmarkers.LogMarkers
 import com.projectronin.interop.common.resource.ResourceType
 import com.projectronin.interop.ehr.factory.EHRFactory
-import com.projectronin.interop.ehr.model.Bundle
+import com.projectronin.interop.fhir.r4.datatype.CodeableConcept
+import com.projectronin.interop.fhir.r4.datatype.primitive.DateTime
+import com.projectronin.interop.fhir.r4.datatype.primitive.Id
 import com.projectronin.interop.proxy.server.context.INTEROP_CONTEXT_KEY
 import com.projectronin.interop.proxy.server.context.InteropGraphQLContext
 import com.projectronin.interop.proxy.server.model.Condition
 import com.projectronin.interop.proxy.server.model.ConditionCategoryCode
+import com.projectronin.interop.proxy.server.util.JacksonUtil
 import com.projectronin.interop.queue.QueueService
 import com.projectronin.interop.queue.model.ApiMessage
 import com.projectronin.interop.tenant.config.TenantService
@@ -21,6 +24,9 @@ import io.mockk.Runs
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
+import io.mockk.mockkObject
+import io.mockk.unmockkObject
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
@@ -33,7 +39,7 @@ import org.junit.jupiter.api.assertThrows
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.web.client.HttpClientErrorException
-import com.projectronin.interop.ehr.model.Condition as EHRCondition
+import com.projectronin.interop.fhir.r4.resource.Condition as R4Condition
 
 @TestInstance(Lifecycle.PER_CLASS)
 class ConditionHandlerTest {
@@ -51,6 +57,11 @@ class ConditionHandlerTest {
     fun initAllTests() {
         logger.addAppender(logAppender)
         logAppender.start()
+    }
+
+    @AfterEach
+    fun unMock() {
+        unmockkObject(JacksonUtil)
     }
 
     @BeforeEach
@@ -169,20 +180,20 @@ class ConditionHandlerTest {
     @Test
     fun `ensure condition is correctly returned`() {
         // Mock response
-        val condition1 = mockk<EHRCondition> {
-            every { id } returns "12345"
+        val condition1 = mockk<R4Condition> {
+            every { id } returns Id("12345")
             every { identifier } returns listOf(
                 mockk {
-                    every { system } returns "test-system"
+                    every { system?.value } returns "test-system"
                     every { value } returns "test-value"
                 }
             )
             every { clinicalStatus } returns mockk {
                 every { coding } returns listOf(
                     mockk {
-                        every { system } returns "test-system"
+                        every { system?.value } returns "test-system"
                         every { version } returns "test-version"
-                        every { code } returns "test-code"
+                        every { code?.value } returns "test-code"
                         every { display } returns "test-display"
                         every { userSelected } returns true
                     }
@@ -193,9 +204,9 @@ class ConditionHandlerTest {
                 mockk {
                     every { coding } returns listOf(
                         mockk {
-                            every { system } returns "test-system"
+                            every { system?.value } returns "test-system"
                             every { version } returns "test-version"
-                            every { code } returns "test-code"
+                            every { code?.value } returns "test-code"
                             every { display } returns "test-display"
                             every { userSelected } returns true
                         }
@@ -206,21 +217,18 @@ class ConditionHandlerTest {
             every { code } returns mockk {
                 every { coding } returns listOf(
                     mockk {
-                        every { system } returns "test-system"
+                        every { system?.value } returns "test-system"
                         every { version } returns "test-version"
-                        every { code } returns "test-code"
+                        every { code?.value } returns "test-code"
                         every { display } returns "test-display"
                         every { userSelected } returns true
                     }
                 )
                 every { text } returns "code text"
             }
-            every { raw } returns "raw JSON for condition"
-            every { recordedDate } returns "2021-03-08"
+            every { recordedDate } returns DateTime("2021-03-08")
         }
-        val response = mockk<Bundle<EHRCondition>> {
-            every { resources } returns listOf(condition1)
-        }
+        val response = listOf(condition1)
 
         every { tenant.mnemonic } returns "tenantId"
         every { tenantService.getTenantForMnemonic("tenantId") } returns tenant
@@ -238,7 +246,8 @@ class ConditionHandlerTest {
                 } returns response
             }
         }
-
+        mockkObject(JacksonUtil)
+        every { JacksonUtil.writeJsonValue(condition1) } returns "raw JSON for condition"
         every {
             queueService.enqueueMessages(
                 listOf(
@@ -271,20 +280,21 @@ class ConditionHandlerTest {
     @Test
     fun `ensure enqueueMessage exception still returns data to user`() {
         // Mock response
-        val condition1 = mockk<EHRCondition> {
-            every { id } returns "12345"
+        val condition1 = mockk<R4Condition> {
+            every { code } returns CodeableConcept("code")
+            every { id } returns Id("12345")
             every { identifier } returns listOf(
                 mockk {
-                    every { system } returns "test-system"
+                    every { system?.value } returns "test-system"
                     every { value } returns "test-value"
                 }
             )
             every { clinicalStatus } returns mockk {
                 every { coding } returns listOf(
                     mockk {
-                        every { system } returns "test-system"
+                        every { system?.value } returns "test-system"
                         every { version } returns "test-version"
-                        every { code } returns "test-code"
+                        every { code?.value } returns "test-code"
                         every { display } returns "test-display"
                         every { userSelected } returns true
                     }
@@ -295,9 +305,9 @@ class ConditionHandlerTest {
                 mockk {
                     every { coding } returns listOf(
                         mockk {
-                            every { system } returns "test-system"
+                            every { system?.value } returns "test-system"
                             every { version } returns "test-version"
-                            every { code } returns "test-code"
+                            every { code?.value } returns "test-code"
                             every { display } returns "test-display"
                             every { userSelected } returns true
                         }
@@ -305,13 +315,9 @@ class ConditionHandlerTest {
                     every { text } returns "category text"
                 }
             )
-            every { code } returns null
-            every { raw } returns "raw JSON for condition"
-            every { recordedDate } returns "2021-03-08"
+            every { recordedDate } returns DateTime("2021-03-08")
         }
-        val response = mockk<Bundle<EHRCondition>> {
-            every { resources } returns listOf(condition1)
-        }
+        val response = listOf(condition1)
 
         every { tenant.mnemonic } returns "tenantId"
         every { tenantService.getTenantForMnemonic("tenantId") } returns tenant
@@ -329,7 +335,8 @@ class ConditionHandlerTest {
                 } returns response
             }
         }
-
+        mockkObject(JacksonUtil)
+        every { JacksonUtil.writeJsonValue(condition1) } returns "raw JSON for condition"
         every {
             queueService.enqueueMessages(
                 listOf(
@@ -362,9 +369,7 @@ class ConditionHandlerTest {
     @Test
     fun `ensure when ehr returns no conditions none are returned`() {
         // Mock response
-        val response = mockk<Bundle<EHRCondition>> {
-            every { resources } returns listOf()
-        }
+        val response = listOf<R4Condition>()
 
         every { tenant.mnemonic } returns "tenantId"
         every { tenantService.getTenantForMnemonic("tenantId") } returns tenant

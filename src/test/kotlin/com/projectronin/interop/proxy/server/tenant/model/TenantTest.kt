@@ -25,6 +25,7 @@ class TenantTest {
                 practitionerUserSystem = "practitionerUserSystem",
                 patientMRNSystem = "patientMRNSystem",
                 patientInternalSystem = "patientInternalSystem",
+                encounterCSNSystem = "encounterCSNSystem",
                 patientMRNTypeText = "patientMRNTypeText",
                 hsi = null,
                 instanceName = "instanceName"
@@ -56,6 +57,7 @@ class TenantTest {
                 practitionerUserSystem = "practitionerUserSystem",
                 patientMRNSystem = "patientMRNSystem",
                 patientInternalSystem = "patientInternalSystem",
+                encounterCSNSystem = "encounterCSNSystem",
                 patientMRNTypeText = "patientMRNTypeText",
                 hsi = null,
                 instanceName = "Epic Sandbox"
@@ -81,6 +83,7 @@ class TenantTest {
                 "practitionerUserSystem" : "practitionerUserSystem",
                 "patientMRNSystem" : "patientMRNSystem",
                 "patientInternalSystem" : "patientInternalSystem",
+                "encounterCSNSystem" : "encounterCSNSystem",
                 "patientMRNTypeText" : "patientMRNTypeText",
                 "instanceName" : "Epic Sandbox",
                 "vendorType" : "EPIC"

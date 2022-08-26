@@ -1,10 +1,10 @@
 package com.projectronin.interop.proxy.server.model
 
 import com.expediagroup.graphql.generator.annotations.GraphQLDescription
-import com.projectronin.interop.ehr.model.Range as EHRRange
+import com.projectronin.interop.fhir.r4.datatype.Range as R4Range
 
 @GraphQLDescription("Set of values bounded by low and high")
-data class Range(private val period: EHRRange) {
+data class Range(private val period: R4Range) {
     @GraphQLDescription("Low limit")
     val low: SimpleQuantity? by lazy {
         period.low?.let { SimpleQuantity(it) }

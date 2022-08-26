@@ -129,6 +129,7 @@ class TenantControllerTests {
             practitionerUserSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.2.697780",
             patientMRNSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.5.737384.14",
             patientInternalSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.2.698084",
+            encounterCSNSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.5.737384.8",
             patientMRNTypeText = "MRN",
             hsi = null,
             instanceName = "Epic Sandbox"
@@ -168,6 +169,7 @@ class TenantControllerTests {
             practitionerUserSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.2.697780",
             patientMRNSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.5.737384.14",
             patientInternalSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.2.698084",
+            encounterCSNSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.5.737384.8",
             patientMRNTypeText = "Custom MRN",
             hsi = null,
             instanceName = "Epic Sandbox"
@@ -207,6 +209,7 @@ class TenantControllerTests {
             practitionerUserSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.2.697780",
             patientMRNSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.5.737384.14",
             patientInternalSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.2.698084",
+            encounterCSNSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.5.737384.8",
             patientMRNTypeText = "MRN",
             hsi = null,
             instanceName = "Epic Sandbox"
@@ -246,6 +249,7 @@ class TenantControllerTests {
             practitionerUserSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.2.697780",
             patientMRNSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.5.737384.14",
             patientInternalSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.2.698084",
+            encounterCSNSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.5.737384.8",
             patientMRNTypeText = "Custom MRN",
             hsi = null,
             instanceName = "Epic Sandbox"

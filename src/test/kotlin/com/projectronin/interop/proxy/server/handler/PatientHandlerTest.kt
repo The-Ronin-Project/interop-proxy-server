@@ -5,13 +5,18 @@ import ch.qos.logback.core.read.ListAppender
 import com.projectronin.interop.common.http.exceptions.ServiceUnavailableException
 import com.projectronin.interop.common.logmarkers.LogMarkers
 import com.projectronin.interop.common.resource.ResourceType
+import com.projectronin.interop.ehr.IdentifierService
+import com.projectronin.interop.ehr.PatientService
 import com.projectronin.interop.ehr.factory.EHRFactory
-import com.projectronin.interop.ehr.model.Bundle
 import com.projectronin.interop.fhir.r4.datatype.Identifier
+import com.projectronin.interop.fhir.r4.datatype.primitive.Date
+import com.projectronin.interop.fhir.r4.datatype.primitive.Id
 import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
+import com.projectronin.interop.fhir.ronin.resource.OncologyPatient
 import com.projectronin.interop.proxy.server.context.INTEROP_CONTEXT_KEY
 import com.projectronin.interop.proxy.server.context.InteropGraphQLContext
 import com.projectronin.interop.proxy.server.model.Patient
+import com.projectronin.interop.proxy.server.util.JacksonUtil
 import com.projectronin.interop.queue.QueueService
 import com.projectronin.interop.queue.model.ApiMessage
 import com.projectronin.interop.tenant.config.TenantService
@@ -22,6 +27,10 @@ import io.mockk.Runs
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
+import io.mockk.mockkConstructor
+import io.mockk.mockkObject
+import io.mockk.unmockkObject
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
@@ -35,7 +44,7 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.web.client.HttpClientErrorException
 import java.time.LocalDate
-import com.projectronin.interop.ehr.model.Patient as EHRPatient
+import com.projectronin.interop.fhir.r4.resource.Patient as R4Patient
 
 @TestInstance(Lifecycle.PER_CLASS)
 class PatientHandlerTest {
@@ -43,6 +52,7 @@ class PatientHandlerTest {
     private lateinit var tenantService: TenantService
     private lateinit var queueService: QueueService
     private lateinit var patientHandler: PatientHandler
+    private lateinit var identifierService: IdentifierService
     private lateinit var dfe: DataFetchingEnvironment
 
     private val logger = LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME) as ch.qos.logback.classic.Logger
@@ -54,11 +64,17 @@ class PatientHandlerTest {
         logAppender.start()
     }
 
+    @AfterEach
+    fun unMock() {
+        unmockkObject(JacksonUtil)
+    }
+
     @BeforeEach
     fun initTest() {
         ehrFactory = mockk()
         tenantService = mockk()
         queueService = mockk()
+        identifierService = mockk()
         dfe = mockk()
         patientHandler = PatientHandler(ehrFactory, tenantService, queueService)
     }
@@ -206,11 +222,11 @@ class PatientHandlerTest {
 
     @Test
     fun `ensure full patient is correctly returned`() {
-        val patient1 = mockk<EHRPatient> {
-            every { id } returns "Patient-UUID-1"
+        val patient1 = mockk<R4Patient> {
+            every { id } returns Id("Patient-UUID-1")
             every { identifier } returns listOf(
                 mockk {
-                    every { system } returns "http://hl7.org/fhir/sid/us-ssn"
+                    every { system?.value } returns "http://hl7.org/fhir/sid/us-ssn"
                     every { value } returns "987-65-4321"
                 }
             )
@@ -221,7 +237,7 @@ class PatientHandlerTest {
                     every { given } returns listOf("Josh")
                 }
             )
-            every { birthDate } returns "1984-08-31"
+            every { birthDate } returns Date("1984-08-31")
             every { gender } returns com.projectronin.interop.fhir.r4.valueset.AdministrativeGender.MALE
             every { telecom } returns listOf(
                 mockk {
@@ -239,11 +255,8 @@ class PatientHandlerTest {
                     every { postalCode } returns "37890"
                 }
             )
-            every { raw } returns "raw JSON for patient"
         }
-        val response = mockk<Bundle<EHRPatient>> {
-            every { resources } returns listOf(patient1)
-        }
+        val response = listOf(patient1)
 
         val tenant = mockk<Tenant>()
         every { tenant.mnemonic } returns "tenantId"
@@ -256,22 +269,21 @@ class PatientHandlerTest {
                 value = "1234"
             )
         )
-        every { ehrFactory.getVendorFactory(tenant) } returns mockk {
-            every { patientService } returns mockk {
-                every {
-                    findPatient(
-                        tenant = tenant,
-                        birthDate = LocalDate.of(1984, 8, 31),
-                        familyName = "Smith",
-                        givenName = "Josh"
-                    )
-                } returns response
-            }
-            every { patientTransformer } returns mockk {
-                every { getRoninIdentifiers(patient1, tenant) } returns roninIdentifiers
-            }
-        }
-
+        val patientService = mockk<PatientService>()
+        every { ehrFactory.getVendorFactory(tenant).patientService } returns patientService
+        every {
+            patientService.findPatient(
+                tenant = tenant,
+                birthDate = LocalDate.of(1984, 8, 31),
+                familyName = "Smith",
+                givenName = "Josh"
+            )
+        } returns response
+        mockkConstructor(OncologyPatient::class)
+        every { ehrFactory.getVendorFactory(tenant).identifierService } returns identifierService
+        every { anyConstructed<OncologyPatient>().getRoninIdentifiers(patient1, tenant) } returns roninIdentifiers
+        mockkObject(JacksonUtil)
+        every { JacksonUtil.writeJsonValue(patient1) } returns "raw JSON for patient"
         every {
             queueService.enqueueMessages(
                 listOf(
@@ -304,11 +316,11 @@ class PatientHandlerTest {
 
     @Test
     fun `ensure full patient is correctly returned for machine 2 machine auth (no user)`() {
-        val patient1 = mockk<EHRPatient> {
-            every { id } returns "Patient-UUID-1"
+        val patient1 = mockk<R4Patient> {
+            every { id } returns Id("Patient-UUID-1")
             every { identifier } returns listOf(
                 mockk {
-                    every { system } returns "http://hl7.org/fhir/sid/us-ssn"
+                    every { system?.value } returns "http://hl7.org/fhir/sid/us-ssn"
                     every { value } returns "987-65-4321"
                 }
             )
@@ -319,7 +331,7 @@ class PatientHandlerTest {
                     every { given } returns listOf("Josh")
                 }
             )
-            every { birthDate } returns "1984-08-31"
+            every { birthDate } returns Date("1984-08-31")
             every { gender } returns com.projectronin.interop.fhir.r4.valueset.AdministrativeGender.MALE
             every { telecom } returns listOf(
                 mockk {
@@ -337,11 +349,8 @@ class PatientHandlerTest {
                     every { postalCode } returns "37890"
                 }
             )
-            every { raw } returns "raw JSON for patient"
         }
-        val response = mockk<Bundle<EHRPatient>> {
-            every { resources } returns listOf(patient1)
-        }
+        val response = listOf(patient1)
 
         val tenant = mockk<Tenant>()
         every { tenant.mnemonic } returns "tenantId"
@@ -355,22 +364,21 @@ class PatientHandlerTest {
                 value = "1234"
             )
         )
-        every { ehrFactory.getVendorFactory(tenant) } returns mockk {
-            every { patientService } returns mockk {
-                every {
-                    findPatient(
-                        tenant = tenant,
-                        birthDate = LocalDate.of(1984, 8, 31),
-                        familyName = "Smith",
-                        givenName = "Josh"
-                    )
-                } returns response
-            }
-            every { patientTransformer } returns mockk {
-                every { getRoninIdentifiers(patient1, tenant) } returns roninIdentifiers
-            }
-        }
-
+        val patientService = mockk<PatientService>()
+        every { ehrFactory.getVendorFactory(tenant).patientService } returns patientService
+        every {
+            patientService.findPatient(
+                tenant = tenant,
+                birthDate = LocalDate.of(1984, 8, 31),
+                familyName = "Smith",
+                givenName = "Josh"
+            )
+        } returns response
+        mockkConstructor(OncologyPatient::class)
+        every { ehrFactory.getVendorFactory(tenant).identifierService } returns identifierService
+        every { anyConstructed<OncologyPatient>().getRoninIdentifiers(patient1, tenant) } returns roninIdentifiers
+        mockkObject(JacksonUtil)
+        every { JacksonUtil.writeJsonValue(patient1) } returns "raw JSON for patient"
         every {
             queueService.enqueueMessages(
                 listOf(
@@ -403,11 +411,11 @@ class PatientHandlerTest {
 
     @Test
     fun `ensure enqueueMessage exception still returns data to user`() {
-        val patient1 = mockk<EHRPatient> {
-            every { id } returns "Patient-UUID-1"
+        val patient1 = mockk<R4Patient> {
+            every { id } returns Id("Patient-UUID-1")
             every { identifier } returns listOf(
                 mockk {
-                    every { system } returns "http://hl7.org/fhir/sid/us-ssn"
+                    every { system?.value } returns "http://hl7.org/fhir/sid/us-ssn"
                     every { value } returns "987-65-4321"
                 }
             )
@@ -418,7 +426,7 @@ class PatientHandlerTest {
                     every { given } returns listOf("Josh")
                 }
             )
-            every { birthDate } returns "1984-08-31"
+            every { birthDate } returns Date("1984-08-31")
             every { gender } returns com.projectronin.interop.fhir.r4.valueset.AdministrativeGender.MALE
             every { telecom } returns listOf(
                 mockk {
@@ -436,11 +444,8 @@ class PatientHandlerTest {
                     every { postalCode } returns "37890"
                 }
             )
-            every { raw } returns "raw JSON for patient"
         }
-        val response = mockk<Bundle<EHRPatient>> {
-            every { resources } returns listOf(patient1)
-        }
+        val response = listOf(patient1)
 
         val tenant = mockk<Tenant>()
         every { tenant.mnemonic } returns "tenantId"
@@ -453,22 +458,19 @@ class PatientHandlerTest {
                 value = "1234"
             )
         )
-        every { ehrFactory.getVendorFactory(tenant) } returns mockk {
-            every { patientService } returns mockk {
-                every {
-                    findPatient(
-                        tenant = tenant,
-                        birthDate = LocalDate.of(1984, 8, 31),
-                        familyName = "Smith",
-                        givenName = "Josh"
-                    )
-                } returns response
-            }
-            every { patientTransformer } returns mockk {
-                every { getRoninIdentifiers(patient1, tenant) } returns roninIdentifiers
-            }
-        }
-
+        val patientService = mockk<PatientService>()
+        every { ehrFactory.getVendorFactory(tenant).patientService } returns patientService
+        every {
+            patientService.findPatient(
+                tenant = tenant,
+                birthDate = LocalDate.of(1984, 8, 31),
+                familyName = "Smith",
+                givenName = "Josh"
+            )
+        } returns response
+        mockkConstructor(OncologyPatient::class)
+        every { ehrFactory.getVendorFactory(tenant).identifierService } returns identifierService
+        every { anyConstructed<OncologyPatient>().getRoninIdentifiers(patient1, tenant) } returns roninIdentifiers
         every {
             queueService.enqueueMessages(
                 listOf(
@@ -501,9 +503,7 @@ class PatientHandlerTest {
 
     @Test
     fun `ensure when ehr returns no patients no patients are returned`() {
-        val response = mockk<Bundle<EHRPatient>> {
-            every { resources } returns listOf()
-        }
+        val response = listOf<R4Patient>()
 
         val tenant = mockk<Tenant>()
         every { tenant.mnemonic } returns "tenantId"

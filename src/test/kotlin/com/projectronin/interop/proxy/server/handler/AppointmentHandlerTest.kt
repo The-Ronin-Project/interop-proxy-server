@@ -6,20 +6,27 @@ import com.projectronin.interop.common.http.exceptions.ServiceUnavailableExcepti
 import com.projectronin.interop.common.logmarkers.LogMarkers
 import com.projectronin.interop.common.resource.ResourceType
 import com.projectronin.interop.ehr.factory.EHRFactory
-import com.projectronin.interop.ehr.model.Bundle
+import com.projectronin.interop.fhir.r4.datatype.primitive.Id
+import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
+import com.projectronin.interop.fhir.r4.valueset.AppointmentStatus
 import com.projectronin.interop.proxy.server.context.INTEROP_CONTEXT_KEY
 import com.projectronin.interop.proxy.server.context.InteropGraphQLContext
 import com.projectronin.interop.proxy.server.model.Appointment
+import com.projectronin.interop.proxy.server.util.JacksonUtil
 import com.projectronin.interop.queue.QueueService
 import com.projectronin.interop.queue.model.ApiMessage
 import com.projectronin.interop.tenant.config.TenantService
 import com.projectronin.interop.tenant.config.model.Tenant
+import com.projectronin.interop.tenant.config.model.vendor.Epic
 import graphql.schema.DataFetchingEnvironment
 import io.ktor.http.HttpStatusCode
 import io.mockk.Runs
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
+import io.mockk.mockkObject
+import io.mockk.unmockkObject
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
@@ -33,7 +40,7 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.web.client.HttpClientErrorException
 import java.time.LocalDate
-import com.projectronin.interop.ehr.model.Appointment as EHRAppointment
+import com.projectronin.interop.fhir.r4.resource.Appointment as R4Appointment
 
 @TestInstance(Lifecycle.PER_CLASS)
 class AppointmentHandlerTest {
@@ -52,6 +59,11 @@ class AppointmentHandlerTest {
         logAppender.start()
     }
 
+    @AfterEach
+    fun unMock() {
+        unmockkObject(JacksonUtil)
+    }
+
     @BeforeEach
     fun initTest() {
         ehrFactory = mockk()
@@ -68,9 +80,9 @@ class AppointmentHandlerTest {
 
         // Run Test
         val exception = assertThrows<HttpClientErrorException> {
-            appointmentHandler.appointmentsByMRNAndDate(
+            appointmentHandler.appointmentsByPatientAndDate(
                 tenantId = "tenantId",
-                mrn = "123456789",
+                patientFhirId = "123456789",
                 startDate = "2025-01-20",
                 endDate = "2025-01-22",
                 dfe = dfe
@@ -87,9 +99,9 @@ class AppointmentHandlerTest {
 
         // Run Test
         val exception = assertThrows<HttpClientErrorException> {
-            appointmentHandler.appointmentsByMRNAndDate(
+            appointmentHandler.appointmentsByPatientAndDate(
                 tenantId = "tenantId",
-                mrn = "123456789",
+                patientFhirId = "123456789",
                 startDate = "2025-01-20",
                 endDate = "2025-01-22",
                 dfe = dfe
@@ -107,9 +119,9 @@ class AppointmentHandlerTest {
 
         // Run Test
         val exception = assertThrows<HttpClientErrorException> {
-            appointmentHandler.appointmentsByMRNAndDate(
+            appointmentHandler.appointmentsByPatientAndDate(
                 tenantId = "tenantId",
-                mrn = "123456789",
+                patientFhirId = "123456789",
                 startDate = "2025-01-20",
                 endDate = "2025-01-22",
                 dfe = dfe
@@ -131,9 +143,9 @@ class AppointmentHandlerTest {
         every { ehrFactory.getVendorFactory(tenant) } throws IllegalStateException("Error")
 
         // Run Test
-        val result = appointmentHandler.appointmentsByMRNAndDate(
+        val result = appointmentHandler.appointmentsByPatientAndDate(
             tenantId = "tenantId",
-            mrn = "123456789",
+            patientFhirId = "123456789",
             startDate = "2025-01-20",
             endDate = "2025-01-22",
             dfe = dfe
@@ -155,7 +167,7 @@ class AppointmentHandlerTest {
                 every {
                     findPatientAppointments(
                         tenant = tenant,
-                        patientMRN = "123456789",
+                        patientFHIRId = "123456789",
                         startDate = LocalDate.of(2025, 1, 20),
                         endDate = LocalDate.of(2025, 1, 22)
                     )
@@ -166,9 +178,9 @@ class AppointmentHandlerTest {
         every { queueService.enqueueMessages(listOf()) } just Runs
 
         // Run Test
-        val result = appointmentHandler.appointmentsByMRNAndDate(
+        val result = appointmentHandler.appointmentsByPatientAndDate(
             tenantId = "tenantId",
-            mrn = "123456789",
+            patientFhirId = "123456789",
             startDate = "2025-01-20",
             endDate = "2025-01-22",
             dfe = dfe
@@ -191,7 +203,7 @@ class AppointmentHandlerTest {
                 every {
                     findPatientAppointments(
                         tenant = tenant,
-                        patientMRN = "123456789",
+                        patientFHIRId = "123456789",
                         startDate = LocalDate.of(2025, 1, 20),
                         endDate = LocalDate.of(2025, 1, 22)
                     )
@@ -202,9 +214,9 @@ class AppointmentHandlerTest {
         every { queueService.enqueueMessages(listOf()) } just Runs
 
         // Run Test
-        val result = appointmentHandler.appointmentsByMRNAndDate(
+        val result = appointmentHandler.appointmentsByPatientAndDate(
             tenantId = "tenantId",
-            mrn = "123456789",
+            patientFhirId = "123456789",
             startDate = "2025-01-20",
             endDate = "2025-01-22",
             dfe = dfe
@@ -218,21 +230,21 @@ class AppointmentHandlerTest {
     @Test
     fun `ensure full appointment is correctly returned`() {
         // Mock response
-        val appointment1 = mockk<EHRAppointment> {
-            every { id } returns "APPT-ID-1"
+        val appointment1 = mockk<R4Appointment> {
+            every { id } returns Id("APPT-ID-1")
             every { identifier } returns listOf(
                 mockk {
-                    every { system } returns "test-system"
+                    every { system?.value } returns "test-system"
                     every { value } returns "test-value"
                 }
             )
-            every { status } returns com.projectronin.interop.fhir.r4.valueset.AppointmentStatus.BOOKED
+            every { status.code } returns AppointmentStatus.BOOKED.code
             every { appointmentType } returns mockk {
                 every { coding } returns listOf(
                     mockk {
-                        every { system } returns "test-system"
+                        every { system?.value } returns "test-system"
                         every { version } returns "test-version"
-                        every { code } returns "test-code"
+                        every { code?.value } returns "test-code"
                         every { display } returns "test-appt-type"
                         every { userSelected } returns true
                     }
@@ -243,9 +255,9 @@ class AppointmentHandlerTest {
                 mockk {
                     every { coding } returns listOf(
                         mockk {
-                            every { system } returns "test-system"
+                            every { system?.value } returns "test-system"
                             every { version } returns "test-version"
-                            every { code } returns "test-code"
+                            every { code?.value } returns "test-code"
                             every { display } returns "test-service-type"
                             every { userSelected } returns true
                         }
@@ -253,26 +265,23 @@ class AppointmentHandlerTest {
                     every { text } returns "service-type-text"
                 }
             )
-            every { start } returns "2025-01-21"
-            every { raw } returns "raw JSON for appointment"
-            every { participants } returns listOf(
+            every { start?.value } returns "2025-01-21"
+            every { participant } returns listOf(
                 mockk {
                     every { actor } returns mockk {
                         every { reference } returns "test-reference"
                         every { display } returns "test-display"
-                        every { type } returns com.projectronin.interop.ehr.model.ReferenceTypes.PRACTITIONER
+                        every { type } returns Uri("Practitioner")
                         every { id } returns "test-id"
                         every { identifier } returns mockk {
-                            every { system } returns "test-system"
+                            every { system?.value } returns "test-system"
                             every { value } returns "test-value"
                         }
                     }
                 }
             )
         }
-        val response = mockk<Bundle<EHRAppointment>> {
-            every { resources } returns listOf(appointment1)
-        }
+        val response = listOf(appointment1)
 
         val tenant = mockk<Tenant>()
         every { tenant.mnemonic } returns "tenantId"
@@ -284,15 +293,15 @@ class AppointmentHandlerTest {
                 every {
                     findPatientAppointments(
                         tenant = tenant,
-                        patientMRN = "123456789",
+                        patientFHIRId = "123456789",
                         startDate = LocalDate.of(2025, 1, 20),
                         endDate = LocalDate.of(2025, 1, 22)
                     )
                 } returns response
             }
-            every { serializeObject(appointment1) } returns "serializedAppt"
         }
-
+        mockkObject(JacksonUtil)
+        every { JacksonUtil.writeJsonValue(appointment1) } returns "serializedAppt"
         every {
             queueService.enqueueMessages(
                 listOf(
@@ -307,9 +316,9 @@ class AppointmentHandlerTest {
         } just Runs
 
         // Run test
-        val actualResponse = appointmentHandler.appointmentsByMRNAndDate(
+        val actualResponse = appointmentHandler.appointmentsByPatientAndDate(
             tenantId = "tenantId",
-            mrn = "123456789",
+            patientFhirId = "123456789",
             startDate = "2025-01-20",
             endDate = "2025-01-22",
             dfe = dfe
@@ -321,26 +330,27 @@ class AppointmentHandlerTest {
         val appointments = actualResponse.data
         assertEquals(1, appointments.size)
         assertEquals(Appointment(appointment1, tenant), appointments[0])
+        unmockkObject(JacksonUtil)
     }
 
     @Test
     fun `ensure enqueueMessage exception still returns data to user`() {
         // Mock response
-        val appointment1 = mockk<EHRAppointment> {
-            every { id } returns "APPT-ID-1"
+        val appointment1 = mockk<R4Appointment> {
+            every { id } returns Id("APPT-ID-1")
             every { identifier } returns listOf(
                 mockk {
-                    every { system } returns "test-system"
+                    every { system?.value } returns "test-system"
                     every { value } returns "test-value"
                 }
             )
-            every { status } returns com.projectronin.interop.fhir.r4.valueset.AppointmentStatus.BOOKED
+            every { status?.code } returns AppointmentStatus.BOOKED.code
             every { appointmentType } returns mockk {
                 every { coding } returns listOf(
                     mockk {
-                        every { system } returns "test-system"
+                        every { system?.value } returns "test-system"
                         every { version } returns "test-version"
-                        every { code } returns "test-code"
+                        every { code?.value } returns "test-code"
                         every { display } returns "test-appt-type"
                         every { userSelected } returns true
                     }
@@ -351,9 +361,9 @@ class AppointmentHandlerTest {
                 mockk {
                     every { coding } returns listOf(
                         mockk {
-                            every { system } returns "test-system"
+                            every { system?.value } returns "test-system"
                             every { version } returns "test-version"
-                            every { code } returns "test-code"
+                            every { code?.value } returns "test-code"
                             every { display } returns "test-service-type"
                             every { userSelected } returns true
                         }
@@ -361,13 +371,10 @@ class AppointmentHandlerTest {
                     every { text } returns "service-type-text"
                 }
             )
-            every { start } returns "2025-01-21"
-            every { raw } returns "raw JSON for appointment"
-            every { participants } returns listOf()
+            every { start?.value } returns "2025-01-21"
+            every { participant } returns listOf()
         }
-        val response = mockk<Bundle<EHRAppointment>> {
-            every { resources } returns listOf(appointment1)
-        }
+        val response = listOf(appointment1)
 
         val tenant = mockk<Tenant>()
         every { tenant.mnemonic } returns "tenantId"
@@ -379,15 +386,15 @@ class AppointmentHandlerTest {
                 every {
                     findPatientAppointments(
                         tenant = tenant,
-                        patientMRN = "123456789",
+                        patientFHIRId = "123456789",
                         startDate = LocalDate.of(2025, 1, 20),
                         endDate = LocalDate.of(2025, 1, 22)
                     )
                 } returns response
             }
-            every { serializeObject(appointment1) } returns "serializedAppt"
         }
-
+        mockkObject(JacksonUtil)
+        every { JacksonUtil.writeJsonValue(appointment1) } returns "serializedAppt"
         every {
             queueService.enqueueMessages(
                 listOf(
@@ -402,9 +409,9 @@ class AppointmentHandlerTest {
         } throws (Exception("exception"))
 
         // Run test
-        val actualResponse = appointmentHandler.appointmentsByMRNAndDate(
+        val actualResponse = appointmentHandler.appointmentsByPatientAndDate(
             tenantId = "tenantId",
-            mrn = "123456789",
+            patientFhirId = "123456789",
             startDate = "2025-01-20",
             endDate = "2025-01-22",
             dfe = dfe
@@ -421,9 +428,7 @@ class AppointmentHandlerTest {
     @Test
     fun `ensure when ehr returns no appointments none are returned`() {
         // Mock response
-        val response = mockk<Bundle<EHRAppointment>> {
-            every { resources } returns listOf()
-        }
+        val response = listOf<R4Appointment>()
 
         val tenant = mockk<Tenant>()
         every { tenant.mnemonic } returns "tenantId"
@@ -435,7 +440,7 @@ class AppointmentHandlerTest {
                 every {
                     findPatientAppointments(
                         tenant = tenant,
-                        patientMRN = "123456789",
+                        patientFHIRId = "123456789",
                         startDate = LocalDate.of(2025, 1, 20),
                         endDate = LocalDate.of(2025, 1, 22)
                     )
@@ -444,9 +449,62 @@ class AppointmentHandlerTest {
         }
 
         // Run test
+        val actualResponse = appointmentHandler.appointmentsByPatientAndDate(
+            tenantId = "tenantId",
+            patientFhirId = "123456789",
+            startDate = "2025-01-20",
+            endDate = "2025-01-22",
+            dfe = dfe
+        )
+
+        // Check results
+        assertNotNull(actualResponse)
+        assertEquals(0, actualResponse.data.size)
+    }
+
+    @Test
+    fun `test MRN function`() {
+        // Mock response
+        val response = listOf<R4Appointment>()
+
+        val tenant = mockk<Tenant>()
+        every { tenant.mnemonic } returns "tenantId"
+        every { tenantService.getTenantForMnemonic("tenantId") } returns tenant
+        every { dfe.graphQlContext.get<InteropGraphQLContext>(INTEROP_CONTEXT_KEY).authzTenantId } returns "tenantId"
+
+        every { tenant.vendor } returns mockk<Epic> {
+            every { patientMRNSystem } returns "MRNSYSTEM"
+        }
+
+        every { ehrFactory.getVendorFactory(tenant) } returns mockk {
+            every { appointmentService } returns mockk {
+                every {
+                    findPatientAppointments(
+                        tenant = tenant,
+                        patientFHIRId = "FHIRID",
+                        startDate = LocalDate.of(2025, 1, 20),
+                        endDate = LocalDate.of(2025, 1, 22)
+                    )
+                } returns response
+            }
+        }
+
+        every { ehrFactory.getVendorFactory(tenant) } returns mockk {
+            every { patientService } returns mockk {
+                every {
+                    getPatientFHIRId(
+                        tenant = tenant,
+                        patientIDSystem = "MRNSYSTEM",
+                        patientIDValue = "MRN"
+                    ).fhirID
+                } returns "FHIRID"
+            }
+        }
+
+        // Run test
         val actualResponse = appointmentHandler.appointmentsByMRNAndDate(
             tenantId = "tenantId",
-            mrn = "123456789",
+            mrn = "MRN",
             startDate = "2025-01-20",
             endDate = "2025-01-22",
             dfe = dfe

@@ -1,11 +1,11 @@
 package com.projectronin.interop.proxy.server.model
 
 import com.expediagroup.graphql.generator.annotations.GraphQLDescription
-import com.projectronin.interop.ehr.model.Condition
+import com.projectronin.interop.fhir.r4.datatype.ConditionStage
 import com.projectronin.interop.tenant.config.model.Tenant
 
 @GraphQLDescription("Stage/grade, usually assessed formally")
-data class Stage(private val stage: Condition.Stage, private val tenant: Tenant) {
+data class Stage(private val stage: ConditionStage, private val tenant: Tenant) {
     @GraphQLDescription("Simple summary (disease specific)")
     val summary: CodeableConcept? by lazy {
         stage.summary?.let { CodeableConcept(it) }

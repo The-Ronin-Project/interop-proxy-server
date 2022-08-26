@@ -1,10 +1,9 @@
 package com.projectronin.interop.proxy.server.model
 
 import com.expediagroup.graphql.generator.annotations.GraphQLDescription
-import com.projectronin.interop.ehr.model.HumanName as EHRHumanName
-
+import com.projectronin.interop.fhir.r4.datatype.HumanName as R4HumanName
 @GraphQLDescription("The name of a person")
-data class HumanName(private val humanName: EHRHumanName) {
+data class HumanName(private val humanName: R4HumanName) {
     @GraphQLDescription("Defines the use of this name (e.g. official, nickname, maiden, etc)")
     val use: String? = humanName.use?.code
 

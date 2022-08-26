@@ -1,10 +1,10 @@
 package com.projectronin.interop.proxy.server.model
 
 import com.expediagroup.graphql.generator.annotations.GraphQLDescription
-import com.projectronin.interop.ehr.model.Address as EHRAddress
+import com.projectronin.interop.fhir.r4.datatype.Address as R4Address
 
 @GraphQLDescription("A physical address")
-data class Address(private val address: EHRAddress) {
+data class Address(private val address: R4Address) {
     @GraphQLDescription("Purpose of address - home | work | temp | old | billing")
     val use: String? = address.use?.code
 

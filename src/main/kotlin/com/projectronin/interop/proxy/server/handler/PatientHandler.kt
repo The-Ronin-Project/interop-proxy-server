@@ -6,7 +6,9 @@ import com.expediagroup.graphql.server.operations.Query
 import com.projectronin.interop.common.logmarkers.getLogMarker
 import com.projectronin.interop.common.resource.ResourceType
 import com.projectronin.interop.ehr.factory.EHRFactory
+import com.projectronin.interop.fhir.ronin.resource.OncologyPatient
 import com.projectronin.interop.proxy.server.util.DateUtil
+import com.projectronin.interop.proxy.server.util.JacksonUtil
 import com.projectronin.interop.queue.QueueService
 import com.projectronin.interop.queue.model.ApiMessage
 import com.projectronin.interop.tenant.config.TenantService
@@ -17,7 +19,7 @@ import graphql.execution.DataFetcherResult
 import graphql.schema.DataFetchingEnvironment
 import mu.KotlinLogging
 import org.springframework.stereotype.Component
-import com.projectronin.interop.ehr.model.Patient as EHRPatient
+import com.projectronin.interop.fhir.r4.resource.Patient as R4Patient
 import com.projectronin.interop.proxy.server.model.Patient as ProxyServerPatient
 
 /**
@@ -27,7 +29,7 @@ import com.projectronin.interop.proxy.server.model.Patient as ProxyServerPatient
 class PatientHandler(
     private val ehrFactory: EHRFactory,
     private val tenantService: TenantService,
-    private val queueService: QueueService
+    private val queueService: QueueService,
 ) : Query {
     private val logger = KotlinLogging.logger { }
     private val dateFormatter = DateUtil()
@@ -56,7 +58,7 @@ class PatientHandler(
                 familyName = family,
                 givenName = given,
                 birthDate = dateFormatter.parseDateString(birthdate)
-            ).resources
+            )
         } catch (e: Exception) {
             findPatientErrors.add(GraphQLException(e.message).toGraphQLError())
             logger.error(e.getLogMarker(), e) { "Patient query for tenant $tenantId contains errors" }
@@ -73,7 +75,7 @@ class PatientHandler(
                         id = null,
                         resourceType = ResourceType.PATIENT,
                         tenant = tenantId,
-                        text = it.raw
+                        text = JacksonUtil.writeJsonValue(it)
                     )
                 }
             )
@@ -84,22 +86,16 @@ class PatientHandler(
         logger.debug { "Patient results for $tenantId sent to queue" }
 
         // Translate for return
-        return DataFetcherResult.newResult<List<ProxyServerPatient>>().data(mapEHRPatients(patients, tenant))
+        return DataFetcherResult.newResult<List<ProxyServerPatient>>().data(mapFHIRPatients(patients, tenant))
             .errors(findPatientErrors).build()
     }
 
     /**
-     * Translates a list of [EHRPatient]s into the appropriate list of proxy server [ProxyServerPatient]s for return.
+     * Translates a list of [R4Patient]s into the appropriate list of proxy server [ProxyServerPatient]s for return.
      */
-    private fun mapEHRPatients(ehrPatients: List<EHRPatient>, tenant: Tenant): List<ProxyServerPatient> {
-        if (ehrPatients.isEmpty()) {
-            return emptyList()
-        }
-
-        val patientTransformer = ehrFactory.getVendorFactory(tenant).patientTransformer
-        return ehrPatients.map {
-            val roninIdentifiers = patientTransformer.getRoninIdentifiers(it, tenant)
-            ProxyServerPatient(it, tenant, roninIdentifiers)
-        }
+    private fun mapFHIRPatients(fhirPatients: List<R4Patient>, tenant: Tenant): List<ProxyServerPatient> {
+        if (fhirPatients.isEmpty()) return emptyList()
+        val oncologyPatient = OncologyPatient.create(ehrFactory.getVendorFactory(tenant).identifierService)
+        return fhirPatients.map { ProxyServerPatient(it, tenant, oncologyPatient.getRoninIdentifiers(it, tenant)) }
     }
 }

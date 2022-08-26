@@ -6,19 +6,15 @@ import io.mockk.mockk
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test
-import com.projectronin.interop.ehr.model.Age as EHRAge
-import com.projectronin.interop.ehr.model.Condition.AgeAbatement as EHRAgeAbatement
-import com.projectronin.interop.ehr.model.Condition.DateTimeAbatement as EHRDateTimeAbatement
-import com.projectronin.interop.ehr.model.Condition.PeriodAbatement as EHRPeriodAbatement
-import com.projectronin.interop.ehr.model.Condition.RangeAbatement as EHRRangeAbatement
-import com.projectronin.interop.ehr.model.Condition.StringAbatement as EHRStringAbatement
-import com.projectronin.interop.ehr.model.Period as EHRPeriod
-import com.projectronin.interop.ehr.model.Range as EHRRange
+import com.projectronin.interop.fhir.r4.datatype.Age as R4Age
+import com.projectronin.interop.fhir.r4.datatype.Period as R4Period
+import com.projectronin.interop.fhir.r4.datatype.Range as R4Range
+import com.projectronin.interop.fhir.r4.datatype.primitive.DateTime as R4DateTime
 
 class AbatementTest {
     @Test
     fun `creates date time abatement`() {
-        val ehrDateTimeAbatement = mockk<EHRDateTimeAbatement> {
+        val ehrDateTimeAbatement = mockk<R4DateTime> {
             every { value } returns "2022-03-09"
         }
         val abatement = DateTimeAbatement(ehrDateTimeAbatement)
@@ -27,40 +23,30 @@ class AbatementTest {
 
     @Test
     fun `creates age abatement`() {
-        val ehrAge = relaxedMockk<EHRAge>()
-        val ehrAgeAbatement = mockk<EHRAgeAbatement> {
-            every { value } returns ehrAge
-        }
-        val abatement = AgeAbatement(ehrAgeAbatement)
+        val ehrAge = relaxedMockk<R4Age>()
+        every { ehrAge.value } returns 10.0
+        val abatement = AgeAbatement(ehrAge)
         assertNotNull(abatement.value)
     }
 
     @Test
     fun `creates period abatement`() {
-        val ehrPeriod = relaxedMockk<EHRPeriod>()
-        val ehrPeriodAbatement = mockk<EHRPeriodAbatement> {
-            every { value } returns ehrPeriod
-        }
-        val abatement = PeriodAbatement(ehrPeriodAbatement)
+        val ehrPeriod = relaxedMockk<R4Period>()
+        every { ehrPeriod.id } returns "1"
+        val abatement = PeriodAbatement(ehrPeriod)
         assertNotNull(abatement.value)
     }
 
     @Test
     fun `creates range abatement`() {
-        val ehrRange = relaxedMockk<EHRRange>()
-        val ehrRangeAbatement = mockk<EHRRangeAbatement> {
-            every { value } returns ehrRange
-        }
-        val abatement = RangeAbatement(ehrRangeAbatement)
+        val ehrRange = relaxedMockk<R4Range>()
+        val abatement = RangeAbatement(ehrRange)
         assertNotNull(abatement.value)
     }
 
     @Test
     fun `creates string abatement`() {
-        val ehrStringAbatement = mockk<EHRStringAbatement> {
-            every { value } returns "recently"
-        }
-        val abatement = StringAbatement(ehrStringAbatement)
+        val abatement = StringAbatement("recently")
         assertEquals("recently", abatement.value)
     }
 }

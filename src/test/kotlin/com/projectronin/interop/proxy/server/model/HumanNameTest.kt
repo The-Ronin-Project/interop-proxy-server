@@ -6,12 +6,12 @@ import io.mockk.every
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
-import com.projectronin.interop.ehr.model.HumanName as EHRHumanName
+import com.projectronin.interop.fhir.r4.datatype.HumanName as R4HumanName
 
 class HumanNameTest {
     @Test
     fun `can get use`() {
-        val ehrHumanName = relaxedMockk<EHRHumanName> {
+        val ehrHumanName = relaxedMockk<R4HumanName> {
             every { use } returns NameUse.USUAL
         }
         val humanName = HumanName(ehrHumanName)
@@ -20,7 +20,7 @@ class HumanNameTest {
 
     @Test
     fun `can get null use`() {
-        val ehrHumanName = relaxedMockk<EHRHumanName> {
+        val ehrHumanName = relaxedMockk<R4HumanName> {
             every { use } returns null
         }
         val humanName = HumanName(ehrHumanName)
@@ -29,7 +29,7 @@ class HumanNameTest {
 
     @Test
     fun `can get family`() {
-        val ehrHumanName = relaxedMockk<EHRHumanName> {
+        val ehrHumanName = relaxedMockk<R4HumanName> {
             every { family } returns "Public"
         }
         val humanName = HumanName(ehrHumanName)
@@ -38,7 +38,7 @@ class HumanNameTest {
 
     @Test
     fun `can get given`() {
-        val ehrHumanName = relaxedMockk<EHRHumanName> {
+        val ehrHumanName = relaxedMockk<R4HumanName> {
             every { given } returns listOf("John", "Q")
         }
         val humanName = HumanName(ehrHumanName)

@@ -1,22 +1,18 @@
 package com.projectronin.interop.proxy.server.model
 
 import com.expediagroup.graphql.generator.annotations.GraphQLDescription
-import com.projectronin.interop.ehr.model.ReferenceTypes
-import com.projectronin.interop.proxy.server.dataloaders.ParticipantDataLoader
+import com.projectronin.interop.fhir.ronin.util.localize
 import com.projectronin.interop.tenant.config.model.Tenant
-import com.projectronin.interop.transform.fhir.r4.util.localize
-import graphql.schema.DataFetchingEnvironment
-import java.util.concurrent.CompletableFuture
-import com.projectronin.interop.ehr.model.Appointment as EHRAppointment
+import com.projectronin.interop.fhir.r4.resource.Appointment as R4Appointment
 
 @GraphQLDescription("An appointment in a clinical setting")
 data class Appointment(
-    private val appointment: EHRAppointment,
+    private val appointment: R4Appointment,
     private val tenant: Tenant
 ) {
     @GraphQLDescription("The internal identifier for this appointment")
     val id: String by lazy {
-        appointment.id.localize(tenant)
+        appointment.id!!.value.localize(tenant)
     }
 
     @GraphQLDescription("List of appointment identifiers")
@@ -25,10 +21,10 @@ data class Appointment(
     }
 
     @GraphQLDescription("When appointment is to take place. An instant in time in the format YYYY-MM-DDThh:mm:ss.sss+zz:zz (e.g. 2015-02-07T13:28:17.239+02:00 or 2017-01-01T00:00:00Z). The time SHALL specified at least to the second and SHALL include a time zone.")
-    val start: String? = appointment.start
+    val start: String? = appointment.start?.value
 
     @GraphQLDescription("Current status of the meeting")
-    val status: String? = appointment.status?.code
+    val status: String = appointment.status.code
 
     @GraphQLDescription("The specific service that is to be performed during this appointment")
     val serviceType: List<CodeableConcept> by lazy {
@@ -41,11 +37,8 @@ data class Appointment(
     }
 
     @GraphQLDescription("Participants on this appointment")
-    fun participants(dataFetchingEnvironment: DataFetchingEnvironment): CompletableFuture<List<Participant>> {
-        val providers = appointment.participants.filter { it.actor.type == ReferenceTypes.PRACTITIONER }
-        val tenantParticipants = providers.map { TenantParticipant(tenant = this.tenant, participant = it) }
-
-        val loader = dataFetchingEnvironment.getDataLoader<TenantParticipant, Participant>(ParticipantDataLoader.name)
-        return loader.loadMany(tenantParticipants)
+    val participants: List<Participant> by lazy {
+        appointment.participant.filter { it.actor?.reference?.contains("Practitioner") ?: false }
+            .map { Participant(Reference.from(it.actor!!, tenant)) }
     }
 }

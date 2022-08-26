@@ -1,5 +1,6 @@
 package com.projectronin.interop.proxy.server.model
 
+import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
 import com.projectronin.interop.proxy.server.util.relaxedMockk
 import com.projectronin.interop.tenant.config.model.Tenant
 import io.mockk.every
@@ -7,8 +8,8 @@ import io.mockk.mockk
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
-import com.projectronin.interop.ehr.model.Identifier as EHRIdentifier
-import com.projectronin.interop.ehr.model.Reference as EHRReference
+import com.projectronin.interop.fhir.r4.datatype.Identifier as R4Identifier
+import com.projectronin.interop.fhir.r4.datatype.Reference as R4Reference
 
 class ReferenceTest {
     @Test
@@ -33,10 +34,10 @@ class ReferenceTest {
         val tenant = mockk<Tenant> {
             every { mnemonic } returns "tenant"
         }
-        val ehrIdentifier = relaxedMockk<EHRIdentifier>()
-        val ehrReference = mockk<EHRReference> {
+        val ehrIdentifier = relaxedMockk<R4Identifier>()
+        val ehrReference = mockk<R4Reference> {
             every { reference } returns "Patient/1234"
-            every { type } returns "Patient"
+            every { type } returns Uri("Patient")
             every { display } returns "Patient 1234"
             every { identifier } returns ehrIdentifier
             every { id } returns "1234"
@@ -54,7 +55,7 @@ class ReferenceTest {
         val tenant = mockk<Tenant> {
             every { mnemonic } returns "tenant"
         }
-        val ehrReference = mockk<EHRReference> {
+        val ehrReference = mockk<R4Reference> {
             every { reference } returns null
             every { type } returns null
             every { display } returns "Patient 1234"

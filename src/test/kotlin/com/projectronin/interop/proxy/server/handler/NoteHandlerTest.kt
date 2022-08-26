@@ -10,8 +10,8 @@ import com.projectronin.interop.fhir.r4.datatype.HumanName
 import com.projectronin.interop.fhir.r4.datatype.Identifier
 import com.projectronin.interop.fhir.r4.datatype.primitive.Date
 import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
-import com.projectronin.interop.fhir.r4.ronin.resource.OncologyPatient
-import com.projectronin.interop.fhir.r4.ronin.resource.OncologyPractitioner
+import com.projectronin.interop.fhir.r4.resource.Patient
+import com.projectronin.interop.fhir.r4.resource.Practitioner
 import com.projectronin.interop.fhir.r4.valueset.AdministrativeGender
 import com.projectronin.interop.fhir.r4.valueset.ContactPointUse
 import com.projectronin.interop.proxy.server.input.NoteInput
@@ -50,7 +50,7 @@ class NoteHandlerTest {
         every { value } returns "1234567890"
         every { use } returns ContactPointUse.HOME
     }
-    private val oncologyPatient = mockk<OncologyPatient> {
+    private val oncologyPatient = mockk<Patient> {
         every { identifier } returns listOf(testidentifier)
         every { name } returns listOf(testname)
         every { gender } returns AdministrativeGender.FEMALE
@@ -58,7 +58,7 @@ class NoteHandlerTest {
         every { address } returns listOf(testaddress)
         every { telecom } returns listOf(testphone)
     }
-    private val oncologyPractitioner = mockk<OncologyPractitioner> {
+    private val oncologyPractitioner = mockk<Practitioner> {
         every { identifier } returns listOf(testidentifier)
         every { name } returns listOf(testname)
     }
@@ -73,8 +73,8 @@ class NoteHandlerTest {
 
     @Test
     fun `accepts note with patient FHIR Id`() {
-        every { practitionerService.getOncologyPractitioner("apposnd", "PractitionerTestId") } returns oncologyPractitioner
-        every { patientService.getOncologyPatient("apposnd", "PatientTestId") } returns oncologyPatient
+        every { practitionerService.getPractitioner("apposnd", "PractitionerTestId") } returns oncologyPractitioner
+        every { patientService.getPatient("apposnd", "PatientTestId") } returns oncologyPatient
         val noteInput = NoteInput("PatientTestId", PatientIdType.FHIR, "PractitionerTestId", "Example Note Text", "202206011250")
         val response = noteHandler.sendNote(noteInput, "apposnd")
         val dateformat = SimpleDateFormat("yyyyMMdd")
@@ -84,10 +84,10 @@ class NoteHandlerTest {
 
     @Test
     fun `accepts note with patient MRN`() {
-        every { practitionerService.getOncologyPractitioner("apposnd", "PractitionerTestId") } returns oncologyPractitioner
+        every { practitionerService.getPractitioner("apposnd", "PractitionerTestId") } returns oncologyPractitioner
         val noteInput = NoteInput("PatientMRNId", PatientIdType.MRN, "PractitionerTestId", "Example Note Text", "202206011250")
         every { patientService.getPatientFHIRIds("apposnd", mapOf("key" to SystemValue(system = CodeSystem.MRN.uri.value, value = noteInput.patientId))).getValue("key") } returns "PatientFhirId"
-        every { patientService.getOncologyPatient("apposnd", "PatientFhirId") } returns oncologyPatient
+        every { patientService.getPatient("apposnd", "PatientFhirId") } returns oncologyPatient
         val response = noteHandler.sendNote(noteInput, "apposnd")
         val dateformat = SimpleDateFormat("yyyyMMdd")
         val docId = "RoninNote" + dateformat.format(java.util.Date())

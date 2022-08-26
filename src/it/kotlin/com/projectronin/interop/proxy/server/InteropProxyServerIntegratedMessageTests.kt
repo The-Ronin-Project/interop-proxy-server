@@ -5,7 +5,9 @@ import com.nimbusds.jwt.JWTClaimsSet
 import com.nimbusds.jwt.PlainJWT
 import com.ninjasquad.springmockk.MockkBean
 import com.projectronin.interop.aidbox.testcontainer.AidboxData
-import com.projectronin.interop.aidbox.testcontainer.BaseAidboxTest
+import com.projectronin.interop.aidbox.testcontainer.AidboxTest
+import com.projectronin.interop.aidbox.testcontainer.container.AidboxContainer
+import com.projectronin.interop.aidbox.testcontainer.container.AidboxDatabaseContainer
 import com.projectronin.interop.common.jackson.JacksonManager.Companion.objectMapper
 import com.projectronin.interop.mock.ehr.testcontainer.MockEHRTestcontainer
 import io.mockk.every
@@ -18,7 +20,7 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.web.client.TestRestTemplate
-import org.springframework.boot.web.server.LocalServerPort
+import org.springframework.boot.test.web.server.LocalServerPort
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
@@ -28,6 +30,7 @@ import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.DynamicPropertyRegistry
 import org.springframework.test.context.DynamicPropertySource
+import org.testcontainers.junit.jupiter.Container
 import java.net.URI
 import javax.sql.DataSource
 
@@ -37,7 +40,8 @@ private var setupDone = false
 @ActiveProfiles("it")
 @ContextConfiguration(initializers = [(InteropProxyServerAuthInitializer::class)])
 @AidboxData("aidbox/practitioner1.yaml", "aidbox/practitioner2.yaml", "aidbox/practitionerPool.yaml")
-class InteropProxyServerIntegratedMessageTests : BaseAidboxTest() {
+@AidboxTest
+class InteropProxyServerIntegratedMessageTests {
     @LocalServerPort
     private var port = 0
 
@@ -61,6 +65,12 @@ class InteropProxyServerIntegratedMessageTests : BaseAidboxTest() {
     }
 
     companion object {
+        @Container
+        val aidboxDatabaseContainer = AidboxDatabaseContainer()
+
+        @Container
+        val aidbox = AidboxContainer(aidboxDatabaseContainer, version = "2206-lts")
+
         // allows us to dynamically change the aidbox port to the testcontainer instance
         @JvmStatic
         @DynamicPropertySource

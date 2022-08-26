@@ -1,18 +1,23 @@
 package com.projectronin.interop.proxy.server.model
 
 import com.expediagroup.graphql.generator.annotations.GraphQLDescription
+import com.projectronin.interop.fhir.r4.datatype.DynamicValueType
+import com.projectronin.interop.fhir.ronin.util.localize
 import com.projectronin.interop.tenant.config.model.Tenant
-import com.projectronin.interop.transform.fhir.r4.util.localize
-import com.projectronin.interop.ehr.model.Condition as EHRCondition
+import com.projectronin.interop.fhir.r4.datatype.Age as R4Age
+import com.projectronin.interop.fhir.r4.datatype.Period as R4Period
+import com.projectronin.interop.fhir.r4.datatype.Range as R4Range
+import com.projectronin.interop.fhir.r4.datatype.primitive.DateTime as R4DateTime
+import com.projectronin.interop.fhir.r4.resource.Condition as R4Condition
 
 @GraphQLDescription("A patient condition")
 data class Condition(
-    private val condition: EHRCondition,
+    private val condition: R4Condition,
     private val tenant: Tenant
 ) {
     @GraphQLDescription("The internal identifier for this condition")
-    val id: String by lazy {
-        condition.id.localize(tenant)
+    val id: String? by lazy {
+        condition.id!!.value.localize(tenant)
     }
 
     @GraphQLDescription("List of external identifiers for this condition")
@@ -63,12 +68,12 @@ data class Condition(
     @GraphQLDescription("Estimated or actual date, date-time, or age")
     val onset: Onset? by lazy {
         condition.onset?.let {
-            when (it) {
-                is EHRCondition.DateTimeOnset -> DateTimeOnset(it)
-                is EHRCondition.AgeOnset -> AgeOnset(it)
-                is EHRCondition.PeriodOnset -> PeriodOnset(it)
-                is EHRCondition.RangeOnset -> RangeOnset(it)
-                is EHRCondition.StringOnset -> StringOnset(it)
+            when (it.type) {
+                DynamicValueType.DATE_TIME -> DateTimeOnset(it.value as R4DateTime)
+                DynamicValueType.AGE -> AgeOnset(it.value as R4Age)
+                DynamicValueType.PERIOD -> PeriodOnset(it.value as R4Period)
+                DynamicValueType.RANGE -> RangeOnset(it.value as R4Range)
+                DynamicValueType.STRING -> StringOnset(it.value as String)
                 else -> throw RuntimeException("Unknown condition onset type encountered")
             }
         }
@@ -77,19 +82,19 @@ data class Condition(
     @GraphQLDescription("When in resolution/remission")
     val abatement: Abatement? by lazy {
         condition.abatement?.let {
-            when (it) {
-                is EHRCondition.DateTimeAbatement -> DateTimeAbatement(it)
-                is EHRCondition.AgeAbatement -> AgeAbatement(it)
-                is EHRCondition.PeriodAbatement -> PeriodAbatement(it)
-                is EHRCondition.RangeAbatement -> RangeAbatement(it)
-                is EHRCondition.StringAbatement -> StringAbatement(it)
+            when (it.type) {
+                DynamicValueType.DATE_TIME -> DateTimeAbatement(it.value as R4DateTime)
+                DynamicValueType.AGE -> AgeAbatement(it.value as R4Age)
+                DynamicValueType.PERIOD -> PeriodAbatement(it.value as R4Period)
+                DynamicValueType.RANGE -> RangeAbatement(it.value as R4Range)
+                DynamicValueType.STRING -> StringAbatement(it.value as String)
                 else -> throw RuntimeException("Unknown condition abatement type encountered")
             }
         }
     }
 
     @GraphQLDescription("Date record was first recorded")
-    val recordedDate: String? = condition.recordedDate
+    val recordedDate: String? = condition.recordedDate?.value
 
     @GraphQLDescription("Who recorded the condition")
     val recorder: Reference? by lazy {

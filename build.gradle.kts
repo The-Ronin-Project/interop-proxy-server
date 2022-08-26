@@ -20,7 +20,8 @@ dependencies {
     implementation(libs.interop.fhir)
     implementation(libs.interop.queue.api)
     implementation(libs.interop.tenant)
-    implementation(libs.interop.transform)
+    implementation(libs.interop.ehr.fhir.ronin)
+    implementation(libs.interop.commonJackson)
 
     implementation(platform(libs.kotlinx.coroutines.bom))
 
@@ -54,7 +55,6 @@ dependencies {
         exclude(module = "mockito-core")
     }
 
-    testImplementation(libs.interop.commonJackson)
     testImplementation(platform(libs.testcontainers.bom))
     testImplementation("org.testcontainers:testcontainers")
     testImplementation("org.testcontainers:junit-jupiter")
@@ -71,6 +71,10 @@ dependencies {
 
     // Allows us to change environment variables
     testImplementation(libs.junit.pioneer)
+
+    testImplementation(platform(libs.testcontainers.bom))
+    testImplementation("org.testcontainers:testcontainers")
+    testImplementation("org.testcontainers:junit-jupiter")
 }
 
 tasks.withType(Test::class) {

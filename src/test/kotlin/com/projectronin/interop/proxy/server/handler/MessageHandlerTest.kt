@@ -117,7 +117,7 @@ class MessageHandlerTest {
                 every { sendMessage(tenant, expectedEHRMessageInput) } returns ("messageId#1")
             }
             every { identifierService } returns mockk {
-                every { getPractitionerUserIdentifier(tenant, fhirIdentifiers) } returns (identifierVendorIdentifier)
+                every { getPractitionerUserIdentifier(tenant, fhirIdentifiers) } returns (identifier)
             }
         }
         every { practitionerService.getPractitionerIdentifiers("TEST_TENANT", "doc1") } returns listOf(identifier)
@@ -165,13 +165,13 @@ class MessageHandlerTest {
                 every { sendMessage(tenant, expectedEHRMessageInput) } returns ("messageId#1")
             }
             every { identifierService } returns mockk {
-                every { getPractitionerUserIdentifier(tenant, fhirIdentifiersDoc) } returns (identifierVendorIdentifier)
+                every { getPractitionerUserIdentifier(tenant, fhirIdentifiersDoc) } returns (identifier)
                 every {
                     getPractitionerUserIdentifier(
                         tenant,
                         fhirIdentifiersPool
                     )
-                } returns (identifierVendorIdentifier)
+                } returns (identifier)
             }
         }
         val messageInput =

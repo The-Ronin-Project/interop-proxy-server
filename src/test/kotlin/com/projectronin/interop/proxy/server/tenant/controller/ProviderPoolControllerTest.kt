@@ -45,6 +45,7 @@ class ProviderPoolControllerTest {
             practitionerUserSystem = "practitionerUserSystem",
             patientMRNSystem = "patientMRNSystem",
             patientInternalSystem = "patientInternalSystem",
+            encounterCSNSystem = "encounterCSNSystem",
             patientMRNTypeText = "patientMRNTypeText",
             hsi = "hsi",
             instanceName = "instanceName"

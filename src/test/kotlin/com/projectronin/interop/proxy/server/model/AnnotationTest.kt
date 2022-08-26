@@ -1,32 +1,43 @@
 package com.projectronin.interop.proxy.server.model
 
+import com.projectronin.interop.fhir.r4.datatype.DynamicValueType
+import com.projectronin.interop.fhir.r4.datatype.primitive.Markdown
 import com.projectronin.interop.proxy.server.util.relaxedMockk
 import com.projectronin.interop.tenant.config.model.Tenant
 import io.mockk.every
-import io.mockk.mockk
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import com.projectronin.interop.ehr.model.Annotation as EHRAnnotation
+import com.projectronin.interop.fhir.r4.datatype.Annotation as R4Annotation
+import com.projectronin.interop.fhir.r4.datatype.Reference as R4Reference
 
 internal class AnnotationTest {
     private val testTenant = relaxedMockk<Tenant>()
 
     @Test
     fun `can get time`() {
-        val ehrAnnotation = relaxedMockk<EHRAnnotation> {
-            every { time } returns "time"
+        val ehrAnnotation = relaxedMockk<R4Annotation> {
+            every { time?.value } returns "time"
         }
         val annotation = Annotation(ehrAnnotation, testTenant)
         assertEquals("time", annotation.time)
     }
 
     @Test
+    fun `null time`() {
+        val ehrAnnotation = relaxedMockk<R4Annotation> {
+            every { time } returns null
+        }
+        val annotation = Annotation(ehrAnnotation, testTenant)
+        assertNull(annotation.time)
+    }
+
+    @Test
     fun `can get text`() {
-        val ehrAnnotation = relaxedMockk<EHRAnnotation> {
-            every { text } returns "text"
+        val ehrAnnotation = relaxedMockk<R4Annotation> {
+            every { text } returns Markdown("text")
         }
         val annotation = Annotation(ehrAnnotation, testTenant)
         assertEquals("text", annotation.text)
@@ -34,7 +45,7 @@ internal class AnnotationTest {
 
     @Test
     fun `can get null author`() {
-        val ehrAnnotation = relaxedMockk<EHRAnnotation> {
+        val ehrAnnotation = relaxedMockk<R4Annotation> {
             every { author } returns null
         }
         val annotation = Annotation(ehrAnnotation, testTenant)
@@ -43,11 +54,10 @@ internal class AnnotationTest {
 
     @Test
     fun `can get string author`() {
-        val ehrStringAuthor = mockk<EHRAnnotation.StringAuthor> {
-            every { value } returns "author"
-        }
-        val ehrAnnotation = relaxedMockk<EHRAnnotation> {
-            every { author } returns ehrStringAuthor
+
+        val ehrAnnotation = relaxedMockk<R4Annotation> {
+            every { author?.value } returns "author"
+            every { author?.type } returns DynamicValueType.STRING
         }
         val annotation = Annotation(ehrAnnotation, testTenant)
         assertTrue(annotation.author is StringAuthor)
@@ -55,11 +65,10 @@ internal class AnnotationTest {
 
     @Test
     fun `can get reference author`() {
-        val ehrReferenceAuthor = mockk<EHRAnnotation.ReferenceAuthor> {
-            every { value } returns relaxedMockk()
-        }
-        val ehrAnnotation = relaxedMockk<EHRAnnotation> {
-            every { author } returns ehrReferenceAuthor
+        val referenceAuthor = relaxedMockk<R4Reference>()
+        val ehrAnnotation = relaxedMockk<R4Annotation> {
+            every { author?.value } returns referenceAuthor
+            every { author?.type } returns DynamicValueType.REFERENCE
         }
         val annotation = Annotation(ehrAnnotation, testTenant)
         assertTrue(annotation.author is ReferenceAuthor)
@@ -67,8 +76,8 @@ internal class AnnotationTest {
 
     @Test
     fun `throws exception on unknown author type`() {
-        val ehrAnnotation = relaxedMockk<EHRAnnotation> {
-            every { author } returns mockk()
+        val ehrAnnotation = relaxedMockk<R4Annotation> {
+            every { author?.type } returns DynamicValueType.MONEY
         }
         val annotation = Annotation(ehrAnnotation, testTenant)
         val exception = assertThrows<RuntimeException> {

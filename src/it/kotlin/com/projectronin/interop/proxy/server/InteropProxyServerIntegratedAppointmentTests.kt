@@ -2,7 +2,9 @@ package com.projectronin.interop.proxy.server
 
 import com.ninjasquad.springmockk.MockkBean
 import com.projectronin.interop.aidbox.testcontainer.AidboxData
-import com.projectronin.interop.aidbox.testcontainer.BaseAidboxTest
+import com.projectronin.interop.aidbox.testcontainer.AidboxTest
+import com.projectronin.interop.aidbox.testcontainer.container.AidboxContainer
+import com.projectronin.interop.aidbox.testcontainer.container.AidboxDatabaseContainer
 import com.projectronin.interop.common.jackson.JacksonManager.Companion.objectMapper
 import com.projectronin.interop.mock.ehr.testcontainer.MockEHRTestcontainer
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -13,7 +15,7 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.web.client.TestRestTemplate
-import org.springframework.boot.web.server.LocalServerPort
+import org.springframework.boot.test.web.server.LocalServerPort
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
@@ -22,6 +24,7 @@ import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.DynamicPropertyRegistry
 import org.springframework.test.context.DynamicPropertySource
+import org.testcontainers.junit.jupiter.Container
 import java.net.URI
 import javax.sql.DataSource
 
@@ -31,8 +34,15 @@ private var setupDone = false
 @ActiveProfiles("it")
 @ContextConfiguration(initializers = [(InteropProxyServerAuthInitializer::class)])
 @AidboxData("aidbox/practitioners.yaml")
-class InteropProxyServerIntegratedAppointmentTests : BaseAidboxTest() {
+@AidboxTest
+class InteropProxyServerIntegratedAppointmentTests {
     companion object {
+        @Container
+        val aidboxDatabaseContainer = AidboxDatabaseContainer()
+
+        @Container
+        val aidbox = AidboxContainer(aidboxDatabaseContainer, version = "2206-lts")
+
         // allows us to dynamically change the aidbox port to the testcontainer instance
         @JvmStatic
         @DynamicPropertySource
@@ -106,18 +116,9 @@ class InteropProxyServerIntegratedAppointmentTests : BaseAidboxTest() {
         appointmentsJSONNode.forEach { appointment ->
             val participants = appointment["participants"]
             assertTrue(participants.size() > 0)
-
             participants.forEach { participant ->
                 val actor = participant["actor"]
-
-                // This is the only practitioner loaded in Aidbox, the rest should have nulls for id and reference
-                if (actor["display"].asText() == "Physician Family Medicine, MD") {
-                    assertEquals("fhirId1", actor["id"].textValue())
-                    assertEquals("Provider/fhirId1", actor["reference"].textValue())
-                } else {
-                    assertTrue(actor["id"].isNull)
-                    assertTrue(actor["reference"].isNull)
-                }
+                assertEquals("Practitioner/apposnd-fhirId1", actor["reference"].textValue())
             }
         }
     }
@@ -156,29 +157,6 @@ class InteropProxyServerIntegratedAppointmentTests : BaseAidboxTest() {
         val startDate = "12-01-2021"
         val endDate = "01-01-2022"
         val mrn = "FAKE_MRN"
-
-        val query = """
-            |query {
-            |   appointmentsByMRNAndDate(endDate: "$endDate", mrn: "$mrn", startDate: "$startDate", tenantId: "$tenantId")
-            |   {id}
-            |}""".trimMargin()
-
-        val httpEntity = HttpEntity(query, httpHeaders)
-
-        val responseEntity =
-            restTemplate.postForEntity(URI("http://localhost:$port/graphql"), httpEntity, String::class.java)
-        val resultJSONObject = objectMapper.readTree(responseEntity.body)
-
-        assertEquals(HttpStatus.OK, responseEntity.statusCode)
-        assertTrue(resultJSONObject.has("errors"))
-    }
-
-    @Test
-    fun `server handles bad dates`() {
-        val tenantId = "apposnd"
-        val startDate = "12-01-2021"
-        val endDate = "01-01-2020" // endDate before startDate
-        val mrn = "202497"
 
         val query = """
             |query {

@@ -6,7 +6,9 @@ import com.expediagroup.graphql.server.operations.Query
 import com.projectronin.interop.common.logmarkers.getLogMarker
 import com.projectronin.interop.common.resource.ResourceType
 import com.projectronin.interop.ehr.factory.EHRFactory
+import com.projectronin.interop.fhir.r4.resource.Condition
 import com.projectronin.interop.proxy.server.model.ConditionCategoryCode
+import com.projectronin.interop.proxy.server.util.JacksonUtil
 import com.projectronin.interop.queue.QueueService
 import com.projectronin.interop.queue.model.ApiMessage
 import com.projectronin.interop.tenant.config.TenantService
@@ -17,7 +19,6 @@ import graphql.execution.DataFetcherResult
 import graphql.schema.DataFetchingEnvironment
 import mu.KotlinLogging
 import org.springframework.stereotype.Component
-import com.projectronin.interop.ehr.model.Condition as EHRCondition
 import com.projectronin.interop.proxy.server.model.Condition as ProxyServerCondition
 
 /**
@@ -58,7 +59,7 @@ class ConditionHandler(
                 patientFhirId = patientFhirId,
                 conditionCategoryCode = conditionCategoryCode.code,
                 clinicalStatus = "active" // We're only interested in active Conditions
-            ).resources
+            )
         } catch (e: Exception) {
             findConditionErrors.add(GraphQLException(e.message).toGraphQLError())
             logger.error(e.getLogMarker(), e) { "Condition query for tenant $tenantId contains errors" }
@@ -80,7 +81,7 @@ class ConditionHandler(
                         id = null,
                         resourceType = ResourceType.CONDITION,
                         tenant = tenantId,
-                        text = it.raw
+                        text = JacksonUtil.writeJsonValue(it)
                     )
                 }
             )
@@ -96,9 +97,9 @@ class ConditionHandler(
     }
 
     /**
-     * Translates a list of [EHRCondition]s into the appropriate list of proxy server [ProxyServerCondition]s for return.
+     * Translates a list of [Condition]s into the appropriate list of proxy server [ProxyServerCondition]s for return.
      */
-    private fun mapEHRConditions(ehrConditions: List<EHRCondition>, tenant: Tenant): List<ProxyServerCondition> {
+    private fun mapEHRConditions(ehrConditions: List<Condition>, tenant: Tenant): List<ProxyServerCondition> {
         return ehrConditions.map { ProxyServerCondition(it, tenant) }
     }
 }

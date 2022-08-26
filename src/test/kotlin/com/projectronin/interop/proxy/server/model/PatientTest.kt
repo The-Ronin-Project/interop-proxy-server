@@ -1,9 +1,7 @@
 package com.projectronin.interop.proxy.server.model
 
-import com.projectronin.interop.ehr.model.Address
-import com.projectronin.interop.ehr.model.ContactPoint
-import com.projectronin.interop.ehr.model.HumanName
-import com.projectronin.interop.ehr.model.Identifier
+import com.projectronin.interop.fhir.r4.datatype.primitive.Date
+import com.projectronin.interop.fhir.r4.datatype.primitive.Id
 import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
 import com.projectronin.interop.fhir.r4.valueset.AdministrativeGender
 import com.projectronin.interop.proxy.server.util.relaxedMockk
@@ -13,8 +11,11 @@ import io.mockk.mockk
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
-import com.projectronin.interop.ehr.model.Patient as EHRPatient
+import com.projectronin.interop.fhir.r4.datatype.Address as R4Address
+import com.projectronin.interop.fhir.r4.datatype.ContactPoint as R4ContactPoint
+import com.projectronin.interop.fhir.r4.datatype.HumanName as R4HumanName
 import com.projectronin.interop.fhir.r4.datatype.Identifier as R4Identifier
+import com.projectronin.interop.fhir.r4.resource.Patient as R4Patient
 
 internal class PatientTest {
     private val mockTenant = mockk<Tenant> {
@@ -23,8 +24,8 @@ internal class PatientTest {
 
     @Test
     fun `can get id`() {
-        val ehrPatient = relaxedMockk<EHRPatient> {
-            every { id } returns "13579"
+        val ehrPatient = relaxedMockk<R4Patient> {
+            every { id } returns Id("13579")
         }
 
         val patient = Patient(ehrPatient, mockTenant, emptyList())
@@ -33,9 +34,9 @@ internal class PatientTest {
 
     @Test
     fun `can get identifier`() {
-        val ehrIdentifier1 = relaxedMockk<Identifier>()
-        val ehrIdentifier2 = relaxedMockk<Identifier>()
-        val ehrPatient = relaxedMockk<EHRPatient> {
+        val ehrIdentifier1 = relaxedMockk<R4Identifier>()
+        val ehrIdentifier2 = relaxedMockk<R4Identifier>()
+        val ehrPatient = relaxedMockk<R4Patient> {
             every { identifier } returns listOf(ehrIdentifier1, ehrIdentifier2)
         }
 
@@ -45,9 +46,9 @@ internal class PatientTest {
 
     @Test
     fun `can get identifier including ronin identifiers`() {
-        val ehrIdentifier1 = relaxedMockk<Identifier>()
-        val ehrIdentifier2 = relaxedMockk<Identifier>()
-        val ehrPatient = relaxedMockk<EHRPatient> {
+        val ehrIdentifier1 = relaxedMockk<R4Identifier>()
+        val ehrIdentifier2 = relaxedMockk<R4Identifier>()
+        val ehrPatient = relaxedMockk<R4Patient> {
             every { identifier } returns listOf(ehrIdentifier1, ehrIdentifier2)
         }
         val roninIdentifiers = listOf(
@@ -61,9 +62,9 @@ internal class PatientTest {
 
     @Test
     fun `can get name`() {
-        val ehrHumanName1 = relaxedMockk<HumanName>()
-        val ehrHumanName2 = relaxedMockk<HumanName>()
-        val ehrPatient = relaxedMockk<EHRPatient> {
+        val ehrHumanName1 = relaxedMockk<R4HumanName>()
+        val ehrHumanName2 = relaxedMockk<R4HumanName>()
+        val ehrPatient = relaxedMockk<R4Patient> {
             every { name } returns listOf(ehrHumanName1, ehrHumanName2)
         }
 
@@ -73,8 +74,8 @@ internal class PatientTest {
 
     @Test
     fun `can get birthdate`() {
-        val ehrPatient = relaxedMockk<EHRPatient> {
-            every { birthDate } returns "1976-07-04"
+        val ehrPatient = relaxedMockk<R4Patient> {
+            every { birthDate } returns Date("1976-07-04")
         }
 
         val patient = Patient(ehrPatient, mockTenant, emptyList())
@@ -82,8 +83,17 @@ internal class PatientTest {
     }
 
     @Test
+    fun `null birthdate`() {
+        val ehrPatient = relaxedMockk<R4Patient> {
+            every { birthDate } returns null
+        }
+        val patient = Patient(ehrPatient, mockTenant, emptyList())
+        assertNull(patient.birthDate)
+    }
+
+    @Test
     fun `can get gender`() {
-        val ehrPatient = relaxedMockk<EHRPatient> {
+        val ehrPatient = relaxedMockk<R4Patient> {
             every { gender } returns AdministrativeGender.MALE
         }
 
@@ -93,7 +103,7 @@ internal class PatientTest {
 
     @Test
     fun `can get null gender`() {
-        val ehrPatient = relaxedMockk<EHRPatient> {
+        val ehrPatient = relaxedMockk<R4Patient> {
             every { gender } returns null
         }
 
@@ -103,9 +113,9 @@ internal class PatientTest {
 
     @Test
     fun `can get telecom`() {
-        val ehrContactPoint1 = relaxedMockk<ContactPoint>()
-        val ehrContactPoint2 = relaxedMockk<ContactPoint>()
-        val ehrPatient = relaxedMockk<EHRPatient> {
+        val ehrContactPoint1 = relaxedMockk<R4ContactPoint>()
+        val ehrContactPoint2 = relaxedMockk<R4ContactPoint>()
+        val ehrPatient = relaxedMockk<R4Patient> {
             every { telecom } returns listOf(ehrContactPoint1, ehrContactPoint2)
         }
 
@@ -115,9 +125,9 @@ internal class PatientTest {
 
     @Test
     fun `can get address`() {
-        val ehrAddress1 = relaxedMockk<Address>()
-        val ehrAddress2 = relaxedMockk<Address>()
-        val ehrPatient = relaxedMockk<EHRPatient> {
+        val ehrAddress1 = relaxedMockk<R4Address>()
+        val ehrAddress2 = relaxedMockk<R4Address>()
+        val ehrPatient = relaxedMockk<R4Patient> {
             every { address } returns listOf(ehrAddress1, ehrAddress2)
         }
 

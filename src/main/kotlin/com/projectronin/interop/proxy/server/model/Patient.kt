@@ -1,20 +1,20 @@
 package com.projectronin.interop.proxy.server.model
 
 import com.expediagroup.graphql.generator.annotations.GraphQLDescription
+import com.projectronin.interop.fhir.ronin.util.localize
 import com.projectronin.interop.tenant.config.model.Tenant
-import com.projectronin.interop.transform.fhir.r4.util.localize
-import com.projectronin.interop.ehr.model.Patient as EHRPatient
 import com.projectronin.interop.fhir.r4.datatype.Identifier as R4Identifier
+import com.projectronin.interop.fhir.r4.resource.Patient as R4Patient
 
 @GraphQLDescription("A patient")
 data class Patient(
-    private val patient: EHRPatient,
+    private val patient: R4Patient,
     private val tenant: Tenant,
     private val roninIdentifiers: List<R4Identifier>
 ) {
     @GraphQLDescription("The internal identifier for this patient")
-    val id: String by lazy {
-        patient.id.localize(tenant)
+    val id: String? by lazy {
+        patient.id!!.value.localize(tenant)
     }
 
     @GraphQLDescription("List of patient known identifiers (e.g. MRN, EPI, etc.)")
@@ -28,7 +28,7 @@ data class Patient(
     }
 
     @GraphQLDescription("Date of birth in ISO 8601 format (YYYY-MM-DD)")
-    val birthDate: String? = patient.birthDate
+    val birthDate: String? = patient.birthDate?.value
 
     @GraphQLDescription("Gender (for administrative uses)")
     val gender: String? = patient.gender?.code

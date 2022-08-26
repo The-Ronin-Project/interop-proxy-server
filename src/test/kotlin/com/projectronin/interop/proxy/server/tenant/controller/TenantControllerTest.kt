@@ -33,6 +33,7 @@ class TenantControllerTest {
         practitionerUserSystem = "userSystemExample",
         patientMRNSystem = "mrnSystemExample",
         patientInternalSystem = "internalSystemExample",
+        encounterCSNSystem = "encounterCSNSystem",
         patientMRNTypeText = "patientMRNTypeText",
         hsi = null,
         instanceName = "instanceName"
@@ -54,6 +55,7 @@ class TenantControllerTest {
         practitionerUserSystem = "userSystemExample",
         patientMRNSystem = "mrnSystemExample",
         patientInternalSystem = "internalSystemExample",
+        encounterCSNSystem = "encounterCSNSystem",
         patientMRNTypeText = "patientMRNTypeText",
     )
     private val tenantServiceVendorWithCustomMrn = tenantServiceVendor.copy(patientMRNTypeText = "Custom MRN")

@@ -47,6 +47,7 @@ class TenantServerControllerTest {
         every { practitionerUserSystem } returns "123"
         every { patientMRNSystem } returns "123"
         every { patientInternalSystem } returns "123"
+        every { encounterCSNSystem } returns "123"
         every { patientMRNTypeText } returns "MRN"
         every { hsi } returns null
         every { instanceName } returns "Epic Instance"

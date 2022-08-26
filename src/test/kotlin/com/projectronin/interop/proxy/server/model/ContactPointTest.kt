@@ -7,12 +7,12 @@ import io.mockk.every
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
-import com.projectronin.interop.ehr.model.ContactPoint as EHRContactPoint
+import com.projectronin.interop.fhir.r4.datatype.ContactPoint as R4ContactPoint
 
 class ContactPointTest {
     @Test
     fun `can get system`() {
-        val ehrContactPoint = relaxedMockk<EHRContactPoint> {
+        val ehrContactPoint = relaxedMockk<R4ContactPoint> {
             every { system } returns ContactPointSystem.EMAIL
         }
         val contactPoint = ContactPoint(ehrContactPoint)
@@ -21,7 +21,7 @@ class ContactPointTest {
 
     @Test
     fun `can get null system`() {
-        val ehrContactPoint = relaxedMockk<EHRContactPoint> {
+        val ehrContactPoint = relaxedMockk<R4ContactPoint> {
             every { system } returns null
         }
         val contactPoint = ContactPoint(ehrContactPoint)
@@ -30,7 +30,7 @@ class ContactPointTest {
 
     @Test
     fun `can get use`() {
-        val ehrContactPoint = relaxedMockk<EHRContactPoint> {
+        val ehrContactPoint = relaxedMockk<R4ContactPoint> {
             every { use } returns ContactPointUse.WORK
         }
         val contactPoint = ContactPoint(ehrContactPoint)
@@ -39,7 +39,7 @@ class ContactPointTest {
 
     @Test
     fun `can get null use`() {
-        val ehrContactPoint = relaxedMockk<EHRContactPoint> {
+        val ehrContactPoint = relaxedMockk<R4ContactPoint> {
             every { use } returns null
         }
         val contactPoint = ContactPoint(ehrContactPoint)
@@ -48,7 +48,7 @@ class ContactPointTest {
 
     @Test
     fun `can get value`() {
-        val ehrContactPoint = relaxedMockk<EHRContactPoint> {
+        val ehrContactPoint = relaxedMockk<R4ContactPoint> {
             every { value } returns "value"
         }
         val contactPoint = ContactPoint(ehrContactPoint)
