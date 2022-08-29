@@ -34,4 +34,13 @@ class IdentifierTest {
         val identifier = Identifier(ehrIdentifier)
         assertEquals("value", identifier.value)
     }
+
+    @Test
+    fun `null value`() {
+        val ehrIdentifier = relaxedMockk<R4Identifier> {
+            every { value } returns null
+        }
+        val identifier = Identifier(ehrIdentifier)
+        assertEquals("", identifier.value)
+    }
 }
