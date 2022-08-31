@@ -44,11 +44,11 @@ class AppointmentHandler(
         dfe: DataFetchingEnvironment
     ): DataFetcherResult<List<ProxyServerAppointment>> {
         val tenant = findAndValidateTenant(dfe, tenantService, tenantId)
-        val patientFHIRID = ehrFactory.getVendorFactory(tenant).patientService.getPatientFHIRId(
+        val patientFHIRID = ehrFactory.getVendorFactory(tenant).patientService.getPatientsFHIRIds(
             tenant,
-            mrn,
-            tenant.vendorAs<Epic>().patientMRNSystem
-        ).fhirID
+            tenant.vendorAs<Epic>().patientMRNSystem,
+            listOf(mrn)
+        )[mrn]!!.fhirID // API will throw exception for us, but should never happen (!! is ok to use here)
         return appointmentsByPatientAndDate(tenantId, patientFHIRID, startDate, endDate, dfe)
     }
 

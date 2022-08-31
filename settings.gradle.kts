@@ -1,10 +1,9 @@
 rootProject.name = "interop-proxy-server"
 
 pluginManagement {
-    val interopGradleVersion = "2.0.0"
     plugins {
-        id("com.projectronin.interop.gradle.spring") version interopGradleVersion
-        id("com.projectronin.interop.gradle.integration") version interopGradleVersion
+        id("com.projectronin.interop.gradle.spring") version "2.0.2"
+        id("com.projectronin.interop.gradle.integration") version "2.0.2"
 
         id("org.springframework.boot") version "2.7.3"
         id("com.expediagroup.graphql") version "6.2.1"
