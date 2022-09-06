@@ -9,6 +9,10 @@
     system: "http://projectronin.com/id/tenantId"
     type:
       text: "External"
+  - value: "fhirId1"
+    system: "urn:oid:1.2.840.114350.1.13.0.1.7.2.836982"
+    type:
+      text: "Internal"
 - resourceType: "Practitioner"
   id: "fhirId2"
   identifier:
@@ -20,3 +24,7 @@
       system: "http://projectronin.com/id/tenantId"
       type:
         text: "External"
+    - value: "fhirId2"
+      system: "urn:oid:1.2.840.114350.1.13.0.1.7.2.836982"
+      type:
+        text: "Internal"
