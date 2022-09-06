@@ -3,7 +3,6 @@ package com.projectronin.interop.proxy.server.handler
 import com.projectronin.interop.aidbox.PatientService
 import com.projectronin.interop.aidbox.PractitionerService
 import com.projectronin.interop.aidbox.model.SystemValue
-import com.projectronin.interop.fhir.r4.CodeSystem
 import com.projectronin.interop.fhir.r4.datatype.Address
 import com.projectronin.interop.fhir.r4.datatype.ContactPoint
 import com.projectronin.interop.fhir.r4.datatype.HumanName
@@ -14,10 +13,12 @@ import com.projectronin.interop.fhir.r4.resource.Patient
 import com.projectronin.interop.fhir.r4.resource.Practitioner
 import com.projectronin.interop.fhir.r4.valueset.AdministrativeGender
 import com.projectronin.interop.fhir.r4.valueset.ContactPointUse
+import com.projectronin.interop.fhir.ronin.code.RoninCodeSystem
 import com.projectronin.interop.proxy.server.context.INTEROP_CONTEXT_KEY
 import com.projectronin.interop.proxy.server.context.InteropGraphQLContext
 import com.projectronin.interop.proxy.server.input.NoteInput
 import com.projectronin.interop.proxy.server.input.PatientIdType
+import com.projectronin.interop.proxy.server.util.asCode
 import com.projectronin.interop.proxy.server.util.relaxedMockk
 import com.projectronin.interop.queue.QueueService
 import com.projectronin.interop.tenant.config.TenantService
@@ -57,12 +58,12 @@ class NoteHandlerTest {
     }
     private val testphone = relaxedMockk<ContactPoint> {
         every { value } returns "1234567890"
-        every { use } returns ContactPointUse.HOME
+        every { use } returns ContactPointUse.HOME.asCode()
     }
     private val oncologyPatient = mockk<Patient> {
         every { identifier } returns listOf(testidentifier)
         every { name } returns listOf(testname)
-        every { gender } returns AdministrativeGender.FEMALE
+        every { gender } returns AdministrativeGender.FEMALE.asCode()
         every { birthDate } returns Date("2022-06-01")
         every { address } returns listOf(testaddress)
         every { telecom } returns listOf(testphone)
@@ -105,8 +106,14 @@ class NoteHandlerTest {
         every { dfe.graphQlContext.get<InteropGraphQLContext>(INTEROP_CONTEXT_KEY).authzTenantId } returns "apposnd"
         every { tenantService.getTenantForMnemonic("apposnd") } returns tenant
         every { practitionerService.getPractitioner("apposnd", "PractitionerTestId") } returns oncologyPractitioner
-        val noteInput = NoteInput("PatientMRNId", PatientIdType.MRN, "PractitionerTestId", "Example Note Text", "202206011250")
-        every { patientService.getPatientFHIRIds("apposnd", mapOf("key" to SystemValue(system = CodeSystem.MRN.uri.value, value = noteInput.patientId))).getValue("key") } returns "PatientFhirId"
+        val noteInput =
+            NoteInput("PatientMRNId", PatientIdType.MRN, "PractitionerTestId", "Example Note Text", "202206011250")
+        every {
+            patientService.getPatientFHIRIds(
+                "apposnd",
+                mapOf("key" to SystemValue(system = RoninCodeSystem.MRN.uri.value, value = noteInput.patientId))
+            ).getValue("key")
+        } returns "PatientFhirId"
         every { patientService.getPatient("apposnd", "PatientFhirId") } returns oncologyPatient
         val response = noteHandler.sendNote(noteInput, "apposnd", dfe)
         val dateformat = SimpleDateFormat("yyyyMMdd")

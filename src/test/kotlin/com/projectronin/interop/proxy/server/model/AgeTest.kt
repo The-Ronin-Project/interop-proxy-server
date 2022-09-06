@@ -1,6 +1,7 @@
 package com.projectronin.interop.proxy.server.model
 
 import com.projectronin.interop.fhir.r4.valueset.QuantityComparator
+import com.projectronin.interop.proxy.server.util.asCode
 import com.projectronin.interop.proxy.server.util.relaxedMockk
 import io.mockk.every
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -21,7 +22,7 @@ internal class AgeTest {
     @Test
     fun `can get comparator`() {
         val ehrAge = relaxedMockk<R4Age> {
-            every { comparator } returns QuantityComparator.LESS_THAN
+            every { comparator } returns QuantityComparator.LESS_THAN.asCode()
         }
         val age = Age(ehrAge)
         assertEquals("<", age.comparator)

@@ -1,6 +1,7 @@
 package com.projectronin.interop.proxy.server.model
 
 import com.projectronin.interop.fhir.r4.valueset.AddressUse
+import com.projectronin.interop.proxy.server.util.asCode
 import com.projectronin.interop.proxy.server.util.relaxedMockk
 import io.mockk.every
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -12,7 +13,7 @@ internal class AddressTest {
     @Test
     fun `can get use`() {
         val ehrAddress = relaxedMockk<R4Address> {
-            every { use } returns AddressUse.HOME
+            every { use } returns AddressUse.HOME.asCode()
         }
         val address = Address(ehrAddress)
         assertEquals("home", address.use)

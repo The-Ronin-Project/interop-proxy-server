@@ -26,5 +26,5 @@ data class Annotation(
     val time: String? = annotation.time?.value
 
     @GraphQLDescription("The annotation - text content (as markdown)")
-    val text: String = annotation.text.value
+    val text: String = annotation.text?.value ?: ""
 }

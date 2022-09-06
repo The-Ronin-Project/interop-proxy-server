@@ -6,7 +6,7 @@ import com.expediagroup.graphql.server.operations.Query
 import com.projectronin.interop.common.logmarkers.getLogMarker
 import com.projectronin.interop.common.resource.ResourceType
 import com.projectronin.interop.ehr.factory.EHRFactory
-import com.projectronin.interop.fhir.ronin.resource.OncologyPatient
+import com.projectronin.interop.fhir.ronin.resource.RoninPatient
 import com.projectronin.interop.proxy.server.util.DateUtil
 import com.projectronin.interop.proxy.server.util.JacksonUtil
 import com.projectronin.interop.queue.QueueService
@@ -95,7 +95,7 @@ class PatientHandler(
      */
     private fun mapFHIRPatients(fhirPatients: List<R4Patient>, tenant: Tenant): List<ProxyServerPatient> {
         if (fhirPatients.isEmpty()) return emptyList()
-        val oncologyPatient = OncologyPatient.create(ehrFactory.getVendorFactory(tenant).identifierService)
+        val oncologyPatient = RoninPatient.create(ehrFactory.getVendorFactory(tenant).identifierService)
         return fhirPatients.map { ProxyServerPatient(it, tenant, oncologyPatient.getRoninIdentifiers(it, tenant)) }
     }
 }

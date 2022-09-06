@@ -8,7 +8,9 @@ import com.projectronin.interop.aidbox.model.SystemValue
 import com.projectronin.interop.common.hl7.EventType
 import com.projectronin.interop.common.hl7.MessageType
 import com.projectronin.interop.common.logmarkers.getLogMarker
-import com.projectronin.interop.fhir.r4.CodeSystem
+import com.projectronin.interop.fhir.r4.valueset.AdministrativeGender
+import com.projectronin.interop.fhir.ronin.code.RoninCodeSystem
+import com.projectronin.interop.fhir.ronin.util.asEnum
 import com.projectronin.interop.proxy.server.hl7.MDMService
 import com.projectronin.interop.proxy.server.hl7.model.MDMPatientFields
 import com.projectronin.interop.proxy.server.hl7.model.MDMPractitionerFields
@@ -40,30 +42,30 @@ class NoteHandler(
         // Throw an exception if the tenant is bad
         findAndValidateTenant(dfe, tenantService, tenantId, false)
 
-        val oncologyPractitioner = practitionerService.getPractitioner(tenantId, noteInput.practitionerFhirId)
+        val practitioner = practitionerService.getPractitioner(tenantId, noteInput.practitionerFhirId)
         val mdmPractitionerFields = MDMPractitionerFields(
-            oncologyPractitioner.name,
-            oncologyPractitioner.identifier
+            practitioner.name,
+            practitioner.identifier
         )
 
-        val oncologyPatient = when (noteInput.patientIdType) {
+        val patient = when (noteInput.patientIdType) {
             PatientIdType.FHIR -> patientService.getPatient(tenantId, noteInput.patientId)
             PatientIdType.MRN -> patientService.getPatient(
                 tenantId,
                 patientService.getPatientFHIRIds(
                     tenantId,
-                    mapOf("key" to SystemValue(system = CodeSystem.MRN.uri.value, value = noteInput.patientId))
+                    mapOf("key" to SystemValue(system = RoninCodeSystem.MRN.uri.value, value = noteInput.patientId))
                 ).getValue("key")
             )
         }
 
         val mdmPatientFields = MDMPatientFields(
-            oncologyPatient.identifier,
-            oncologyPatient.name,
-            oncologyPatient.birthDate,
-            oncologyPatient.gender,
-            oncologyPatient.address,
-            oncologyPatient.telecom
+            patient.identifier,
+            patient.name,
+            patient.birthDate,
+            patient.gender.asEnum<AdministrativeGender>(),
+            patient.address,
+            patient.telecom
         )
         val hl7 = MDMService().generateMDM(
             tenantId,

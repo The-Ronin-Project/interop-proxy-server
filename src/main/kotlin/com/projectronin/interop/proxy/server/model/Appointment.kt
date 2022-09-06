@@ -24,7 +24,7 @@ data class Appointment(
     val start: String? = appointment.start?.value
 
     @GraphQLDescription("Current status of the meeting")
-    val status: String = appointment.status.code
+    val status: String = appointment.status?.value ?: ""
 
     @GraphQLDescription("The specific service that is to be performed during this appointment")
     val serviceType: List<CodeableConcept> by lazy {

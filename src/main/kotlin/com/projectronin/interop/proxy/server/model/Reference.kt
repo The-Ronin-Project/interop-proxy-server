@@ -20,13 +20,13 @@ data class Reference(
     val id: String?
 ) {
     companion object {
-        fun from(reference: R4Reference, tenant: Tenant): Reference =
+        fun from(reference: R4Reference?, tenant: Tenant): Reference =
             Reference(
-                reference = reference.reference?.localizeReference(tenant),
-                type = reference.type?.value,
-                display = reference.display,
-                identifier = reference.identifier?.let { Identifier(it) },
-                id = reference.id?.localize(tenant)
+                reference = reference?.reference?.localizeReference(tenant),
+                type = reference?.type?.value,
+                display = reference?.display,
+                identifier = reference?.identifier?.let { Identifier(it) },
+                id = reference?.id?.localize(tenant)
             )
     }
 }

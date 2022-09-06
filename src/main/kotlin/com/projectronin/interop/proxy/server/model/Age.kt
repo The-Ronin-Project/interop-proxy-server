@@ -9,7 +9,7 @@ data class Age(private val age: R4Age) {
     val value: Double? = age.value
 
     @GraphQLDescription("< | <= | >= | > - how to understand the value")
-    val comparator: String? = age.comparator?.code
+    val comparator: String? = age.comparator?.value
 
     @GraphQLDescription("Unit representation")
     val unit: String? = age.unit

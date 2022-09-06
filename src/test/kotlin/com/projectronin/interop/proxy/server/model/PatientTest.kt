@@ -4,6 +4,7 @@ import com.projectronin.interop.fhir.r4.datatype.primitive.Date
 import com.projectronin.interop.fhir.r4.datatype.primitive.Id
 import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
 import com.projectronin.interop.fhir.r4.valueset.AdministrativeGender
+import com.projectronin.interop.proxy.server.util.asCode
 import com.projectronin.interop.proxy.server.util.relaxedMockk
 import com.projectronin.interop.tenant.config.model.Tenant
 import io.mockk.every
@@ -94,7 +95,7 @@ internal class PatientTest {
     @Test
     fun `can get gender`() {
         val ehrPatient = relaxedMockk<R4Patient> {
-            every { gender } returns AdministrativeGender.MALE
+            every { gender } returns AdministrativeGender.MALE.asCode()
         }
 
         val patient = Patient(ehrPatient, mockTenant, emptyList())

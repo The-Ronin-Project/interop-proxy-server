@@ -6,7 +6,7 @@ import com.projectronin.interop.fhir.r4.datatype.Address as R4Address
 @GraphQLDescription("A physical address")
 data class Address(private val address: R4Address) {
     @GraphQLDescription("Purpose of address - home | work | temp | old | billing")
-    val use: String? = address.use?.code
+    val use: String? = address.use?.value
 
     @GraphQLDescription("Street name, number, direction & P.O. Box etc.")
     val line: List<String> = address.line

@@ -238,7 +238,7 @@ class AppointmentHandlerTest {
                     every { value } returns "test-value"
                 }
             )
-            every { status.code } returns AppointmentStatus.BOOKED.code
+            every { status?.value } returns AppointmentStatus.BOOKED.code
             every { appointmentType } returns mockk {
                 every { coding } returns listOf(
                     mockk {
@@ -344,7 +344,7 @@ class AppointmentHandlerTest {
                     every { value } returns "test-value"
                 }
             )
-            every { status?.code } returns AppointmentStatus.BOOKED.code
+            every { status?.value } returns AppointmentStatus.BOOKED.code
             every { appointmentType } returns mockk {
                 every { coding } returns listOf(
                     mockk {

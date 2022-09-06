@@ -69,4 +69,17 @@ class ReferenceTest {
         assertNull(reference.type)
         assertEquals("Patient 1234", reference.display)
     }
+
+    @Test
+    fun `can build from null EHR reference`() {
+        val tenant = mockk<Tenant> {
+            every { mnemonic } returns "tenant"
+        }
+        val reference = Reference.from(null, tenant)
+        assertNull(reference.id)
+        assertNull(reference.reference)
+        assertNull(reference.identifier)
+        assertNull(reference.type)
+        assertNull(reference.display)
+    }
 }

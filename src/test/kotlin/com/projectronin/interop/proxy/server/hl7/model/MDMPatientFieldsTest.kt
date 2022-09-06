@@ -6,6 +6,7 @@ import com.projectronin.interop.fhir.r4.datatype.primitive.Date
 import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
 import com.projectronin.interop.fhir.r4.valueset.AdministrativeGender
 import com.projectronin.interop.fhir.r4.valueset.ContactPointUse
+import com.projectronin.interop.proxy.server.util.asCode
 import com.projectronin.interop.proxy.server.util.relaxedMockk
 import io.mockk.every
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -24,6 +25,7 @@ class MDMPatientFieldsTest {
         assertEquals("testID", mdmPatientFields.identifier[0].value)
         assertEquals(Uri("testsystem"), mdmPatientFields.identifier[0].system)
     }
+
     @Test
     fun `can get names`() {
         val names = relaxedMockk<com.projectronin.interop.fhir.r4.datatype.HumanName> {
@@ -36,6 +38,7 @@ class MDMPatientFieldsTest {
         assertEquals("family", mdmPatientFields.name[0].family)
         assertEquals(listOf("given", "given2"), mdmPatientFields.name[0].given)
     }
+
     @Test
     fun `can get DOB`() {
         val mdmPatientFields = relaxedMockk<MDMPatientFields> {
@@ -43,6 +46,7 @@ class MDMPatientFieldsTest {
         }
         assertEquals(Date("2022-06-01"), mdmPatientFields.dob)
     }
+
     @Test
     fun `can get gender`() {
         val mdmPatientFields = relaxedMockk<MDMPatientFields> {
@@ -50,6 +54,7 @@ class MDMPatientFieldsTest {
         }
         assertEquals(AdministrativeGender.FEMALE, mdmPatientFields.gender)
     }
+
     @Test
     fun `can get addresses`() {
         val addresses = relaxedMockk<com.projectronin.interop.fhir.r4.datatype.Address> {
@@ -64,11 +69,12 @@ class MDMPatientFieldsTest {
         }
         assertEquals(listOf(addresses), mdmPatientFields.address)
     }
+
     @Test
     fun `can get phones`() {
         val phone1 = relaxedMockk<ContactPoint> {
             every { value } returns "1234567890"
-            every { use } returns ContactPointUse.HOME
+            every { use } returns ContactPointUse.HOME.asCode()
         }
         val mdmPatientFields = relaxedMockk<MDMPatientFields> {
             every { phone } returns listOf(phone1)

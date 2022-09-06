@@ -2,6 +2,7 @@ package com.projectronin.interop.proxy.server.model
 
 import com.projectronin.interop.fhir.r4.datatype.primitive.Id
 import com.projectronin.interop.fhir.r4.valueset.AppointmentStatus
+import com.projectronin.interop.proxy.server.util.asCode
 import com.projectronin.interop.proxy.server.util.relaxedMockk
 import com.projectronin.interop.tenant.config.model.Tenant
 import io.mockk.every
@@ -62,7 +63,7 @@ internal class AppointmentTest {
     @Test
     fun `can get status`() {
         val ehrAppointment = relaxedMockk<R4Appointment> {
-            every { status } returns AppointmentStatus.PROPOSED
+            every { status } returns AppointmentStatus.PROPOSED.asCode()
         }
         val appointment = Appointment(ehrAppointment, mockTenant)
         assertEquals("proposed", appointment.status)

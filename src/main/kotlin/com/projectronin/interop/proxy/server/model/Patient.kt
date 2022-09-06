@@ -31,7 +31,7 @@ data class Patient(
     val birthDate: String? = patient.birthDate?.value
 
     @GraphQLDescription("Gender (for administrative uses)")
-    val gender: String? = patient.gender?.code
+    val gender: String? = patient.gender?.value
 
     @GraphQLDescription("The available means of telecommunication")
     val telecom: List<ContactPoint> by lazy {

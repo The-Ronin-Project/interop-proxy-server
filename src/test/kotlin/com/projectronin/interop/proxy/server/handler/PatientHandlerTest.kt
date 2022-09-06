@@ -12,11 +12,12 @@ import com.projectronin.interop.fhir.r4.datatype.Identifier
 import com.projectronin.interop.fhir.r4.datatype.primitive.Date
 import com.projectronin.interop.fhir.r4.datatype.primitive.Id
 import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
-import com.projectronin.interop.fhir.ronin.resource.OncologyPatient
+import com.projectronin.interop.fhir.ronin.resource.RoninPatient
 import com.projectronin.interop.proxy.server.context.INTEROP_CONTEXT_KEY
 import com.projectronin.interop.proxy.server.context.InteropGraphQLContext
 import com.projectronin.interop.proxy.server.model.Patient
 import com.projectronin.interop.proxy.server.util.JacksonUtil
+import com.projectronin.interop.proxy.server.util.asCode
 import com.projectronin.interop.queue.QueueService
 import com.projectronin.interop.queue.model.ApiMessage
 import com.projectronin.interop.tenant.config.TenantService
@@ -232,23 +233,23 @@ class PatientHandlerTest {
             )
             every { name } returns listOf(
                 mockk {
-                    every { use } returns com.projectronin.interop.fhir.r4.valueset.NameUse.USUAL
+                    every { use } returns com.projectronin.interop.fhir.r4.valueset.NameUse.USUAL.asCode()
                     every { family } returns "Smith"
                     every { given } returns listOf("Josh")
                 }
             )
             every { birthDate } returns Date("1984-08-31")
-            every { gender } returns com.projectronin.interop.fhir.r4.valueset.AdministrativeGender.MALE
+            every { gender } returns com.projectronin.interop.fhir.r4.valueset.AdministrativeGender.MALE.asCode()
             every { telecom } returns listOf(
                 mockk {
-                    every { system } returns com.projectronin.interop.fhir.r4.valueset.ContactPointSystem.PHONE
-                    every { use } returns com.projectronin.interop.fhir.r4.valueset.ContactPointUse.MOBILE
+                    every { system } returns com.projectronin.interop.fhir.r4.valueset.ContactPointSystem.PHONE.asCode()
+                    every { use } returns com.projectronin.interop.fhir.r4.valueset.ContactPointUse.MOBILE.asCode()
                     every { value } returns "123-456-7890"
                 }
             )
             every { address } returns listOf(
                 mockk {
-                    every { use } returns com.projectronin.interop.fhir.r4.valueset.AddressUse.HOME
+                    every { use } returns com.projectronin.interop.fhir.r4.valueset.AddressUse.HOME.asCode()
                     every { line } returns listOf("1234 Main St")
                     every { city } returns "Anywhere"
                     every { state } returns "FL"
@@ -279,9 +280,9 @@ class PatientHandlerTest {
                 givenName = "Josh"
             )
         } returns response
-        mockkConstructor(OncologyPatient::class)
+        mockkConstructor(RoninPatient::class)
         every { ehrFactory.getVendorFactory(tenant).identifierService } returns identifierService
-        every { anyConstructed<OncologyPatient>().getRoninIdentifiers(patient1, tenant) } returns roninIdentifiers
+        every { anyConstructed<RoninPatient>().getRoninIdentifiers(patient1, tenant) } returns roninIdentifiers
         mockkObject(JacksonUtil)
         every { JacksonUtil.writeJsonValue(patient1) } returns "raw JSON for patient"
         every {
@@ -326,23 +327,23 @@ class PatientHandlerTest {
             )
             every { name } returns listOf(
                 mockk {
-                    every { use } returns com.projectronin.interop.fhir.r4.valueset.NameUse.USUAL
+                    every { use } returns com.projectronin.interop.fhir.r4.valueset.NameUse.USUAL.asCode()
                     every { family } returns "Smith"
                     every { given } returns listOf("Josh")
                 }
             )
             every { birthDate } returns Date("1984-08-31")
-            every { gender } returns com.projectronin.interop.fhir.r4.valueset.AdministrativeGender.MALE
+            every { gender } returns com.projectronin.interop.fhir.r4.valueset.AdministrativeGender.MALE.asCode()
             every { telecom } returns listOf(
                 mockk {
-                    every { system } returns com.projectronin.interop.fhir.r4.valueset.ContactPointSystem.PHONE
-                    every { use } returns com.projectronin.interop.fhir.r4.valueset.ContactPointUse.MOBILE
+                    every { system } returns com.projectronin.interop.fhir.r4.valueset.ContactPointSystem.PHONE.asCode()
+                    every { use } returns com.projectronin.interop.fhir.r4.valueset.ContactPointUse.MOBILE.asCode()
                     every { value } returns "123-456-7890"
                 }
             )
             every { address } returns listOf(
                 mockk {
-                    every { use } returns com.projectronin.interop.fhir.r4.valueset.AddressUse.HOME
+                    every { use } returns com.projectronin.interop.fhir.r4.valueset.AddressUse.HOME.asCode()
                     every { line } returns listOf("1234 Main St")
                     every { city } returns "Anywhere"
                     every { state } returns "FL"
@@ -374,9 +375,9 @@ class PatientHandlerTest {
                 givenName = "Josh"
             )
         } returns response
-        mockkConstructor(OncologyPatient::class)
+        mockkConstructor(RoninPatient::class)
         every { ehrFactory.getVendorFactory(tenant).identifierService } returns identifierService
-        every { anyConstructed<OncologyPatient>().getRoninIdentifiers(patient1, tenant) } returns roninIdentifiers
+        every { anyConstructed<RoninPatient>().getRoninIdentifiers(patient1, tenant) } returns roninIdentifiers
         mockkObject(JacksonUtil)
         every { JacksonUtil.writeJsonValue(patient1) } returns "raw JSON for patient"
         every {
@@ -421,23 +422,23 @@ class PatientHandlerTest {
             )
             every { name } returns listOf(
                 mockk {
-                    every { use } returns com.projectronin.interop.fhir.r4.valueset.NameUse.USUAL
+                    every { use } returns com.projectronin.interop.fhir.r4.valueset.NameUse.USUAL.asCode()
                     every { family } returns "Smith"
                     every { given } returns listOf("Josh")
                 }
             )
             every { birthDate } returns Date("1984-08-31")
-            every { gender } returns com.projectronin.interop.fhir.r4.valueset.AdministrativeGender.MALE
+            every { gender } returns com.projectronin.interop.fhir.r4.valueset.AdministrativeGender.MALE.asCode()
             every { telecom } returns listOf(
                 mockk {
-                    every { system } returns com.projectronin.interop.fhir.r4.valueset.ContactPointSystem.PHONE
-                    every { use } returns com.projectronin.interop.fhir.r4.valueset.ContactPointUse.MOBILE
+                    every { system } returns com.projectronin.interop.fhir.r4.valueset.ContactPointSystem.PHONE.asCode()
+                    every { use } returns com.projectronin.interop.fhir.r4.valueset.ContactPointUse.MOBILE.asCode()
                     every { value } returns "123-456-7890"
                 }
             )
             every { address } returns listOf(
                 mockk {
-                    every { use } returns com.projectronin.interop.fhir.r4.valueset.AddressUse.HOME
+                    every { use } returns com.projectronin.interop.fhir.r4.valueset.AddressUse.HOME.asCode()
                     every { line } returns listOf("1234 Main St")
                     every { city } returns "Anywhere"
                     every { state } returns "FL"
@@ -468,9 +469,9 @@ class PatientHandlerTest {
                 givenName = "Josh"
             )
         } returns response
-        mockkConstructor(OncologyPatient::class)
+        mockkConstructor(RoninPatient::class)
         every { ehrFactory.getVendorFactory(tenant).identifierService } returns identifierService
-        every { anyConstructed<OncologyPatient>().getRoninIdentifiers(patient1, tenant) } returns roninIdentifiers
+        every { anyConstructed<RoninPatient>().getRoninIdentifiers(patient1, tenant) } returns roninIdentifiers
         every {
             queueService.enqueueMessages(
                 listOf(

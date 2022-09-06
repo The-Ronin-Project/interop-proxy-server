@@ -11,6 +11,7 @@ import ca.uhn.hl7v2.model.v251.segment.PV1
 import ca.uhn.hl7v2.model.v251.segment.TXA
 import com.projectronin.interop.fhir.r4.datatype.primitive.Date
 import com.projectronin.interop.fhir.r4.valueset.ContactPointUse
+import com.projectronin.interop.fhir.ronin.util.asEnum
 import com.projectronin.interop.proxy.server.hl7.model.MDMPatientFields
 import com.projectronin.interop.proxy.server.hl7.model.MDMPractitionerFields
 import io.ktor.util.toUpperCasePreservingASCIIRules
@@ -26,7 +27,13 @@ class MDMService {
      * @param note: Text of the note to be attached in the OBX segment(s)
      * @param datetime: Date and Time the note was recorded, in yyyymmddhhmmss
      */
-    fun generateMDM(tenantId: String, patient: MDMPatientFields, practitioner: MDMPractitionerFields, note: String, datetime: String): Pair<String, String> {
+    fun generateMDM(
+        tenantId: String,
+        patient: MDMPatientFields,
+        practitioner: MDMPractitionerFields,
+        note: String,
+        datetime: String
+    ): Pair<String, String> {
         val mdm = MDM_T02()
         // TODO MSH-11, MSH-5 should be set based on Tenant interface information, will need to be added to our tenant configurations and pulled based on tenantId
         mdm.initQuickstart("MDM", "T02", "T")
@@ -96,7 +103,8 @@ class MDMService {
 
             if (type in listOf("mrn", "fhir")) {
                 pid.getPatientIdentifierList(pid3count).idNumber.value = patient.identifier[i].value
-                pid.getPatientIdentifierList(pid3count).assigningAuthority.namespaceID.value = type.toUpperCasePreservingASCIIRules()
+                pid.getPatientIdentifierList(pid3count).assigningAuthority.namespaceID.value =
+                    type.toUpperCasePreservingASCIIRules()
                 pid3count += 1
             }
         }
@@ -114,7 +122,8 @@ class MDMService {
 
         // PID-11 Address
         for (i in patient.address.indices) {
-            pid.getPatientAddress(i).streetAddress.streetOrMailingAddress.value = patient.address[i].line.joinToString(", ")
+            pid.getPatientAddress(i).streetAddress.streetOrMailingAddress.value =
+                patient.address[i].line.joinToString(", ")
             pid.getPatientAddress(i).city.value = patient.address[i].city
             pid.getPatientAddress(i).stateOrProvince.value = patient.address[i].state
             pid.getPatientAddress(i).zipOrPostalCode.value = patient.address[i].postalCode
@@ -124,7 +133,7 @@ class MDMService {
         // PID-13 Phone
         var phonecount = 0
         for (i in patient.phone.indices) {
-            when (patient.phone[i].use) {
+            when (patient.phone[i].use.asEnum<ContactPointUse>()) {
                 ContactPointUse.HOME -> {
                     pid.getPhoneNumberHome(phonecount).telephoneNumber.value = patient.phone[i].value
                     pid.getPhoneNumberHome(phonecount).telecommunicationUseCode.value = "PRN"
@@ -161,7 +170,8 @@ class MDMService {
         txa.getOriginatorCodeName(0).givenName.value = "Ronin"
 
         // TXA-12 Unique Document Number (needs to be generated and unique, needs to be cited for addendum messages)
-        txa.uniqueDocumentNumber.entityIdentifier.value = "RoninNote" + mdm.msh.dateTimeOfMessage.time.value + ".'" + mdm.msh.messageControlID.value
+        txa.uniqueDocumentNumber.entityIdentifier.value =
+            "RoninNote" + mdm.msh.dateTimeOfMessage.time.value + ".'" + mdm.msh.messageControlID.value
 
         // TXA-17 Document Completion Status, default to documented. If future workflow passes on document status, this could change
         txa.documentCompletionStatus.value = "DO"

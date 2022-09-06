@@ -1,6 +1,7 @@
 package com.projectronin.interop.proxy.server.model
 
 import com.projectronin.interop.fhir.r4.valueset.NameUse
+import com.projectronin.interop.proxy.server.util.asCode
 import com.projectronin.interop.proxy.server.util.relaxedMockk
 import io.mockk.every
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -12,7 +13,7 @@ class HumanNameTest {
     @Test
     fun `can get use`() {
         val ehrHumanName = relaxedMockk<R4HumanName> {
-            every { use } returns NameUse.USUAL
+            every { use } returns NameUse.USUAL.asCode()
         }
         val humanName = HumanName(ehrHumanName)
         assertEquals("usual", humanName.use)
