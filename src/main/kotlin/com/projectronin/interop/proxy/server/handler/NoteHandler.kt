@@ -16,6 +16,8 @@ import com.projectronin.interop.proxy.server.input.NoteInput
 import com.projectronin.interop.proxy.server.input.PatientIdType
 import com.projectronin.interop.queue.QueueService
 import com.projectronin.interop.queue.model.HL7Message
+import com.projectronin.interop.tenant.config.TenantService
+import graphql.schema.DataFetchingEnvironment
 import mu.KotlinLogging
 import org.springframework.stereotype.Component
 
@@ -23,7 +25,8 @@ import org.springframework.stereotype.Component
 class NoteHandler(
     private val patientService: PatientService,
     private val practitionerService: PractitionerService,
-    private val queueService: QueueService
+    private val queueService: QueueService,
+    private val tenantService: TenantService
 ) : Mutation {
     private val logger = KotlinLogging.logger { }
 
@@ -31,8 +34,12 @@ class NoteHandler(
      * Handler for Notes going to downstream EHRs. Sends notes to the queue to be sent to the tenant's EHR system based on tenant Id and noteInput
      */
     @GraphQLDescription("Takes in note from product and processes it for downstream services")
-    fun sendNote(noteInput: NoteInput, tenantId: String): String {
+    fun sendNote(noteInput: NoteInput, tenantId: String, dfe: DataFetchingEnvironment): String {
         logger.info { "Receiving Note for patient ${noteInput.patientIdType}: ${noteInput.patientId} from Practitioner ${noteInput.practitionerFhirId}" }
+
+        // Throw an exception if the tenant is bad
+        findAndValidateTenant(dfe, tenantService, tenantId, false)
+
         val oncologyPractitioner = practitionerService.getPractitioner(tenantId, noteInput.practitionerFhirId)
         val mdmPractitionerFields = MDMPractitionerFields(
             oncologyPractitioner.name,

@@ -14,15 +14,22 @@ import com.projectronin.interop.fhir.r4.resource.Patient
 import com.projectronin.interop.fhir.r4.resource.Practitioner
 import com.projectronin.interop.fhir.r4.valueset.AdministrativeGender
 import com.projectronin.interop.fhir.r4.valueset.ContactPointUse
+import com.projectronin.interop.proxy.server.context.INTEROP_CONTEXT_KEY
+import com.projectronin.interop.proxy.server.context.InteropGraphQLContext
 import com.projectronin.interop.proxy.server.input.NoteInput
 import com.projectronin.interop.proxy.server.input.PatientIdType
 import com.projectronin.interop.proxy.server.util.relaxedMockk
 import com.projectronin.interop.queue.QueueService
+import com.projectronin.interop.tenant.config.TenantService
+import com.projectronin.interop.tenant.config.model.Tenant
+import graphql.schema.DataFetchingEnvironment
 import io.mockk.every
 import io.mockk.mockk
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
+import org.springframework.web.client.HttpClientErrorException
 import java.text.SimpleDateFormat
 
 class NoteHandlerTest {
@@ -30,6 +37,8 @@ class NoteHandlerTest {
     private lateinit var practitionerService: PractitionerService
     private lateinit var patientService: PatientService
     private lateinit var queueService: QueueService
+    private lateinit var tenantService: TenantService
+    private lateinit var dfe: DataFetchingEnvironment
 
     private val testidentifier = relaxedMockk<Identifier> {
         every { system } returns Uri("test")
@@ -68,15 +77,22 @@ class NoteHandlerTest {
         practitionerService = mockk()
         patientService = mockk()
         queueService = mockk()
-        noteHandler = NoteHandler(patientService, practitionerService, queueService)
+        tenantService = mockk()
+        noteHandler = NoteHandler(patientService, practitionerService, queueService, tenantService)
+        dfe = mockk()
     }
 
     @Test
     fun `accepts note with patient FHIR Id`() {
+        val tenant = mockk<Tenant>()
+
+        every { dfe.graphQlContext.get<InteropGraphQLContext>(INTEROP_CONTEXT_KEY).authzTenantId } returns "apposnd"
         every { practitionerService.getPractitioner("apposnd", "PractitionerTestId") } returns oncologyPractitioner
         every { patientService.getPatient("apposnd", "PatientTestId") } returns oncologyPatient
+        every { tenantService.getTenantForMnemonic("apposnd") } returns tenant
+
         val noteInput = NoteInput("PatientTestId", PatientIdType.FHIR, "PractitionerTestId", "Example Note Text", "202206011250")
-        val response = noteHandler.sendNote(noteInput, "apposnd")
+        val response = noteHandler.sendNote(noteInput, "apposnd", dfe)
         val dateformat = SimpleDateFormat("yyyyMMdd")
         val docId = "RoninNote" + dateformat.format(java.util.Date())
         assertTrue(response.startsWith(docId))
@@ -84,13 +100,28 @@ class NoteHandlerTest {
 
     @Test
     fun `accepts note with patient MRN`() {
+        val tenant = mockk<Tenant>()
+
+        every { dfe.graphQlContext.get<InteropGraphQLContext>(INTEROP_CONTEXT_KEY).authzTenantId } returns "apposnd"
+        every { tenantService.getTenantForMnemonic("apposnd") } returns tenant
         every { practitionerService.getPractitioner("apposnd", "PractitionerTestId") } returns oncologyPractitioner
         val noteInput = NoteInput("PatientMRNId", PatientIdType.MRN, "PractitionerTestId", "Example Note Text", "202206011250")
         every { patientService.getPatientFHIRIds("apposnd", mapOf("key" to SystemValue(system = CodeSystem.MRN.uri.value, value = noteInput.patientId))).getValue("key") } returns "PatientFhirId"
         every { patientService.getPatient("apposnd", "PatientFhirId") } returns oncologyPatient
-        val response = noteHandler.sendNote(noteInput, "apposnd")
+        val response = noteHandler.sendNote(noteInput, "apposnd", dfe)
         val dateformat = SimpleDateFormat("yyyyMMdd")
         val docId = "RoninNote" + dateformat.format(java.util.Date())
         assertTrue(response.startsWith(docId))
+    }
+
+    @Test
+    fun `handles bad tenant`() {
+        every { dfe.graphQlContext.get<InteropGraphQLContext>(INTEROP_CONTEXT_KEY).authzTenantId } returns "apposnd"
+        every { tenantService.getTenantForMnemonic("apposnd") } returns null
+
+        val noteInput = NoteInput("PatientMRNId", PatientIdType.MRN, "PractitionerTestId", "Example Note Text", "202206011250")
+        assertThrows<HttpClientErrorException> {
+            noteHandler.sendNote(noteInput, "apposnd", dfe)
+        }
     }
 }
