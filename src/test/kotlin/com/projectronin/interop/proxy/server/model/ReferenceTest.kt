@@ -82,4 +82,44 @@ class ReferenceTest {
         assertNull(reference.type)
         assertNull(reference.display)
     }
+
+    @Test
+    fun `created from R4 reference with just reference sets id and type as well`() {
+        val tenant = mockk<Tenant> {
+            every { mnemonic } returns "tenant"
+        }
+        val ehrReference = mockk<R4Reference> {
+            every { reference } returns "Patient/1234"
+            every { type } returns null
+            every { display } returns null
+            every { identifier } returns null
+            every { id } returns null
+        }
+        val reference = Reference.from(ehrReference, tenant)
+        assertEquals("tenant-1234", reference.id)
+        assertEquals("Patient/tenant-1234", reference.reference)
+        assertNull(reference.identifier)
+        assertEquals("Patient", reference.type)
+        assertNull(reference.display)
+    }
+
+    @Test
+    fun `created from R4 reference does not override type and id if already present`() {
+        val tenant = mockk<Tenant> {
+            every { mnemonic } returns "tenant"
+        }
+        val ehrReference = mockk<R4Reference> {
+            every { reference } returns "Patient/1234"
+            every { type } returns Uri("Practitioner")
+            every { display } returns null
+            every { identifier } returns null
+            every { id } returns "5678"
+        }
+        val reference = Reference.from(ehrReference, tenant)
+        assertEquals("tenant-5678", reference.id)
+        assertEquals("Patient/tenant-1234", reference.reference)
+        assertNull(reference.identifier)
+        assertEquals("Practitioner", reference.type)
+        assertNull(reference.display)
+    }
 }
