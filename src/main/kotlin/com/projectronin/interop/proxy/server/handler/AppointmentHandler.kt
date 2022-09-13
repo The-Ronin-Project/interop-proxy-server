@@ -13,13 +13,13 @@ import com.projectronin.interop.queue.QueueService
 import com.projectronin.interop.queue.model.ApiMessage
 import com.projectronin.interop.tenant.config.TenantService
 import com.projectronin.interop.tenant.config.model.Tenant
-import com.projectronin.interop.tenant.config.model.vendor.Epic
 import graphql.GraphQLError
 import graphql.GraphQLException
 import graphql.execution.DataFetcherResult
 import graphql.schema.DataFetchingEnvironment
 import mu.KotlinLogging
 import org.springframework.stereotype.Component
+import java.time.LocalDate
 import com.projectronin.interop.proxy.server.model.Appointment as ProxyServerAppointment
 
 /**
@@ -43,13 +43,15 @@ class AppointmentHandler(
         endDate: String,
         dfe: DataFetchingEnvironment
     ): DataFetcherResult<List<ProxyServerAppointment>> {
-        val tenant = findAndValidateTenant(dfe, tenantService, tenantId)
-        val patientFHIRID = ehrFactory.getVendorFactory(tenant).patientService.getPatientsFHIRIds(
-            tenant,
-            tenant.vendorAs<Epic>().patientMRNSystem,
-            listOf(mrn)
-        )[mrn]!!.fhirID // API will throw exception for us, but should never happen (!! is ok to use here)
-        return appointmentsByPatientAndDate(tenantId, patientFHIRID, startDate, endDate, dfe)
+        return appointmentsByPatientAndDate(tenantId, mrn, startDate, endDate, dfe) { tenant, mrn, startDate, endDate ->
+            val appointmentService = ehrFactory.getVendorFactory(tenant).appointmentService
+            appointmentService.findPatientAppointmentsByMRN(
+                tenant = tenant,
+                mrn = mrn,
+                startDate = startDate,
+                endDate = endDate
+            )
+        }
     }
 
     @GraphQLDescription("Finds appointments for a given patient UDP ID and date range. Requires User Auth.")
@@ -60,6 +62,31 @@ class AppointmentHandler(
         endDate: String,
         dfe: DataFetchingEnvironment // automatically added to requests
     ): DataFetcherResult<List<ProxyServerAppointment>> {
+        return appointmentsByPatientAndDate(
+            tenantId,
+            patientFhirId,
+            startDate,
+            endDate,
+            dfe
+        ) { tenant, patientId, startDate, endDate ->
+            val appointmentService = ehrFactory.getVendorFactory(tenant).appointmentService
+            appointmentService.findPatientAppointments(
+                tenant = tenant,
+                patientFHIRId = patientFhirId,
+                startDate = startDate,
+                endDate = endDate
+            )
+        }
+    }
+
+    private fun appointmentsByPatientAndDate(
+        tenantId: String,
+        patientId: String,
+        startDate: String,
+        endDate: String,
+        dfe: DataFetchingEnvironment,
+        appointmentLookup: (Tenant, String, LocalDate, LocalDate) -> List<Appointment>
+    ): DataFetcherResult<List<ProxyServerAppointment>> {
         logger.info { "Processing appointment query for tenant: $tenantId" }
 
         val findAppointmentErrors = mutableListOf<GraphQLError>()
@@ -69,12 +96,11 @@ class AppointmentHandler(
 
         // request appointment list from EHR
         val appointments = try {
-            val appointmentService = ehrFactory.getVendorFactory(tenant).appointmentService
-            appointmentService.findPatientAppointments(
-                tenant = tenant,
-                patientFHIRId = patientFhirId,
-                startDate = dateFormatter.parseDateString(startDate),
-                endDate = dateFormatter.parseDateString(endDate)
+            appointmentLookup.invoke(
+                tenant,
+                patientId,
+                dateFormatter.parseDateString(startDate),
+                dateFormatter.parseDateString(endDate)
             )
         } catch (e: Exception) {
             findAppointmentErrors.add(GraphQLException(e.message).toGraphQLError())

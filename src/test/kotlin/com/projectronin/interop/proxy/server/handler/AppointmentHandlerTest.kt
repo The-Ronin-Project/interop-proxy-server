@@ -479,25 +479,13 @@ class AppointmentHandlerTest {
         every { ehrFactory.getVendorFactory(tenant) } returns mockk {
             every { appointmentService } returns mockk {
                 every {
-                    findPatientAppointments(
+                    findPatientAppointmentsByMRN(
                         tenant = tenant,
-                        patientFHIRId = "FHIRID",
+                        mrn = "MRN",
                         startDate = LocalDate.of(2025, 1, 20),
                         endDate = LocalDate.of(2025, 1, 22)
                     )
                 } returns response
-            }
-        }
-
-        every { ehrFactory.getVendorFactory(tenant) } returns mockk {
-            every { patientService } returns mockk {
-                every {
-                    getPatientsFHIRIds(
-                        tenant = tenant,
-                        patientIDSystem = "MRNSYSTEM",
-                        patientIDValues = listOf("MRN")
-                    )["MRN"]?.fhirID
-                } returns "FHIRID"
             }
         }
 
