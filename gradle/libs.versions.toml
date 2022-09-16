@@ -1,7 +1,7 @@
 [libraries]
 datadog-java-agent = "com.datadoghq:dd-java-agent:0.108.2"
-graphql-kotlin-schema-generator = "com.expediagroup:graphql-kotlin-schema-generator:6.2.2"
-graphql-kotlin-spring-server = "com.expediagroup:graphql-kotlin-spring-server:6.2.2"
+graphql-kotlin-schema-generator = "com.expediagroup:graphql-kotlin-schema-generator:6.2.4"
+graphql-kotlin-spring-server = "com.expediagroup:graphql-kotlin-spring-server:6.2.4"
 graphql-spring-boot-starter-test = "com.graphql-java-kickstart:graphql-spring-boot-starter-test:14.0.0"
 hapi-hl7v2-251 = "ca.uhn.hapi:hapi-structures-v251:2.3"
 hapi-hl7v2-base = "ca.uhn.hapi:hapi-base:2.3"
