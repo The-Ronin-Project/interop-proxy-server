@@ -64,13 +64,14 @@ class PatientHandler(
             logger.error(e.getLogMarker(), e) { "Patient query for tenant $tenantId contains errors" }
             listOf()
         }
-
         logger.debug { "Patient query for tenant $tenantId returned" }
+        // post search matching
+        val postMatchPatients = postSearchPatientMatch(patients, family, given, birthdate)
 
         // Send patients to queue service
         try {
             queueService.enqueueMessages(
-                patients.map {
+                postMatchPatients.map {
                     ApiMessage(
                         id = null,
                         resourceType = ResourceType.PATIENT,
@@ -86,7 +87,7 @@ class PatientHandler(
         logger.debug { "Patient results for $tenantId sent to queue" }
 
         // Translate for return
-        return DataFetcherResult.newResult<List<ProxyServerPatient>>().data(mapFHIRPatients(patients, tenant))
+        return DataFetcherResult.newResult<List<ProxyServerPatient>>().data(mapFHIRPatients(postMatchPatients, tenant))
             .errors(findPatientErrors).build()
     }
 
@@ -97,5 +98,22 @@ class PatientHandler(
         if (fhirPatients.isEmpty()) return emptyList()
         val oncologyPatient = RoninPatient.create(ehrFactory.getVendorFactory(tenant).identifierService)
         return fhirPatients.map { ProxyServerPatient(it, tenant, oncologyPatient.getRoninIdentifiers(it, tenant)) }
+    }
+
+    private fun postSearchPatientMatch(patientList: List<R4Patient>, family: String, given: String, dob: String): List<R4Patient> {
+
+        var returnList = mutableListOf<R4Patient>()
+        for (i in patientList) {
+            i.name.forEach {
+                if (it.family == family && it.given.contains(given) && i.birthDate.toString().contains(dob)) {
+                    returnList.add(i)
+                }
+            }
+        }
+        return if (returnList.isNullOrEmpty()) {
+            patientList
+        } else {
+            returnList
+        }
     }
 }
