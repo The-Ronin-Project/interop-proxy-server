@@ -116,7 +116,7 @@ class ProviderPoolController(private val providerPoolDAO: ProviderPoolDAO, priva
 
     @ExceptionHandler
     fun handleException(e: Exception): ResponseEntity<String> {
-        logger.error(e) { "Unspecified error occurred during ProviderPoolController ${e.message}" }
+        logger.warn(e) { "Unspecified error occurred during ProviderPoolController ${e.message}" }
         return ResponseEntity(e.message, HttpStatus.INTERNAL_SERVER_ERROR)
     }
 

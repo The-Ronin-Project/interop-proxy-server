@@ -89,7 +89,7 @@ class NoteHandler(
                 )
             )
         } catch (e: Exception) {
-            logger.error(e.getLogMarker(), e) { "Exception sending note to queue: ${e.message}" }
+            logger.warn(e.getLogMarker(), e) { "Exception sending note to queue: ${e.message}" }
         }
         return hl7.second
     }

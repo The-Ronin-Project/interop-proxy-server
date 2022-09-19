@@ -72,7 +72,7 @@ class MirthTenantConfigController(private val mirthTenantConfigDAO: MirthTenantC
 
     @ExceptionHandler
     fun handleException(e: Exception): ResponseEntity<String> {
-        logger.error(e) { "Unspecified error occurred during MirthTenantConfigController ${e.message}" }
+        logger.warn(e) { "Unspecified error occurred during MirthTenantConfigController ${e.message}" }
         return ResponseEntity(e.message, HttpStatus.INTERNAL_SERVER_ERROR)
     }
 

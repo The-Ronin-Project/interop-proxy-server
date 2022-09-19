@@ -123,7 +123,7 @@ class AppointmentHandler(
                 }
             )
         } catch (e: Exception) {
-            logger.error { "Exception sending appointments to queue: ${e.message}" }
+            logger.warn { "Exception sending appointments to queue: ${e.message}" }
         }
 
         logger.info { "Appointments for $tenantId sent to queue" }

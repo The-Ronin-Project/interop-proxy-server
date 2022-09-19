@@ -46,7 +46,7 @@ class EhrController(private val ehrDAO: EhrDAO) {
 
     @ExceptionHandler
     fun handleException(e: Exception): ResponseEntity<String> {
-        logger.error(e) { "Unspecified error occurred during EhrController" }
+        logger.warn(e) { "Unspecified error occurred during EhrController" }
         return ResponseEntity(e.message, HttpStatus.INTERNAL_SERVER_ERROR)
     }
 

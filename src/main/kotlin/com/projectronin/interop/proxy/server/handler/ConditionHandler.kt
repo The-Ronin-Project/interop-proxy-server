@@ -86,7 +86,7 @@ class ConditionHandler(
                 }
             )
         } catch (e: Exception) {
-            logger.error { "Exception sending conditions to queue: ${e.message}" }
+            logger.warn { "Exception sending conditions to queue: ${e.message}" }
         }
 
         logger.info { "Condition results for $tenantId sent to queue" }

@@ -47,7 +47,7 @@ class UserAuthService(private val client: HttpClient, @Value("\${seki.endpoint}"
             } catch (e: Exception) {
                 if (e is ClientRequestException && e.response.status == HttpStatusCode.Unauthorized) {
                     // token is invalid, but we received a response back we could handle
-                    logger.warn(e) { "Token not valid: ${e.message}" }
+                    logger.info(e) { "Token not valid: ${e.message}" }
                     null
                 } else {
                     // Seiki is throwing an error we can't handle and we won't be able to

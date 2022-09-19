@@ -81,7 +81,7 @@ class PatientHandler(
                 }
             )
         } catch (e: Exception) {
-            logger.error { "Exception sending patients to queue: ${e.message}" }
+            logger.warn { "Exception sending patients to queue: ${e.message}" }
         }
 
         logger.debug { "Patient results for $tenantId sent to queue" }

@@ -54,7 +54,7 @@ class TenantController(private val tenantService: TenantService) {
 
     @ExceptionHandler
     fun handleException(e: Exception): ResponseEntity<String> {
-        logger.error(e) { "Unspecified error occurred during TenantController" }
+        logger.warn(e) { "Unspecified error occurred during TenantController" }
         return ResponseEntity(e.message, HttpStatus.INTERNAL_SERVER_ERROR)
     }
 
@@ -62,7 +62,7 @@ class TenantController(private val tenantService: TenantService) {
     // but we can't find that type in the DB. It's really hard for that to be the caller's fault
     @ExceptionHandler(value = [(NoEHRFoundException::class)])
     fun handleEHRException(e: NoEHRFoundException): ResponseEntity<String> {
-        logger.error(e) { "Unable to find EHR" }
+        logger.warn(e) { "Unable to find EHR" }
         return ResponseEntity("Unable to find EHR", HttpStatus.INTERNAL_SERVER_ERROR)
     }
 

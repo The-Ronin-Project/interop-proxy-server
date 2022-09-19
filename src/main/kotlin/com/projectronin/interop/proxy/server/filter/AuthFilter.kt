@@ -32,7 +32,7 @@ class AuthFilter(private val userAuthService: UserAuthService, private val m2MAu
         val bearer =
             kotlin.runCatching { exchange.request.headers.getFirst(AUTH_HEADER)!!.substring(7) /* strip 'Bearer '*/ }
                 .getOrElse {
-                    logger.warn(it) { "Invalid or missing bearer token when requesting ${exchange.request.uri}" }
+                    logger.info(it) { "Invalid or missing bearer token when requesting ${exchange.request.uri}" }
                     return handleForbidden(exchange, "Invalid Bearer token")
                 }
 
@@ -55,7 +55,7 @@ class AuthFilter(private val userAuthService: UserAuthService, private val m2MAu
             logger.debug { "User Authentication success" }
             chain.filter(mutatedExchange) // This essentially just means 'nothing wrong, please continue'
         } else {
-            logger.warn { "Authentication failed" }
+            logger.info { "Authentication failed" }
             handleForbidden(exchange, "Invalid Bearer token '$bearer'")
         }
     }
