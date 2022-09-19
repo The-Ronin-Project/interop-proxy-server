@@ -38,7 +38,7 @@ data class Appointment(
 
     @GraphQLDescription("Participants on this appointment")
     val participants: List<Participant> by lazy {
-        appointment.participant.filter { it.actor?.reference?.contains("Practitioner") ?: false }
+        appointment.participant.filter { it.actor != null }
             .map { Participant(Reference.from(it.actor!!, tenant)) }
     }
 }

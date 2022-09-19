@@ -101,24 +101,6 @@ internal class AppointmentTest {
         val appointment = Appointment(ehrAppointment, mockTenant)
         assertNull(appointment.appointmentType)
     }
-
-    @Test
-    fun `get participants when practitioners found and not found`() {
-        val mockEHRParticipant = relaxedMockk<R4Participant> {
-            every { actor?.reference } returns "Practitioner"
-        }
-        val mockEHRParticipant2 = relaxedMockk<R4Participant> {
-            every { actor?.reference } returns "different type"
-        }
-
-        val ehrAppointment = relaxedMockk<R4Appointment> {
-            every { participant } returns listOf(mockEHRParticipant, mockEHRParticipant2)
-        }
-        val appointment = Appointment(ehrAppointment, mockTenant)
-
-        assertEquals(appointment.participants.size, 1)
-    }
-
     @Test
     fun `get participants when practitioners null`() {
         val mockEHRParticipant = relaxedMockk<R4Participant> {
@@ -133,6 +115,6 @@ internal class AppointmentTest {
         }
         val appointment = Appointment(ehrAppointment, mockTenant)
 
-        assertEquals(appointment.participants.size, 0)
+        assertEquals(1, appointment.participants.size)
     }
 }

@@ -87,6 +87,8 @@ class InteropProxyServerIntegratedAppointmentTests {
             mockEHR.addR4Resource("Appointment", createAppt, "06d7feb3-3326-4276-9535-83a622d8e216")
             val createPat = this::class.java.getResource("/mockEHR/r4Patient.json")!!.readText()
             mockEHR.addR4Resource("Patient", createPat, "eJzlzKe3KPzAV5TtkxmNivQ3")
+            val creatPract = this::class.java.getResource("/mockEHR/r4Practitioner.json")!!.readText()
+            mockEHR.addR4Resource("Practitioner", creatPract, "fhirId1")
             setupDone = true
         }
     }
@@ -104,28 +106,29 @@ class InteropProxyServerIntegratedAppointmentTests {
         val resultJSONNode = objectMapper.readTree(responseEntity.body)
         val appointmentsJSONNode = resultJSONNode["data"]["appointmentsByMRNAndDate"]
 
-        /*
-         * Appointments in the sandbox keep changing, so instead of checking for a specific response we're checking
-         * that appointments were returned with participants, and there were no errors.
-         */
         assertEquals(HttpStatus.OK, responseEntity.statusCode)
         assertFalse(resultJSONNode.has("errors"))
-        assertTrue(appointmentsJSONNode.size() > 0)
+        assertEquals(1, appointmentsJSONNode.size())
 
-        println(appointmentsJSONNode.toPrettyString())
-
-        // TODO: Fix how this is working with recent changes to both code and Mock EHR.
         // Check participants on each appointment
-        // appointmentsJSONNode.forEach { appointment ->
-        //     val participants = appointment["participants"]
-        //     assertTrue(participants.size() > 0)
-        //     participants.forEach { participant ->
-        //         val actor = participant["actor"]
-        //         assertEquals("Practitioner/apposnd-fhirId1", actor["reference"].textValue())
-        //         // assertEquals("Practitioner", actor["type"].textValue())
-        //         // assertEquals("apposnd-fhirId1", actor["id"].textValue())
-        //     }
-        // }
+        appointmentsJSONNode.forEach { appointment ->
+            val participants = appointment["participants"]
+            assertEquals(3, participants.size())
+            participants.forEach { participant ->
+                val actor = participant["actor"]
+                val type = actor["type"].asText()
+                if (type == "Patient") {
+                    assertEquals("Patient/apposnd-202497", actor["reference"].asText())
+                }
+                if (type == "Practitioner") {
+                    if (actor["reference"].asText() == "null") {
+                        assertEquals("NO-INTERNAL-ID", actor["identifier"]["value"].asText())
+                    } else {
+                        assertEquals("Practitioner/apposnd-fhirId1", actor["reference"].asText())
+                    }
+                }
+            }
+        }
     }
 
     @Test
