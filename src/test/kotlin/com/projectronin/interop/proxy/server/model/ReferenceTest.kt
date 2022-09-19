@@ -41,6 +41,8 @@ class ReferenceTest {
             every { display } returns "Patient 1234"
             every { identifier } returns ehrIdentifier
             every { id } returns "1234"
+            every { decomposedType() } returns "Patient"
+            every { decomposedId() } returns "1234"
         }
         val reference = Reference.from(ehrReference, tenant)
         assertEquals("tenant-1234", reference.id)
@@ -61,6 +63,8 @@ class ReferenceTest {
             every { display } returns "Patient 1234"
             every { identifier } returns null
             every { id } returns null
+            every { decomposedType() } returns null
+            every { decomposedId() } returns null
         }
         val reference = Reference.from(ehrReference, tenant)
         assertNull(reference.id)
@@ -94,6 +98,8 @@ class ReferenceTest {
             every { display } returns null
             every { identifier } returns null
             every { id } returns null
+            every { decomposedType() } returns "Patient"
+            every { decomposedId() } returns "1234"
         }
         val reference = Reference.from(ehrReference, tenant)
         assertEquals("tenant-1234", reference.id)
@@ -114,6 +120,8 @@ class ReferenceTest {
             every { display } returns null
             every { identifier } returns null
             every { id } returns "5678"
+            every { decomposedType() } returns "Practitioner"
+            every { decomposedId() } returns "5678"
         }
         val reference = Reference.from(ehrReference, tenant)
         assertEquals("tenant-5678", reference.id)

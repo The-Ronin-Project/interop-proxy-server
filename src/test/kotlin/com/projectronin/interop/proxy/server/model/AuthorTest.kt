@@ -27,6 +27,8 @@ class AuthorTest {
             every { display } returns "display"
             every { identifier } returns Identifier(value = "123")
             every { id } returns "123"
+            every { decomposedType() } returns "type"
+            every { decomposedId() } returns "123"
         }
         val referenceAuthor = ReferenceAuthor(ehrReferenceAuthor, testTenant)
         assertNotNull(referenceAuthor.value)
