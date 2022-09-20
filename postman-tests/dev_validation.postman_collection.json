@@ -1,10 +1,10 @@
 {
 	"info": {
-		"_postman_id": "dd9fe546-5ab8-47c9-b858-7488db824c6f",
+		"_postman_id": "033b788c-5dd8-48a8-8912-8636e6a2052a",
 		"name": "Proxy Server Dev Validation Tests",
 		"description": "**Overview**\n\nThis is a collection of tests that can be used to validate proxy server is running in the dev environment by running the \"happy path\" for each end point.\n\n**Usage**\n\n1.  Select the `Proxy Server-dev` environment.\n2.  With `Proxy Server Dev Validation Tests` selected, click Run in the top right corner.\n3.  Click the big, blue run button.\n    \n\n**Notes**\n\nThe Seki token in the `Proxy Server-dev` environment only has a 60 day lifetime. New tokens can be found [here](https://dev.projectronin.io/seki/admin/tenants). The Seki team is working on a way to automate generating a new one for us if one isn't available, but until then just ask them when it expires.\n\nFor the Tenant Config tests, we're currently not testing inserts unless the end point has a delete, because the database is persisted and I don't want to fill it with junk. For the same reason, all updates set the row to itself to avoid changing things.\n\n**Authorization**\n\nUser level calls pull the auth token from the environment. M2M calls reach out to Auth0 to get an auth token and save it as a collection variable. When the token expires it will attempt to get a new one.",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-		"_exporter_id": "18425757"
+		"_exporter_id": "17529185"
 	},
 	"item": [
 		{
@@ -761,7 +761,7 @@
 								"header": [],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n    \"id\": 1001,\n    \"mnemonic\": \"apposnd\",\n    \"name\": \"apposnd\",\n    \"availableStart\": \"22:00:00\",\n    \"availableEnd\": \"06:00:00\",\n    \"vendor\": {\n        \"type\": \"EPIC\",\n        \"release\": \"1.0\",\n        \"serviceEndpoint\": \"https://appmarket.epic.com/interconnect-amcurprd-oauth\",\n        \"authEndpoint\": \"https://appmarket.epic.com/interconnect-amcurprd-oauth/oauth2/token\",\n        \"ehrUserId\": \"1\",\n        \"messageType\": \"1\",\n        \"practitionerProviderSystem\": \"urn:oid:1.2.840.114350.1.13.0.1.7.2.836982\",\n        \"practitionerUserSystem\": \"urn:oid:1.2.840.114350.1.13.0.1.7.2.697780\",\n        \"patientMRNSystem\": \"urn:oid:1.2.840.114350.1.13.0.1.7.5.737384.14\",\n        \"patientInternalSystem\": \"\",\n        \"patientMRNTypeText\": \"\",\n        \"hsi\": null,\n        \"instanceName\": \"EPIC\",\n        \"vendorType\": \"EPIC\"\n    }\n}",
+									"raw": "{\n    \"id\": 1001,\n    \"mnemonic\": \"apposnd\",\n    \"name\": \"apposnd\",\n    \"availableStart\": \"22:00:00\",\n    \"availableEnd\": \"06:00:00\",\n    \"vendor\": {\n        \"type\": \"EPIC\",\n        \"release\": \"1.0\",\n        \"serviceEndpoint\": \"https://appmarket.epic.com/interconnect-amcurprd-oauth\",\n        \"authEndpoint\": \"https://appmarket.epic.com/interconnect-amcurprd-oauth/oauth2/token\",\n        \"ehrUserId\": \"1\",\n        \"messageType\": \"1\",\n        \"practitionerProviderSystem\": \"urn:oid:1.2.840.114350.1.13.0.1.7.2.836982\",\n        \"practitionerUserSystem\": \"urn:oid:1.2.840.114350.1.13.0.1.7.2.697780\",\n        \"patientMRNSystem\": \"urn:oid:1.2.840.114350.1.13.0.1.7.5.737384.14\",\n        \"patientInternalSystem\": \"urn:oid:1.2.840.114350.1.13.0.1.7.2.698084\",\n        \"encounterCSNSystem\": \"\",\n        \"patientMRNTypeText\": \"MRN\",\n        \"hsi\": null,\n        \"instanceName\": \"EPIC\",\n        \"vendorType\": \"EPIC\"\n    }\n}",
 									"options": {
 										"raw": {
 											"language": "json"
