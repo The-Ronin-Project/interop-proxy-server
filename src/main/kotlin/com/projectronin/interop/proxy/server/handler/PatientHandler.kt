@@ -6,6 +6,7 @@ import com.expediagroup.graphql.server.operations.Query
 import com.projectronin.interop.common.logmarkers.getLogMarker
 import com.projectronin.interop.common.resource.ResourceType
 import com.projectronin.interop.ehr.factory.EHRFactory
+import com.projectronin.interop.fhir.r4.datatype.primitive.Date
 import com.projectronin.interop.fhir.ronin.resource.RoninPatient
 import com.projectronin.interop.proxy.server.util.DateUtil
 import com.projectronin.interop.proxy.server.util.JacksonUtil
@@ -34,7 +35,7 @@ class PatientHandler(
     private val logger = KotlinLogging.logger { }
     private val dateFormatter = DateUtil()
 
-    @GraphQLDescription("Finds patient(s) by family name, given name, and birthdate (YYYY-mm-dd format).")
+    @GraphQLDescription("Finds patient(s) that exactly match on family name, given name, and birthdate (YYYY-mm-dd format).")
     fun patientsByNameAndDOB(
         tenantId: String,
         family: String,
@@ -64,9 +65,10 @@ class PatientHandler(
             logger.error(e.getLogMarker(), e) { "Patient query for tenant $tenantId contains errors" }
             listOf()
         }
-        logger.debug { "Patient query for tenant $tenantId returned" }
+        logger.debug { "Patient query for tenant $tenantId returned ${patients.size} patients." }
         // post search matching
         val postMatchPatients = postSearchPatientMatch(patients, family, given, birthdate)
+        logger.debug { "Patient post filtering for tenant $tenantId returned ${postMatchPatients.size} patients." }
 
         // Send patients to queue service
         try {
@@ -100,20 +102,20 @@ class PatientHandler(
         return fhirPatients.map { ProxyServerPatient(it, tenant, oncologyPatient.getRoninIdentifiers(it, tenant)) }
     }
 
-    private fun postSearchPatientMatch(patientList: List<R4Patient>, family: String, given: String, dob: String): List<R4Patient> {
-
-        var returnList = mutableListOf<R4Patient>()
-        for (i in patientList) {
-            i.name.forEach {
-                if (it.family == family && it.given.contains(given) && i.birthDate.toString().contains(dob)) {
-                    returnList.add(i)
+    private fun postSearchPatientMatch(
+        patientList: List<R4Patient>,
+        family: String,
+        given: String,
+        dob: String
+    ): List<R4Patient> {
+        return patientList.filter { patient ->
+            val requestDate = Date(dob)
+            patient.birthDate?.equals(requestDate) ?: false &&
+                patient.name.any { humanName ->
+                    humanName.family.equals(family, true) && humanName.given.any {
+                        it.equals(given, true)
+                    }
                 }
-            }
-        }
-        return if (returnList.isNullOrEmpty()) {
-            patientList
-        } else {
-            returnList
         }
     }
 }

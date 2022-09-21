@@ -272,7 +272,7 @@ type Query {
   appointmentsByPatientAndDate(endDate: String!, patientFhirId: String!, startDate: String!, tenantId: String!): [Appointment!]!
   "Finds active patient conditions for a given patient and category. Only conditions registered within the category will be returned. Requires User Auth."
   conditionsByPatientAndCategory(conditionCategoryCode: ConditionCategoryCode!, patientFhirId: String!, tenantId: String!): [Condition!]!
-  "Finds patient(s) by family name, given name, and birthdate (YYYY-mm-dd format)."
+  "Finds patient(s) that exactly match on family name, given name, and birthdate (YYYY-mm-dd format)."
   patientsByNameAndDOB(birthdate: String!, family: String!, given: String!, tenantId: String!): [Patient!]!
 }
 

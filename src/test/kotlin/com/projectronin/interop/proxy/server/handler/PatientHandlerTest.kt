@@ -543,7 +543,7 @@ class PatientHandlerTest {
     }
 
     @Test
-    fun `post search matching finds identical patients`() {
+    fun `ensure when post search matching finds multiple patients only exact match is returned`() {
         val patient1 = mockk<R4Patient> {
             every { id } returns Id("Patient-UUID-1")
             every { identifier } returns listOf(
@@ -654,7 +654,7 @@ class PatientHandlerTest {
     }
 
     @Test
-    fun `post search matching finds no identical patients`() {
+    fun `ensure when post search matching finds multiple patients only exact match regardless of case is returned`() {
         val patient1 = mockk<R4Patient> {
             every { id } returns Id("Patient-UUID-1")
             every { identifier } returns listOf(
@@ -666,7 +666,7 @@ class PatientHandlerTest {
             every { name } returns listOf(
                 mockk {
                     every { use } returns com.projectronin.interop.fhir.r4.valueset.NameUse.USUAL.asCode()
-                    every { family } returns "Smyth"
+                    every { family } returns "Smith"
                     every { given } returns listOf("Josh")
                 }
             )
@@ -705,6 +705,278 @@ class PatientHandlerTest {
                 }
             )
             every { birthDate } returns Date("1984-01-31")
+            every { gender } returns com.projectronin.interop.fhir.r4.valueset.AdministrativeGender.MALE.asCode()
+            every { telecom } returns listOf(
+                mockk {
+                    every { system } returns com.projectronin.interop.fhir.r4.valueset.ContactPointSystem.PHONE.asCode()
+                    every { use } returns com.projectronin.interop.fhir.r4.valueset.ContactPointUse.MOBILE.asCode()
+                    every { value } returns "123-456-7890"
+                }
+            )
+            every { address } returns listOf(
+                mockk {
+                    every { use } returns com.projectronin.interop.fhir.r4.valueset.AddressUse.HOME.asCode()
+                    every { line } returns listOf("1234 Main St")
+                    every { city } returns "Anywhere"
+                    every { state } returns "FL"
+                    every { postalCode } returns "37890"
+                }
+            )
+        }
+
+        val response = listOf(patient1, patient2)
+        val tenant = mockk<Tenant>()
+        every { tenant.mnemonic } returns "tenantId"
+        every { tenantService.getTenantForMnemonic("tenantId") } returns tenant
+        every { dfe.graphQlContext.get<InteropGraphQLContext>(INTEROP_CONTEXT_KEY).authzTenantId } returns "tenantId"
+
+        val roninIdentifiers = listOf(
+            Identifier(
+                system = Uri("mrnSystem"),
+                value = "1234"
+            )
+        )
+        mockkConstructor(RoninPatient::class)
+        every { ehrFactory.getVendorFactory(tenant).identifierService } returns identifierService
+        every { anyConstructed<RoninPatient>().getRoninIdentifiers(patient1, tenant) } returns roninIdentifiers
+
+        val patientService = mockk<PatientService>()
+        every { ehrFactory.getVendorFactory(tenant).patientService } returns patientService
+        every {
+            patientService.findPatient(
+                tenant = tenant,
+                birthDate = LocalDate.of(1984, 8, 31),
+                familyName = "smiTH",
+                givenName = "jOsh"
+            )
+        } returns response
+
+        val actualResponse = patientHandler.patientsByNameAndDOB(
+            tenantId = "tenantId",
+            birthdate = "1984-08-31",
+            given = "jOsh",
+            family = "smiTH",
+            dfe = dfe
+        )
+        // Assert outcome
+        assertNotNull(actualResponse)
+        val patients = actualResponse.data
+        assertEquals(1, patients.size)
+        assertEquals(Patient(patient1, tenant, roninIdentifiers), patients[0])
+    }
+
+    @Test
+    fun `ensure when post search matching finds no exact match patients none are returned`() {
+        // Not exact name match
+        val patient1 = mockk<R4Patient> {
+            every { id } returns Id("Patient-UUID-1")
+            every { identifier } returns listOf(
+                mockk {
+                    every { system?.value } returns "http://hl7.org/fhir/sid/us-ssn"
+                    every { value } returns "987-65-4321"
+                }
+            )
+            every { name } returns listOf(
+                mockk {
+                    every { use } returns com.projectronin.interop.fhir.r4.valueset.NameUse.USUAL.asCode()
+                    every { family } returns "Smyth"
+                    every { given } returns listOf("Josh")
+                },
+                mockk {
+                    every { use } returns com.projectronin.interop.fhir.r4.valueset.NameUse.USUAL.asCode()
+                    every { family } returns "Smith"
+                    every { given } returns listOf("Joshua")
+                }
+            )
+            every { birthDate } returns Date("1984-08-31")
+            every { gender } returns com.projectronin.interop.fhir.r4.valueset.AdministrativeGender.MALE.asCode()
+            every { telecom } returns listOf(
+                mockk {
+                    every { system } returns com.projectronin.interop.fhir.r4.valueset.ContactPointSystem.PHONE.asCode()
+                    every { use } returns com.projectronin.interop.fhir.r4.valueset.ContactPointUse.MOBILE.asCode()
+                    every { value } returns "123-456-7890"
+                }
+            )
+            every { address } returns listOf(
+                mockk {
+                    every { use } returns com.projectronin.interop.fhir.r4.valueset.AddressUse.HOME.asCode()
+                    every { line } returns listOf("1234 Main St")
+                    every { city } returns "Anywhere"
+                    every { state } returns "FL"
+                    every { postalCode } returns "37890"
+                }
+            )
+        }
+
+        // Not an exact match on dob
+        val patient2 = mockk<R4Patient> {
+            every { id } returns Id("Patient-UUID-1")
+            every { identifier } returns listOf(
+                mockk {
+                    every { system?.value } returns "http://hl7.org/fhir/sid/us-ssn"
+                    every { value } returns "987-65-4321"
+                }
+            )
+            every { name } returns listOf(
+                mockk {
+                    every { use } returns com.projectronin.interop.fhir.r4.valueset.NameUse.USUAL.asCode()
+                    every { family } returns "Smith"
+                    every { given } returns listOf("Josh")
+                }
+            )
+            every { birthDate } returns Date("1984-01-31")
+            every { gender } returns com.projectronin.interop.fhir.r4.valueset.AdministrativeGender.MALE.asCode()
+            every { telecom } returns listOf(
+                mockk {
+                    every { system } returns com.projectronin.interop.fhir.r4.valueset.ContactPointSystem.PHONE.asCode()
+                    every { use } returns com.projectronin.interop.fhir.r4.valueset.ContactPointUse.MOBILE.asCode()
+                    every { value } returns "123-456-7890"
+                }
+            )
+            every { address } returns listOf(
+                mockk {
+                    every { use } returns com.projectronin.interop.fhir.r4.valueset.AddressUse.HOME.asCode()
+                    every { line } returns listOf("1234 Main St")
+                    every { city } returns "Anywhere"
+                    every { state } returns "FL"
+                    every { postalCode } returns "37890"
+                }
+            )
+        }
+
+        // No returned date of birth
+        val patient3 = mockk<R4Patient> {
+            every { id } returns Id("Patient-UUID-1")
+            every { identifier } returns listOf(
+                mockk {
+                    every { system?.value } returns "http://hl7.org/fhir/sid/us-ssn"
+                    every { value } returns "987-65-4321"
+                }
+            )
+            every { name } returns listOf(
+                mockk {
+                    every { use } returns com.projectronin.interop.fhir.r4.valueset.NameUse.USUAL.asCode()
+                    every { family } returns "Smith"
+                    every { given } returns listOf("Josh")
+                }
+            )
+            every { birthDate } returns null
+            every { gender } returns com.projectronin.interop.fhir.r4.valueset.AdministrativeGender.MALE.asCode()
+            every { telecom } returns listOf(
+                mockk {
+                    every { system } returns com.projectronin.interop.fhir.r4.valueset.ContactPointSystem.PHONE.asCode()
+                    every { use } returns com.projectronin.interop.fhir.r4.valueset.ContactPointUse.MOBILE.asCode()
+                    every { value } returns "123-456-7890"
+                }
+            )
+            every { address } returns listOf(
+                mockk {
+                    every { use } returns com.projectronin.interop.fhir.r4.valueset.AddressUse.HOME.asCode()
+                    every { line } returns listOf("1234 Main St")
+                    every { city } returns "Anywhere"
+                    every { state } returns "FL"
+                    every { postalCode } returns "37890"
+                }
+            )
+        }
+        val response = listOf(patient1, patient2, patient3)
+        val tenant = mockk<Tenant>()
+        every { tenant.mnemonic } returns "tenantId"
+        every { tenantService.getTenantForMnemonic("tenantId") } returns tenant
+        every { dfe.graphQlContext.get<InteropGraphQLContext>(INTEROP_CONTEXT_KEY).authzTenantId } returns "tenantId"
+
+        val roninIdentifiers = listOf(
+            Identifier(
+                system = Uri("mrnSystem"),
+                value = "1234"
+            )
+        )
+        mockkConstructor(RoninPatient::class)
+        every { ehrFactory.getVendorFactory(tenant).identifierService } returns identifierService
+        every { anyConstructed<RoninPatient>().getRoninIdentifiers(patient1, tenant) } returns roninIdentifiers
+        every { anyConstructed<RoninPatient>().getRoninIdentifiers(patient2, tenant) } returns roninIdentifiers
+
+        val patientService = mockk<PatientService>()
+        every { ehrFactory.getVendorFactory(tenant).patientService } returns patientService
+        every {
+            patientService.findPatient(
+                tenant = tenant,
+                birthDate = LocalDate.of(1984, 8, 31),
+                familyName = "Smith",
+                givenName = "Josh"
+            )
+        } returns response
+
+        val actualResponse = patientHandler.patientsByNameAndDOB(
+            tenantId = "tenantId",
+            birthdate = "1984-08-31",
+            given = "Josh",
+            family = "Smith",
+            dfe = dfe
+        )
+        // Assert outcome
+        assertNotNull(actualResponse)
+        val patients = actualResponse.data
+        assertEquals(0, patients.size)
+    }
+
+    @Test
+    fun `ensure when post search matching finds multiple exact match patients all are returned`() {
+        val patient1 = mockk<R4Patient> {
+            every { id } returns Id("Patient-UUID-1")
+            every { identifier } returns listOf(
+                mockk {
+                    every { system?.value } returns "http://hl7.org/fhir/sid/us-ssn"
+                    every { value } returns "987-65-4321"
+                }
+            )
+            every { name } returns listOf(
+                mockk {
+                    every { use } returns com.projectronin.interop.fhir.r4.valueset.NameUse.USUAL.asCode()
+                    every { family } returns "Smith"
+                    every { given } returns listOf("Josh")
+                }
+            )
+            every { birthDate } returns Date("1984-08-31")
+            every { gender } returns com.projectronin.interop.fhir.r4.valueset.AdministrativeGender.MALE.asCode()
+            every { telecom } returns listOf(
+                mockk {
+                    every { system } returns com.projectronin.interop.fhir.r4.valueset.ContactPointSystem.PHONE.asCode()
+                    every { use } returns com.projectronin.interop.fhir.r4.valueset.ContactPointUse.MOBILE.asCode()
+                    every { value } returns "123-456-7890"
+                }
+            )
+            every { address } returns listOf(
+                mockk {
+                    every { use } returns com.projectronin.interop.fhir.r4.valueset.AddressUse.HOME.asCode()
+                    every { line } returns listOf("1234 Main St")
+                    every { city } returns "Anywhere"
+                    every { state } returns "FL"
+                    every { postalCode } returns "37890"
+                }
+            )
+        }
+        val patient2 = mockk<R4Patient> {
+            every { id } returns Id("Patient-UUID-1")
+            every { identifier } returns listOf(
+                mockk {
+                    every { system?.value } returns "http://hl7.org/fhir/sid/us-ssn"
+                    every { value } returns "987-65-4321"
+                }
+            )
+            every { name } returns listOf(
+                mockk {
+                    every { use } returns com.projectronin.interop.fhir.r4.valueset.NameUse.USUAL.asCode()
+                    every { family } returns "Smith"
+                    every { given } returns listOf("Josh", "Potato")
+                },
+                mockk {
+                    every { use } returns com.projectronin.interop.fhir.r4.valueset.NameUse.USUAL.asCode()
+                    every { family } returns "Tomato"
+                    every { given } returns listOf("Josh", "Potato")
+                }
+            )
+            every { birthDate } returns Date("1984-08-31")
             every { gender } returns com.projectronin.interop.fhir.r4.valueset.AdministrativeGender.MALE.asCode()
             every { telecom } returns listOf(
                 mockk {
