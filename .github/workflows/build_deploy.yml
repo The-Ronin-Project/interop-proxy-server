@@ -1,4 +1,4 @@
-name: Deployment to ArgoCD + Nexus Image Push
+name: Build and push to Nexus; Deploy to ArgoCD DEV
 
 on:
   workflow_dispatch:
@@ -102,30 +102,9 @@ jobs:
 
   argocd_dev:
     uses: projectronin/github/.github/workflows/argocd_deploy.yml@master
-    needs: [image-push-latest]
+    needs: [image-push-sha]
     with:
       environment: dev
       image-tag: ${{ github.sha }}
     secrets:
       argocd-svc-automation: ${{ secrets.ARGOCD_SVC_AUTOMATION }}
-
-  argocd_stage:
-    uses: projectronin/github/.github/workflows/argocd_deploy.yml@master
-    needs: [argocd_dev]
-    with:
-      environment: stage
-      image-tag: ${{ github.sha }}
-    secrets:
-      argocd-svc-automation: ${{ secrets.ARGOCD_SVC_AUTOMATION }}
-
-  argocd_prod:
-    uses: projectronin/github/.github/workflows/argocd_deploy.yml@master
-    needs: [argocd_stage]
-    with:
-      environment: prod
-      image-tag: ${{ github.sha }}
-    secrets:
-      argocd-svc-automation: ${{ secrets.ARGOCD_SVC_AUTOMATION }}
-
-
-

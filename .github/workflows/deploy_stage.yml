@@ -1,4 +1,4 @@
-name: Deployment to ArgoCD + Nexus Image Push
+name: STAGE - Deploy to ArgoCD
 
 on:
   workflow_dispatch:
