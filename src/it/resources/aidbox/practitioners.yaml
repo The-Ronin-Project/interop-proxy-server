@@ -1,11 +1,11 @@
 - resourceType: "Practitioner"
-  id: "fhirId1"
+  id: "ronin-PractitionerFHIRID1"
   identifier:
   - value: "   E1000"
-    system: "urn:oid:1.2.840.114350.1.13.0.1.7.2.836982"
+    system: "mockEHRProviderSystem"
     type:
       text: "Internal"
-  - value: "apposnd"
+  - value: "ronin"
     system: "http://projectronin.com/id/tenantId"
     type:
       text: "External"

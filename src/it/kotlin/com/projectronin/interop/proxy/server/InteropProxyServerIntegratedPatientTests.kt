@@ -65,11 +65,11 @@ class InteropProxyServerIntegratedPatientTests {
             // we need to change the service address of "Epic" after instantiation since the Testcontainer has a dynamic port
             val connection = ehrDatasource.connection
             val statement = connection.createStatement()
-            statement.execute("update io_tenant_epic set service_endpoint = '${mockEHR.getURL()}/epic' where io_tenant_id = 1001;")
-            statement.execute("update io_tenant_epic set auth_endpoint = '${mockEHR.getURL()}/epic/oauth2/token' where io_tenant_id = 1001;")
+            statement.execute("update io_tenant_epic set service_endpoint = '${mockEHR.getURL()}/epic' where io_tenant_id = 1002;")
+            statement.execute("update io_tenant_epic set auth_endpoint = '${mockEHR.getURL()}/epic/oauth2/token' where io_tenant_id = 1002;")
             // insert testing patient to MockEHR
             val createPat = this::class.java.getResource("/mockEHR/r4Patient.json")!!.readText()
-            mockEHR.addR4Resource("Patient", createPat, "eJzlzKe3KPzAV5TtkxmNivQ3")
+            mockEHR.addR4Resource("Patient", createPat, "PatientFHIRID1")
             setupDone = true
         }
     }
@@ -91,7 +91,7 @@ class InteropProxyServerIntegratedPatientTests {
 
     @Test
     fun `server handles patient query`() {
-        val query = this::class.java.getResource("/graphql/epicAOTestPatient.graphql")!!.readText()
+        val query = this::class.java.getResource("/graphql/patientByNameAndDOB.graphql")!!.readText()
         val expectedJSON = this::class.java.getResource("/epicAOTestPatientGraphQLResults.json")!!.readText()
 
         val httpEntity = HttpEntity(query, httpHeaders)
@@ -132,7 +132,7 @@ class InteropProxyServerIntegratedPatientTests {
 
     @Test
     fun `server handles missing data`() {
-        val tenantId = "apposnd"
+        val tenantId = "ronin"
         val given = "Allison"
         val birthdate = "1987-01-15"
 
@@ -154,7 +154,7 @@ class InteropProxyServerIntegratedPatientTests {
 
     @Test
     fun `server handles no patient found`() {
-        val tenantId = "apposnd"
+        val tenantId = "ronin"
         val family = "Fake Name"
         val given = "Fake Name"
         val birthdate = "1900-01-15"
@@ -179,7 +179,7 @@ class InteropProxyServerIntegratedPatientTests {
 
     @Test
     fun `server handles patient query with m2m auth`() {
-        val query = this::class.java.getResource("/graphql/epicAOTestPatient.graphql")!!.readText()
+        val query = this::class.java.getResource("/graphql/patientByNameAndDOB.graphql")!!.readText()
         val expectedJSON = this::class.java.getResource("/epicAOTestPatientGraphQLResults.json")!!.readText()
 
         val m2mHeaders = HttpHeaders()
@@ -208,7 +208,7 @@ class InteropProxyServerIntegratedPatientTests {
 
     @Test
     fun `server handles invalid m2m auth by falling back to user auth`() {
-        val query = this::class.java.getResource("/graphql/epicAOTestPatient.graphql")!!.readText()
+        val query = this::class.java.getResource("/graphql/patientByNameAndDOB.graphql")!!.readText()
         val expectedJSON = this::class.java.getResource("/epicAOTestPatientGraphQLResults.json")!!.readText()
 
         val m2mHeaders = HttpHeaders()

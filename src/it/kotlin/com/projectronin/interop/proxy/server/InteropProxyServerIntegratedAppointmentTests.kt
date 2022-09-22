@@ -1,5 +1,6 @@
 package com.projectronin.interop.proxy.server
 
+import com.fasterxml.jackson.databind.JsonNode
 import com.ninjasquad.springmockk.MockkBean
 import com.projectronin.interop.aidbox.testcontainer.AidboxData
 import com.projectronin.interop.aidbox.testcontainer.AidboxTest
@@ -79,52 +80,104 @@ class InteropProxyServerIntegratedAppointmentTests {
             // we need to change the service address of "Epic" after instantiation since the Testcontainer has a dynamic port
             val connection = ehrDatasource.connection
             val statement = connection.createStatement()
-            statement.execute("update io_tenant_epic set service_endpoint = '${mockEHR.getURL()}/epic' where io_tenant_id = 1001;")
-            statement.execute("update io_tenant_epic set auth_endpoint = '${mockEHR.getURL()}/epic/oauth2/token' where io_tenant_id = 1001;")
+            statement.execute("update io_tenant_epic set service_endpoint = '${mockEHR.getURL()}/epic' where io_tenant_id = 1002;")
+            statement.execute("update io_tenant_epic set auth_endpoint = '${mockEHR.getURL()}/epic/oauth2/token' where io_tenant_id = 1002;")
 
             // insert testing data to MockEHR
-            val createAppt = this::class.java.getResource("/mockEHR/r4Appointment.json")!!.readText()
-            mockEHR.addR4Resource("Appointment", createAppt, "06d7feb3-3326-4276-9535-83a622d8e216")
-            val createPat = this::class.java.getResource("/mockEHR/r4Patient.json")!!.readText()
-            mockEHR.addR4Resource("Patient", createPat, "eJzlzKe3KPzAV5TtkxmNivQ3")
-            val creatPract = this::class.java.getResource("/mockEHR/r4Practitioner.json")!!.readText()
-            mockEHR.addR4Resource("Practitioner", creatPract, "fhirId1")
+            mockEHR.addR4Resource(
+                "Appointment",
+                this::class.java.getResource("/mockEHR/r4Appointment1.json")!!.readText(),
+                "AppointmentFHIRID1"
+            )
+            mockEHR.addR4Resource(
+                "Appointment",
+                this::class.java.getResource("/mockEHR/r4Appointment2.json")!!.readText(),
+                "AppointmentFHIRID2"
+            )
+            mockEHR.addR4Resource(
+                "Appointment",
+                this::class.java.getResource("/mockEHR/r4Appointment3.json")!!.readText(),
+                "AppointmentFHIRID3"
+            )
+            mockEHR.addR4Resource(
+                "Patient",
+                this::class.java.getResource("/mockEHR/r4Patient.json")!!.readText(),
+                "PatientFHIRID1"
+            )
+            mockEHR.addR4Resource(
+                "Practitioner",
+                this::class.java.getResource("/mockEHR/r4Practitioner.json")!!.readText(),
+                "PractitionerFHIRID1"
+            )
             setupDone = true
         }
     }
 
     @Test
-    fun `server handles appointment query`() {
-        val query = this::class.java.getResource("/graphql/epicAOTestAppointment.graphql")!!.readText()
-            .replace("__START_DATE__", "01-01-2021").replace("__END_DATE__", "01-01-2023")
-
+    fun `server handles appointment by MRN query`() {
+        val query = this::class.java.getResource("/graphql/appointmentsByMRN.graphql")!!.readText()
+            .replace("__START_DATE__", "01-01-2022").replace("__END_DATE__", "02-02-2022")
         val httpEntity = HttpEntity(query, httpHeaders)
 
         val responseEntity =
             restTemplate.postForEntity(URI("http://localhost:$port/graphql"), httpEntity, String::class.java)
+        assertEquals(HttpStatus.OK, responseEntity.statusCode)
 
         val resultJSONNode = objectMapper.readTree(responseEntity.body)
-        val appointmentsJSONNode = resultJSONNode["data"]["appointmentsByMRNAndDate"]
+        val node = resultJSONNode["data"]["appointmentsByMRNAndDate"]
+        validateAppointmentResponse(node)
+    }
 
+    @Test
+    fun `server handles appointment by FHIR ID query`() {
+        val query = this::class.java.getResource("/graphql/appointmentsByFHIR.graphql")!!.readText()
+            .replace("__START_DATE__", "01-01-2022").replace("__END_DATE__", "02-02-2022")
+        val httpEntity = HttpEntity(query, httpHeaders)
+
+        val responseEntity =
+            restTemplate.postForEntity(URI("http://localhost:$port/graphql"), httpEntity, String::class.java)
         assertEquals(HttpStatus.OK, responseEntity.statusCode)
-        assertFalse(resultJSONNode.has("errors"))
-        assertEquals(1, appointmentsJSONNode.size())
 
-        // Check participants on each appointment
-        appointmentsJSONNode.forEach { appointment ->
-            val participants = appointment["participants"]
-            assertEquals(3, participants.size())
-            participants.forEach { participant ->
-                val actor = participant["actor"]
-                val type = actor["type"].asText()
-                if (type == "Patient") {
-                    assertEquals("Patient/apposnd-202497", actor["reference"].asText())
+        val resultJSONNode = objectMapper.readTree(responseEntity.body)
+        val node = resultJSONNode["data"]["appointmentsByPatientAndDate"]
+        validateAppointmentResponse(node)
+    }
+
+    private fun validateAppointmentResponse(node: JsonNode) {
+        assertFalse(node.has("errors"))
+        assertEquals(2, node.size())
+
+        node.forEach { appointment ->
+            if (appointment["id"].asText().contains("AppointmentFHIRID1")) {
+                assertEquals("2022-01-01T09:00:00Z", appointment["start"].asText())
+                assertEquals(
+                    "AppointmentFHIRID1",
+                    appointment["identifier"].first { it["system"].asText() == "mockEncounterCSNSystem" }["value"].asText()
+                )
+                assertEquals("pending", appointment["status"].asText())
+                val participants = appointment["participants"]
+                assertEquals(2, participants.size())
+                participants.forEach { participant ->
+                    val actor = participant["actor"]
+                    val type = actor["type"].asText()
+                    if (type == "Patient") {
+                        assertEquals("Patient/ronin-PatientFHIRID1", actor["reference"].asText())
+                    }
+                    if (type == "Practitioner") {
+                        assertEquals("Practitioner/ronin-PractitionerFHIRID1", actor["reference"].asText())
+                    }
                 }
-                if (type == "Practitioner") {
-                    if (actor["reference"].asText() == "null") {
-                        assertEquals("NO-INTERNAL-ID", actor["identifier"]["value"].asText())
-                    } else {
-                        assertEquals("Practitioner/apposnd-fhirId1", actor["reference"].asText())
+            }
+            if (appointment["id"].asText().contains("AppointmentFHIRID2")) {
+                val participants = appointment["participants"]
+                assertEquals(2, participants.size())
+                participants.forEach { participant ->
+                    val actor = participant["actor"]
+                    val type = actor["type"].asText()
+                    if (type == "Practitioner") {
+                        actor["identifier"]?.find { it["system"]?.asText() == "mockEHRProviderSystem" }?.let {
+                            assertEquals("NO-INTERNAL-ID", it["value"].asText())
+                        }
                     }
                 }
             }
@@ -154,14 +207,14 @@ class InteropProxyServerIntegratedAppointmentTests {
 
         assertEquals(HttpStatus.OK, responseEntity.statusCode)
         assertEquals(
-            "Exception while fetching data (/appointmentsByMRNAndDate) : 403 Requested Tenant 'fake' does not match authorized Tenant 'apposnd'",
+            "Exception while fetching data (/appointmentsByMRNAndDate) : 403 Requested Tenant 'fake' does not match authorized Tenant 'ronin'",
             errorJSONObject["message"].asText()
         )
     }
 
     @Test
     fun `server handles bad mrn`() {
-        val tenantId = "apposnd"
+        val tenantId = "ronin"
         val startDate = "12-01-2021"
         val endDate = "01-01-2022"
         val mrn = "FAKE_MRN"
@@ -184,7 +237,7 @@ class InteropProxyServerIntegratedAppointmentTests {
 
     @Test
     fun `server handles missing data`() {
-        val tenantId = "apposnd"
+        val tenantId = "ronin"
         val startDate = "12-01-2021"
         val mrn = "202497"
 
@@ -206,7 +259,7 @@ class InteropProxyServerIntegratedAppointmentTests {
 
     @Test
     fun `server handles no appointment found`() {
-        val tenantId = "apposnd"
+        val tenantId = "ronin"
         val startDate = "01-01-2001"
         val endDate = "12-01-2001"
         val mrn = "202497"

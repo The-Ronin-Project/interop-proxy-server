@@ -73,7 +73,7 @@ class InteropProxyServerIntegratedNoteTests {
         val notetext = "Test Note"
         val patientid = "654321"
         val practitionerid = "654321"
-        val tenantId = "apposnd"
+        val tenantId = "ronin"
         val mutation =
             """mutation sendNote(${'$'}noteInput: NoteInput!, ${'$'}tenantId: String!) {sendNote(noteInput: ${'$'}noteInput, tenantId: ${'$'}tenantId)}"""
         val query = """
@@ -107,7 +107,7 @@ class InteropProxyServerIntegratedNoteTests {
         val notetext = "Test Note"
         val patientid = "654321"
         val practitionerid = "654321"
-        val tenantId = "apposnd"
+        val tenantId = "ronin"
         val mutation =
             """mutation sendNote(${'$'}noteInput: NoteInput!, ${'$'}tenantId: String!) {sendNote(noteInput: ${'$'}noteInput, tenantId: ${'$'}tenantId)}"""
         val query = """
@@ -155,7 +155,7 @@ class InteropProxyServerIntegratedNoteTests {
         val notetext = "Test Note"
         val patientid = "123456"
         val practitionerid = "654321"
-        val tenantId = "apposnd"
+        val tenantId = "ronin"
         val mutation =
             """mutation sendNote(${'$'}noteInput: NoteInput!, ${'$'}tenantId: String!) {sendNote(noteInput: ${'$'}noteInput, tenantId: ${'$'}tenantId)}"""
         val query = """
@@ -189,7 +189,7 @@ class InteropProxyServerIntegratedNoteTests {
         val notetext = "Test Note"
         val patientid = "654321"
         val practitionerid = "123456"
-        val tenantId = "apposnd"
+        val tenantId = "ronin"
         val mutation =
             """mutation sendNote(${'$'}noteInput: NoteInput!, ${'$'}tenantId: String!) {sendNote(noteInput: ${'$'}noteInput, tenantId: ${'$'}tenantId)}"""
         val query = """
@@ -225,7 +225,7 @@ class InteropProxyServerIntegratedNoteTests {
         val notetext = "Test Note"
         val patientid = "123456"
         val practitionerid = "654321"
-        val tenantId = "apposnd"
+        val tenantId = "ronin"
         val mutation =
             """mutation sendNote(${'$'}noteInput: NoteInput!, ${'$'}tenantId: String!) {sendNote(noteInput: ${'$'}noteInput, tenantId: ${'$'}tenantId)}"""
         val query = """

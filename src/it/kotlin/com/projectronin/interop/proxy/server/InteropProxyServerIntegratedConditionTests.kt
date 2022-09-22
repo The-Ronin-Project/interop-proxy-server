@@ -57,20 +57,20 @@ class InteropProxyServerIntegratedConditionTests {
             // we need to change the service address of "Epic" after instantiation since the Testcontainer has a dynamic port
             val connection = ehrDatasource.connection
             val statement = connection.createStatement()
-            statement.execute("update io_tenant_epic set service_endpoint = '${mockEHR.getURL()}/epic' where io_tenant_id = 1001;")
-            statement.execute("update io_tenant_epic set auth_endpoint = '${mockEHR.getURL()}/epic/oauth2/token' where io_tenant_id = 1001;")
+            statement.execute("update io_tenant_epic set service_endpoint = '${mockEHR.getURL()}/epic' where io_tenant_id = 1002;")
+            statement.execute("update io_tenant_epic set auth_endpoint = '${mockEHR.getURL()}/epic/oauth2/token' where io_tenant_id = 1002;")
             // insert testing patient to MockEHR
             val createPat = this::class.java.getResource("/mockEHR/r4Patient.json")!!.readText()
-            mockEHR.addR4Resource("Patient", createPat, "eJzlzKe3KPzAV5TtkxmNivQ3")
+            mockEHR.addR4Resource("Patient", createPat, "PatientFHIRID1")
             val createCondition = this::class.java.getResource("/mockEHR/r4Condition.json")!!.readText()
-            mockEHR.addR4Resource("Condition", createCondition, "39bb2850-50e2-4bb0-a5ae-3a98bbaf199f")
+            mockEHR.addR4Resource("Condition", createCondition, "ConditionFHIRID1")
             setupDone = true
         }
     }
 
     @Test
     fun `server handles condition query`() {
-        val query = this::class.java.getResource("/graphql/epicAOTestCondition.graphql")!!.readText()
+        val query = this::class.java.getResource("/graphql/conditionsByPatient.graphql")!!.readText()
         val expectedJSON = this::class.java.getResource("/epicAOTestConditionGraphQLResults.json")!!.readText()
 
         val httpEntity = HttpEntity(query, httpHeaders)
@@ -109,14 +109,14 @@ class InteropProxyServerIntegratedConditionTests {
         assertEquals(HttpStatus.OK, responseEntity.statusCode)
         assertTrue(resultJSONObject.has("errors"))
         assertEquals(
-            "Exception while fetching data (/conditionsByPatientAndCategory) : 403 Requested Tenant 'fake' does not match authorized Tenant 'apposnd'",
+            "Exception while fetching data (/conditionsByPatientAndCategory) : 403 Requested Tenant 'fake' does not match authorized Tenant 'ronin'",
             resultJSONObject["errors"][0]["message"].asText()
         )
     }
 
     @Test
     fun `server handles missing field`() {
-        val tenantId = "apposnd"
+        val tenantId = "ronin"
         val patientFhirId = "eovSKnwDlsv-8MsEzCJO3BA3"
 
         val query = """
@@ -140,7 +140,7 @@ class InteropProxyServerIntegratedConditionTests {
 
     @Test
     fun `server handles no conditions found`() {
-        val tenantId = "apposnd"
+        val tenantId = "ronin"
         val patientFhirId = "e9Bi2yhKnvFU8rsjpJpPMCw3" // Test patient with no conditions
         val conditionCategoryCode = ConditionCategoryCode.PROBLEM_LIST_ITEM
 

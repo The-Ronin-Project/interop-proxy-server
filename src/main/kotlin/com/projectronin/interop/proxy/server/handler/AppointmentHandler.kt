@@ -19,7 +19,6 @@ import graphql.execution.DataFetcherResult
 import graphql.schema.DataFetchingEnvironment
 import mu.KotlinLogging
 import org.springframework.stereotype.Component
-import java.time.LocalDate
 import com.projectronin.interop.proxy.server.model.Appointment as ProxyServerAppointment
 
 /**
@@ -43,15 +42,9 @@ class AppointmentHandler(
         endDate: String,
         dfe: DataFetchingEnvironment
     ): DataFetcherResult<List<ProxyServerAppointment>> {
-        return appointmentsByPatientAndDate(tenantId, mrn, startDate, endDate, dfe) { tenant, mrn, startDate, endDate ->
-            val appointmentService = ehrFactory.getVendorFactory(tenant).appointmentService
-            appointmentService.findPatientAppointmentsByMRN(
-                tenant = tenant,
-                mrn = mrn,
-                startDate = startDate,
-                endDate = endDate
-            )
-        }
+        val tenant = findAndValidateTenant(dfe, tenantService, tenantId)
+        val patientFHIRID = ehrFactory.getVendorFactory(tenant).patientService.getPatientFHIRId(tenant, mrn)
+        return appointmentHandler(tenant, patientFHIRID, startDate, endDate, mrn)
     }
 
     @GraphQLDescription("Finds appointments for a given patient UDP ID and date range. Requires User Auth.")
@@ -62,53 +55,38 @@ class AppointmentHandler(
         endDate: String,
         dfe: DataFetchingEnvironment // automatically added to requests
     ): DataFetcherResult<List<ProxyServerAppointment>> {
-        return appointmentsByPatientAndDate(
-            tenantId,
-            patientFhirId,
-            startDate,
-            endDate,
-            dfe
-        ) { tenant, patientId, startDate, endDate ->
+        val tenant = findAndValidateTenant(dfe, tenantService, tenantId)
+        return appointmentHandler(tenant, patientFhirId, startDate, endDate)
+    }
+
+    private fun appointmentHandler(
+        tenant: Tenant,
+        patientFhirId: String,
+        startDate: String,
+        endDate: String,
+        patientMrn: String? = null,
+    ): DataFetcherResult<List<ProxyServerAppointment>> {
+        logger.info { "Processing appointment query for tenant: ${tenant.name}" }
+
+        val findAppointmentErrors = mutableListOf<GraphQLError>()
+
+        // request appointment list from EHR
+        val appointments = try {
             val appointmentService = ehrFactory.getVendorFactory(tenant).appointmentService
             appointmentService.findPatientAppointments(
                 tenant = tenant,
                 patientFHIRId = patientFhirId,
-                startDate = startDate,
-                endDate = endDate
-            )
-        }
-    }
-
-    private fun appointmentsByPatientAndDate(
-        tenantId: String,
-        patientId: String,
-        startDate: String,
-        endDate: String,
-        dfe: DataFetchingEnvironment,
-        appointmentLookup: (Tenant, String, LocalDate, LocalDate) -> List<Appointment>
-    ): DataFetcherResult<List<ProxyServerAppointment>> {
-        logger.info { "Processing appointment query for tenant: $tenantId" }
-
-        val findAppointmentErrors = mutableListOf<GraphQLError>()
-
-        // make sure requested tenant is valid
-        val tenant = findAndValidateTenant(dfe, tenantService, tenantId)
-
-        // request appointment list from EHR
-        val appointments = try {
-            appointmentLookup.invoke(
-                tenant,
-                patientId,
-                dateFormatter.parseDateString(startDate),
-                dateFormatter.parseDateString(endDate)
+                startDate = dateFormatter.parseDateString(startDate),
+                endDate = dateFormatter.parseDateString(endDate),
+                patientMRN = patientMrn
             )
         } catch (e: Exception) {
             findAppointmentErrors.add(GraphQLException(e.message).toGraphQLError())
-            logger.error(e.getLogMarker(), e) { "Appointment query for tenant $tenantId contains error" }
+            logger.error(e.getLogMarker(), e) { "Appointment query for tenant ${tenant.name} contains error" }
             listOf()
         }
 
-        logger.debug { "Appointment query for tenant $tenantId returned" }
+        logger.debug { "Appointment query for tenant ${tenant.name} returned" }
 
         // send appointments to queue service
         if (appointments.isNotEmpty()) try {
@@ -117,7 +95,7 @@ class AppointmentHandler(
                     ApiMessage(
                         id = null,
                         resourceType = ResourceType.APPOINTMENT,
-                        tenant = tenantId,
+                        tenant = tenant.mnemonic,
                         text = JacksonUtil.writeJsonValue(it)
                     )
                 }
@@ -126,7 +104,7 @@ class AppointmentHandler(
             logger.warn { "Exception sending appointments to queue: ${e.message}" }
         }
 
-        logger.info { "Appointments for $tenantId sent to queue" }
+        logger.info { "Appointments for ${tenant.name} sent to queue" }
 
         // translate for return
         return DataFetcherResult.newResult<List<ProxyServerAppointment>>()

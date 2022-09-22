@@ -134,13 +134,13 @@ databaseChangeLog:
                   value: "1002"
               - column:
                   name: service_endpoint
-                  value: "http://localhost:8081/epic"
+                  value: "http://mockehr:8080/epic"
               - column:
                   name: auth_endpoint
-                  value: "http://localhost:8081/epic/oauth2/token"
+                  value: "http://mockehr:8080/epic/oauth2/token"
               - column:
                   name: ehr_user_id
-                  value: "1"
+                  value: "2"
               - column:
                   name: release_version
                   value: "1.0"
@@ -149,22 +149,22 @@ databaseChangeLog:
                   value: "1"
               - column:
                   name: practitioner_provider_system
-                  value: "urn:oid:1.2.840.114350.1.13.0.1.7.2.836982"
+                  value: "mockEHRProviderSystem"
               - column:
                   name: practitioner_user_system
-                  value: "urn:oid:1.2.840.114350.1.13.0.1.7.2.697780"
+                  value: "mockEHRUserSystem"
               - column:
                   name: mrn_system
-                  value: "urn:oid:1.2.840.114350.1.13.0.1.7.5.737384.14"
+                  value: "mockEHRMRNSystem"
+              - column:
+                  name: patient_internal_system
+                  value: "mockPatientInternalSystem"
+              - column:
+                  name: encounter_csn_system
+                  value: "mockEncounterCSNSystem"
               - column:
                   name: mrn_type_text
                   value: "MRN"
-              - column:
-                  name: patient_internal_system
-                  value: "urn:oid:1.2.840.114350.1.13.0.1.7.2.698084"
-              - column:
-                  name: encounter_csn_system
-                  value: "urn:oid:1.2.840.114350.1.13.0.1.7.5.737384.8"
         - insert:
             dbms: 'mysql'
             tableName: io_tenant_provider_pool

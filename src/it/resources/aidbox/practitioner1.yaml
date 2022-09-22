@@ -1,9 +1,9 @@
 resourceType: "Practitioner"
-id: "3566c140-dafb-4db6-95f1-fb23a72c7b25"
+id: "PractitionerFHIRID1"
 identifier:
   - value: IPMD
-    system: urn:oid:1.2.840.114350.1.13.0.1.7.2.697780
+    system: mockEHRUserSystem
     type:
       text: EXTERNAL
-  - value: apposnd
+  - value: ronin
     system: http://projectronin.com/id/tenantId

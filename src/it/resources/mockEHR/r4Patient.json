@@ -1,5 +1,6 @@
 {
   "resourceType": "Patient",
+  "id": "PatientFHIRID1",
   "address": [
     {
       "city": "Madison",
@@ -22,7 +23,6 @@
   ],
   "birthDate": "1987-01-15",
   "gender": "female",
-  "id": "eJzlzKe3KPzAV5TtkxmNivQ3",
   "identifier": [
     {
       "system": "mockEHRMRNSystem",

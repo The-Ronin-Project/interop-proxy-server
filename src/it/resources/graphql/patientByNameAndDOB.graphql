@@ -1,5 +1,5 @@
 query {
-    patientsByNameAndDOB(tenantId: "apposnd", family: "Mychart", given: "Allison", birthdate: "1987-01-15") {
+    patientsByNameAndDOB(tenantId: "ronin", family: "Mychart", given: "Allison", birthdate: "1987-01-15") {
         address {
             city
             line

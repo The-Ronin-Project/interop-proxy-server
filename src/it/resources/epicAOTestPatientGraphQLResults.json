@@ -24,7 +24,7 @@
         ],
         "birthDate": "1987-01-15",
         "gender": "female",
-        "id": "apposnd-eJzlzKe3KPzAV5TtkxmNivQ3",
+        "id": "ronin-PatientFHIRID1",
         "identifier": [
           {
             "system": "mockEHRMRNSystem",
@@ -68,7 +68,7 @@
           },
           {
             "system": "http://projectronin.com/id/fhir",
-            "value": "eJzlzKe3KPzAV5TtkxmNivQ3"
+            "value": "PatientFHIRID1"
           },
           {
             "system": "http://projectronin.com/id/mrn",

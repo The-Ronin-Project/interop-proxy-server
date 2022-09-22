@@ -1,6 +1,6 @@
 {
   "resourceType": "Condition",
-  "id": "39bb2850-50e2-4bb0-a5ae-3a98bbaf199f",
+  "id": "ConditionFHIRID1",
   "text": {
     "status": "generated",
     "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">Severe burn of left ear (Date: 24-May 2012)</div>"
@@ -69,7 +69,7 @@
     }
   ],
   "subject": {
-    "reference": "Patient/eJzlzKe3KPzAV5TtkxmNivQ3"
+    "reference": "Patient/PatientFHIRID1"
   },
   "onsetDateTime": "2012-05-24"
 }

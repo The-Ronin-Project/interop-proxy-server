@@ -1,0 +1,43 @@
+{
+    appointmentsByPatientAndDate (endDate: "__END_DATE__", patientFhirId: "PatientFHIRID1", startDate: "__START_DATE__", tenantId: "ronin") {
+        appointmentType {
+            coding {
+                code
+                display
+                system
+                userSelected
+                version
+            }
+            text
+        }
+        id
+        identifier {
+            system
+            value
+        }
+        serviceType {
+            coding {
+                code
+                display
+                system
+                userSelected
+                version
+            }
+            text
+        }
+        start
+        status
+        participants {
+            actor {
+                display
+                id
+                identifier {
+                    system
+                    value
+                }
+                reference
+                type
+            }
+        }
+    }
+}

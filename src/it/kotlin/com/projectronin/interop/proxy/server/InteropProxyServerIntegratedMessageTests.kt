@@ -85,20 +85,20 @@ class InteropProxyServerIntegratedMessageTests {
             // we need to change the service address of "Epic" after instantiation since the Testcontainer has a dynamic port
             val connection = ehrDatasource.connection
             val statement = connection.createStatement()
-            statement.execute("update io_tenant_epic set service_endpoint = '${mockEHR.getURL()}/epic' where io_tenant_id = 1001;")
-            statement.execute("update io_tenant_epic set auth_endpoint = '${mockEHR.getURL()}/epic/oauth2/token' where io_tenant_id = 1001;")
+            statement.execute("update io_tenant_epic set service_endpoint = '${mockEHR.getURL()}/epic' where io_tenant_id = 1002;")
+            statement.execute("update io_tenant_epic set auth_endpoint = '${mockEHR.getURL()}/epic/oauth2/token' where io_tenant_id = 1002;")
 
             val createPat = this::class.java.getResource("/mockEHR/r4Patient.json")!!.readText()
-            mockEHR.addR4Resource("Patient", createPat, "eJzlzKe3KPzAV5TtkxmNivQ3")
+            mockEHR.addR4Resource("Patient", createPat, "PatientFHIRID1")
             setupDone = true
         }
     }
 
     @Test
     fun `server handles message mutation`() {
-        val tenantId = "apposnd"
+        val tenantId = "ronin"
         val mrn = "202497"
-        val id = "3566c140-dafb-4db6-95f1-fb23a72c7b25"
+        val id = "PractitionerFHIRID1"
         val message = "Test message"
         val mutation =
             """mutation sendMessage (${'$'}message: MessageInput!, ${'$'}tenantId: String!) {sendMessage (message: ${'$'}message, tenantId: ${'$'}tenantId)}"""
@@ -137,9 +137,9 @@ class InteropProxyServerIntegratedMessageTests {
 
     @Test
     fun `server handles pool provider`() {
-        val tenantId = "apposnd"
+        val tenantId = "ronin"
         val mrn = "202497"
-        val id = "c305eedb-96e4-401e-be0f-b34995638d42"
+        val id = "PractitionerPoolFHIRID1"
         val message = "Test pool message"
         val mutation =
             """mutation sendMessage (${'$'}message: MessageInput!, ${'$'}tenantId: String!) {sendMessage (message: ${'$'}message, tenantId: ${'$'}tenantId)}"""
@@ -178,10 +178,10 @@ class InteropProxyServerIntegratedMessageTests {
 
     @Test
     fun `server handles pool and non-pool providers`() {
-        val tenantId = "apposnd"
+        val tenantId = "ronin"
         val mrn = "202497"
-        val idPool = "c305eedb-96e4-401e-be0f-b34995638d42"
-        val idNotPool = "3566c140-dafb-4db6-95f1-fb23a72c7b25"
+        val idPool = "PractitionerPoolFHIRID1"
+        val idNotPool = "PractitionerFHIRID1"
         val message = "Test pool message"
         val mutation =
             """mutation sendMessage (${'$'}message: MessageInput!, ${'$'}tenantId: String!) {sendMessage (message: ${'$'}message, tenantId: ${'$'}tenantId)}"""
@@ -227,7 +227,7 @@ class InteropProxyServerIntegratedMessageTests {
     fun `server handles bad tenant`() {
         val tenantId = "fake"
         val mrn = "202497"
-        val id = "3566c140-dafb-4db6-95f1-fb23a72c7b25"
+        val id = "PractitionerFHIRID1"
         val message = "Test message"
         val mutation =
             """mutation sendMessage (${'$'}message: MessageInput!, ${'$'}tenantId: String!) {sendMessage (message: ${'$'}message, tenantId: ${'$'}tenantId)}"""
@@ -262,15 +262,15 @@ class InteropProxyServerIntegratedMessageTests {
         assertEquals(HttpStatus.OK, responseEntity.statusCode)
         assertTrue(
             errorJSONObject["message"].asText()
-                .contains("Requested Tenant '$tenantId' does not match authorized Tenant 'apposnd'")
+                .contains("Requested Tenant '$tenantId' does not match authorized Tenant 'ronin'")
         )
     }
 
     @Test
     fun `server handles epic bad data response`() {
-        val tenantId = "apposnd"
+        val tenantId = "ronin"
         val mrn = "fake"
-        val id = "3566c140-dafb-4db6-95f1-fb23a72c7b25"
+        val id = "PractitionerFHIRIDI1"
         val message = "Test message"
         val mutation =
             """mutation sendMessage (${'$'}message: MessageInput!, ${'$'}tenantId: String!) {sendMessage (message: ${'$'}message, tenantId: ${'$'}tenantId)}"""
@@ -306,9 +306,9 @@ class InteropProxyServerIntegratedMessageTests {
 
     @Test
     fun `server handles epic missing data`() {
-        val tenantId = "apposnd"
+        val tenantId = "ronin"
         val mrn = "202497"
-        val id = "3566c140-dafb-4db6-95f1-fb23a72c7b25"
+        val id = "PractitionerFHIRIDI1"
         val mutation =
             """mutation sendMessage (${'$'}message: MessageInput!, ${'$'}tenantId: String!) {sendMessage (message: ${'$'}message, tenantId: ${'$'}tenantId)}"""
 
@@ -342,9 +342,9 @@ class InteropProxyServerIntegratedMessageTests {
 
     @Test
     fun `server accepts valid m2m auth`() {
-        val tenantId = "apposnd"
+        val tenantId = "ronin"
         val mrn = "202497"
-        val id = "3566c140-dafb-4db6-95f1-fb23a72c7b25"
+        val id = "PractitionerFHIRID1"
         val message = "Test message"
         val mutation =
             """mutation sendMessage (${'$'}message: MessageInput!, ${'$'}tenantId: String!) {sendMessage (message: ${'$'}message, tenantId: ${'$'}tenantId)}"""
@@ -394,7 +394,7 @@ class InteropProxyServerIntegratedMessageTests {
 
     @Test
     fun `server handles provider tenant mismatch`() {
-        val tenantId = "apposnd"
+        val tenantId = "ronin"
         val mrn = "202497"
         val id = "7e52ab01-0393-4e97-afd8-5b0649ab49e2"
         val message = "Test message"
@@ -431,7 +431,7 @@ class InteropProxyServerIntegratedMessageTests {
         assertEquals(HttpStatus.OK, responseEntity.statusCode)
         assertTrue(
             errorJSONObject["message"].asText()
-                .contains("No practitioner user identifier with system 'urn:oid:1.2.840.114350.1.13.0.1.7.2.697780' found for resource with FHIR id '7e52ab01-0393-4e97-afd8-5b0649ab49e2")
+                .contains("No practitioner user identifier with system 'mockEHRUserSystem' found for resource with FHIR id '7e52ab01-0393-4e97-afd8-5b0649ab49e2")
         )
     }
 }

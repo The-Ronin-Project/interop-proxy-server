@@ -5,11 +5,11 @@
     "patient_ronin_id": null,
     "preferred_timezone": "America/Chicago",
     "provider_ronin_id": "mock_provider_id",
-    "tenant_id": "apposnd",
+    "tenant_id": "ronin",
     "tenant_name": "epic app orchard sandbox"
   },
   "user_session": {
-    "expires_at": "2022-03-14T21:16:05",
+    "expires_at": "2030-03-14T21:16:05",
     "metadata": {
       "created_by": "Seungjin manually in dev cloud for integrations team",
       "some": "dummy metadata"

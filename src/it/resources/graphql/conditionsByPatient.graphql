@@ -1,5 +1,5 @@
 {
-    conditionsByPatientAndCategory(tenantId:"apposnd", patientFhirId:"eJzlzKe3KPzAV5TtkxmNivQ3", conditionCategoryCode:PROBLEM_LIST_ITEM){
+    conditionsByPatientAndCategory(tenantId:"ronin", patientFhirId:"PatientFHIRID1", conditionCategoryCode:PROBLEM_LIST_ITEM){
         category{
             coding {
                 code,
