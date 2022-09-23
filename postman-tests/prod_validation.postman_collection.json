@@ -3,7 +3,7 @@
 		"_postman_id": "f8dfbc33-0903-4e7b-8b79-e777b8a054d7",
 		"name": "Proxy Server Prod Validation Tests",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-		"_exporter_id": "18425757"
+		"_exporter_id": "19039668"
 	},
 	"item": [
 		{
@@ -469,7 +469,7 @@
 							"mode": "graphql",
 							"graphql": {
 								"query": "mutation sendMessage($message: MessageInput!, $tenantId: String!) {\n    sendMessage(message: $message, tenantId: $tenantId)\n}",
-								"variables": "{\n    \"message\": {\n        \"patient\": {\n            \"mrn\": \"202497\"\n        },\n        \"recipients\": {\n            \"fhirId\": \"roninPSJPractitioner04Test\"\n        },\n        \"text\": \"test message\"\n    },\n    \"tenantId\": \"apposnd\"\n}"
+								"variables": "{\n    \"message\": {\n        \"patient\": {\n            \"mrn\": \"202497\"\n        },\n        \"recipients\": {\n            \"fhirId\": \"apposnd-e3Dt5qIBhMpHNwBK2q370pg3\"\n        },\n        \"text\": \"test message\"\n    },\n    \"tenantId\": \"apposnd\"\n}"
 							}
 						},
 						"url": {
@@ -681,7 +681,7 @@
 								"header": [],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n    \"id\": 1001,\n    \"mnemonic\": \"apposnd\",\n    \"name\": \"apposnd\",\n    \"availableStart\": \"22:00:00\",\n    \"availableEnd\": \"06:00:00\",\n    \"vendor\": {\n        \"type\": \"EPIC\",\n        \"release\": \"1.0\",\n        \"serviceEndpoint\": \"https://appmarket.epic.com/interconnect-amcurprd-oauth\",\n        \"authEndpoint\": \"https://appmarket.epic.com/interconnect-amcurprd-oauth/oauth2/token\",\n        \"ehrUserId\": \"1\",\n        \"messageType\": \"1\",\n        \"practitionerProviderSystem\": \"urn:oid:1.2.840.114350.1.13.0.1.7.2.836982\",\n        \"practitionerUserSystem\": \"urn:oid:1.2.840.114350.1.13.0.1.7.2.697780\",\n        \"patientMRNSystem\": \"urn:oid:1.2.840.114350.1.13.0.1.7.5.737384.14\",\n        \"patientInternalSystem\": \"\",\n        \"patientMRNTypeText\": \"MRN\",\n        \"hsi\": null,\n        \"instanceName\": \"EPIC\",\n        \"vendorType\": \"EPIC\"\n    }\n}",
+									"raw": "{\n    \"id\": 1001,\n    \"mnemonic\": \"apposnd\",\n    \"name\": \"apposnd\",\n    \"availableStart\": \"22:00:00\",\n    \"availableEnd\": \"06:00:00\",\n    \"vendor\": {\n        \"type\": \"EPIC\",\n        \"release\": \"1.0\",\n        \"serviceEndpoint\": \"https://appmarket.epic.com/interconnect-amcurprd-oauth\",\n        \"authEndpoint\": \"https://appmarket.epic.com/interconnect-amcurprd-oauth/oauth2/token\",\n        \"ehrUserId\": \"1\",\n        \"messageType\": \"1\",\n        \"practitionerProviderSystem\": \"urn:oid:1.2.840.114350.1.13.0.1.7.2.836982\",\n        \"practitionerUserSystem\": \"urn:oid:1.2.840.114350.1.13.0.1.7.2.697780\",\n        \"patientMRNSystem\": \"urn:oid:1.2.840.114350.1.13.0.1.7.5.737384.14\",\n        \"patientInternalSystem\": \"urn:oid:1.2.840.114350.1.13.0.1.7.2.698084\",\n        \"encounterCSNSystem\": \"\",\n        \"patientMRNTypeText\": \"MRN\",\n        \"hsi\": null,\n        \"instanceName\": \"EPIC\",\n        \"vendorType\": \"EPIC\"\n    }\n}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -745,6 +745,54 @@
 							"response": []
 						},
 						{
+							"name": "Update Provider Pool",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"var jsonResponse = pm.response.json();",
+											"",
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											"",
+											"pm.test(\"ProviderWithPool returned\", function () {",
+											"    pm.expect(jsonResponse.providerId).equals(\"ProviderWithPool\")",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"providerPoolId\": 10001,\n    \"providerId\": \"ProviderWithPool\",\n    \"poolId\": \"14600\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{proxy_url}}/tenants/apposnd/pools/5",
+									"host": [
+										"{{proxy_url}}"
+									],
+									"path": [
+										"tenants",
+										"apposnd",
+										"pools",
+										"5"
+									]
+								}
+							},
+							"response": []
+						},
+						{
 							"name": "Insert Provider Pool",
 							"event": [
 								{
@@ -789,54 +837,6 @@
 										"tenants",
 										"apposnd",
 										"pools"
-									]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "Update Provider Pool",
-							"event": [
-								{
-									"listen": "test",
-									"script": {
-										"exec": [
-											"var jsonResponse = pm.response.json();",
-											"",
-											"pm.test(\"Status code is 200\", function () {",
-											"    pm.response.to.have.status(200);",
-											"});",
-											"",
-											"pm.test(\"ProviderWithPool returned\", function () {",
-											"    pm.expect(jsonResponse.providerId).equals(\"ProviderWithPool\")",
-											"});"
-										],
-										"type": "text/javascript"
-									}
-								}
-							],
-							"request": {
-								"method": "PUT",
-								"header": [],
-								"body": {
-									"mode": "raw",
-									"raw": "{\n    \"providerPoolId\": 10001,\n    \"providerId\": \"ProviderWithPool\",\n    \"poolId\": \"14600\"\n}",
-									"options": {
-										"raw": {
-											"language": "json"
-										}
-									}
-								},
-								"url": {
-									"raw": "{{proxy_url}}/tenants/apposnd/pools/10001",
-									"host": [
-										"{{proxy_url}}"
-									],
-									"path": [
-										"tenants",
-										"apposnd",
-										"pools",
-										"10001"
 									]
 								}
 							},
@@ -944,7 +944,7 @@
 								"header": [],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n    \"locationIds\": [\n        \"1\",\n        \"2\",\n        \"3\"\n    ]\n}",
+									"raw": "{\n    \"locationIds\": [\n        \"e4W4rmGe9QzuGm2Dy4NBqVc0KDe6yGld6HW95UuN-Qd03\",\n        \"etKZzJux8VWCn.v-YDz2ZLhdhUwhVwqE082St.Jnq1eDXmuSzU9D4HAOFAP3RHkzY3\",\n        \"en3vmXpNOEYzO2ZFTnH-zcZWjVUInE7.WHpB4gifjyYI3\",\n        \"eJoWPNHZJG0jGSceogBCWb-hb2VKYzZ3B4QhRSKs-vb83\",\n        \"e4aPTZoZLqOja.QwzaEzp0A3\"\n    ]\n}",
 									"options": {
 										"raw": {
 											"language": "json"
