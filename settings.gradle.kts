@@ -5,7 +5,7 @@ pluginManagement {
         id("com.projectronin.interop.gradle.spring") version "2.0.2"
         id("com.projectronin.interop.gradle.integration") version "2.0.2"
 
-        id("org.springframework.boot") version "2.7.3"
+        id("org.springframework.boot") version "2.7.4"
         id("com.expediagroup.graphql") version "6.2.5"
         id("com.google.cloud.tools.jib") version "3.3.0"
     }
