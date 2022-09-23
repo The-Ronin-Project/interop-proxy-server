@@ -154,7 +154,7 @@ class InteropProxyServerIntegratedAppointmentTests {
                     "AppointmentFHIRID1",
                     appointment["identifier"].first { it["system"].asText() == "mockEncounterCSNSystem" }["value"].asText()
                 )
-                assertEquals("pending", appointment["status"].asText())
+                assertEquals("booked", appointment["status"].asText())
                 val participants = appointment["participants"]
                 assertEquals(2, participants.size())
                 participants.forEach { participant ->
