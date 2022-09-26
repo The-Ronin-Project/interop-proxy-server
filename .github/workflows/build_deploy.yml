@@ -17,6 +17,9 @@ jobs:
       image-tag: latest
       repo: "interop-proxy-server"
       build_boot_jar: true
+    secrets:
+      username: ${{ secrets.NEXUS_DOCKER_USERNAME }}
+      password: ${{ secrets.NEXUS_DOCKER_PASSWORD }}
 
   image-push-sha:
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
@@ -27,6 +30,9 @@ jobs:
       image-tag: ${{ github.sha }}
       repo: "interop-proxy-server"
       build_boot_jar: true
+    secrets:
+      username: ${{ secrets.NEXUS_DOCKER_USERNAME }}
+      password: ${{ secrets.NEXUS_DOCKER_PASSWORD }}
 
   argocd_dev:
     uses: projectronin/github/.github/workflows/argocd_deploy.yml@master
