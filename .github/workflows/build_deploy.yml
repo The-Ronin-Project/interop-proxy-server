@@ -13,7 +13,7 @@ jobs:
     name: Push Docker:latest to Nexus
     uses: projectronin/github/.github/workflows/image_push_nexus.yml@master
     with:
-      base_directory: ./
+      base-directory: ./
       image-tag: latest
       repo: "interop-proxy-server"
       build_boot_jar: true
@@ -23,7 +23,7 @@ jobs:
     name: Push Docker:SHA to Nexus
     uses: projectronin/github/.github/workflows/image_push_nexus.yml@master
     with:
-      base_directory: ./
+      base-directory: ./
       image-tag: ${{ github.sha }}
       repo: "interop-proxy-server"
       build_boot_jar: true
