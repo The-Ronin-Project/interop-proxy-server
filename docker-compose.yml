@@ -1,6 +1,8 @@
 services:
   proxyserver:
-    image: interop-proxy-server
+    build:
+      dockerfile: Dockerfile
+    image: interop-proxy-server:local
     environment:
       - INTEROP_TENANT_CONFIG=file:/config/tenants.yaml
       - SPRING_QUEUE_DATASOURCE_JDBCURL=jdbc:mysql://queue:secret@db-queue:3306/interop-queue

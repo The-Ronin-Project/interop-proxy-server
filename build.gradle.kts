@@ -7,10 +7,7 @@ plugins {
     id("com.projectronin.interop.gradle.integration")
     id("org.springframework.boot")
     id("com.expediagroup.graphql")
-    id("com.google.cloud.tools.jib")
 }
-
-val tracerAgent: Configuration by configurations.creating
 
 dependencies {
     implementation(libs.interop.aidbox)
@@ -36,9 +33,6 @@ dependencies {
     implementation(libs.ktor.client.core)
     implementation(libs.bundles.graphql)
     implementation(libs.bundles.hl7v2)
-
-    // Dependency on the datadog agent jar.
-    tracerAgent(libs.datadog.java.agent)
 
     runtimeOnly(libs.bundles.ehr.impls)
     runtimeOnly(libs.interop.queue.db)
@@ -117,42 +111,5 @@ publishing {
         create<MavenPublication>("bootJava") {
             artifact(tasks.getByName("bootJar"))
         }
-    }
-}
-
-val ddJavaAgentName = "dd-java-agent.jar"
-
-val copyTraceAgent by tasks.register<Copy>("copyTraceAgent") {
-    // Copy the tracer agent jar from the repo to a project folder and rename it without version.
-    from(tracerAgent.asPath)
-    rename { _ -> ddJavaAgentName }
-    into("$buildDir/tracer")
-}
-
-// Jib depends on getting the trace agent.
-tasks.jib.get().dependsOn(copyTraceAgent)
-tasks.jibDockerBuild.get().dependsOn(copyTraceAgent)
-tasks.jibBuildTar.get().dependsOn(copyTraceAgent)
-
-jib {
-    to {
-        image = "interop-proxy-server"
-    }
-    extraDirectories {
-        paths {
-            path {
-                // Pull in the tracer jar to the container image.
-                // https://github.com/GoogleContainerTools/jib/issues/2715
-                setFrom("$buildDir/tracer")
-                into = "/opt/tracer"
-            }
-        }
-    }
-    container {
-        jvmFlags = listOf("-javaagent:/opt/tracer/$ddJavaAgentName")
-        environment = mapOf(
-            "DD_SERVICE" to project.name,
-            "DD_VERSION" to "${project.version}"
-        )
     }
 }

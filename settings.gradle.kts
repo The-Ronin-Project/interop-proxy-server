@@ -7,7 +7,6 @@ pluginManagement {
 
         id("org.springframework.boot") version "2.7.4"
         id("com.expediagroup.graphql") version "6.2.5"
-        id("com.google.cloud.tools.jib") version "3.3.0"
     }
 
     repositories {

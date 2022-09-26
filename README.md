@@ -46,25 +46,11 @@ machine can download the Project Ronin's artifacts.
 Graphql schema is generated directly from the corresponding Kotlin data classes and persisted
 at [interopSchema.graphql](interopSchema.graphql). This is currently done automatically during compile.
 
-### Generating container
-
-This project uses [Jib](https://github.com/GoogleContainerTools/jib) to build containers. This can be used with or
-without Docker installed on your system. Currently, we have not assigned a specific name to the created image, so it
-will need to be supplied on the command line.
-
-To build with Docker installed, run the following, which will build the server into a Docker repository and make it
-available on your local Docker daemon.
-
+### Generating a container
+The following commands will first build a jar file with all of the relevant classes and dependencies, then create an image using this [Dockerfile](Dockerfile):
 ```shell
-./gradlew jibDockerBuild --image=[IMAGE_NAME]
-```
-
-To build without Docker installed, run the following command. This will
-require [authentication](https://github.com/GoogleContainerTools/jib/tree/master/jib-gradle-plugin#authentication-methods)
-to deploy to the chosen image location. This is not currently enabled for the project.
-
-```shell
-./gradlew jib --image=[IMAGE_NAME]
+./gradlew bootJar
+docker build . -t image_name:tag
 ```
 
 ## Dependent Configuration
@@ -101,7 +87,7 @@ export SERVICE_CALL_JWT_SECRET=SECRET_VALUE
 #### Machine to Machine Auth (Auth0)
 
 Additional configuration is required for supporting Machine to Machine calls, prefixed by "ronin.server.auth.m2m". These
-can either be configured via the applications.yaml ([example](resources/application-test.properties)) in the environment
+can either be configured via the applications.properties ([example](src/test/resources/application-test.properties)) in the environment
 or via the following env variables, both are defaulted to dev values should not need manual configuration while running
 locally.
 
@@ -152,15 +138,9 @@ similar to a unit test.
 
 ### Running locally via Docker
 
-The proxy server can also be run via docker compose by building the [container image](#generating-container) from jib in
-combination with the [docker compose configuration](docker-compose.yml). Additionally, you will need to have the
-interop-queue-liquibase and interop-ehr-liquibase container images for database schema deployment. Follow the
-instructions [here](https://github.com/projectronin/interop-queue/tree/master/interop-queue-liquibase/README.md#building-the-docker-container-image)
-and [here](https://github.com/projectronin/interop-ehr/tree/master/interop-ehr-liquibase/README.md#building-the-docker-container-image)
-to build those images locally. Then use this command to start that container and the other dependent containers:
-
+The proxy server can also be run via docker compose with the following command using this [docker compose](docker-compose.yml) file:
 ```shell
-./gradlew jibDockerBuild && docker compose up
+./gradlew clean bootJar && docker compose build --no-cache && docker compose up --force-recreate
 ```
 
 ## Code Review, Codeowners, and the PR process
