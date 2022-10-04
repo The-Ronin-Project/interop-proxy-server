@@ -13,6 +13,7 @@ import com.projectronin.interop.proxy.server.input.MessageInput
 import com.projectronin.interop.proxy.server.input.MessageRecipientInput
 import com.projectronin.interop.tenant.config.TenantService
 import com.projectronin.interop.tenant.config.model.Tenant
+import datadog.trace.api.Trace
 import graphql.schema.DataFetchingEnvironment
 import mu.KotlinLogging
 import org.springframework.stereotype.Component
@@ -29,6 +30,7 @@ class MessageHandler(
     private val logger = KotlinLogging.logger { }
 
     @GraphQLDescription("Sends a message and returns the current status.")
+    @Trace
     fun sendMessage(tenantId: String, message: MessageInput, dfe: DataFetchingEnvironment): String {
         logger.info { "Sending message to $tenantId" }
 

@@ -19,6 +19,7 @@ import com.projectronin.interop.proxy.server.input.PatientIdType
 import com.projectronin.interop.queue.QueueService
 import com.projectronin.interop.queue.model.HL7Message
 import com.projectronin.interop.tenant.config.TenantService
+import datadog.trace.api.Trace
 import graphql.schema.DataFetchingEnvironment
 import mu.KotlinLogging
 import org.springframework.stereotype.Component
@@ -36,6 +37,7 @@ class NoteHandler(
      * Handler for Notes going to downstream EHRs. Sends notes to the queue to be sent to the tenant's EHR system based on tenant Id and noteInput
      */
     @GraphQLDescription("Takes in note from product and processes it for downstream services")
+    @Trace
     fun sendNote(noteInput: NoteInput, tenantId: String, dfe: DataFetchingEnvironment): String {
         logger.info { "Receiving Note for patient ${noteInput.patientIdType}: ${noteInput.patientId} from Practitioner ${noteInput.practitionerFhirId}" }
 

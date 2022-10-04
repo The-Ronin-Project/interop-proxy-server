@@ -13,6 +13,7 @@ import com.projectronin.interop.queue.QueueService
 import com.projectronin.interop.queue.model.ApiMessage
 import com.projectronin.interop.tenant.config.TenantService
 import com.projectronin.interop.tenant.config.model.Tenant
+import datadog.trace.api.Trace
 import graphql.GraphQLError
 import graphql.GraphQLException
 import graphql.execution.DataFetcherResult
@@ -37,6 +38,7 @@ class ConditionHandler(
      * See [Jira](https://projectronin.atlassian.net/browse/INT-284?focusedCommentId=24692)
      */
     @GraphQLDescription("Finds active patient conditions for a given patient and category. Only conditions registered within the category will be returned. Requires User Auth.")
+    @Trace
     fun conditionsByPatientAndCategory(
         tenantId: String,
         patientFhirId: String,

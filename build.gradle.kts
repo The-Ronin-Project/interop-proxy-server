@@ -30,9 +30,9 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-jdbc")
     implementation("org.springframework.boot:spring-boot-starter-actuator")
 
-    implementation(libs.ktor.client.core)
     implementation(libs.bundles.graphql)
     implementation(libs.bundles.hl7v2)
+    implementation(libs.dd.trace.api)
 
     runtimeOnly(libs.bundles.ehr.impls)
     runtimeOnly(libs.interop.queue.db)
@@ -58,9 +58,6 @@ dependencies {
     testImplementation(libs.interop.testcontainer.aidbox)
     testImplementation(libs.interop.testcontainer.mockehr)
 
-    testImplementation(libs.ktor.client.cio)
-    testImplementation(libs.ktor.client.content.negotiation)
-    testImplementation(libs.ktor.serialization.jackson)
     testImplementation("com.squareup.okhttp3:mockwebserver")
 
     // Allows us to change environment variables

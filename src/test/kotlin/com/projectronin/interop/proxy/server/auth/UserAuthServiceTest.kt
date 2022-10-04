@@ -1,7 +1,7 @@
 package com.projectronin.interop.proxy.server.auth
 
 import io.ktor.client.HttpClient
-import io.ktor.client.engine.cio.CIO
+import io.ktor.client.engine.okhttp.OkHttp
 import io.ktor.client.plugins.ServerResponseException
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.serialization.jackson.jackson
@@ -65,7 +65,7 @@ class UserAuthServiceTest {
     }
 
     private fun getClient(): HttpClient {
-        return HttpClient(CIO) {
+        return HttpClient(OkHttp) {
             install(ContentNegotiation) {
                 jackson()
             }

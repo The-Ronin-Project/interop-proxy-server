@@ -6,6 +6,7 @@ import com.projectronin.interop.tenant.config.data.ProviderPoolDAO
 import com.projectronin.interop.tenant.config.data.model.ProviderPoolDO
 import com.projectronin.interop.tenant.config.data.model.TenantDO
 import com.projectronin.interop.tenant.config.exception.NoTenantFoundException
+import datadog.trace.api.Trace
 import mu.KotlinLogging
 import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.http.HttpStatus
@@ -27,6 +28,7 @@ class ProviderPoolController(private val providerPoolDAO: ProviderPoolDAO, priva
     private val logger = KotlinLogging.logger { }
 
     @GetMapping
+    @Trace
     fun get(
         @PathVariable tenantMnemonic: String,
         @RequestParam(required = false) providerIds: List<String>? = null,
@@ -49,7 +51,11 @@ class ProviderPoolController(private val providerPoolDAO: ProviderPoolDAO, priva
     }
 
     @PostMapping
-    fun insert(@PathVariable tenantMnemonic: String, @RequestBody providerPool: ProviderPool): ResponseEntity<ProviderPool> {
+    @Trace
+    fun insert(
+        @PathVariable tenantMnemonic: String,
+        @RequestBody providerPool: ProviderPool
+    ): ResponseEntity<ProviderPool> {
         val tenant = tenantService.getTenantForMnemonic(tenantMnemonic)
             ?: throw NoTenantFoundException("No Tenant With that mnemonic")
 
@@ -68,6 +74,7 @@ class ProviderPoolController(private val providerPoolDAO: ProviderPoolDAO, priva
     }
 
     @PutMapping("/{providerPoolId}")
+    @Trace
     fun update(
         @PathVariable tenantMnemonic: String,
         @PathVariable providerPoolId: Int,
@@ -92,6 +99,7 @@ class ProviderPoolController(private val providerPoolDAO: ProviderPoolDAO, priva
     }
 
     @DeleteMapping("/{providerPoolId}")
+    @Trace
     fun delete(@PathVariable tenantMnemonic: String, @PathVariable providerPoolId: Int): ResponseEntity<String> {
         // Does the providerPoolId belong to the right tenant?
         val tenant = tenantService.getTenantForMnemonic(tenantMnemonic)

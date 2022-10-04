@@ -13,6 +13,7 @@ import com.projectronin.interop.queue.QueueService
 import com.projectronin.interop.queue.model.ApiMessage
 import com.projectronin.interop.tenant.config.TenantService
 import com.projectronin.interop.tenant.config.model.Tenant
+import datadog.trace.api.Trace
 import graphql.GraphQLError
 import graphql.GraphQLException
 import graphql.execution.DataFetcherResult
@@ -35,6 +36,7 @@ class AppointmentHandler(
 
     @GraphQLDescription("Finds appointments for a given MRN and date range. Requires User Auth.")
     @Deprecated("This query is deprecated.", ReplaceWith("appointmentsByPatientAndDate"))
+    @Trace
     fun appointmentsByMRNAndDate(
         tenantId: String,
         mrn: String,
@@ -48,6 +50,7 @@ class AppointmentHandler(
     }
 
     @GraphQLDescription("Finds appointments for a given patient UDP ID and date range. Requires User Auth.")
+    @Trace
     fun appointmentsByPatientAndDate(
         tenantId: String,
         patientFhirId: String,

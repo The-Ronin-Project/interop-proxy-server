@@ -9,6 +9,7 @@ import com.projectronin.interop.tenant.config.data.TenantServerDAO
 import com.projectronin.interop.tenant.config.data.model.TenantDO
 import com.projectronin.interop.tenant.config.data.model.TenantServerDO
 import com.projectronin.interop.tenant.config.exception.NoTenantFoundException
+import datadog.trace.api.Trace
 import mu.KotlinLogging
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -27,6 +28,7 @@ class TenantServerController(private val tenantServerDAO: TenantServerDAO, priva
     private val logger = KotlinLogging.logger { }
 
     @GetMapping("/{type}")
+    @Trace
     fun getWithType(
         @PathVariable("tenantMnemonic") tenantMnemonic: String,
         @PathVariable("type") type: String
@@ -38,6 +40,7 @@ class TenantServerController(private val tenantServerDAO: TenantServerDAO, priva
     }
 
     @GetMapping
+    @Trace
     fun get(@PathVariable("tenantMnemonic") tenantMnemonic: String): ResponseEntity<List<TenantServer>> {
         logger.info { "Retrieving TenantServer with mnemonic $tenantMnemonic" }
         val tenantServerList = tenantServerDAO.getTenantServers(tenantMnemonic)
@@ -46,6 +49,7 @@ class TenantServerController(private val tenantServerDAO: TenantServerDAO, priva
     }
 
     @PostMapping
+    @Trace
     fun insert(
         @PathVariable tenantMnemonic: String,
         @RequestBody tenantServer: TenantServer
@@ -59,6 +63,7 @@ class TenantServerController(private val tenantServerDAO: TenantServerDAO, priva
     }
 
     @PutMapping
+    @Trace
     fun update(
         @PathVariable tenantMnemonic: String,
         @RequestBody tenantServer: TenantServer

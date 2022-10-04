@@ -7,6 +7,7 @@ import com.projectronin.interop.tenant.config.data.MirthTenantConfigDAO
 import com.projectronin.interop.tenant.config.data.model.MirthTenantConfigDO
 import com.projectronin.interop.tenant.config.data.model.TenantDO
 import com.projectronin.interop.tenant.config.exception.NoTenantFoundException
+import datadog.trace.api.Trace
 import mu.KotlinLogging
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -21,10 +22,14 @@ import org.springframework.web.bind.annotation.RestController
 
 @RestController
 @RequestMapping("/tenants/{tenantMnemonic}/mirth-config")
-class MirthTenantConfigController(private val mirthTenantConfigDAO: MirthTenantConfigDAO, private val tenantService: TenantService) {
+class MirthTenantConfigController(
+    private val mirthTenantConfigDAO: MirthTenantConfigDAO,
+    private val tenantService: TenantService
+) {
     private val logger = KotlinLogging.logger { }
 
     @GetMapping
+    @Trace
     fun get(
         @PathVariable tenantMnemonic: String,
     ): ResponseEntity<MirthTenantConfig?> {
@@ -36,6 +41,7 @@ class MirthTenantConfigController(private val mirthTenantConfigDAO: MirthTenantC
     }
 
     @PostMapping
+    @Trace
     fun insert(
         @PathVariable tenantMnemonic: String,
         @RequestBody mirthTenantConfig: MirthTenantConfig
@@ -50,6 +56,7 @@ class MirthTenantConfigController(private val mirthTenantConfigDAO: MirthTenantC
     }
 
     @PutMapping
+    @Trace
     fun update(
         @PathVariable tenantMnemonic: String,
         @RequestBody mirthTenantConfig: MirthTenantConfig

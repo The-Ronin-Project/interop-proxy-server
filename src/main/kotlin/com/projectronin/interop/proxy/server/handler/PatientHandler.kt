@@ -14,6 +14,7 @@ import com.projectronin.interop.queue.QueueService
 import com.projectronin.interop.queue.model.ApiMessage
 import com.projectronin.interop.tenant.config.TenantService
 import com.projectronin.interop.tenant.config.model.Tenant
+import datadog.trace.api.Trace
 import graphql.GraphQLError
 import graphql.GraphQLException
 import graphql.execution.DataFetcherResult
@@ -36,6 +37,7 @@ class PatientHandler(
     private val dateFormatter = DateUtil()
 
     @GraphQLDescription("Finds patient(s) that exactly match on family name, given name, and birthdate (YYYY-mm-dd format).")
+    @Trace
     fun patientsByNameAndDOB(
         tenantId: String,
         family: String,

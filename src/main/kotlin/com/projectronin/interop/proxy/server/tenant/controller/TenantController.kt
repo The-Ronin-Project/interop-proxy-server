@@ -1,8 +1,10 @@
 package com.projectronin.interop.proxy.server.tenant.controller
+
 import com.projectronin.interop.proxy.server.tenant.model.Tenant
 import com.projectronin.interop.tenant.config.TenantService
 import com.projectronin.interop.tenant.config.exception.NoEHRFoundException
 import com.projectronin.interop.tenant.config.exception.NoTenantFoundException
+import datadog.trace.api.Trace
 import mu.KotlinLogging
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -19,7 +21,9 @@ import org.springframework.web.bind.annotation.RestController
 @RequestMapping("tenants")
 class TenantController(private val tenantService: TenantService) {
     private val logger = KotlinLogging.logger { }
+
     @GetMapping
+    @Trace
     fun read(): ResponseEntity<List<Tenant>> {
         logger.info { "Retrieving all tenants" }
         val tenants = tenantService.getAllTenants().map { it.toProxyTenant() }
@@ -27,6 +31,7 @@ class TenantController(private val tenantService: TenantService) {
     }
 
     @GetMapping("/{mnemonic}")
+    @Trace
     fun read(@PathVariable("mnemonic") tenantMnemonic: String): ResponseEntity<Tenant> {
         logger.info { "Retrieving tenant with mnemonic $tenantMnemonic" }
         val tenant = tenantService.getTenantForMnemonic(tenantMnemonic)
@@ -35,6 +40,7 @@ class TenantController(private val tenantService: TenantService) {
     }
 
     @PostMapping
+    @Trace
     fun insert(@RequestBody tenant: Tenant): ResponseEntity<Tenant> {
         logger.info { "Inserting new tenant with mnemonic ${tenant.mnemonic}" }
         val newTenant = tenantService.insertTenant(tenant.toTenantServerTenant())
@@ -42,6 +48,7 @@ class TenantController(private val tenantService: TenantService) {
     }
 
     @PutMapping("/{mnemonic}")
+    @Trace
     fun update(@PathVariable("mnemonic") tenantMnemonic: String, @RequestBody tenant: Tenant): ResponseEntity<Tenant> {
         logger.info { "Updating tenant with mnemonic $tenantMnemonic" }
 

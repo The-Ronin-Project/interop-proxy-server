@@ -4,6 +4,7 @@ import com.projectronin.interop.proxy.server.tenant.model.Ehr
 import com.projectronin.interop.tenant.config.data.EhrDAO
 import com.projectronin.interop.tenant.config.data.model.EhrDO
 import com.projectronin.interop.tenant.config.exception.NoEHRFoundException
+import datadog.trace.api.Trace
 import mu.KotlinLogging
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -23,18 +24,21 @@ class EhrController(private val ehrDAO: EhrDAO) {
     private val logger = KotlinLogging.logger { }
 
     @GetMapping
+    @Trace
     fun read(): ResponseEntity<List<Ehr>> {
         val ehrDOList = ehrDAO.read()
         return ResponseEntity(ehrDOList.map { it.toEhr() }, HttpStatus.OK)
     }
 
     @PostMapping
+    @Trace
     fun insert(@RequestBody ehr: Ehr): ResponseEntity<Ehr> {
         val insertedEhr = ehrDAO.insert(ehr.toEhrDO())
         return ResponseEntity(insertedEhr.toEhr(), HttpStatus.CREATED)
     }
 
     @PutMapping("/{instanceName}")
+    @Trace
     fun update(@PathVariable("instanceName") instanceName: String, @RequestBody ehr: Ehr): ResponseEntity<Ehr> {
         val decodedInstanceName = UriUtils.decode(instanceName, Charsets.UTF_8)
         val existingEhr = ehrDAO.getByInstance(decodedInstanceName)
