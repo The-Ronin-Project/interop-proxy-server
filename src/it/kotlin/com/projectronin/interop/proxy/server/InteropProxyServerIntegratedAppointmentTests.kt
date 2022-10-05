@@ -149,7 +149,8 @@ class InteropProxyServerIntegratedAppointmentTests {
 
         node.forEach { appointment ->
             if (appointment["id"].asText().contains("AppointmentFHIRID1")) {
-                assertEquals("2022-01-01T09:00:00Z", appointment["start"].asText())
+                // The time is represented in UTC, but the source is PST
+                assertEquals("2022-01-01T17:00:00Z", appointment["start"].asText())
                 assertEquals(
                     "AppointmentFHIRID1",
                     appointment["identifier"].first { it["system"].asText() == "mockEncounterCSNSystem" }["value"].asText()
