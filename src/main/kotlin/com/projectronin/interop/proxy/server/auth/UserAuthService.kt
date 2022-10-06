@@ -1,14 +1,14 @@
 package com.projectronin.interop.proxy.server.auth
 
+import com.projectronin.interop.common.http.exceptions.ClientAuthenticationException
+import com.projectronin.interop.common.http.throwExceptionFromHttpStatus
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
-import io.ktor.client.plugins.ClientRequestException
 import io.ktor.client.request.get
 import io.ktor.client.request.headers
 import io.ktor.client.request.parameter
 import io.ktor.client.statement.HttpResponse
 import io.ktor.http.HttpHeaders
-import io.ktor.http.HttpStatusCode
 import kotlinx.coroutines.runBlocking
 import mu.KotlinLogging
 import org.springframework.beans.factory.annotation.Value
@@ -34,18 +34,19 @@ class UserAuthService(private val client: HttpClient, @Value("\${seki.endpoint}"
         logger.debug { "Calling authentication for $authURL" }
         return runBlocking {
             try {
-                val httpResponse: HttpResponse = client.get(authServiceEndPoint + authURLPart) {
+                val httpResponse: HttpResponse = client.get(authURL) {
                     headers {
                         append(HttpHeaders.ContentType, "application/json")
                     }
                     parameter("token", consumerToken)
                 }
+                httpResponse.throwExceptionFromHttpStatus("Seki", "authentication")
 
                 val authResponse = httpResponse.body<AuthResponse>()
                 logger.info { "User ${authResponse.user} successfully validated" }
                 authResponse
             } catch (e: Exception) {
-                if (e is ClientRequestException && e.response.status == HttpStatusCode.Unauthorized) {
+                if (e is ClientAuthenticationException) {
                     // token is invalid, but we received a response back we could handle
                     logger.info(e) { "Token not valid: ${e.message}" }
                     null

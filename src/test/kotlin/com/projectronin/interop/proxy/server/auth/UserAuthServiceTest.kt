@@ -1,8 +1,8 @@
 package com.projectronin.interop.proxy.server.auth
 
+import com.projectronin.interop.common.http.exceptions.ServerFailureException
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.okhttp.OkHttp
-import io.ktor.client.plugins.ServerResponseException
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.serialization.jackson.jackson
 import okhttp3.mockwebserver.MockResponse
@@ -59,7 +59,7 @@ class UserAuthServiceTest {
         mockWebServer.start()
         val userAuthService = UserAuthService(getClient(), mockWebServer.url("/auth").toString())
 
-        assertThrows<ServerResponseException> {
+        assertThrows<ServerFailureException> {
             userAuthService.validateToken("fake token")
         }
     }
@@ -69,7 +69,6 @@ class UserAuthServiceTest {
             install(ContentNegotiation) {
                 jackson()
             }
-            expectSuccess = true
         }
     }
 }
