@@ -2,10 +2,8 @@ import com.expediagroup.graphql.plugin.gradle.tasks.GraphQLGenerateSDLTask
 
 plugins {
     java
-    `maven-publish`
-    id("com.projectronin.interop.gradle.spring")
+    id("com.projectronin.interop.gradle.spring-boot")
     id("com.projectronin.interop.gradle.integration")
-    id("org.springframework.boot")
     id("com.expediagroup.graphql")
 }
 
@@ -69,10 +67,6 @@ dependencies {
 }
 
 tasks.withType(Test::class) {
-    testLogging {
-        events("passed", "skipped", "failed", "standardOut", "standardError")
-    }
-
     jvmArgs("--add-opens=java.base/java.util=ALL-UNNAMED")
 }
 
@@ -88,25 +82,3 @@ val graphqlGenerateSDL by tasks.getting(GraphQLGenerateSDLTask::class) {
 
 // We want to tie the GraphQL schema generation to the kotlin compile step.
 tasks.compileKotlin.get().finalizedBy(graphqlGenerateSDL)
-
-publishing {
-    repositories {
-        maven {
-            name = "nexus"
-            credentials {
-                username = System.getenv("NEXUS_USER")
-                password = System.getenv("NEXUS_TOKEN")
-            }
-            url = if (project.version.toString().endsWith("SNAPSHOT")) {
-                uri("https://repo.devops.projectronin.io/repository/maven-snapshots/")
-            } else {
-                uri("https://repo.devops.projectronin.io/repository/maven-releases/")
-            }
-        }
-    }
-    publications {
-        create<MavenPublication>("bootJava") {
-            artifact(tasks.getByName("bootJar"))
-        }
-    }
-}
