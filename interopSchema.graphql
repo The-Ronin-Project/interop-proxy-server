@@ -265,6 +265,16 @@ type PeriodOnset {
   value: Period!
 }
 
+"A practitioner"
+type Practitioner {
+  "The internal identifier for this patient"
+  id: String
+  "List of practitioner known identifiers"
+  identifier: [Identifier!]!
+  "The name(s) of the practitioner"
+  name: [HumanName!]!
+}
+
 type Query {
   "Finds appointments for a given MRN and date range. Requires User Auth."
   appointmentsByMRNAndDate(endDate: String!, mrn: String!, startDate: String!, tenantId: String!): [Appointment!]! @deprecated(reason : "This query is deprecated., replace with appointmentsByPatientAndDate")
@@ -272,6 +282,10 @@ type Query {
   appointmentsByPatientAndDate(endDate: String!, patientFhirId: String!, startDate: String!, tenantId: String!): [Appointment!]!
   "Finds active patient conditions for a given patient and category. Only conditions registered within the category will be returned. Requires User Auth."
   conditionsByPatientAndCategory(conditionCategoryCode: ConditionCategoryCode!, patientFhirId: String!, tenantId: String!): [Condition!]!
+  "Retrieves a FHIR Practitioner from the EHR, and adds it to the Aidbox queue."
+  getPractitionerById(practitionerFhirId: String!, tenantId: String!): Practitioner!
+  "Searches the EHR for a FHIR Practitioner by an internal identifier, and adds it to the Aidbox queue."
+  getPractitionerByProvider(providerId: String!, tenantId: String!): Practitioner!
   "Finds patient(s) that exactly match on family name, given name, and birthdate (YYYY-mm-dd format)."
   patientsByNameAndDOB(birthdate: String!, family: String!, given: String!, tenantId: String!): [Patient!]!
 }

@@ -27,6 +27,10 @@
     {
       "system": "mockEHRProviderSystem",
       "value": "   E1000"
+    },
+    {
+      "system": "External",
+      "value": "E1000"
     }
   ],
   "name": [

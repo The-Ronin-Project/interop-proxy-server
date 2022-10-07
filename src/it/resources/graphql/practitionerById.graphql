@@ -1,0 +1,14 @@
+query {
+    getPractitionerById(tenantId: "ronin", practitionerFhirId: "PractitionerFHIRID1") {
+        id
+        identifier {
+            system
+            value
+        }
+        name {
+            family
+            given
+            use
+        }
+    }
+}

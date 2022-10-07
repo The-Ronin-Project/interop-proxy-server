@@ -16,7 +16,7 @@ dependencies {
     implementation(libs.interop.ehr.api)
     implementation(libs.interop.fhir)
     implementation(libs.interop.queue.api)
-    implementation(libs.interop.tenant)
+    implementation(libs.interop.ehr.tenant)
     implementation(libs.interop.ehr.fhir.ronin)
     implementation(libs.interop.commonJackson)
 

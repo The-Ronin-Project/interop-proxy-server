@@ -1,0 +1,14 @@
+query {
+    getPractitionerByProvider(tenantId: "ronin", providerId: "E1000") {
+        id
+        identifier {
+            system
+            value
+        }
+        name {
+            family
+            given
+            use
+        }
+    }
+}
