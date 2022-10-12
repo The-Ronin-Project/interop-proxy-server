@@ -113,6 +113,12 @@ class InteropProxyServerIntegratedAppointmentTests {
         }
     }
 
+    private fun changeTimeZone(timezone: String) {
+        val connection = ehrDatasource.connection
+        val statement = connection.createStatement()
+        statement.execute("update io_tenant set timezone = '$timezone' where io_tenant_id = 1002;")
+    }
+
     @Test
     fun `server handles appointment by MRN query`() {
         val query = this::class.java.getResource("/graphql/appointmentsByMRN.graphql")!!.readText()
@@ -143,13 +149,44 @@ class InteropProxyServerIntegratedAppointmentTests {
         validateAppointmentResponse(node)
     }
 
+    @Test
+    fun `server handles appointment with differing timezone`() {
+        changeTimeZone("America/Chicago")
+
+        val query = this::class.java.getResource("/graphql/appointmentsByFHIR.graphql")!!.readText()
+            .replace("__START_DATE__", "01-01-2022").replace("__END_DATE__", "02-02-2022")
+        val httpEntity = HttpEntity(query, httpHeaders)
+
+        val responseEntity =
+            restTemplate.postForEntity(URI("http://localhost:$port/graphql"), httpEntity, String::class.java)
+        assertEquals(HttpStatus.OK, responseEntity.statusCode)
+
+        val resultJSONNode = objectMapper.readTree(responseEntity.body)
+        val node = resultJSONNode["data"]["appointmentsByPatientAndDate"]
+
+        assertFalse(node.has("errors"))
+        assertEquals(2, node.size())
+
+        node.forEach { appointment ->
+            if (appointment["id"].asText().contains("AppointmentFHIRID1")) {
+                // The time is represented in UTC, but the source is CT
+                assertEquals("2022-01-01T15:00:00Z", appointment["start"].asText())
+            } else if (appointment["id"].asText().contains("AppointmentFHIRID2")) {
+                assertEquals("2022-01-01T16:00:00Z", appointment["start"].asText())
+            }
+        }
+
+        // reset the Timezone
+        changeTimeZone("America/Los_Angeles")
+    }
+
     private fun validateAppointmentResponse(node: JsonNode) {
         assertFalse(node.has("errors"))
         assertEquals(2, node.size())
 
         node.forEach { appointment ->
             if (appointment["id"].asText().contains("AppointmentFHIRID1")) {
-                // The time is represented in UTC, but the source is PST
+                // The time is represented in UTC, but the source is PT
                 assertEquals("2022-01-01T17:00:00Z", appointment["start"].asText())
                 assertEquals(
                     "AppointmentFHIRID1",
@@ -170,6 +207,8 @@ class InteropProxyServerIntegratedAppointmentTests {
                 }
             }
             if (appointment["id"].asText().contains("AppointmentFHIRID2")) {
+                assertEquals("2022-01-01T18:00:00Z", appointment["start"].asText())
+
                 val participants = appointment["participants"]
                 assertEquals(2, participants.size())
                 participants.forEach { participant ->

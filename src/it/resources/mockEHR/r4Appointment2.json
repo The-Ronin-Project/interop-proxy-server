@@ -51,8 +51,8 @@
   ],
   "priority": 5,
   "description": "Appointment with a 'bad' Practitioner reference and different status.",
-  "start": "2022-01-01T09:00:00Z",
-  "end": "2022-01-01T10:00:00Z",
+  "start": "2022-01-01T10:00:00Z",
+  "end": "2022-01-01T11:00:00Z",
   "created": "2013-10-10",
   "comment": "Further expand on the results of the MRI and determine the next actions that may be appropriate.",
   "participant": [

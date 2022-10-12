@@ -15,6 +15,7 @@ class TenantTest {
             availableStart = LocalTime.of(22, 0),
             availableEnd = LocalTime.of(23, 0),
             name = "test tenant",
+            timezone = "America/Chicago",
             vendor = Epic(
                 release = "release",
                 serviceEndpoint = "serviceEndpoint",
@@ -37,6 +38,7 @@ class TenantTest {
         assertEquals("test tenant", tenant.name)
         assertEquals(LocalTime.of(22, 0), tenant.availableStart)
         assertEquals(LocalTime.of(23, 0), tenant.availableEnd)
+        assertEquals("America/Chicago", tenant.timezone)
     }
 
     @Test
@@ -47,6 +49,7 @@ class TenantTest {
             availableStart = LocalTime.of(22, 0),
             availableEnd = LocalTime.of(23, 0),
             name = "test tenant",
+            timezone = "America/Chicago",
             vendor = Epic(
                 release = "release",
                 serviceEndpoint = "serviceEndpoint",
@@ -87,7 +90,8 @@ class TenantTest {
                 "patientMRNTypeText" : "patientMRNTypeText",
                 "instanceName" : "Epic Sandbox",
                 "vendorType" : "EPIC"
-              }
+              },
+              "timezone" : "America/Chicago"
             }
         """.trimIndent()
         assertEquals(expectedJSON, json)

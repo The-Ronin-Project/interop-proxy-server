@@ -12,4 +12,5 @@ data class Tenant(
     val availableStart: LocalTime?,
     val availableEnd: LocalTime?,
     val vendor: Vendor,
+    val timezone: String
 )

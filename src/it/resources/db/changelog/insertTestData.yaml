@@ -47,6 +47,9 @@ databaseChangeLog:
               - column:
                   name: available_batch_end
                   value: "06:00:00"
+              - column:
+                  name: timezone
+                  value: "Etc/UTC"
         - insert:
             dbms: 'mysql'
             tableName: io_tenant_epic
@@ -125,6 +128,9 @@ databaseChangeLog:
               - column:
                   name: available_batch_end
                   value: "06:00:00"
+              - column:
+                  name: timezone
+                  value: "America/Los_Angeles"
         - insert:
             dbms: 'mysql'
             tableName: io_tenant_epic
@@ -181,3 +187,4 @@ databaseChangeLog:
               - column:
                   name: pool_id
                   value: "14600"
+

@@ -16,6 +16,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.springframework.http.HttpStatus
 import java.sql.SQLIntegrityConstraintViolationException
+import java.time.ZoneId
 
 class MirthTenantConfigControllerTest {
     private lateinit var dao: MirthTenantConfigDAO
@@ -56,6 +57,7 @@ class MirthTenantConfigControllerTest {
         every { batchConfig } returns null
         every { vendor } returns mockTenantServiceEpic
         every { name } returns "Epic Tenant"
+        every { timezone } returns ZoneId.of("America/New_York")
     }
 
     @BeforeEach

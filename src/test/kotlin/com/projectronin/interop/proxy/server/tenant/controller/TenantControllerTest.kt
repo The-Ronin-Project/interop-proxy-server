@@ -12,6 +12,7 @@ import org.junit.jupiter.api.assertThrows
 import org.springframework.http.HttpStatus
 import java.sql.SQLIntegrityConstraintViolationException
 import java.time.LocalTime
+import java.time.ZoneId
 import com.projectronin.interop.proxy.server.tenant.model.Epic as ProxyEpic
 import com.projectronin.interop.proxy.server.tenant.model.Tenant as ProxyTenant
 import com.projectronin.interop.tenant.config.model.AuthenticationConfig as TenantServiceAuthenticationConfig
@@ -66,7 +67,8 @@ class TenantControllerTest {
         availableStart = LocalTime.of(20, 0),
         availableEnd = LocalTime.of(6, 0),
         vendor = proxyVendor,
-        name = "test tenant"
+        name = "test tenant",
+        timezone = "America/Los_Angeles"
     )
     private val proxyTenantWithCustomMrn = proxyTenant.copy(vendor = proxyVendorWithCustomMrn)
     private val tenantServiceTenant = TenantServiceTenant(
@@ -77,7 +79,8 @@ class TenantControllerTest {
             availableEnd = LocalTime.of(6, 0)
         ),
         vendor = tenantServiceVendor,
-        name = "test tenant"
+        name = "test tenant",
+        timezone = ZoneId.of("America/Los_Angeles")
     )
     private val tenantServiceTenantWithCustomMrn = tenantServiceTenant.copy(vendor = tenantServiceVendorWithCustomMrn)
     private val proxyTenantNoTimes = ProxyTenant(
@@ -86,14 +89,16 @@ class TenantControllerTest {
         availableStart = null,
         availableEnd = null,
         vendor = proxyVendor,
-        name = "test tenant2"
+        name = "test tenant2",
+        timezone = "America/Denver"
     )
     private val tenantServiceTenantNoBatch = TenantServiceTenant(
         internalId = 2,
         mnemonic = "mnemonic2",
         batchConfig = null,
         vendor = tenantServiceVendor,
-        name = "test tenant2"
+        name = "test tenant2",
+        timezone = ZoneId.of("America/Denver")
     )
 
     @Test
@@ -158,7 +163,8 @@ class TenantControllerTest {
             availableStart = null,
             availableEnd = LocalTime.of(6, 0),
             vendor = proxyVendor,
-            name = "test tenant2"
+            name = "test tenant2",
+            timezone = "America/Denver"
         )
         every { tenantService.insertTenant(any()) } returns tenantServiceTenantNoBatch
         val response = tenantController.insert(proxyTenantNoStart)
@@ -174,7 +180,8 @@ class TenantControllerTest {
             availableStart = LocalTime.of(6, 0),
             availableEnd = null,
             vendor = proxyVendor,
-            name = "test tenant2"
+            name = "test tenant2",
+            timezone = "America/Denver"
         )
         every { tenantService.insertTenant(any()) } returns tenantServiceTenantNoBatch
         val response = tenantController.insert(proxyTenantNoEnd)

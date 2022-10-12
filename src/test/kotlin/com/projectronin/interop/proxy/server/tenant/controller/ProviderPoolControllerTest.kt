@@ -19,6 +19,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.http.HttpStatus
+import java.time.ZoneId
 
 class ProviderPoolControllerTest {
     private lateinit var dao: ProviderPoolDAO
@@ -29,6 +30,7 @@ class ProviderPoolControllerTest {
         internalId = 1,
         mnemonic = "tenantMnemonic",
         name = "full name",
+        timezone = ZoneId.of("America/Los_Angeles"),
         batchConfig = null,
         vendor = Epic(
             clientId = "clientId",
@@ -106,7 +108,9 @@ class ProviderPoolControllerTest {
 
     @Test
     fun `handles get`() {
-        every { dao.getPoolsForProviders(tenant.internalId, listOf(providerPoolDO.providerId)) } returns listOf(providerPoolDO)
+        every { dao.getPoolsForProviders(tenant.internalId, listOf(providerPoolDO.providerId)) } returns listOf(
+            providerPoolDO
+        )
         val response = controller.get(tenant.mnemonic, listOf(providerPoolDO.providerId))
 
         assertEquals(HttpStatus.OK, response.statusCode)

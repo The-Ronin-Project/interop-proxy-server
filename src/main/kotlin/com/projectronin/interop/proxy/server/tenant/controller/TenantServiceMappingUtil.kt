@@ -2,6 +2,7 @@ package com.projectronin.interop.proxy.server.tenant.controller
 
 import com.projectronin.interop.tenant.config.model.AuthenticationConfig
 import com.projectronin.interop.tenant.config.model.BatchConfig
+import java.time.ZoneId
 import com.projectronin.interop.proxy.server.tenant.model.Epic as ProxyEpic
 import com.projectronin.interop.proxy.server.tenant.model.Tenant as ProxyTenant
 import com.projectronin.interop.tenant.config.model.Tenant as TenantServiceTenant
@@ -12,6 +13,7 @@ fun TenantServiceTenant.toProxyTenant(): ProxyTenant {
         id = internalId,
         mnemonic = mnemonic,
         name = name,
+        timezone = timezone.id,
         availableStart = batchConfig?.availableStart,
         availableEnd = batchConfig?.availableEnd,
         vendor = (vendor as TenantServiceEpic).toProxyEpic()
@@ -26,6 +28,7 @@ fun ProxyTenant.toTenantServerTenant(newId: Int): TenantServiceTenant {
         internalId = newId,
         mnemonic = mnemonic,
         name = name,
+        timezone = ZoneId.of(timezone),
         batchConfig = availableStart?.let { start ->
             availableEnd?.let { end ->
                 BatchConfig(start, end)

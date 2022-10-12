@@ -141,7 +141,8 @@ class TenantControllerTests {
             availableStart = LocalTime.of(22, 0),
             availableEnd = LocalTime.of(6, 0),
             vendor = vendor,
-            name = "coolest boi hospital"
+            name = "coolest boi hospital",
+            timezone = "America/Chicago"
         )
         val httpEntity = HttpEntity(newTenant, httpHeaders)
 
@@ -181,7 +182,8 @@ class TenantControllerTests {
             availableStart = LocalTime.of(22, 0),
             availableEnd = LocalTime.of(6, 0),
             vendor = vendor,
-            name = "coolest boi hospital"
+            name = "coolest boi hospital",
+            timezone = "America/New_York"
         )
         val httpEntity = HttpEntity(newTenant, httpHeaders)
 
@@ -221,7 +223,8 @@ class TenantControllerTests {
             availableStart = LocalTime.of(22, 0),
             availableEnd = LocalTime.of(6, 0),
             vendor = vendor,
-            name = "App Orchard Test"
+            name = "App Orchard Test",
+            timezone = "America/Denver"
         )
         val httpEntity = HttpEntity(updatedTenant, httpHeaders)
 
@@ -261,7 +264,8 @@ class TenantControllerTests {
             availableStart = LocalTime.of(22, 0),
             availableEnd = LocalTime.of(6, 0),
             vendor = vendor,
-            name = "App Orchard Test"
+            name = "App Orchard Test",
+            timezone = "America/Los_Angeles"
         )
         val httpEntity = HttpEntity(updatedTenant, httpHeaders)
 

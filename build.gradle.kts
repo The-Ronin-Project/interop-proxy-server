@@ -15,7 +15,10 @@ dependencies {
     implementation(libs.interop.fhir)
     implementation(libs.interop.queue.api)
     implementation(libs.interop.ehr.tenant)
-    implementation(libs.interop.ehr.fhir.ronin)
+    implementation(libs.interop.ehr.fhir.ronin) {
+        // We're not ready to use the datalake portion.
+        exclude(group = "com.projectronin.interop.publish", module = "interop-datalake")
+    }
     implementation(libs.interop.commonJackson)
 
     implementation(platform(libs.kotlinx.coroutines.bom))
@@ -32,7 +35,10 @@ dependencies {
     implementation(libs.bundles.hl7v2)
     implementation(libs.dd.trace.api)
 
-    runtimeOnly(libs.bundles.ehr.impls)
+    runtimeOnly(libs.bundles.ehr.impls) {
+        // We're not ready to use the datalake portion.
+        exclude(group = "com.projectronin.interop.publish", module = "interop-datalake")
+    }
     runtimeOnly(libs.interop.queue.db)
     runtimeOnly(libs.mysql.connector.java)
 
