@@ -67,12 +67,45 @@ internal class PractitionerHandlerTest {
     }
 
     @Test
+    fun `getById does not care about authorized tenant`() {
+        mockkObject(JacksonUtil)
+        every { JacksonUtil.writeJsonValue(any()) } returns "json"
+
+        every { tenantService.getTenantForMnemonic("tenant") } returns tenant
+        every { dfe.graphQlContext.get<InteropGraphQLContext>(INTEROP_CONTEXT_KEY).authzTenantId } returns null
+        every { factory.getVendorFactory(tenant).practitionerService } returns practService
+        every { practService.getPractitioner(tenant, "FHIRID1") } returns practitioner
+        every { queueService.enqueueMessages(any()) } just runs
+        val ret = handler.getPractitionerById("tenant", "FHIRID1", dfe)
+        assertEquals(0, ret.errors.size)
+        assertEquals("tenant-practID1", ret.data.id)
+        assertNotNull(ret.data.identifier)
+        assertNotNull(ret.data.name)
+        unmockkObject(JacksonUtil)
+    }
+
+    @Test
     fun `getByProvider test`() {
         mockkObject(JacksonUtil)
         every { JacksonUtil.writeJsonValue(any()) } returns "json"
 
         every { tenantService.getTenantForMnemonic("tenant") } returns tenant
         every { dfe.graphQlContext.get<InteropGraphQLContext>(INTEROP_CONTEXT_KEY).authzTenantId } returns "tenant"
+        every { factory.getVendorFactory(tenant).practitionerService } returns practService
+        every { practService.getPractitionerByProvider(tenant, "ProviderID1") } returns practitioner
+        every { queueService.enqueueMessages(any()) } just runs
+        val ret = handler.getPractitionerByProvider("tenant", "ProviderID1", dfe)
+        assertEquals(0, ret.errors.size)
+        unmockkObject(JacksonUtil)
+    }
+
+    @Test
+    fun `getByProvider does not care about authorized tenant`() {
+        mockkObject(JacksonUtil)
+        every { JacksonUtil.writeJsonValue(any()) } returns "json"
+
+        every { tenantService.getTenantForMnemonic("tenant") } returns tenant
+        every { dfe.graphQlContext.get<InteropGraphQLContext>(INTEROP_CONTEXT_KEY).authzTenantId } returns null
         every { factory.getVendorFactory(tenant).practitionerService } returns practService
         every { practService.getPractitionerByProvider(tenant, "ProviderID1") } returns practitioner
         every { queueService.enqueueMessages(any()) } just runs

@@ -39,7 +39,7 @@ class PractitionerHandler(
         providerId: String,
         dfe: DataFetchingEnvironment
     ): DataFetcherResult<ProxyServerPractitioner> {
-        val tenant = findAndValidateTenant(dfe, tenantService, tenantId)
+        val tenant = findAndValidateTenant(dfe, tenantService, tenantId, false)
         return retrievePractitioner(
             tenant,
             providerId,
@@ -54,7 +54,7 @@ class PractitionerHandler(
         practitionerFhirId: String,
         dfe: DataFetchingEnvironment
     ): DataFetcherResult<ProxyServerPractitioner> {
-        val tenant = findAndValidateTenant(dfe, tenantService, tenantId)
+        val tenant = findAndValidateTenant(dfe, tenantService, tenantId, false)
         return retrievePractitioner(
             tenant,
             practitionerFhirId,
