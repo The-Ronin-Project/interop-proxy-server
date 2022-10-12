@@ -374,6 +374,11 @@ enum ConditionCategoryCode {
   PROBLEM_LIST_ITEM
 }
 
+enum NoteSender {
+  PATIENT
+  PRACTITIONER
+}
+
 enum PatientIdType {
   FHIR
   MRN @deprecated(reason : "Deprecated ID Type")
@@ -405,6 +410,10 @@ input MessageRecipientInput {
 input NoteInput {
   "Timestamp of when note was recorded, in yyyymmddhhmmss format"
   datetime: String!
+  "If the note is an alert"
+  isAlert: Boolean!
+  "The originator of the note"
+  noteSender: NoteSender!
   "The text of the note that should be sent"
   noteText: String!
   "The identifier of the patient that the note is for"

@@ -15,6 +15,7 @@ import com.projectronin.interop.proxy.server.hl7.MDMService
 import com.projectronin.interop.proxy.server.hl7.model.MDMPatientFields
 import com.projectronin.interop.proxy.server.hl7.model.MDMPractitionerFields
 import com.projectronin.interop.proxy.server.input.NoteInput
+import com.projectronin.interop.proxy.server.input.NoteSender
 import com.projectronin.interop.proxy.server.input.PatientIdType
 import com.projectronin.interop.queue.QueueService
 import com.projectronin.interop.queue.model.HL7Message
@@ -29,7 +30,8 @@ class NoteHandler(
     private val patientService: PatientService,
     private val practitionerService: PractitionerService,
     private val queueService: QueueService,
-    private val tenantService: TenantService
+    private val tenantService: TenantService,
+    private val mdmService: MDMService,
 ) : Mutation {
     private val logger = KotlinLogging.logger { }
 
@@ -69,12 +71,18 @@ class NoteHandler(
             patient.address,
             patient.telecom
         )
-        val hl7 = MDMService().generateMDM(
+        val documentStatus = if (noteInput.noteSender == NoteSender.PATIENT && noteInput.isAlert) {
+            "IP"
+        } else {
+            "DO"
+        }
+        val hl7 = mdmService.generateMDM(
             tenantId,
             mdmPatientFields,
             mdmPractitionerFields,
             noteInput.noteText,
-            noteInput.datetime
+            noteInput.datetime,
+            documentStatus
         )
 
         // Send generated MDM message to queue service

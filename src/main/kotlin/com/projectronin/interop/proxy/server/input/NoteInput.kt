@@ -14,4 +14,8 @@ data class NoteInput(
     val noteText: String,
     @GraphQLDescription("Timestamp of when note was recorded, in yyyymmddhhmmss format")
     val datetime: String,
+    @GraphQLDescription("The originator of the note")
+    val noteSender: NoteSender,
+    @GraphQLDescription("If the note is an alert")
+    val isAlert: Boolean
 )

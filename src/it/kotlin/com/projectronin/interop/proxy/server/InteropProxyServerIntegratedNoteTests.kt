@@ -85,7 +85,9 @@ class InteropProxyServerIntegratedNoteTests {
             |         "patientId":  "$patientid",
             |         "patientIdType":  "FHIR",
             |         "practitionerFhirId": "$practitionerid",
-            |         "noteText": "$notetext"
+            |         "noteText": "$notetext",
+            |         "noteSender": "PRACTITIONER",
+            |         "isAlert" : "False"
             |      },
             |      "tenantId": "$tenantId"
             |   }
@@ -119,7 +121,9 @@ class InteropProxyServerIntegratedNoteTests {
             |         "patientId":  "$patientid",
             |         "patientIdType":  "FHIR",
             |         "practitionerFhirId": "$practitionerid",
-            |         "noteText": "$notetext"
+            |         "noteText": "$notetext",
+            |         "noteSender": "PRACTITIONER",
+            |         "isAlert" : "False"
             |      },
             |      "tenantId": "$tenantId"
             |   }
@@ -167,7 +171,9 @@ class InteropProxyServerIntegratedNoteTests {
             |         "patientId":  "$patientid",
             |         "patientIdType":  "MRN",
             |         "practitionerFhirId": "$practitionerid",
-            |         "noteText": "$notetext"
+            |         "noteText": "$notetext",
+            |         "noteSender": "PRACTITIONER",
+            |         "isAlert" : "False"
             |      },
             |      "tenantId": "$tenantId"
             |   }
@@ -201,7 +207,9 @@ class InteropProxyServerIntegratedNoteTests {
             |         "patientId":  "$patientid",
             |         "patientIdType":  "FHIR",
             |         "practitionerFhirId": "$practitionerid",
-            |         "noteText": "$notetext"
+            |         "noteText": "$notetext",
+            |         "noteSender": "PRACTITIONER",
+            |         "isAlert" : "False"
             |      },
             |      "tenantId": "$tenantId"
             |   }
@@ -237,7 +245,9 @@ class InteropProxyServerIntegratedNoteTests {
             |         "patientId":  "$patientid",
             |         "patientIdType":  "FHIR",
             |         "practitionerFhirId": "$practitionerid",
-            |         "noteText": "$notetext"
+            |         "noteText": "$notetext",
+            |         "noteSender": "PRACTITIONER",
+            |         "isAlert" : "False"
             |      },
             |      "tenantId": "$tenantId"
             |   }
@@ -273,7 +283,9 @@ class InteropProxyServerIntegratedNoteTests {
             |         "patientId":  "$patientid",
             |         "patientIdType":  "FHIR",
             |         "practitionerFhirId": "$practitionerid",
-            |         "noteText": "$notetext"
+            |         "noteText": "$notetext",
+            |         "noteSender": "PRACTITIONER",
+            |         "isAlert" : "False"
             |      },
             |      "tenantId": "$tenantId"
             |   }

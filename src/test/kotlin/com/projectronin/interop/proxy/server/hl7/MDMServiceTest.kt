@@ -2,6 +2,7 @@ package com.projectronin.interop.proxy.server.hl7
 
 import ca.uhn.hl7v2.DefaultHapiContext
 import ca.uhn.hl7v2.HapiContext
+import ca.uhn.hl7v2.model.v251.datatype.ID
 import ca.uhn.hl7v2.parser.Parser
 import ca.uhn.hl7v2.util.Terser
 import ca.uhn.hl7v2.validation.impl.ValidationContextFactory
@@ -135,5 +136,18 @@ class MDMServiceTest {
             assertTrue(terser.get("/PID-3($i)") in listOf("123456", "654321"))
             assertFalse(terser.get("/PID-3($i)") in listOf("987-65-4321", "randomid"))
         }
+    }
+
+    @Test
+    fun `respect passed in documentStatus`() {
+        val note = """test note"""
+        val hl7 = MDMService().generateMDM("Test", mdmPatientFields, mdmPractitionerFields, note, "202206011250", "IP")
+        val context: HapiContext = DefaultHapiContext()
+        context.validationContext = ValidationContextFactory.defaultValidation()
+        val parser: Parser = context.pipeParser
+        val message = parser.parse(hl7.first)
+        val terser = Terser(message)
+        val status = terser.getSegment("TXA").getField(17, 0) as ID
+        assertEquals("IP", status.value)
     }
 }

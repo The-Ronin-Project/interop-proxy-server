@@ -26,13 +26,15 @@ class MDMService {
      * @param practitioner: MDMPractitionerFields, relevant practitioner information for the practitioner from aidbox
      * @param note: Text of the note to be attached in the OBX segment(s)
      * @param datetime: Date and Time the note was recorded, in yyyymmddhhmmss
+     * @param documentStatus: Whether the document is documented "DO" or in progress "IP", goes into TXA-17
      */
     fun generateMDM(
         tenantId: String,
         patient: MDMPatientFields,
         practitioner: MDMPractitionerFields,
         note: String,
-        datetime: String
+        datetime: String,
+        documentStatus: String = "DO"
     ): Pair<String, String> {
         val mdm = MDM_T02()
         // TODO MSH-11, MSH-5 should be set based on Tenant interface information, will need to be added to our tenant configurations and pulled based on tenantId
@@ -53,7 +55,7 @@ class MDMService {
         pv1.patientClass.value = "U"
 
         // Populate the TXA Segment
-        setTXA(mdm, practitioner)
+        setTXA(mdm, practitioner, documentStatus)
 
         // Populate the OBX Segment
         setOBX(mdm, note)
@@ -155,7 +157,7 @@ class MDMService {
     }
 
     // creates and populates the TXA segment
-    fun setTXA(mdm: MDM_T02, practitioner: MDMPractitionerFields) {
+    fun setTXA(mdm: MDM_T02, practitioner: MDMPractitionerFields, documentStatus: String) {
         val txa: TXA = mdm.txa
         txa.setIDTXA.value = "1"
         txa.documentType.value = "PR"
@@ -173,8 +175,9 @@ class MDMService {
         txa.uniqueDocumentNumber.entityIdentifier.value =
             "RoninNote" + mdm.msh.dateTimeOfMessage.time.value + ".'" + mdm.msh.messageControlID.value
 
-        // TXA-17 Document Completion Status, default to documented. If future workflow passes on document status, this could change
-        txa.documentCompletionStatus.value = "DO"
+        // TXA-17 Document Completion Status, default to documented.
+        // This default comes from when a message is first requested at generation
+        txa.documentCompletionStatus.value = documentStatus
     }
 
     // creates and populates the OBX segment

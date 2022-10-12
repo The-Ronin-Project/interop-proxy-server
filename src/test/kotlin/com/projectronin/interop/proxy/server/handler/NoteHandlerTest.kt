@@ -16,7 +16,9 @@ import com.projectronin.interop.fhir.r4.valueset.ContactPointUse
 import com.projectronin.interop.fhir.ronin.code.RoninCodeSystem
 import com.projectronin.interop.proxy.server.context.INTEROP_CONTEXT_KEY
 import com.projectronin.interop.proxy.server.context.InteropGraphQLContext
+import com.projectronin.interop.proxy.server.hl7.MDMService
 import com.projectronin.interop.proxy.server.input.NoteInput
+import com.projectronin.interop.proxy.server.input.NoteSender
 import com.projectronin.interop.proxy.server.input.PatientIdType
 import com.projectronin.interop.proxy.server.util.asCode
 import com.projectronin.interop.proxy.server.util.relaxedMockk
@@ -26,12 +28,11 @@ import com.projectronin.interop.tenant.config.model.Tenant
 import graphql.schema.DataFetchingEnvironment
 import io.mockk.every
 import io.mockk.mockk
-import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.springframework.web.client.HttpClientErrorException
-import java.text.SimpleDateFormat
 
 class NoteHandlerTest {
     private lateinit var noteHandler: NoteHandler
@@ -39,6 +40,7 @@ class NoteHandlerTest {
     private lateinit var patientService: PatientService
     private lateinit var queueService: QueueService
     private lateinit var tenantService: TenantService
+    private lateinit var mdmService: MDMService
     private lateinit var dfe: DataFetchingEnvironment
 
     private val testidentifier = relaxedMockk<Identifier> {
@@ -79,7 +81,8 @@ class NoteHandlerTest {
         patientService = mockk()
         queueService = mockk()
         tenantService = mockk()
-        noteHandler = NoteHandler(patientService, practitionerService, queueService, tenantService)
+        mdmService = mockk()
+        noteHandler = NoteHandler(patientService, practitionerService, queueService, tenantService, mdmService)
         dfe = mockk()
     }
 
@@ -91,12 +94,28 @@ class NoteHandlerTest {
         every { practitionerService.getPractitioner("apposnd", "PractitionerTestId") } returns oncologyPractitioner
         every { patientService.getPatient("apposnd", "PatientTestId") } returns oncologyPatient
         every { tenantService.getTenantForMnemonic("apposnd") } returns tenant
+        every {
+            mdmService.generateMDM(
+                "apposnd",
+                match { it.name == listOf(testname) },
+                match { it.name == listOf(testname) },
+                "Example Note Text",
+                "202206011250",
+                "IP"
+            )
+        } returns Pair("mock", "uniqueId")
 
-        val noteInput = NoteInput("PatientTestId", PatientIdType.FHIR, "PractitionerTestId", "Example Note Text", "202206011250")
+        val noteInput = NoteInput(
+            "PatientTestId",
+            PatientIdType.FHIR,
+            "PractitionerTestId",
+            "Example Note Text",
+            "202206011250",
+            NoteSender.PATIENT,
+            true
+        )
         val response = noteHandler.sendNote(noteInput, "apposnd", dfe)
-        val dateformat = SimpleDateFormat("yyyyMMdd")
-        val docId = "RoninNote" + dateformat.format(java.util.Date())
-        assertTrue(response.startsWith(docId))
+        assertEquals("uniqueId", response)
     }
 
     @Test
@@ -107,7 +126,15 @@ class NoteHandlerTest {
         every { tenantService.getTenantForMnemonic("apposnd") } returns tenant
         every { practitionerService.getPractitioner("apposnd", "PractitionerTestId") } returns oncologyPractitioner
         val noteInput =
-            NoteInput("PatientMRNId", PatientIdType.MRN, "PractitionerTestId", "Example Note Text", "202206011250")
+            NoteInput(
+                "PatientMRNId",
+                PatientIdType.MRN,
+                "PractitionerTestId",
+                "Example Note Text",
+                "202206011250",
+                NoteSender.PRACTITIONER,
+                false
+            )
         every {
             patientService.getPatientFHIRIds(
                 "apposnd",
@@ -115,10 +142,58 @@ class NoteHandlerTest {
             ).getValue("key")
         } returns "PatientFhirId"
         every { patientService.getPatient("apposnd", "PatientFhirId") } returns oncologyPatient
+        every {
+            mdmService.generateMDM(
+                "apposnd",
+                match { it.name == listOf(testname) },
+                match { it.name == listOf(testname) },
+                "Example Note Text",
+                "202206011250",
+                "DO"
+            )
+        } returns Pair("mock", "uniqueId")
+
         val response = noteHandler.sendNote(noteInput, "apposnd", dfe)
-        val dateformat = SimpleDateFormat("yyyyMMdd")
-        val docId = "RoninNote" + dateformat.format(java.util.Date())
-        assertTrue(response.startsWith(docId))
+        assertEquals("uniqueId", response)
+    }
+
+    @Test
+    fun `accepts note with patient MRN but not an alert`() {
+        val tenant = mockk<Tenant>()
+
+        every { dfe.graphQlContext.get<InteropGraphQLContext>(INTEROP_CONTEXT_KEY).authzTenantId } returns "apposnd"
+        every { tenantService.getTenantForMnemonic("apposnd") } returns tenant
+        every { practitionerService.getPractitioner("apposnd", "PractitionerTestId") } returns oncologyPractitioner
+        val noteInput =
+            NoteInput(
+                "PatientMRNId",
+                PatientIdType.MRN,
+                "PractitionerTestId",
+                "Example Note Text",
+                "202206011250",
+                NoteSender.PATIENT,
+                false
+            )
+        every {
+            patientService.getPatientFHIRIds(
+                "apposnd",
+                mapOf("key" to SystemValue(system = RoninCodeSystem.MRN.uri.value, value = noteInput.patientId))
+            ).getValue("key")
+        } returns "PatientFhirId"
+        every { patientService.getPatient("apposnd", "PatientFhirId") } returns oncologyPatient
+        every {
+            mdmService.generateMDM(
+                "apposnd",
+                match { it.name == listOf(testname) },
+                match { it.name == listOf(testname) },
+                "Example Note Text",
+                "202206011250",
+                "DO"
+            )
+        } returns Pair("mock", "uniqueId")
+
+        val response = noteHandler.sendNote(noteInput, "apposnd", dfe)
+        assertEquals("uniqueId", response)
     }
 
     @Test
@@ -126,7 +201,15 @@ class NoteHandlerTest {
         every { dfe.graphQlContext.get<InteropGraphQLContext>(INTEROP_CONTEXT_KEY).authzTenantId } returns "apposnd"
         every { tenantService.getTenantForMnemonic("apposnd") } returns null
 
-        val noteInput = NoteInput("PatientMRNId", PatientIdType.MRN, "PractitionerTestId", "Example Note Text", "202206011250")
+        val noteInput = NoteInput(
+            "PatientMRNId",
+            PatientIdType.MRN,
+            "PractitionerTestId",
+            "Example Note Text",
+            "202206011250",
+            NoteSender.PRACTITIONER,
+            false
+        )
         assertThrows<HttpClientErrorException> {
             noteHandler.sendNote(noteInput, "apposnd", dfe)
         }
