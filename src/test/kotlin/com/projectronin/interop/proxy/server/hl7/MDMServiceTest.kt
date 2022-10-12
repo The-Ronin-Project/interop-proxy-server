@@ -141,7 +141,8 @@ class MDMServiceTest {
     @Test
     fun `respect passed in documentStatus`() {
         val note = """test note"""
-        val hl7 = MDMService().generateMDM("Test", mdmPatientFields, mdmPractitionerFields, note, "202206011250", "IP")
+        val hl7 =
+            MDMService().generateMDM("Test", mdmPatientFields, mdmPractitionerFields, note, "202206011250", null, "IP")
         val context: HapiContext = DefaultHapiContext()
         context.validationContext = ValidationContextFactory.defaultValidation()
         val parser: Parser = context.pipeParser

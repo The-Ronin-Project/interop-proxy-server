@@ -101,6 +101,7 @@ class NoteHandlerTest {
                 match { it.name == listOf(testname) },
                 "Example Note Text",
                 "202206011250",
+                null,
                 "IP"
             )
         } returns Pair("mock", "uniqueId")
@@ -115,6 +116,39 @@ class NoteHandlerTest {
             true
         )
         val response = noteHandler.sendNote(noteInput, "apposnd", dfe)
+        assertEquals("uniqueId", response)
+    }
+
+    @Test
+    fun `accepts addendum note with patient FHIR Id`() {
+        val tenant = mockk<Tenant>()
+
+        every { dfe.graphQlContext.get<InteropGraphQLContext>(INTEROP_CONTEXT_KEY).authzTenantId } returns "apposnd"
+        every { practitionerService.getPractitioner("apposnd", "PractitionerTestId") } returns oncologyPractitioner
+        every { patientService.getPatient("apposnd", "PatientTestId") } returns oncologyPatient
+        every { tenantService.getTenantForMnemonic("apposnd") } returns tenant
+        every {
+            mdmService.generateMDM(
+                "apposnd",
+                match { it.name == listOf(testname) },
+                match { it.name == listOf(testname) },
+                "Example Note Text",
+                "202206011250",
+                "parentDocId",
+                "IP"
+            )
+        } returns Pair("mock", "uniqueId")
+
+        val noteInput = NoteInput(
+            "PatientTestId",
+            PatientIdType.FHIR,
+            "PractitionerTestId",
+            "Example Note Text",
+            "202206011250",
+            NoteSender.PATIENT,
+            true
+        )
+        val response = noteHandler.sendNoteAddendum(noteInput, "apposnd", "parentDocId", dfe)
         assertEquals("uniqueId", response)
     }
 
@@ -149,6 +183,7 @@ class NoteHandlerTest {
                 match { it.name == listOf(testname) },
                 "Example Note Text",
                 "202206011250",
+                null,
                 "DO"
             )
         } returns Pair("mock", "uniqueId")
@@ -188,6 +223,7 @@ class NoteHandlerTest {
                 match { it.name == listOf(testname) },
                 "Example Note Text",
                 "202206011250",
+                null,
                 "DO"
             )
         } returns Pair("mock", "uniqueId")

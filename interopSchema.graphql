@@ -219,6 +219,8 @@ type Mutation {
   sendMessage(message: MessageInput!, tenantId: String!): String!
   "Takes in note from product and processes it for downstream services"
   sendNote(noteInput: NoteInput!, tenantId: String!): String!
+  "Takes in addendum note from product and processes it for downstream services"
+  sendNoteAddendum(noteInput: NoteInput!, parentDocumentId: String!, tenantId: String!): String!
 }
 
 "A participant on an appointment"

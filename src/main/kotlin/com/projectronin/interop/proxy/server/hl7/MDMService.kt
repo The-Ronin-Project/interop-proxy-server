@@ -26,6 +26,7 @@ class MDMService {
      * @param practitioner: MDMPractitionerFields, relevant practitioner information for the practitioner from aidbox
      * @param note: Text of the note to be attached in the OBX segment(s)
      * @param datetime: Date and Time the note was recorded, in yyyymmddhhmmss
+     * @param parentDocumentId: document identifier for parent note, in case of addendum
      * @param documentStatus: Whether the document is documented "DO" or in progress "IP", goes into TXA-17
      */
     fun generateMDM(
@@ -34,17 +35,19 @@ class MDMService {
         practitioner: MDMPractitionerFields,
         note: String,
         datetime: String,
+        parentDocumentId: String? = null,
         documentStatus: String = "DO"
     ): Pair<String, String> {
         val mdm = MDM_T02()
+        val eventType = parentDocumentId?.let { "T06" } ?: "T02"
         // TODO MSH-11, MSH-5 should be set based on Tenant interface information, will need to be added to our tenant configurations and pulled based on tenantId
-        mdm.initQuickstart("MDM", "T02", "T")
+        mdm.initQuickstart("MDM", eventType, "T")
         mdm.msh.msh3_SendingApplication.namespaceID.value = "RONIN"
         mdm.msh.msh5_ReceivingApplication.namespaceID.value = "TenantApplication"
 
         // Populate the EVN Segment
         val evn: EVN = mdm.evn
-        evn.eventTypeCode.value = "T02"
+        evn.eventTypeCode.value = eventType
         evn.recordedDateTime.time.value = datetime
 
         // Populate PID Segment
@@ -55,7 +58,7 @@ class MDMService {
         pv1.patientClass.value = "U"
 
         // Populate the TXA Segment
-        setTXA(mdm, practitioner, documentStatus)
+        setTXA(mdm, practitioner, parentDocumentId, documentStatus)
 
         // Populate the OBX Segment
         setOBX(mdm, note)
@@ -157,7 +160,8 @@ class MDMService {
     }
 
     // creates and populates the TXA segment
-    fun setTXA(mdm: MDM_T02, practitioner: MDMPractitionerFields, documentStatus: String) {
+    fun setTXA(mdm: MDM_T02, practitioner: MDMPractitionerFields, parentDocumentId: String?, documentStatus: String) {
+
         val txa: TXA = mdm.txa
         txa.setIDTXA.value = "1"
         txa.documentType.value = "PR"
@@ -173,7 +177,10 @@ class MDMService {
 
         // TXA-12 Unique Document Number (needs to be generated and unique, needs to be cited for addendum messages)
         txa.uniqueDocumentNumber.entityIdentifier.value =
-            "RoninNote" + mdm.msh.dateTimeOfMessage.time.value + ".'" + mdm.msh.messageControlID.value
+            "RoninNote" + mdm.msh.dateTimeOfMessage.time.value + "." + mdm.msh.messageControlID.value
+
+        // TXA-13 Parent Document Number, used for addendum (T06) messages
+        parentDocumentId?.let { txa.parentDocumentNumber.entityIdentifier.value = parentDocumentId }
 
         // TXA-17 Document Completion Status, default to documented.
         // This default comes from when a message is first requested at generation

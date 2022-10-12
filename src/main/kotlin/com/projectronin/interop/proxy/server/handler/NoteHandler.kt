@@ -41,10 +41,25 @@ class NoteHandler(
     @GraphQLDescription("Takes in note from product and processes it for downstream services")
     @Trace
     fun sendNote(noteInput: NoteInput, tenantId: String, dfe: DataFetchingEnvironment): String {
-        logger.info { "Receiving Note for patient ${noteInput.patientIdType}: ${noteInput.patientId} from Practitioner ${noteInput.practitionerFhirId}" }
-
-        // Throw an exception if the tenant is bad
         findAndValidateTenant(dfe, tenantService, tenantId, false)
+        return enqueueHL7(noteInput, tenantId)
+    }
+
+    @GraphQLDescription("Takes in addendum note from product and processes it for downstream services")
+    @Trace
+    fun sendNoteAddendum(
+        noteInput: NoteInput,
+        tenantId: String,
+        parentDocumentId: String,
+        dfe: DataFetchingEnvironment
+    ): String {
+        findAndValidateTenant(dfe, tenantService, tenantId, false)
+        return enqueueHL7(noteInput, tenantId, parentDocumentId)
+    }
+
+    private fun enqueueHL7(noteInput: NoteInput, tenantId: String, parentDocumentId: String? = null): String {
+        logger.info { "Receiving Note for patient ${noteInput.patientIdType}: ${noteInput.patientId} from Practitioner ${noteInput.practitionerFhirId}" }
+        parentDocumentId?.let { logger.info { "Attempting to addend parent document $it" } }
 
         val practitioner = practitionerService.getPractitioner(tenantId, noteInput.practitionerFhirId)
         val mdmPractitionerFields = MDMPractitionerFields(
@@ -71,6 +86,7 @@ class NoteHandler(
             patient.address,
             patient.telecom
         )
+
         val documentStatus = if (noteInput.noteSender == NoteSender.PATIENT && noteInput.isAlert) {
             "IP"
         } else {
@@ -82,6 +98,7 @@ class NoteHandler(
             mdmPractitionerFields,
             noteInput.noteText,
             noteInput.datetime,
+            parentDocumentId,
             documentStatus
         )
 
@@ -94,7 +111,7 @@ class NoteHandler(
                         tenant = tenantId,
                         text = hl7.first,
                         hl7Type = MessageType.MDM,
-                        hl7Event = EventType.MDMT02
+                        hl7Event = parentDocumentId?.let { EventType.MDMT06 } ?: EventType.MDMT02
                     )
                 )
             )
