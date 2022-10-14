@@ -84,8 +84,8 @@
     },
     {
       "actor": {
-        "reference": "Location/1",
-        "display": "South Wing, second floor"
+        "reference": "Location/LocationFHIRID1",
+        "display": "EMC Family Medicine"
       },
       "required": "required",
       "status": "accepted"

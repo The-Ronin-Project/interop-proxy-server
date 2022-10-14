@@ -52,6 +52,7 @@ class TenantServerControllerTest {
         every { patientMRNTypeText } returns "MRN"
         every { hsi } returns null
         every { instanceName } returns "Epic Instance"
+        every { departmentInternalSystem } returns "456"
     }
     private val mockTenantServiceTenant = mockk<Tenant> {
         every { internalId } returns 1

@@ -37,7 +37,8 @@ class TenantControllerTest {
         encounterCSNSystem = "encounterCSNSystem",
         patientMRNTypeText = "patientMRNTypeText",
         hsi = null,
-        instanceName = "instanceName"
+        instanceName = "instanceName",
+        departmentInternalSystem = "departmentInternalSystem"
     )
     private val proxyVendorWithCustomMrn = proxyVendor.copy(patientMRNTypeText = "Custom MRN")
     private val tenantServiceVendor = TenantServiceEpic(
@@ -58,6 +59,7 @@ class TenantControllerTest {
         patientInternalSystem = "internalSystemExample",
         encounterCSNSystem = "encounterCSNSystem",
         patientMRNTypeText = "patientMRNTypeText",
+        departmentInternalSystem = "departmentInternalSystem"
     )
     private val tenantServiceVendorWithCustomMrn = tenantServiceVendor.copy(patientMRNTypeText = "Custom MRN")
 

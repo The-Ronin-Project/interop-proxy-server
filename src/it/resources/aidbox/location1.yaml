@@ -1,0 +1,11 @@
+- resourceType: "Location"
+  id: "ronin-LocationFHIRID1"
+  identifier:
+    - value: "E12345"
+      system: "mockEHRDepartmentInternalSystem"
+  status: "active"
+  name: "South Wing, second floor"
+  telecom:
+    - system: "phone"
+      value: "2328"
+      use: "work"

@@ -58,6 +58,7 @@ fun ProxyEpic.toTenantServerEpic(): TenantServiceEpic {
         clientId = "",
         instanceName = instanceName,
         authenticationConfig = AuthenticationConfig(authEndpoint, "", ""),
+        departmentInternalSystem = departmentInternalSystem
     )
 }
 
@@ -75,7 +76,7 @@ fun TenantServiceEpic.toProxyEpic(): ProxyEpic {
         patientMRNTypeText = patientMRNTypeText,
         encounterCSNSystem = encounterCSNSystem,
         hsi = hsi,
-        instanceName = instanceName
-
+        instanceName = instanceName,
+        departmentInternalSystem = departmentInternalSystem ?: ""
     )
 }

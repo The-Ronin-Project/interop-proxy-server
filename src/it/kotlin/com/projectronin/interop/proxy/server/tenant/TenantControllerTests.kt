@@ -132,7 +132,8 @@ class TenantControllerTests {
             encounterCSNSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.5.737384.8",
             patientMRNTypeText = "MRN",
             hsi = null,
-            instanceName = "Epic Sandbox"
+            instanceName = "Epic Sandbox",
+            departmentInternalSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.2.686980"
         )
 
         val newTenant = Tenant(
@@ -173,7 +174,8 @@ class TenantControllerTests {
             encounterCSNSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.5.737384.8",
             patientMRNTypeText = "Custom MRN",
             hsi = null,
-            instanceName = "Epic Sandbox"
+            instanceName = "Epic Sandbox",
+            departmentInternalSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.2.686980"
         )
 
         val newTenant = Tenant(
@@ -214,7 +216,8 @@ class TenantControllerTests {
             encounterCSNSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.5.737384.8",
             patientMRNTypeText = "MRN",
             hsi = null,
-            instanceName = "Epic Sandbox"
+            instanceName = "Epic Sandbox",
+            departmentInternalSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.2.686980"
         )
 
         val updatedTenant = Tenant(
@@ -255,7 +258,8 @@ class TenantControllerTests {
             encounterCSNSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.5.737384.8",
             patientMRNTypeText = "Custom MRN",
             hsi = null,
-            instanceName = "Epic Sandbox"
+            instanceName = "Epic Sandbox",
+            departmentInternalSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.2.686980"
         )
 
         val updatedTenant = Tenant(

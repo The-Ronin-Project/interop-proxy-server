@@ -29,7 +29,8 @@ class TenantTest {
                 encounterCSNSystem = "encounterCSNSystem",
                 patientMRNTypeText = "patientMRNTypeText",
                 hsi = null,
-                instanceName = "instanceName"
+                instanceName = "instanceName",
+                departmentInternalSystem = "departmentInternalSystem"
             )
         )
 
@@ -63,7 +64,8 @@ class TenantTest {
                 encounterCSNSystem = "encounterCSNSystem",
                 patientMRNTypeText = "patientMRNTypeText",
                 hsi = null,
-                instanceName = "Epic Sandbox"
+                instanceName = "Epic Sandbox",
+                departmentInternalSystem = "departmentInternalSystem"
             )
         )
         val json = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(tenant)
@@ -89,6 +91,7 @@ class TenantTest {
                 "encounterCSNSystem" : "encounterCSNSystem",
                 "patientMRNTypeText" : "patientMRNTypeText",
                 "instanceName" : "Epic Sandbox",
+                "departmentInternalSystem" : "departmentInternalSystem",
                 "vendorType" : "EPIC"
               },
               "timezone" : "America/Chicago"

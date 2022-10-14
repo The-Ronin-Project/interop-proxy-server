@@ -50,7 +50,8 @@ class ProviderPoolControllerTest {
             encounterCSNSystem = "encounterCSNSystem",
             patientMRNTypeText = "patientMRNTypeText",
             hsi = "hsi",
-            instanceName = "instanceName"
+            instanceName = "instanceName",
+            departmentInternalSystem = "departmentInternalSystem"
         )
     )
 

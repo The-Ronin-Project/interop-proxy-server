@@ -34,7 +34,7 @@ private var setupDone = false
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("it")
 @ContextConfiguration(initializers = [(InteropProxyServerAuthInitializer::class)])
-@AidboxData("aidbox/practitioners.yaml", "aidbox/patient2.yaml")
+@AidboxData("aidbox/practitioners.yaml", "aidbox/patient2.yaml", "aidbox/location1.yaml")
 @AidboxTest
 class InteropProxyServerIntegratedAppointmentTests {
     companion object {
@@ -84,6 +84,11 @@ class InteropProxyServerIntegratedAppointmentTests {
             statement.execute("update io_tenant_epic set auth_endpoint = '${mockEHR.getURL()}/epic/oauth2/token' where io_tenant_id = 1002;")
 
             // insert testing data to MockEHR
+            mockEHR.addR4Resource(
+                "Location",
+                this::class.java.getResource("/mockEHR/r4Location.json")!!.readText(),
+                "LocationFHIRID1"
+            )
             mockEHR.addR4Resource(
                 "Appointment",
                 this::class.java.getResource("/mockEHR/r4Appointment1.json")!!.readText(),
@@ -203,6 +208,9 @@ class InteropProxyServerIntegratedAppointmentTests {
                     }
                     if (type == "Practitioner") {
                         assertEquals("Practitioner/ronin-PractitionerFHIRID1", actor["reference"].asText())
+                    }
+                    if (type == "Location") {
+                        assertEquals("Location/ronin-LocationFHIRID1", actor["reference"].asText())
                     }
                 }
             }
