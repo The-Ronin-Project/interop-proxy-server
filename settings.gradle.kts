@@ -2,9 +2,9 @@ rootProject.name = "interop-proxy-server"
 
 pluginManagement {
     plugins {
-        id("com.projectronin.interop.gradle.spring") version "2.1.3"
-        id("com.projectronin.interop.gradle.spring-boot") version "2.1.3"
-        id("com.projectronin.interop.gradle.integration") version "2.1.3"
+        id("com.projectronin.interop.gradle.spring") version "2.1.4"
+        id("com.projectronin.interop.gradle.spring-boot") version "2.1.4"
+        id("com.projectronin.interop.gradle.integration") version "2.1.4"
 
         id("com.expediagroup.graphql") version "6.2.5"
     }
