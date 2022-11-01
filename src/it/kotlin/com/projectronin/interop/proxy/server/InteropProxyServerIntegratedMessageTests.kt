@@ -39,7 +39,7 @@ private var setupDone = false
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("it")
 @ContextConfiguration(initializers = [(InteropProxyServerAuthInitializer::class)])
-@AidboxData("aidbox/practitioner1.yaml", "aidbox/practitioner2.yaml", "aidbox/practitionerPool.yaml")
+@AidboxData("aidbox/practitioner1.yaml", "aidbox/practitioner2.yaml", "aidbox/practitionerPool.yaml", "aidbox/patient2.yaml")
 @AidboxTest
 class InteropProxyServerIntegratedMessageTests {
     @LocalServerPort

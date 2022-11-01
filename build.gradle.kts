@@ -11,6 +11,7 @@ dependencies {
     implementation(libs.interop.aidbox)
     implementation(libs.interop.common)
     implementation(libs.interop.commonHttp)
+    implementation(libs.interop.datalake)
     implementation(libs.interop.ehr.api)
     implementation(libs.interop.fhir)
     implementation(libs.interop.queue.api)

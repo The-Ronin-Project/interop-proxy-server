@@ -1,19 +1,25 @@
 package com.projectronin.interop.proxy.server.handler
 
 import com.expediagroup.graphql.generator.annotations.GraphQLDescription
+import com.expediagroup.graphql.server.extensions.toGraphQLError
 import com.expediagroup.graphql.server.operations.Mutation
+import com.projectronin.interop.aidbox.PatientService
 import com.projectronin.interop.aidbox.PractitionerService
+import com.projectronin.interop.aidbox.model.SystemValue
 import com.projectronin.interop.ehr.factory.EHRFactory
 import com.projectronin.interop.ehr.inputs.EHRMessageInput
 import com.projectronin.interop.ehr.inputs.EHRRecipient
 import com.projectronin.interop.ehr.inputs.FHIRIdentifiers
 import com.projectronin.interop.ehr.inputs.IdentifierVendorIdentifier
 import com.projectronin.interop.fhir.r4.datatype.primitive.Id
+import com.projectronin.interop.fhir.ronin.code.RoninCodeSystem
 import com.projectronin.interop.proxy.server.input.MessageInput
 import com.projectronin.interop.proxy.server.input.MessageRecipientInput
 import com.projectronin.interop.tenant.config.TenantService
 import com.projectronin.interop.tenant.config.model.Tenant
 import datadog.trace.api.Trace
+import graphql.GraphQLException
+import graphql.execution.DataFetcherResult
 import graphql.schema.DataFetchingEnvironment
 import mu.KotlinLogging
 import org.springframework.stereotype.Component
@@ -26,22 +32,32 @@ class MessageHandler(
     private val ehrFactory: EHRFactory,
     private val tenantService: TenantService,
     private val practitionerService: PractitionerService,
+    private val patientService: PatientService,
 ) : Mutation {
     private val logger = KotlinLogging.logger { }
 
     @GraphQLDescription("Sends a message and returns the current status.")
     @Trace
-    fun sendMessage(tenantId: String, message: MessageInput, dfe: DataFetchingEnvironment): String {
+    fun sendMessage(tenantId: String, message: MessageInput, dfe: DataFetchingEnvironment): DataFetcherResult<String> {
         logger.info { "Sending message to $tenantId" }
 
         val tenant = findAndValidateTenant(dfe, tenantService, tenantId, false)
-
+        // ensure patient exists in Aidbox
+        patientService.getPatientFHIRIds(
+            tenant.mnemonic,
+            mapOf("MRN" to SystemValue(system = RoninCodeSystem.MRN.uri.value, value = message.patient.mrn))
+        ).getOrElse("MRN") {
+            val error =
+                "Attempted to send message for patient with MRN ${message.patient.mrn} whom does not exist in Aidbox."
+            logger.error { error }
+            return DataFetcherResult.newResult<String>().errors(listOf(GraphQLException(error).toGraphQLError()))
+                .build()
+        }
         val messageService = ehrFactory.getVendorFactory(tenant).messageService
-        // For now there is only one possible vendor/service
-        val messageId = messageService.sendMessage(tenant, mapEHRMessage(tenant, message))
 
+        val messageId = messageService.sendMessage(tenant, mapEHRMessage(tenant, message))
         logger.info { "Message, id $messageId, sent to $tenantId" }
-        return "sent"
+        return DataFetcherResult.newResult<String>().data("sent").build()
     }
 
     private fun mapEHRMessage(tenant: Tenant, message: MessageInput): EHRMessageInput {

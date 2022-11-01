@@ -3,7 +3,9 @@ package com.projectronin.interop.proxy.server
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.graphql.spring.boot.test.GraphQLTestTemplate
 import com.ninjasquad.springmockk.MockkBean
+import com.projectronin.interop.aidbox.PatientService
 import com.projectronin.interop.aidbox.PractitionerService
+import com.projectronin.interop.aidbox.model.SystemValue
 import com.projectronin.interop.common.exceptions.VendorIdentifierNotFoundException
 import com.projectronin.interop.ehr.factory.EHRFactory
 import com.projectronin.interop.ehr.inputs.EHRMessageInput
@@ -13,6 +15,7 @@ import com.projectronin.interop.ehr.inputs.IdentifierVendorIdentifier
 import com.projectronin.interop.fhir.r4.datatype.Identifier
 import com.projectronin.interop.fhir.r4.datatype.primitive.Id
 import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
+import com.projectronin.interop.fhir.ronin.code.RoninCodeSystem
 import com.projectronin.interop.proxy.server.handler.findAndValidateTenant
 import com.projectronin.interop.tenant.config.model.Tenant
 import io.mockk.every
@@ -40,6 +43,9 @@ class InteropProxyServerTests {
 
     @MockkBean
     private lateinit var practitionerService: PractitionerService
+
+    @MockkBean
+    private lateinit var patientService: PatientService
 
     @Test
     fun `Server handles patient query`() {
@@ -100,12 +106,19 @@ class InteropProxyServerTests {
         val identifier = Identifier(value = "IdentifierID", system = Uri("system"))
 
         every { practitionerService.getPractitionerIdentifiers("tenant", "1234") } returns listOf(identifier)
-        val tenant = mockk<Tenant>()
+        val tenant = mockk<Tenant> {
+            every { mnemonic } returns "tenant"
+        }
         every { tenant.mnemonic } returns "tenant"
 
         mockkStatic("com.projectronin.interop.proxy.server.handler.TenantUtilKt")
         every { findAndValidateTenant(any(), any(), any(), false) } returns tenant
-
+        every {
+            patientService.getPatientFHIRIds(
+                "tenant",
+                mapOf("MRN" to SystemValue(system = RoninCodeSystem.MRN.uri.value, value = "12345"))
+            )
+        } returns mapOf("MRN" to "1234")
         every { ehrFactory.getVendorFactory(tenant) } returns mockk {
             every { messageService } returns mockk {
                 every {
