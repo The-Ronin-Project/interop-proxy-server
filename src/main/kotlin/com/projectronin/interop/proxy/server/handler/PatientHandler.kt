@@ -114,10 +114,31 @@ class PatientHandler(
             val requestDate = Date(dob)
             patient.birthDate?.equals(requestDate) ?: false &&
                 patient.name.any { humanName ->
-                    humanName.family.equals(family, true) && humanName.given.any {
-                        it.equals(given, true)
-                    }
+                    humanName.family.equals(family, true) && containsName(given, humanName.given)
                 }
         }
     }
+
+    /**
+     * Determines if the supplied name is considered covered by the given names. This includes 2 distinct scenarios:
+     * * At least one given name matches the supplied name
+     * * If the above does not apply, and the [name] contains spaces, each space-delimited word must be present in [givenNames].
+     */
+    private fun containsName(name: String, givenNames: List<String>): Boolean {
+        return if (givenNames.containsIgnoreCase(name)) {
+            true
+        } else {
+            name.split(" ").all {
+                givenNames.containsIgnoreCase(it)
+            }
+        }
+    }
+
+    /**
+     * Extension function to encapsulate case-insensitive searches across a List of Strings.
+     */
+    private fun List<String>.containsIgnoreCase(search: String): Boolean =
+        any {
+            search.equals(it, true)
+        }
 }

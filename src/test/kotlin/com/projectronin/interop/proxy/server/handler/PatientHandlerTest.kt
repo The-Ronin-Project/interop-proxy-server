@@ -1037,4 +1037,158 @@ class PatientHandlerTest {
         assertEquals(Patient(patient1, tenant, roninIdentifiers), patients[0])
         assertEquals(Patient(patient2, tenant, roninIdentifiers), patients[1])
     }
+
+    @Test
+    fun `ensure when post search matching supports supplied given names with multiple words`() {
+        val patient1 = mockk<R4Patient> {
+            every { id } returns Id("Patient-UUID-1")
+            every { identifier } returns listOf(
+                mockk {
+                    every { system?.value } returns "http://hl7.org/fhir/sid/us-ssn"
+                    every { value } returns "987-65-4321"
+                }
+            )
+            every { name } returns listOf(
+                mockk {
+                    every { use } returns com.projectronin.interop.fhir.r4.valueset.NameUse.USUAL.asCode()
+                    every { family } returns "Cyrus"
+                    every { given } returns listOf("Billy", "Ray")
+                }
+            )
+            every { birthDate } returns Date("1961-08-25")
+            every { gender } returns com.projectronin.interop.fhir.r4.valueset.AdministrativeGender.MALE.asCode()
+            every { telecom } returns listOf(
+                mockk {
+                    every { system } returns com.projectronin.interop.fhir.r4.valueset.ContactPointSystem.PHONE.asCode()
+                    every { use } returns com.projectronin.interop.fhir.r4.valueset.ContactPointUse.MOBILE.asCode()
+                    every { value } returns "123-456-7890"
+                }
+            )
+            every { address } returns listOf(
+                mockk {
+                    every { use } returns com.projectronin.interop.fhir.r4.valueset.AddressUse.HOME.asCode()
+                    every { line } returns listOf("1234 Main St")
+                    every { city } returns "Anywhere"
+                    every { state } returns "FL"
+                    every { postalCode } returns "37890"
+                }
+            )
+        }
+        val response = listOf(patient1)
+        val tenant = mockk<Tenant>()
+        every { tenant.mnemonic } returns "tenantId"
+        every { tenantService.getTenantForMnemonic("tenantId") } returns tenant
+        every { dfe.graphQlContext.get<InteropGraphQLContext>(INTEROP_CONTEXT_KEY).authzTenantId } returns "tenantId"
+
+        val roninIdentifiers = listOf(
+            Identifier(
+                system = Uri("mrnSystem"),
+                value = "1234"
+            )
+        )
+        mockkConstructor(RoninPatient::class)
+        every { ehrFactory.getVendorFactory(tenant).identifierService } returns identifierService
+        every { anyConstructed<RoninPatient>().getRoninIdentifiers(patient1, tenant) } returns roninIdentifiers
+
+        val patientService = mockk<PatientService>()
+        every { ehrFactory.getVendorFactory(tenant).patientService } returns patientService
+        every {
+            patientService.findPatient(
+                tenant = tenant,
+                birthDate = LocalDate.of(1961, 8, 25),
+                familyName = "Cyrus",
+                givenName = "Billy Ray"
+            )
+        } returns response
+
+        val actualResponse = patientHandler.patientsByNameAndDOB(
+            tenantId = "tenantId",
+            birthdate = "1961-08-25",
+            given = "Billy Ray",
+            family = "Cyrus",
+            dfe = dfe
+        )
+        // Assert outcome
+        assertNotNull(actualResponse)
+        val patients = actualResponse.data
+        assertEquals(1, patients.size)
+        assertEquals(Patient(patient1, tenant, roninIdentifiers), patients[0])
+    }
+
+    @Test
+    fun `ensure when post search matching supports supplied given names with multiple words that is represented as a single given name by the EHR`() {
+        val patient1 = mockk<R4Patient> {
+            every { id } returns Id("Patient-UUID-1")
+            every { identifier } returns listOf(
+                mockk {
+                    every { system?.value } returns "http://hl7.org/fhir/sid/us-ssn"
+                    every { value } returns "987-65-4321"
+                }
+            )
+            every { name } returns listOf(
+                mockk {
+                    every { use } returns com.projectronin.interop.fhir.r4.valueset.NameUse.USUAL.asCode()
+                    every { family } returns "Cyrus"
+                    every { given } returns listOf("Billy Ray")
+                }
+            )
+            every { birthDate } returns Date("1961-08-25")
+            every { gender } returns com.projectronin.interop.fhir.r4.valueset.AdministrativeGender.MALE.asCode()
+            every { telecom } returns listOf(
+                mockk {
+                    every { system } returns com.projectronin.interop.fhir.r4.valueset.ContactPointSystem.PHONE.asCode()
+                    every { use } returns com.projectronin.interop.fhir.r4.valueset.ContactPointUse.MOBILE.asCode()
+                    every { value } returns "123-456-7890"
+                }
+            )
+            every { address } returns listOf(
+                mockk {
+                    every { use } returns com.projectronin.interop.fhir.r4.valueset.AddressUse.HOME.asCode()
+                    every { line } returns listOf("1234 Main St")
+                    every { city } returns "Anywhere"
+                    every { state } returns "FL"
+                    every { postalCode } returns "37890"
+                }
+            )
+        }
+        val response = listOf(patient1)
+        val tenant = mockk<Tenant>()
+        every { tenant.mnemonic } returns "tenantId"
+        every { tenantService.getTenantForMnemonic("tenantId") } returns tenant
+        every { dfe.graphQlContext.get<InteropGraphQLContext>(INTEROP_CONTEXT_KEY).authzTenantId } returns "tenantId"
+
+        val roninIdentifiers = listOf(
+            Identifier(
+                system = Uri("mrnSystem"),
+                value = "1234"
+            )
+        )
+        mockkConstructor(RoninPatient::class)
+        every { ehrFactory.getVendorFactory(tenant).identifierService } returns identifierService
+        every { anyConstructed<RoninPatient>().getRoninIdentifiers(patient1, tenant) } returns roninIdentifiers
+
+        val patientService = mockk<PatientService>()
+        every { ehrFactory.getVendorFactory(tenant).patientService } returns patientService
+        every {
+            patientService.findPatient(
+                tenant = tenant,
+                birthDate = LocalDate.of(1961, 8, 25),
+                familyName = "Cyrus",
+                givenName = "Billy Ray"
+            )
+        } returns response
+
+        val actualResponse = patientHandler.patientsByNameAndDOB(
+            tenantId = "tenantId",
+            birthdate = "1961-08-25",
+            given = "Billy Ray",
+            family = "Cyrus",
+            dfe = dfe
+        )
+        // Assert outcome
+        assertNotNull(actualResponse)
+        val patients = actualResponse.data
+        assertEquals(1, patients.size)
+        assertEquals(Patient(patient1, tenant, roninIdentifiers), patients[0])
+    }
 }
