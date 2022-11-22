@@ -12,7 +12,7 @@ data class Practitioner(
 ) {
     @GraphQLDescription("The internal identifier for this patient")
     val id: String? by lazy {
-        practitioner.id!!.value.localize(tenant)
+        practitioner.id!!.value!!.localize(tenant)
     }
 
     @GraphQLDescription("List of practitioner known identifiers")

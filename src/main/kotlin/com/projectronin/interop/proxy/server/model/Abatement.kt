@@ -12,7 +12,7 @@ sealed interface Abatement
 @GraphQLDescription("Date-time representation of the Abatement")
 data class DateTimeAbatement(private val abatement: R4DateTime) : Abatement {
     @GraphQLDescription("The string representation of the date/time. The format is YYYY, YYYY-MM, YYYY-MM-DD or YYYY-MM-DDThh:mm:ss+zz:zz")
-    val value: String = abatement.value
+    val value: String = abatement.value ?: ""
 }
 
 @GraphQLDescription("Age representation of the Abatement")

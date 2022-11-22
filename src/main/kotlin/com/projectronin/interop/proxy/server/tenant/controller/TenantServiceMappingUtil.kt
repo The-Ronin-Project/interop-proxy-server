@@ -77,6 +77,6 @@ fun TenantServiceEpic.toProxyEpic(): ProxyEpic {
         encounterCSNSystem = encounterCSNSystem,
         hsi = hsi,
         instanceName = instanceName,
-        departmentInternalSystem = departmentInternalSystem ?: ""
+        departmentInternalSystem = departmentInternalSystem
     )
 }

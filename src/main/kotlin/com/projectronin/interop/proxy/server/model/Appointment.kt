@@ -12,7 +12,7 @@ data class Appointment(
 ) {
     @GraphQLDescription("The internal identifier for this appointment")
     val id: String by lazy {
-        appointment.id!!.value.localize(tenant)
+        appointment.id!!.value!!.localize(tenant)
     }
 
     @GraphQLDescription("List of appointment identifiers")

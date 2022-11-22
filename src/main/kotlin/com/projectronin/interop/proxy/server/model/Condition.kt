@@ -17,7 +17,7 @@ data class Condition(
 ) {
     @GraphQLDescription("The internal identifier for this condition")
     val id: String? by lazy {
-        condition.id!!.value.localize(tenant)
+        condition.id!!.value!!.localize(tenant)
     }
 
     @GraphQLDescription("List of external identifiers for this condition")

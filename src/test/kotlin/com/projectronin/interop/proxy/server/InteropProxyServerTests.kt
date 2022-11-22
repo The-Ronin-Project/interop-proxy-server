@@ -116,7 +116,7 @@ class InteropProxyServerTests {
         every {
             patientService.getPatientFHIRIds(
                 "tenant",
-                mapOf("MRN" to SystemValue(system = RoninCodeSystem.MRN.uri.value, value = "12345"))
+                mapOf("MRN" to SystemValue(system = RoninCodeSystem.MRN.uri.value!!, value = "12345"))
             )
         } returns mapOf("MRN" to "1234")
         every { ehrFactory.getVendorFactory(tenant) } returns mockk {

@@ -73,7 +73,7 @@ class NoteHandler(
                 tenantId,
                 patientService.getPatientFHIRIds(
                     tenantId,
-                    mapOf("key" to SystemValue(system = RoninCodeSystem.MRN.uri.value, value = noteInput.patientId))
+                    mapOf("key" to SystemValue(system = RoninCodeSystem.MRN.uri.value!!, value = noteInput.patientId))
                 ).getValue("key")
             )
         }

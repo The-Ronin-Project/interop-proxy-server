@@ -172,7 +172,7 @@ class NoteHandlerTest {
         every {
             patientService.getPatientFHIRIds(
                 "apposnd",
-                mapOf("key" to SystemValue(system = RoninCodeSystem.MRN.uri.value, value = noteInput.patientId))
+                mapOf("key" to SystemValue(system = RoninCodeSystem.MRN.uri.value!!, value = noteInput.patientId))
             ).getValue("key")
         } returns "PatientFhirId"
         every { patientService.getPatient("apposnd", "PatientFhirId") } returns oncologyPatient
@@ -212,7 +212,7 @@ class NoteHandlerTest {
         every {
             patientService.getPatientFHIRIds(
                 "apposnd",
-                mapOf("key" to SystemValue(system = RoninCodeSystem.MRN.uri.value, value = noteInput.patientId))
+                mapOf("key" to SystemValue(system = RoninCodeSystem.MRN.uri.value!!, value = noteInput.patientId))
             ).getValue("key")
         } returns "PatientFhirId"
         every { patientService.getPatient("apposnd", "PatientFhirId") } returns oncologyPatient

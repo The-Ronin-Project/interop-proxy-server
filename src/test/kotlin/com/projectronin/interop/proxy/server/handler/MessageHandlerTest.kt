@@ -48,7 +48,7 @@ class MessageHandlerTest {
             every {
                 getPatientFHIRIds(
                     "TEST_TENANT",
-                    mapOf("MRN" to SystemValue(system = RoninCodeSystem.MRN.uri.value, value = "MRN#1"))
+                    mapOf("MRN" to SystemValue(system = RoninCodeSystem.MRN.uri.value!!, value = "MRN#1"))
                 )
             } returns mapOf("MRN" to "FHIRID")
         }
@@ -66,13 +66,13 @@ class MessageHandlerTest {
         every {
             patientService.getPatientFHIRIds(
                 "TEST_TENANT",
-                mapOf("MRN" to SystemValue(system = RoninCodeSystem.MRN.uri.value, value = "MRN#1"))
+                mapOf("MRN" to SystemValue(system = RoninCodeSystem.MRN.uri.value!!, value = "MRN#1"))
             )
         } returns emptyMap()
         val messageInput = MessageInput("Test Message", MessagePatientInput("MRN#1"), listOf())
         assertEquals(
             messageHandler.sendMessage("TEST_TENANT", messageInput, dfe).errors.first().message,
-            "Attempted to send message for patient with MRN MRN#1 whom does not exist in Aidbox."
+            "Attempted to send message for patient with MRN MRN#1 who does not exist in Aidbox."
         )
     }
 

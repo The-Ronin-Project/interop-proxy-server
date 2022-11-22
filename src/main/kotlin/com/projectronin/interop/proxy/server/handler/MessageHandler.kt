@@ -45,10 +45,10 @@ class MessageHandler(
         // ensure patient exists in Aidbox
         patientService.getPatientFHIRIds(
             tenant.mnemonic,
-            mapOf("MRN" to SystemValue(system = RoninCodeSystem.MRN.uri.value, value = message.patient.mrn))
+            mapOf("MRN" to SystemValue(system = RoninCodeSystem.MRN.uri.value!!, value = message.patient.mrn))
         ).getOrElse("MRN") {
             val error =
-                "Attempted to send message for patient with MRN ${message.patient.mrn} whom does not exist in Aidbox."
+                "Attempted to send message for patient with MRN ${message.patient.mrn} who does not exist in Aidbox."
             logger.error { error }
             return DataFetcherResult.newResult<String>().errors(listOf(GraphQLException(error).toGraphQLError()))
                 .build()

@@ -14,7 +14,7 @@ data class Patient(
 ) {
     @GraphQLDescription("The internal identifier for this patient")
     val id: String? by lazy {
-        patient.id!!.value.localize(tenant)
+        patient.id!!.value!!.localize(tenant)
     }
 
     @GraphQLDescription("List of patient known identifiers (e.g. MRN, EPI, etc.)")

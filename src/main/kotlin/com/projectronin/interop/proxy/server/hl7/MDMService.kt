@@ -69,7 +69,7 @@ class MDMService {
 
     // formatDate converts the dates from aidbox with dashes into yyyymmdd format for HL7 compatibility
     fun formatDate(date: Date): String {
-        return date.value.replace("-", "")
+        return date.value?.replace("-", "") ?: ""
     }
 
     // splitIntoChunks breaks down notes that are too long for the OBX-5 character limit into repeating OBX segments

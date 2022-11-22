@@ -12,6 +12,7 @@ import com.projectronin.interop.fhir.r4.datatype.Identifier
 import com.projectronin.interop.fhir.r4.datatype.primitive.Date
 import com.projectronin.interop.fhir.r4.datatype.primitive.Id
 import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
+import com.projectronin.interop.fhir.ronin.conceptmap.ConceptMapClient
 import com.projectronin.interop.fhir.ronin.resource.RoninPatient
 import com.projectronin.interop.proxy.server.context.INTEROP_CONTEXT_KEY
 import com.projectronin.interop.proxy.server.context.InteropGraphQLContext
@@ -55,6 +56,7 @@ class PatientHandlerTest {
     private lateinit var patientHandler: PatientHandler
     private lateinit var identifierService: IdentifierService
     private lateinit var dfe: DataFetchingEnvironment
+    private lateinit var conceptMapClient: ConceptMapClient
 
     private val logger = LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME) as ch.qos.logback.classic.Logger
     private val logAppender = ListAppender<ILoggingEvent>()
@@ -77,7 +79,8 @@ class PatientHandlerTest {
         queueService = mockk()
         identifierService = mockk()
         dfe = mockk()
-        patientHandler = PatientHandler(ehrFactory, tenantService, queueService)
+        conceptMapClient = mockk()
+        patientHandler = PatientHandler(ehrFactory, tenantService, queueService, conceptMapClient)
     }
 
     @Test
