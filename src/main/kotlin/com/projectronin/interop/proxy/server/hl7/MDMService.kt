@@ -11,9 +11,9 @@ import ca.uhn.hl7v2.model.v251.segment.PV1
 import ca.uhn.hl7v2.model.v251.segment.TXA
 import com.projectronin.interop.fhir.r4.datatype.primitive.Date
 import com.projectronin.interop.fhir.r4.valueset.ContactPointUse
-import com.projectronin.interop.fhir.ronin.util.asEnum
 import com.projectronin.interop.proxy.server.hl7.model.MDMPatientFields
 import com.projectronin.interop.proxy.server.hl7.model.MDMPractitionerFields
+import com.projectronin.interop.proxy.server.util.asEnum
 import io.ktor.util.toUpperCasePreservingASCIIRules
 import org.springframework.stereotype.Component
 
@@ -73,32 +73,33 @@ class MDMService {
     }
 
     // splitIntoChunks breaks down notes that are too long for the OBX-5 character limit into repeating OBX segments
-    fun splitIntoChunks(max: Int, string: String): List<String> = ArrayList<String>(string.length / max + 1).also {
-        var firstWord = true
-        val builder = StringBuilder()
+    private fun splitIntoChunks(max: Int, string: String): List<String> =
+        ArrayList<String>(string.length / max + 1).also {
+            var firstWord = true
+            val builder = StringBuilder()
 
-        // split string by whitespace
-        for (word in string.split(Regex("( |\n|\r)+"))) {
-            // if the current string exceeds the max size
-            if (builder.length + word.length > max) {
-                // then we add the string to the list and clear the builder
-                it.add(builder.toString())
-                builder.setLength(0)
-                firstWord = true
+            // split string by whitespace
+            for (word in string.split(Regex("( |\n|\r)+"))) {
+                // if the current string exceeds the max size
+                if (builder.length + word.length > max) {
+                    // then we add the string to the list and clear the builder
+                    it.add(builder.toString())
+                    builder.setLength(0)
+                    firstWord = true
+                }
+                // append a space at the beginning of each word, except the first one
+                if (firstWord) firstWord = false else builder.append(' ')
+                builder.append(word)
             }
-            // append a space at the beginning of each word, except the first one
-            if (firstWord) firstWord = false else builder.append(' ')
-            builder.append(word)
-        }
 
-        // add the last collected part if there was any
-        if (builder.isNotEmpty()) {
-            it.add(builder.toString())
+            // add the last collected part if there was any
+            if (builder.isNotEmpty()) {
+                it.add(builder.toString())
+            }
         }
-    }
 
     // creates and populates the PID segment
-    fun setPID(mdm: MDM_T02, patient: MDMPatientFields) {
+    private fun setPID(mdm: MDM_T02, patient: MDMPatientFields) {
         val pid: PID = mdm.pid
 
         // PID-3 Identifiers
@@ -107,7 +108,7 @@ class MDMService {
             val type = patient.identifier[i].system?.value.toString().substringAfterLast("/")
 
             if (type in listOf("mrn", "fhir")) {
-                pid.getPatientIdentifierList(pid3count).idNumber.value = patient.identifier[i].value
+                pid.getPatientIdentifierList(pid3count).idNumber.value = patient.identifier[i].value?.value
                 pid.getPatientIdentifierList(pid3count).assigningAuthority.namespaceID.value =
                     type.toUpperCasePreservingASCIIRules()
                 pid3count += 1
@@ -116,8 +117,8 @@ class MDMService {
 
         // PID-5 Name
         for (i in patient.name.indices) {
-            pid.getPatientName(i).familyName.surname.value = patient.name[i].family
-            pid.getPatientName(i).givenName.value = patient.name[i].given[0]
+            pid.getPatientName(i).familyName.surname.value = patient.name[i].family?.value
+            pid.getPatientName(i).givenName.value = patient.name[i].given.getOrNull(0)?.value
         }
         // PID-7 DOB
         pid.dateTimeOfBirth.time.value = patient.dob?.let { formatDate(it) }
@@ -128,11 +129,11 @@ class MDMService {
         // PID-11 Address
         for (i in patient.address.indices) {
             pid.getPatientAddress(i).streetAddress.streetOrMailingAddress.value =
-                patient.address[i].line.joinToString(", ")
-            pid.getPatientAddress(i).city.value = patient.address[i].city
-            pid.getPatientAddress(i).stateOrProvince.value = patient.address[i].state
-            pid.getPatientAddress(i).zipOrPostalCode.value = patient.address[i].postalCode
-            pid.getPatientAddress(i).country.value = patient.address[i].country.orEmpty()
+                patient.address[i].line.mapNotNull { it.value }.joinToString(", ")
+            pid.getPatientAddress(i).city.value = patient.address[i].city?.value
+            pid.getPatientAddress(i).stateOrProvince.value = patient.address[i].state?.value
+            pid.getPatientAddress(i).zipOrPostalCode.value = patient.address[i].postalCode?.value
+            pid.getPatientAddress(i).country.value = patient.address[i].country?.value.orEmpty()
         }
 
         // PID-13 Phone
@@ -140,17 +141,17 @@ class MDMService {
         for (i in patient.phone.indices) {
             when (patient.phone[i].use.asEnum<ContactPointUse>()) {
                 ContactPointUse.HOME -> {
-                    pid.getPhoneNumberHome(phonecount).telephoneNumber.value = patient.phone[i].value
+                    pid.getPhoneNumberHome(phonecount).telephoneNumber.value = patient.phone[i].value?.value
                     pid.getPhoneNumberHome(phonecount).telecommunicationUseCode.value = "PRN"
                     phonecount += 1
                 }
                 ContactPointUse.WORK -> {
-                    pid.getPhoneNumberHome(phonecount).telephoneNumber.value = patient.phone[i].value
+                    pid.getPhoneNumberHome(phonecount).telephoneNumber.value = patient.phone[i].value?.value
                     pid.getPhoneNumberHome(phonecount).telecommunicationUseCode.value = "WPN"
                     phonecount += 1
                 }
                 ContactPointUse.MOBILE -> {
-                    pid.getPhoneNumberHome(phonecount).telephoneNumber.value = patient.phone[i].value
+                    pid.getPhoneNumberHome(phonecount).telephoneNumber.value = patient.phone[i].value?.value
                     pid.getPhoneNumberHome(phonecount).telecommunicationUseCode.value = "ORN"
                     phonecount += 1
                 }
@@ -160,7 +161,12 @@ class MDMService {
     }
 
     // creates and populates the TXA segment
-    fun setTXA(mdm: MDM_T02, practitioner: MDMPractitionerFields, parentDocumentId: String?, documentStatus: String) {
+    private fun setTXA(
+        mdm: MDM_T02,
+        practitioner: MDMPractitionerFields,
+        parentDocumentId: String?,
+        documentStatus: String
+    ) {
 
         val txa: TXA = mdm.txa
         txa.setIDTXA.value = "1"
@@ -168,8 +174,10 @@ class MDMService {
         txa.documentContentPresentation.value = "TX"
 
         // TXA-5 Primary Activity Provider from Practitioner Info
-        txa.getPrimaryActivityProviderCodeName(0).familyName.surname.value = practitioner.name[0].family
-        txa.getPrimaryActivityProviderCodeName(0).givenName.value = practitioner.name[0].given[0]
+        txa.getPrimaryActivityProviderCodeName(0).familyName.surname.value =
+            practitioner.name.getOrNull(0)?.family?.value
+        txa.getPrimaryActivityProviderCodeName(0).givenName.value =
+            practitioner.name.getOrNull(0)?.given?.getOrNull(0)?.value
 
         // TXA-9 Originator Code/Name (need to provide information from Project Ronin as originators of the transcription)
         txa.getOriginatorCodeName(0).familyName.surname.value = "Project"
@@ -188,7 +196,7 @@ class MDMService {
     }
 
     // creates and populates the OBX segment
-    fun setOBX(mdm: MDM_T02, note: String) {
+    private fun setOBX(mdm: MDM_T02, note: String) {
         var obxcount = 1
         for (line in note.lines()) {
             val lines = splitIntoChunks(65535, line)

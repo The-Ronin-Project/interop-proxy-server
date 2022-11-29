@@ -7,6 +7,7 @@ import com.projectronin.interop.common.logmarkers.getLogMarker
 import com.projectronin.interop.common.resource.ResourceType
 import com.projectronin.interop.ehr.factory.EHRFactory
 import com.projectronin.interop.fhir.r4.datatype.primitive.Date
+import com.projectronin.interop.fhir.r4.datatype.primitive.FHIRString
 import com.projectronin.interop.fhir.ronin.conceptmap.ConceptMapClient
 import com.projectronin.interop.fhir.ronin.resource.RoninPatient
 import com.projectronin.interop.proxy.server.util.DateUtil
@@ -121,7 +122,7 @@ class PatientHandler(
             val requestDate = Date(dob)
             patient.birthDate?.equals(requestDate) ?: false &&
                 patient.name.any { humanName ->
-                    humanName.family.equals(family, true) && containsName(given, humanName.given)
+                    humanName.family?.value.equals(family, true) && containsName(given, humanName.given)
                 }
         }
     }
@@ -131,7 +132,7 @@ class PatientHandler(
      * * At least one given name matches the supplied name
      * * If the above does not apply, and the [name] contains spaces, each space-delimited word must be present in [givenNames].
      */
-    private fun containsName(name: String, givenNames: List<String>): Boolean {
+    private fun containsName(name: String, givenNames: List<FHIRString>): Boolean {
         return if (givenNames.containsIgnoreCase(name)) {
             true
         } else {
@@ -144,8 +145,8 @@ class PatientHandler(
     /**
      * Extension function to encapsulate case-insensitive searches across a List of Strings.
      */
-    private fun List<String>.containsIgnoreCase(search: String): Boolean =
+    private fun List<FHIRString>.containsIgnoreCase(search: String): Boolean =
         any {
-            search.equals(it, true)
+            it.value.equals(search, true)
         }
 }

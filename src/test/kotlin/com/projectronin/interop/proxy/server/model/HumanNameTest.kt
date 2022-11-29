@@ -1,5 +1,7 @@
 package com.projectronin.interop.proxy.server.model
 
+import com.projectronin.interop.fhir.r4.datatype.primitive.FHIRString
+import com.projectronin.interop.fhir.r4.datatype.primitive.asFHIR
 import com.projectronin.interop.fhir.r4.valueset.NameUse
 import com.projectronin.interop.proxy.server.util.asCode
 import com.projectronin.interop.proxy.server.util.relaxedMockk
@@ -31,16 +33,34 @@ class HumanNameTest {
     @Test
     fun `can get family`() {
         val ehrHumanName = relaxedMockk<R4HumanName> {
-            every { family } returns "Public"
+            every { family } returns "Public".asFHIR()
         }
         val humanName = HumanName(ehrHumanName)
         assertEquals("Public", humanName.family)
     }
 
     @Test
+    fun `can get null family`() {
+        val ehrHumanName = relaxedMockk<R4HumanName> {
+            every { family } returns null
+        }
+        val humanName = HumanName(ehrHumanName)
+        assertNull(humanName.family)
+    }
+
+    @Test
+    fun `can get family with null value`() {
+        val ehrHumanName = relaxedMockk<R4HumanName> {
+            every { family } returns FHIRString(null)
+        }
+        val humanName = HumanName(ehrHumanName)
+        assertNull(humanName.family)
+    }
+
+    @Test
     fun `can get given`() {
         val ehrHumanName = relaxedMockk<R4HumanName> {
-            every { given } returns listOf("John", "Q")
+            every { given } returns listOf("John", "Q").asFHIR()
         }
         val humanName = HumanName(ehrHumanName)
         assertEquals(listOf("John", "Q"), humanName.given)

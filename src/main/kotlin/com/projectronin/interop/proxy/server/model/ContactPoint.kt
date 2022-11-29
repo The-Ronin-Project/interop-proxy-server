@@ -12,5 +12,5 @@ data class ContactPoint(private val contactPoint: R4ContactPoint) {
     val use: String? = contactPoint.use?.value
 
     @GraphQLDescription("The actual contact value")
-    val value: String? = contactPoint.value
+    val value: String? = contactPoint.value?.value
 }

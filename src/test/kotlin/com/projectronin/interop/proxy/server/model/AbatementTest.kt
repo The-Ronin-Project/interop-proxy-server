@@ -1,5 +1,7 @@
 package com.projectronin.interop.proxy.server.model
 
+import com.projectronin.interop.fhir.r4.datatype.primitive.Decimal
+import com.projectronin.interop.fhir.r4.datatype.primitive.asFHIR
 import com.projectronin.interop.proxy.server.util.relaxedMockk
 import io.mockk.every
 import io.mockk.mockk
@@ -22,9 +24,18 @@ class AbatementTest {
     }
 
     @Test
+    fun `creates date time abatement for date time with null value`() {
+        val ehrDateTimeAbatement = mockk<R4DateTime> {
+            every { value } returns null
+        }
+        val abatement = DateTimeAbatement(ehrDateTimeAbatement)
+        assertEquals("", abatement.value)
+    }
+
+    @Test
     fun `creates age abatement`() {
         val ehrAge = relaxedMockk<R4Age>()
-        every { ehrAge.value } returns 10.0
+        every { ehrAge.value } returns Decimal(10.0)
         val abatement = AgeAbatement(ehrAge)
         assertNotNull(abatement.value)
     }
@@ -32,7 +43,7 @@ class AbatementTest {
     @Test
     fun `creates period abatement`() {
         val ehrPeriod = relaxedMockk<R4Period>()
-        every { ehrPeriod.id } returns "1"
+        every { ehrPeriod.id } returns "1".asFHIR()
         val abatement = PeriodAbatement(ehrPeriod)
         assertNotNull(abatement.value)
     }

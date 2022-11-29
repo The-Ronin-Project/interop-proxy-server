@@ -9,6 +9,7 @@ import com.projectronin.interop.fhir.r4.datatype.HumanName
 import com.projectronin.interop.fhir.r4.datatype.Identifier
 import com.projectronin.interop.fhir.r4.datatype.primitive.Date
 import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
+import com.projectronin.interop.fhir.r4.datatype.primitive.asFHIR
 import com.projectronin.interop.fhir.r4.resource.Patient
 import com.projectronin.interop.fhir.r4.resource.Practitioner
 import com.projectronin.interop.fhir.r4.valueset.AdministrativeGender
@@ -45,21 +46,21 @@ class NoteHandlerTest {
 
     private val testidentifier = relaxedMockk<Identifier> {
         every { system } returns Uri("test")
-        every { value } returns "123"
+        every { value } returns "123".asFHIR()
     }
     private val testname = relaxedMockk<HumanName> {
-        every { family } returns "family"
-        every { given } returns listOf("given", "given2")
+        every { family } returns "family".asFHIR()
+        every { given } returns listOf("given", "given2").asFHIR()
     }
     private val testaddress = relaxedMockk<Address> {
-        every { line } returns listOf("123 ABC Street", "Unit 1")
-        every { city } returns "Anytown"
-        every { state } returns "CA"
-        every { postalCode } returns "12345"
-        every { country } returns "USA"
+        every { line } returns listOf("123 ABC Street", "Unit 1").asFHIR()
+        every { city } returns "Anytown".asFHIR()
+        every { state } returns "CA".asFHIR()
+        every { postalCode } returns "12345".asFHIR()
+        every { country } returns "USA".asFHIR()
     }
     private val testphone = relaxedMockk<ContactPoint> {
-        every { value } returns "1234567890"
+        every { value } returns "1234567890".asFHIR()
         every { use } returns ContactPointUse.HOME.asCode()
     }
     private val oncologyPatient = mockk<Patient> {

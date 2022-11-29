@@ -15,6 +15,7 @@ import com.projectronin.interop.ehr.inputs.IdentifierVendorIdentifier
 import com.projectronin.interop.fhir.r4.datatype.Identifier
 import com.projectronin.interop.fhir.r4.datatype.primitive.Id
 import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
+import com.projectronin.interop.fhir.r4.datatype.primitive.asFHIR
 import com.projectronin.interop.fhir.ronin.code.RoninCodeSystem
 import com.projectronin.interop.proxy.server.handler.findAndValidateTenant
 import com.projectronin.interop.tenant.config.model.Tenant
@@ -103,7 +104,7 @@ class InteropProxyServerTests {
     @Test
     fun `Handles message input`() {
 
-        val identifier = Identifier(value = "IdentifierID", system = Uri("system"))
+        val identifier = Identifier(value = "IdentifierID".asFHIR(), system = Uri("system"))
 
         every { practitionerService.getPractitionerIdentifiers("tenant", "1234") } returns listOf(identifier)
         val tenant = mockk<Tenant> {

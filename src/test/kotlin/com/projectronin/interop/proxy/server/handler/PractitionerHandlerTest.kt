@@ -3,6 +3,7 @@ package com.projectronin.interop.proxy.server.handler
 import com.projectronin.interop.ehr.PractitionerService
 import com.projectronin.interop.ehr.factory.EHRFactory
 import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
+import com.projectronin.interop.fhir.r4.datatype.primitive.asFHIR
 import com.projectronin.interop.fhir.r4.resource.Practitioner
 import com.projectronin.interop.proxy.server.context.INTEROP_CONTEXT_KEY
 import com.projectronin.interop.proxy.server.context.InteropGraphQLContext
@@ -36,14 +37,14 @@ internal class PractitionerHandlerTest {
         every { identifier } returns listOf(
             mockk {
                 every { system } returns Uri("system")
-                every { value } returns "value"
+                every { value?.value } returns "value"
             }
         )
         every { name } returns listOf(
             mockk {
                 every { use?.value } returns "use"
-                every { family } returns "family"
-                every { given } returns listOf("given")
+                every { family?.value } returns "family"
+                every { given } returns listOf("given").asFHIR()
             }
         )
     }

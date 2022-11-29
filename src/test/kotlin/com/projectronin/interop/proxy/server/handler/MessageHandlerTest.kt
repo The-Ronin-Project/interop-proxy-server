@@ -11,6 +11,7 @@ import com.projectronin.interop.ehr.inputs.IdentifierVendorIdentifier
 import com.projectronin.interop.fhir.r4.datatype.Identifier
 import com.projectronin.interop.fhir.r4.datatype.primitive.Id
 import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
+import com.projectronin.interop.fhir.r4.datatype.primitive.asFHIR
 import com.projectronin.interop.fhir.ronin.code.RoninCodeSystem
 import com.projectronin.interop.proxy.server.context.INTEROP_CONTEXT_KEY
 import com.projectronin.interop.proxy.server.context.InteropGraphQLContext
@@ -36,7 +37,7 @@ class MessageHandlerTest {
     private lateinit var patientService: PatientService
     private lateinit var dfe: DataFetchingEnvironment
 
-    private var identifier = Identifier(system = Uri("system"), value = "1234")
+    private var identifier = Identifier(system = Uri("system"), value = "1234".asFHIR())
     private var identifierVendorIdentifier = IdentifierVendorIdentifier(identifier)
 
     @BeforeEach

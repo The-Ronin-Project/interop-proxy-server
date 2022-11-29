@@ -23,10 +23,11 @@ data class Reference(
         fun from(reference: R4Reference?, tenant: Tenant): Reference {
             val type = reference?.decomposedType()
             val id = reference?.decomposedId()
+            val localizedReference = reference?.reference?.localizeReference(tenant)
             return Reference(
-                reference = reference?.reference?.localizeReference(tenant),
+                reference = localizedReference?.value,
                 type = type,
-                display = reference?.display,
+                display = reference?.display?.value,
                 identifier = reference?.identifier?.let { Identifier(it) },
                 id = id?.localize(tenant)
             )

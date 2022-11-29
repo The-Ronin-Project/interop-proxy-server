@@ -23,6 +23,15 @@ class OnsetTest {
     }
 
     @Test
+    fun `creates date time onset with null value`() {
+        val ehrDateTimeOnset = mockk<DynamicValue<DateTime>> {
+            every { value } returns DateTime(null)
+        }
+        val onset = DateTimeOnset(ehrDateTimeOnset.value)
+        assertEquals("", onset.value)
+    }
+
+    @Test
     fun `creates age onset`() {
         val ehrAge = relaxedMockk<R4Age>()
         val ehrAgeOnset = mockk<DynamicValue<R4Age>> {

@@ -9,5 +9,5 @@ data class Identifier(private val identifier: R4Identifier) {
     val system: String? = identifier.system?.value
 
     @GraphQLDescription("The value.")
-    val value: String = identifier.value ?: ""
+    val value: String = identifier.value?.value.orEmpty()
 }

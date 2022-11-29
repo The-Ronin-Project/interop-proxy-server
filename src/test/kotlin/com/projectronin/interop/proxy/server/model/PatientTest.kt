@@ -3,6 +3,7 @@ package com.projectronin.interop.proxy.server.model
 import com.projectronin.interop.fhir.r4.datatype.primitive.Date
 import com.projectronin.interop.fhir.r4.datatype.primitive.Id
 import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
+import com.projectronin.interop.fhir.r4.datatype.primitive.asFHIR
 import com.projectronin.interop.fhir.r4.valueset.AdministrativeGender
 import com.projectronin.interop.proxy.server.util.asCode
 import com.projectronin.interop.proxy.server.util.relaxedMockk
@@ -53,8 +54,8 @@ internal class PatientTest {
             every { identifier } returns listOf(ehrIdentifier1, ehrIdentifier2)
         }
         val roninIdentifiers = listOf(
-            R4Identifier(system = Uri("system1"), value = "value"),
-            R4Identifier(system = Uri("system2"), value = "value")
+            R4Identifier(system = Uri("system1"), value = "value".asFHIR()),
+            R4Identifier(system = Uri("system2"), value = "value".asFHIR())
         )
 
         val patient = Patient(ehrPatient, mockTenant, roninIdentifiers)

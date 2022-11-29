@@ -11,5 +11,5 @@ data class CodeableConcept(private val codeableConcept: R4CodeableConcept) {
     }
 
     @GraphQLDescription("Plain text representation of the concept")
-    val text: String? = codeableConcept.text
+    val text: String? = codeableConcept.text?.value
 }

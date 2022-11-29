@@ -12,7 +12,7 @@ sealed interface Onset
 @GraphQLDescription("Date-time representation of the Onset")
 data class DateTimeOnset(private val onset: R4DateTime) : Onset {
     @GraphQLDescription("The string representation of the date/time. The format is YYYY, YYYY-MM, YYYY-MM-DD or YYYY-MM-DDThh:mm:ss+zz:zz")
-    val value: String = onset.value ?: ""
+    val value: String = onset.value.orEmpty()
 }
 
 @GraphQLDescription("Age representation of the Onset")

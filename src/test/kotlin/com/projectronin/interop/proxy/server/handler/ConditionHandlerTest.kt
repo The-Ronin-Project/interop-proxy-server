@@ -9,6 +9,7 @@ import com.projectronin.interop.ehr.factory.EHRFactory
 import com.projectronin.interop.fhir.r4.datatype.CodeableConcept
 import com.projectronin.interop.fhir.r4.datatype.primitive.DateTime
 import com.projectronin.interop.fhir.r4.datatype.primitive.Id
+import com.projectronin.interop.fhir.r4.datatype.primitive.asFHIR
 import com.projectronin.interop.proxy.server.context.INTEROP_CONTEXT_KEY
 import com.projectronin.interop.proxy.server.context.InteropGraphQLContext
 import com.projectronin.interop.proxy.server.model.Condition
@@ -185,46 +186,46 @@ class ConditionHandlerTest {
             every { identifier } returns listOf(
                 mockk {
                     every { system?.value } returns "test-system"
-                    every { value } returns "test-value"
+                    every { value?.value } returns "test-value"
                 }
             )
             every { clinicalStatus } returns mockk {
                 every { coding } returns listOf(
                     mockk {
                         every { system?.value } returns "test-system"
-                        every { version } returns "test-version"
+                        every { version?.value } returns "test-version"
                         every { code?.value } returns "test-code"
-                        every { display } returns "test-display"
-                        every { userSelected } returns true
+                        every { display?.value } returns "test-display"
+                        every { userSelected?.value } returns true
                     }
                 )
-                every { text } returns "clinical status text"
+                every { text?.value } returns "clinical status text"
             }
             every { category } returns listOf(
                 mockk {
                     every { coding } returns listOf(
                         mockk {
                             every { system?.value } returns "test-system"
-                            every { version } returns "test-version"
+                            every { version?.value } returns "test-version"
                             every { code?.value } returns "test-code"
-                            every { display } returns "test-display"
-                            every { userSelected } returns true
+                            every { display?.value } returns "test-display"
+                            every { userSelected?.value } returns true
                         }
                     )
-                    every { text } returns "category text"
+                    every { text?.value } returns "category text"
                 }
             )
             every { code } returns mockk {
                 every { coding } returns listOf(
                     mockk {
                         every { system?.value } returns "test-system"
-                        every { version } returns "test-version"
+                        every { version?.value } returns "test-version"
                         every { code?.value } returns "test-code"
-                        every { display } returns "test-display"
-                        every { userSelected } returns true
+                        every { display?.value } returns "test-display"
+                        every { userSelected?.value } returns true
                     }
                 )
-                every { text } returns "code text"
+                every { text?.value } returns "code text"
             }
             every { recordedDate } returns DateTime("2021-03-08")
         }
@@ -281,38 +282,38 @@ class ConditionHandlerTest {
     fun `ensure enqueueMessage exception still returns data to user`() {
         // Mock response
         val condition1 = mockk<R4Condition> {
-            every { code } returns CodeableConcept("code")
+            every { code } returns CodeableConcept("code".asFHIR())
             every { id } returns Id("12345")
             every { identifier } returns listOf(
                 mockk {
                     every { system?.value } returns "test-system"
-                    every { value } returns "test-value"
+                    every { value?.value } returns "test-value"
                 }
             )
             every { clinicalStatus } returns mockk {
                 every { coding } returns listOf(
                     mockk {
                         every { system?.value } returns "test-system"
-                        every { version } returns "test-version"
+                        every { version?.value } returns "test-version"
                         every { code?.value } returns "test-code"
-                        every { display } returns "test-display"
-                        every { userSelected } returns true
+                        every { display?.value } returns "test-display"
+                        every { userSelected?.value } returns true
                     }
                 )
-                every { text } returns "clinical status text"
+                every { text?.value } returns "clinical status text"
             }
             every { category } returns listOf(
                 mockk {
                     every { coding } returns listOf(
                         mockk {
                             every { system?.value } returns "test-system"
-                            every { version } returns "test-version"
+                            every { version?.value } returns "test-version"
                             every { code?.value } returns "test-code"
-                            every { display } returns "test-display"
-                            every { userSelected } returns true
+                            every { display?.value } returns "test-display"
+                            every { userSelected?.value } returns true
                         }
                     )
-                    every { text } returns "category text"
+                    every { text?.value } returns "category text"
                 }
             )
             every { recordedDate } returns DateTime("2021-03-08")

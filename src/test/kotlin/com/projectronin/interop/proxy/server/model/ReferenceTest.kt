@@ -1,6 +1,8 @@
 package com.projectronin.interop.proxy.server.model
 
+import com.projectronin.interop.fhir.r4.datatype.primitive.FHIRString
 import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
+import com.projectronin.interop.fhir.r4.datatype.primitive.asFHIR
 import com.projectronin.interop.proxy.server.util.relaxedMockk
 import com.projectronin.interop.tenant.config.model.Tenant
 import io.mockk.every
@@ -36,11 +38,11 @@ class ReferenceTest {
         }
         val ehrIdentifier = relaxedMockk<R4Identifier>()
         val ehrReference = mockk<R4Reference> {
-            every { reference } returns "Patient/1234"
+            every { reference } returns "Patient/1234".asFHIR()
             every { type } returns Uri("Patient")
-            every { display } returns "Patient 1234"
+            every { display } returns "Patient 1234".asFHIR()
             every { identifier } returns ehrIdentifier
-            every { id } returns "1234"
+            every { id } returns "1234".asFHIR()
             every { decomposedType() } returns "Patient"
             every { decomposedId() } returns "1234"
         }
@@ -60,7 +62,7 @@ class ReferenceTest {
         val ehrReference = mockk<R4Reference> {
             every { reference } returns null
             every { type } returns null
-            every { display } returns "Patient 1234"
+            every { display } returns "Patient 1234".asFHIR()
             every { identifier } returns null
             every { id } returns null
             every { decomposedType() } returns null
@@ -88,12 +90,34 @@ class ReferenceTest {
     }
 
     @Test
+    fun `can build from EHR reference with null reference value`() {
+        val tenant = mockk<Tenant> {
+            every { mnemonic } returns "tenant"
+        }
+        val ehrReference = mockk<R4Reference> {
+            every { reference } returns FHIRString(null)
+            every { type } returns null
+            every { display } returns FHIRString("Patient 1234")
+            every { identifier } returns null
+            every { id } returns null
+            every { decomposedType() } returns null
+            every { decomposedId() } returns null
+        }
+        val reference = Reference.from(ehrReference, tenant)
+        assertNull(reference.id)
+        assertNull(reference.reference)
+        assertNull(reference.identifier)
+        assertNull(reference.type)
+        assertEquals("Patient 1234", reference.display)
+    }
+
+    @Test
     fun `created from R4 reference with just reference sets id and type as well`() {
         val tenant = mockk<Tenant> {
             every { mnemonic } returns "tenant"
         }
         val ehrReference = mockk<R4Reference> {
-            every { reference } returns "Patient/1234"
+            every { reference } returns "Patient/1234".asFHIR()
             every { type } returns null
             every { display } returns null
             every { identifier } returns null
@@ -115,11 +139,11 @@ class ReferenceTest {
             every { mnemonic } returns "tenant"
         }
         val ehrReference = mockk<R4Reference> {
-            every { reference } returns "Patient/1234"
+            every { reference } returns "Patient/1234".asFHIR()
             every { type } returns Uri("Practitioner")
             every { display } returns null
             every { identifier } returns null
-            every { id } returns "5678"
+            every { id } returns "5678".asFHIR()
             every { decomposedType() } returns "Practitioner"
             every { decomposedId() } returns "5678"
         }

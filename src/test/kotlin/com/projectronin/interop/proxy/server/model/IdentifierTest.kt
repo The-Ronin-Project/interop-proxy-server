@@ -1,5 +1,6 @@
 package com.projectronin.interop.proxy.server.model
 
+import com.projectronin.interop.fhir.r4.datatype.primitive.asFHIR
 import com.projectronin.interop.proxy.server.util.relaxedMockk
 import io.mockk.every
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -29,7 +30,7 @@ class IdentifierTest {
     @Test
     fun `can get value`() {
         val ehrIdentifier = relaxedMockk<R4Identifier> {
-            every { value } returns "value"
+            every { value } returns "value".asFHIR()
         }
         val identifier = Identifier(ehrIdentifier)
         assertEquals("value", identifier.value)

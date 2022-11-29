@@ -12,6 +12,7 @@ import com.projectronin.interop.fhir.r4.datatype.Identifier
 import com.projectronin.interop.fhir.r4.datatype.primitive.Date
 import com.projectronin.interop.fhir.r4.datatype.primitive.Id
 import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
+import com.projectronin.interop.fhir.r4.datatype.primitive.asFHIR
 import com.projectronin.interop.fhir.ronin.conceptmap.ConceptMapClient
 import com.projectronin.interop.fhir.ronin.resource.RoninPatient
 import com.projectronin.interop.proxy.server.context.INTEROP_CONTEXT_KEY
@@ -231,14 +232,14 @@ class PatientHandlerTest {
             every { identifier } returns listOf(
                 mockk {
                     every { system?.value } returns "http://hl7.org/fhir/sid/us-ssn"
-                    every { value } returns "987-65-4321"
+                    every { value?.value } returns "987-65-4321"
                 }
             )
             every { name } returns listOf(
                 mockk {
                     every { use } returns com.projectronin.interop.fhir.r4.valueset.NameUse.USUAL.asCode()
-                    every { family } returns "Smith"
-                    every { given } returns listOf("Josh")
+                    every { family?.value } returns "Smith"
+                    every { given } returns listOf("Josh").asFHIR()
                 }
             )
             every { birthDate } returns Date("1984-08-31")
@@ -247,16 +248,16 @@ class PatientHandlerTest {
                 mockk {
                     every { system } returns com.projectronin.interop.fhir.r4.valueset.ContactPointSystem.PHONE.asCode()
                     every { use } returns com.projectronin.interop.fhir.r4.valueset.ContactPointUse.MOBILE.asCode()
-                    every { value } returns "123-456-7890"
+                    every { value?.value } returns "123-456-7890"
                 }
             )
             every { address } returns listOf(
                 mockk {
                     every { use } returns com.projectronin.interop.fhir.r4.valueset.AddressUse.HOME.asCode()
-                    every { line } returns listOf("1234 Main St")
-                    every { city } returns "Anywhere"
-                    every { state } returns "FL"
-                    every { postalCode } returns "37890"
+                    every { line } returns listOf("1234 Main St").asFHIR()
+                    every { city?.value } returns "Anywhere"
+                    every { state?.value } returns "FL"
+                    every { postalCode?.value } returns "37890"
                 }
             )
         }
@@ -270,7 +271,7 @@ class PatientHandlerTest {
         val roninIdentifiers = listOf(
             Identifier(
                 system = Uri("mrnSystem"),
-                value = "1234"
+                value = "1234".asFHIR()
             )
         )
         val patientService = mockk<PatientService>()
@@ -325,14 +326,14 @@ class PatientHandlerTest {
             every { identifier } returns listOf(
                 mockk {
                     every { system?.value } returns "http://hl7.org/fhir/sid/us-ssn"
-                    every { value } returns "987-65-4321"
+                    every { value?.value } returns "987-65-4321"
                 }
             )
             every { name } returns listOf(
                 mockk {
                     every { use } returns com.projectronin.interop.fhir.r4.valueset.NameUse.USUAL.asCode()
-                    every { family } returns "Smith"
-                    every { given } returns listOf("Josh")
+                    every { family?.value } returns "Smith"
+                    every { given } returns listOf("Josh").asFHIR()
                 }
             )
             every { birthDate } returns Date("1984-08-31")
@@ -341,16 +342,16 @@ class PatientHandlerTest {
                 mockk {
                     every { system } returns com.projectronin.interop.fhir.r4.valueset.ContactPointSystem.PHONE.asCode()
                     every { use } returns com.projectronin.interop.fhir.r4.valueset.ContactPointUse.MOBILE.asCode()
-                    every { value } returns "123-456-7890"
+                    every { value?.value } returns "123-456-7890"
                 }
             )
             every { address } returns listOf(
                 mockk {
                     every { use } returns com.projectronin.interop.fhir.r4.valueset.AddressUse.HOME.asCode()
-                    every { line } returns listOf("1234 Main St")
-                    every { city } returns "Anywhere"
-                    every { state } returns "FL"
-                    every { postalCode } returns "37890"
+                    every { line } returns listOf("1234 Main St").asFHIR()
+                    every { city?.value } returns "Anywhere"
+                    every { state?.value } returns "FL"
+                    every { postalCode?.value } returns "37890"
                 }
             )
         }
@@ -365,7 +366,7 @@ class PatientHandlerTest {
         val roninIdentifiers = listOf(
             Identifier(
                 system = Uri("mrnSystem"),
-                value = "1234"
+                value = "1234".asFHIR()
             )
         )
         val patientService = mockk<PatientService>()
@@ -420,14 +421,14 @@ class PatientHandlerTest {
             every { identifier } returns listOf(
                 mockk {
                     every { system?.value } returns "http://hl7.org/fhir/sid/us-ssn"
-                    every { value } returns "987-65-4321"
+                    every { value?.value } returns "987-65-4321"
                 }
             )
             every { name } returns listOf(
                 mockk {
                     every { use } returns com.projectronin.interop.fhir.r4.valueset.NameUse.USUAL.asCode()
-                    every { family } returns "Smith"
-                    every { given } returns listOf("Josh")
+                    every { family?.value } returns "Smith"
+                    every { given } returns listOf("Josh").asFHIR()
                 }
             )
             every { birthDate } returns Date("1984-08-31")
@@ -436,16 +437,16 @@ class PatientHandlerTest {
                 mockk {
                     every { system } returns com.projectronin.interop.fhir.r4.valueset.ContactPointSystem.PHONE.asCode()
                     every { use } returns com.projectronin.interop.fhir.r4.valueset.ContactPointUse.MOBILE.asCode()
-                    every { value } returns "123-456-7890"
+                    every { value?.value } returns "123-456-7890"
                 }
             )
             every { address } returns listOf(
                 mockk {
                     every { use } returns com.projectronin.interop.fhir.r4.valueset.AddressUse.HOME.asCode()
-                    every { line } returns listOf("1234 Main St")
-                    every { city } returns "Anywhere"
-                    every { state } returns "FL"
-                    every { postalCode } returns "37890"
+                    every { line } returns listOf("1234 Main St").asFHIR()
+                    every { city?.value } returns "Anywhere"
+                    every { state?.value } returns "FL"
+                    every { postalCode?.value } returns "37890"
                 }
             )
         }
@@ -459,7 +460,7 @@ class PatientHandlerTest {
         val roninIdentifiers = listOf(
             Identifier(
                 system = Uri("mrnSystem"),
-                value = "1234"
+                value = "1234".asFHIR()
             )
         )
         val patientService = mockk<PatientService>()
@@ -552,14 +553,14 @@ class PatientHandlerTest {
             every { identifier } returns listOf(
                 mockk {
                     every { system?.value } returns "http://hl7.org/fhir/sid/us-ssn"
-                    every { value } returns "987-65-4321"
+                    every { value?.value } returns "987-65-4321"
                 }
             )
             every { name } returns listOf(
                 mockk {
                     every { use } returns com.projectronin.interop.fhir.r4.valueset.NameUse.USUAL.asCode()
-                    every { family } returns "Smith"
-                    every { given } returns listOf("Josh")
+                    every { family?.value } returns "Smith"
+                    every { given } returns listOf("Josh").asFHIR()
                 }
             )
             every { birthDate } returns Date("1984-08-31")
@@ -568,16 +569,16 @@ class PatientHandlerTest {
                 mockk {
                     every { system } returns com.projectronin.interop.fhir.r4.valueset.ContactPointSystem.PHONE.asCode()
                     every { use } returns com.projectronin.interop.fhir.r4.valueset.ContactPointUse.MOBILE.asCode()
-                    every { value } returns "123-456-7890"
+                    every { value?.value } returns "123-456-7890"
                 }
             )
             every { address } returns listOf(
                 mockk {
                     every { use } returns com.projectronin.interop.fhir.r4.valueset.AddressUse.HOME.asCode()
-                    every { line } returns listOf("1234 Main St")
-                    every { city } returns "Anywhere"
-                    every { state } returns "FL"
-                    every { postalCode } returns "37890"
+                    every { line } returns listOf("1234 Main St").asFHIR()
+                    every { city?.value } returns "Anywhere"
+                    every { state?.value } returns "FL"
+                    every { postalCode?.value } returns "37890"
                 }
             )
         }
@@ -586,14 +587,14 @@ class PatientHandlerTest {
             every { identifier } returns listOf(
                 mockk {
                     every { system?.value } returns "http://hl7.org/fhir/sid/us-ssn"
-                    every { value } returns "987-65-4321"
+                    every { value?.value } returns "987-65-4321"
                 }
             )
             every { name } returns listOf(
                 mockk {
                     every { use } returns com.projectronin.interop.fhir.r4.valueset.NameUse.USUAL.asCode()
-                    every { family } returns "Potato"
-                    every { given } returns listOf("Tomato")
+                    every { family?.value } returns "Potato"
+                    every { given } returns listOf("Tomato").asFHIR()
                 }
             )
             every { birthDate } returns Date("1984-01-31")
@@ -602,16 +603,16 @@ class PatientHandlerTest {
                 mockk {
                     every { system } returns com.projectronin.interop.fhir.r4.valueset.ContactPointSystem.PHONE.asCode()
                     every { use } returns com.projectronin.interop.fhir.r4.valueset.ContactPointUse.MOBILE.asCode()
-                    every { value } returns "123-456-7890"
+                    every { value?.value } returns "123-456-7890"
                 }
             )
             every { address } returns listOf(
                 mockk {
                     every { use } returns com.projectronin.interop.fhir.r4.valueset.AddressUse.HOME.asCode()
-                    every { line } returns listOf("1234 Main St")
-                    every { city } returns "Anywhere"
-                    every { state } returns "FL"
-                    every { postalCode } returns "37890"
+                    every { line } returns listOf("1234 Main St").asFHIR()
+                    every { city?.value } returns "Anywhere"
+                    every { state?.value } returns "FL"
+                    every { postalCode?.value } returns "37890"
                 }
             )
         }
@@ -624,7 +625,7 @@ class PatientHandlerTest {
         val roninIdentifiers = listOf(
             Identifier(
                 system = Uri("mrnSystem"),
-                value = "1234"
+                value = "1234".asFHIR()
             )
         )
         mockkConstructor(RoninPatient::class)
@@ -663,14 +664,14 @@ class PatientHandlerTest {
             every { identifier } returns listOf(
                 mockk {
                     every { system?.value } returns "http://hl7.org/fhir/sid/us-ssn"
-                    every { value } returns "987-65-4321"
+                    every { value?.value } returns "987-65-4321"
                 }
             )
             every { name } returns listOf(
                 mockk {
                     every { use } returns com.projectronin.interop.fhir.r4.valueset.NameUse.USUAL.asCode()
-                    every { family } returns "Smith"
-                    every { given } returns listOf("Josh")
+                    every { family?.value } returns "Smith"
+                    every { given } returns listOf("Josh").asFHIR()
                 }
             )
             every { birthDate } returns Date("1984-08-31")
@@ -679,16 +680,16 @@ class PatientHandlerTest {
                 mockk {
                     every { system } returns com.projectronin.interop.fhir.r4.valueset.ContactPointSystem.PHONE.asCode()
                     every { use } returns com.projectronin.interop.fhir.r4.valueset.ContactPointUse.MOBILE.asCode()
-                    every { value } returns "123-456-7890"
+                    every { value?.value } returns "123-456-7890"
                 }
             )
             every { address } returns listOf(
                 mockk {
                     every { use } returns com.projectronin.interop.fhir.r4.valueset.AddressUse.HOME.asCode()
-                    every { line } returns listOf("1234 Main St")
-                    every { city } returns "Anywhere"
-                    every { state } returns "FL"
-                    every { postalCode } returns "37890"
+                    every { line } returns listOf("1234 Main St").asFHIR()
+                    every { city?.value } returns "Anywhere"
+                    every { state?.value } returns "FL"
+                    every { postalCode?.value } returns "37890"
                 }
             )
         }
@@ -697,14 +698,14 @@ class PatientHandlerTest {
             every { identifier } returns listOf(
                 mockk {
                     every { system?.value } returns "http://hl7.org/fhir/sid/us-ssn"
-                    every { value } returns "987-65-4321"
+                    every { value?.value } returns "987-65-4321"
                 }
             )
             every { name } returns listOf(
                 mockk {
                     every { use } returns com.projectronin.interop.fhir.r4.valueset.NameUse.USUAL.asCode()
-                    every { family } returns "Potato"
-                    every { given } returns listOf("Tomato")
+                    every { family?.value } returns "Potato"
+                    every { given } returns listOf("Tomato").asFHIR()
                 }
             )
             every { birthDate } returns Date("1984-01-31")
@@ -713,16 +714,16 @@ class PatientHandlerTest {
                 mockk {
                     every { system } returns com.projectronin.interop.fhir.r4.valueset.ContactPointSystem.PHONE.asCode()
                     every { use } returns com.projectronin.interop.fhir.r4.valueset.ContactPointUse.MOBILE.asCode()
-                    every { value } returns "123-456-7890"
+                    every { value?.value } returns "123-456-7890"
                 }
             )
             every { address } returns listOf(
                 mockk {
                     every { use } returns com.projectronin.interop.fhir.r4.valueset.AddressUse.HOME.asCode()
-                    every { line } returns listOf("1234 Main St")
-                    every { city } returns "Anywhere"
-                    every { state } returns "FL"
-                    every { postalCode } returns "37890"
+                    every { line } returns listOf("1234 Main St").asFHIR()
+                    every { city?.value } returns "Anywhere"
+                    every { state?.value } returns "FL"
+                    every { postalCode?.value } returns "37890"
                 }
             )
         }
@@ -736,7 +737,7 @@ class PatientHandlerTest {
         val roninIdentifiers = listOf(
             Identifier(
                 system = Uri("mrnSystem"),
-                value = "1234"
+                value = "1234".asFHIR()
             )
         )
         mockkConstructor(RoninPatient::class)
@@ -776,19 +777,19 @@ class PatientHandlerTest {
             every { identifier } returns listOf(
                 mockk {
                     every { system?.value } returns "http://hl7.org/fhir/sid/us-ssn"
-                    every { value } returns "987-65-4321"
+                    every { value?.value } returns "987-65-4321"
                 }
             )
             every { name } returns listOf(
                 mockk {
                     every { use } returns com.projectronin.interop.fhir.r4.valueset.NameUse.USUAL.asCode()
-                    every { family } returns "Smyth"
-                    every { given } returns listOf("Josh")
+                    every { family?.value } returns "Smyth"
+                    every { given } returns listOf("Josh").asFHIR()
                 },
                 mockk {
                     every { use } returns com.projectronin.interop.fhir.r4.valueset.NameUse.USUAL.asCode()
-                    every { family } returns "Smith"
-                    every { given } returns listOf("Joshua")
+                    every { family?.value } returns "Smith"
+                    every { given } returns listOf("Joshua").asFHIR()
                 }
             )
             every { birthDate } returns Date("1984-08-31")
@@ -797,16 +798,16 @@ class PatientHandlerTest {
                 mockk {
                     every { system } returns com.projectronin.interop.fhir.r4.valueset.ContactPointSystem.PHONE.asCode()
                     every { use } returns com.projectronin.interop.fhir.r4.valueset.ContactPointUse.MOBILE.asCode()
-                    every { value } returns "123-456-7890"
+                    every { value?.value } returns "123-456-7890"
                 }
             )
             every { address } returns listOf(
                 mockk {
                     every { use } returns com.projectronin.interop.fhir.r4.valueset.AddressUse.HOME.asCode()
-                    every { line } returns listOf("1234 Main St")
-                    every { city } returns "Anywhere"
-                    every { state } returns "FL"
-                    every { postalCode } returns "37890"
+                    every { line } returns listOf("1234 Main St").asFHIR()
+                    every { city?.value } returns "Anywhere"
+                    every { state?.value } returns "FL"
+                    every { postalCode?.value } returns "37890"
                 }
             )
         }
@@ -817,14 +818,14 @@ class PatientHandlerTest {
             every { identifier } returns listOf(
                 mockk {
                     every { system?.value } returns "http://hl7.org/fhir/sid/us-ssn"
-                    every { value } returns "987-65-4321"
+                    every { value?.value } returns "987-65-4321"
                 }
             )
             every { name } returns listOf(
                 mockk {
                     every { use } returns com.projectronin.interop.fhir.r4.valueset.NameUse.USUAL.asCode()
-                    every { family } returns "Smith"
-                    every { given } returns listOf("Josh")
+                    every { family?.value } returns "Smith"
+                    every { given } returns listOf("Josh").asFHIR()
                 }
             )
             every { birthDate } returns Date("1984-01-31")
@@ -833,16 +834,16 @@ class PatientHandlerTest {
                 mockk {
                     every { system } returns com.projectronin.interop.fhir.r4.valueset.ContactPointSystem.PHONE.asCode()
                     every { use } returns com.projectronin.interop.fhir.r4.valueset.ContactPointUse.MOBILE.asCode()
-                    every { value } returns "123-456-7890"
+                    every { value?.value } returns "123-456-7890"
                 }
             )
             every { address } returns listOf(
                 mockk {
                     every { use } returns com.projectronin.interop.fhir.r4.valueset.AddressUse.HOME.asCode()
-                    every { line } returns listOf("1234 Main St")
-                    every { city } returns "Anywhere"
-                    every { state } returns "FL"
-                    every { postalCode } returns "37890"
+                    every { line } returns listOf("1234 Main St").asFHIR()
+                    every { city?.value } returns "Anywhere"
+                    every { state?.value } returns "FL"
+                    every { postalCode?.value } returns "37890"
                 }
             )
         }
@@ -853,14 +854,14 @@ class PatientHandlerTest {
             every { identifier } returns listOf(
                 mockk {
                     every { system?.value } returns "http://hl7.org/fhir/sid/us-ssn"
-                    every { value } returns "987-65-4321"
+                    every { value?.value } returns "987-65-4321"
                 }
             )
             every { name } returns listOf(
                 mockk {
                     every { use } returns com.projectronin.interop.fhir.r4.valueset.NameUse.USUAL.asCode()
-                    every { family } returns "Smith"
-                    every { given } returns listOf("Josh")
+                    every { family?.value } returns "Smith"
+                    every { given } returns listOf("Josh").asFHIR()
                 }
             )
             every { birthDate } returns null
@@ -869,16 +870,16 @@ class PatientHandlerTest {
                 mockk {
                     every { system } returns com.projectronin.interop.fhir.r4.valueset.ContactPointSystem.PHONE.asCode()
                     every { use } returns com.projectronin.interop.fhir.r4.valueset.ContactPointUse.MOBILE.asCode()
-                    every { value } returns "123-456-7890"
+                    every { value?.value } returns "123-456-7890"
                 }
             )
             every { address } returns listOf(
                 mockk {
                     every { use } returns com.projectronin.interop.fhir.r4.valueset.AddressUse.HOME.asCode()
-                    every { line } returns listOf("1234 Main St")
-                    every { city } returns "Anywhere"
-                    every { state } returns "FL"
-                    every { postalCode } returns "37890"
+                    every { line } returns listOf("1234 Main St").asFHIR()
+                    every { city?.value } returns "Anywhere"
+                    every { state?.value } returns "FL"
+                    every { postalCode?.value } returns "37890"
                 }
             )
         }
@@ -891,7 +892,7 @@ class PatientHandlerTest {
         val roninIdentifiers = listOf(
             Identifier(
                 system = Uri("mrnSystem"),
-                value = "1234"
+                value = "1234".asFHIR()
             )
         )
         mockkConstructor(RoninPatient::class)
@@ -930,14 +931,14 @@ class PatientHandlerTest {
             every { identifier } returns listOf(
                 mockk {
                     every { system?.value } returns "http://hl7.org/fhir/sid/us-ssn"
-                    every { value } returns "987-65-4321"
+                    every { value?.value } returns "987-65-4321"
                 }
             )
             every { name } returns listOf(
                 mockk {
                     every { use } returns com.projectronin.interop.fhir.r4.valueset.NameUse.USUAL.asCode()
-                    every { family } returns "Smith"
-                    every { given } returns listOf("Josh")
+                    every { family?.value } returns "Smith"
+                    every { given } returns listOf("Josh").asFHIR()
                 }
             )
             every { birthDate } returns Date("1984-08-31")
@@ -946,16 +947,16 @@ class PatientHandlerTest {
                 mockk {
                     every { system } returns com.projectronin.interop.fhir.r4.valueset.ContactPointSystem.PHONE.asCode()
                     every { use } returns com.projectronin.interop.fhir.r4.valueset.ContactPointUse.MOBILE.asCode()
-                    every { value } returns "123-456-7890"
+                    every { value?.value } returns "123-456-7890"
                 }
             )
             every { address } returns listOf(
                 mockk {
                     every { use } returns com.projectronin.interop.fhir.r4.valueset.AddressUse.HOME.asCode()
-                    every { line } returns listOf("1234 Main St")
-                    every { city } returns "Anywhere"
-                    every { state } returns "FL"
-                    every { postalCode } returns "37890"
+                    every { line } returns listOf("1234 Main St").asFHIR()
+                    every { city?.value } returns "Anywhere"
+                    every { state?.value } returns "FL"
+                    every { postalCode?.value } returns "37890"
                 }
             )
         }
@@ -964,19 +965,19 @@ class PatientHandlerTest {
             every { identifier } returns listOf(
                 mockk {
                     every { system?.value } returns "http://hl7.org/fhir/sid/us-ssn"
-                    every { value } returns "987-65-4321"
+                    every { value?.value } returns "987-65-4321"
                 }
             )
             every { name } returns listOf(
                 mockk {
                     every { use } returns com.projectronin.interop.fhir.r4.valueset.NameUse.USUAL.asCode()
-                    every { family } returns "Smith"
-                    every { given } returns listOf("Josh", "Potato")
+                    every { family?.value } returns "Smith"
+                    every { given } returns listOf("Josh", "Potato").asFHIR()
                 },
                 mockk {
                     every { use } returns com.projectronin.interop.fhir.r4.valueset.NameUse.USUAL.asCode()
-                    every { family } returns "Tomato"
-                    every { given } returns listOf("Josh", "Potato")
+                    every { family?.value } returns "Tomato"
+                    every { given } returns listOf("Josh", "Potato").asFHIR()
                 }
             )
             every { birthDate } returns Date("1984-08-31")
@@ -985,16 +986,16 @@ class PatientHandlerTest {
                 mockk {
                     every { system } returns com.projectronin.interop.fhir.r4.valueset.ContactPointSystem.PHONE.asCode()
                     every { use } returns com.projectronin.interop.fhir.r4.valueset.ContactPointUse.MOBILE.asCode()
-                    every { value } returns "123-456-7890"
+                    every { value?.value } returns "123-456-7890"
                 }
             )
             every { address } returns listOf(
                 mockk {
                     every { use } returns com.projectronin.interop.fhir.r4.valueset.AddressUse.HOME.asCode()
-                    every { line } returns listOf("1234 Main St")
-                    every { city } returns "Anywhere"
-                    every { state } returns "FL"
-                    every { postalCode } returns "37890"
+                    every { line } returns listOf("1234 Main St").asFHIR()
+                    every { city?.value } returns "Anywhere"
+                    every { state?.value } returns "FL"
+                    every { postalCode?.value } returns "37890"
                 }
             )
         }
@@ -1007,7 +1008,7 @@ class PatientHandlerTest {
         val roninIdentifiers = listOf(
             Identifier(
                 system = Uri("mrnSystem"),
-                value = "1234"
+                value = "1234".asFHIR()
             )
         )
         mockkConstructor(RoninPatient::class)
@@ -1048,14 +1049,14 @@ class PatientHandlerTest {
             every { identifier } returns listOf(
                 mockk {
                     every { system?.value } returns "http://hl7.org/fhir/sid/us-ssn"
-                    every { value } returns "987-65-4321"
+                    every { value?.value } returns "987-65-4321"
                 }
             )
             every { name } returns listOf(
                 mockk {
                     every { use } returns com.projectronin.interop.fhir.r4.valueset.NameUse.USUAL.asCode()
-                    every { family } returns "Cyrus"
-                    every { given } returns listOf("Billy", "Ray")
+                    every { family?.value } returns "Cyrus"
+                    every { given } returns listOf("Billy", "Ray").asFHIR()
                 }
             )
             every { birthDate } returns Date("1961-08-25")
@@ -1064,16 +1065,16 @@ class PatientHandlerTest {
                 mockk {
                     every { system } returns com.projectronin.interop.fhir.r4.valueset.ContactPointSystem.PHONE.asCode()
                     every { use } returns com.projectronin.interop.fhir.r4.valueset.ContactPointUse.MOBILE.asCode()
-                    every { value } returns "123-456-7890"
+                    every { value?.value } returns "123-456-7890"
                 }
             )
             every { address } returns listOf(
                 mockk {
                     every { use } returns com.projectronin.interop.fhir.r4.valueset.AddressUse.HOME.asCode()
-                    every { line } returns listOf("1234 Main St")
-                    every { city } returns "Anywhere"
-                    every { state } returns "FL"
-                    every { postalCode } returns "37890"
+                    every { line } returns listOf("1234 Main St").asFHIR()
+                    every { city?.value } returns "Anywhere"
+                    every { state?.value } returns "FL"
+                    every { postalCode?.value } returns "37890"
                 }
             )
         }
@@ -1086,7 +1087,7 @@ class PatientHandlerTest {
         val roninIdentifiers = listOf(
             Identifier(
                 system = Uri("mrnSystem"),
-                value = "1234"
+                value = "1234".asFHIR()
             )
         )
         mockkConstructor(RoninPatient::class)
@@ -1125,14 +1126,14 @@ class PatientHandlerTest {
             every { identifier } returns listOf(
                 mockk {
                     every { system?.value } returns "http://hl7.org/fhir/sid/us-ssn"
-                    every { value } returns "987-65-4321"
+                    every { value?.value } returns "987-65-4321"
                 }
             )
             every { name } returns listOf(
                 mockk {
                     every { use } returns com.projectronin.interop.fhir.r4.valueset.NameUse.USUAL.asCode()
-                    every { family } returns "Cyrus"
-                    every { given } returns listOf("Billy Ray")
+                    every { family?.value } returns "Cyrus"
+                    every { given } returns listOf("Billy Ray").asFHIR()
                 }
             )
             every { birthDate } returns Date("1961-08-25")
@@ -1141,16 +1142,16 @@ class PatientHandlerTest {
                 mockk {
                     every { system } returns com.projectronin.interop.fhir.r4.valueset.ContactPointSystem.PHONE.asCode()
                     every { use } returns com.projectronin.interop.fhir.r4.valueset.ContactPointUse.MOBILE.asCode()
-                    every { value } returns "123-456-7890"
+                    every { value?.value } returns "123-456-7890"
                 }
             )
             every { address } returns listOf(
                 mockk {
                     every { use } returns com.projectronin.interop.fhir.r4.valueset.AddressUse.HOME.asCode()
-                    every { line } returns listOf("1234 Main St")
-                    every { city } returns "Anywhere"
-                    every { state } returns "FL"
-                    every { postalCode } returns "37890"
+                    every { line } returns listOf("1234 Main St").asFHIR()
+                    every { city?.value } returns "Anywhere"
+                    every { state?.value } returns "FL"
+                    every { postalCode?.value } returns "37890"
                 }
             )
         }
@@ -1163,7 +1164,7 @@ class PatientHandlerTest {
         val roninIdentifiers = listOf(
             Identifier(
                 system = Uri("mrnSystem"),
-                value = "1234"
+                value = "1234".asFHIR()
             )
         )
         mockkConstructor(RoninPatient::class)

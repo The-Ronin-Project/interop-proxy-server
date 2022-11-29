@@ -9,14 +9,14 @@ data class Address(private val address: R4Address) {
     val use: String? = address.use?.value
 
     @GraphQLDescription("Street name, number, direction & P.O. Box etc.")
-    val line: List<String> = address.line
+    val line: List<String> = address.line.mapNotNull { it.value }
 
     @GraphQLDescription("Name of city, town, etc.")
-    val city: String? = address.city
+    val city: String? = address.city?.value
 
     @GraphQLDescription("Subunit of country")
-    val state: String? = address.state
+    val state: String? = address.state?.value
 
     @GraphQLDescription("Postal code for area")
-    val postalCode: String? = address.postalCode
+    val postalCode: String? = address.postalCode?.value
 }

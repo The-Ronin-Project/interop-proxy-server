@@ -9,14 +9,14 @@ data class Coding(private val coding: R4Coding) {
     val system: String? = coding.system?.value
 
     @GraphQLDescription("Version of the system")
-    val version: String? = coding.version
+    val version: String? = coding.version?.value
 
     @GraphQLDescription("Symbol in syntax defined by the system")
     val code: String? = coding.code?.value
 
     @GraphQLDescription("Representation defined by the system")
-    val display: String? = coding.display
+    val display: String? = coding.display?.value
 
     @GraphQLDescription("If this coding was chosen directly by the user")
-    val userSelected: Boolean? = coding.userSelected
+    val userSelected: Boolean? = coding.userSelected?.value
 }

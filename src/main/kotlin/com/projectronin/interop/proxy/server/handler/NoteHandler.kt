@@ -10,13 +10,13 @@ import com.projectronin.interop.common.hl7.MessageType
 import com.projectronin.interop.common.logmarkers.getLogMarker
 import com.projectronin.interop.fhir.r4.valueset.AdministrativeGender
 import com.projectronin.interop.fhir.ronin.code.RoninCodeSystem
-import com.projectronin.interop.fhir.ronin.util.asEnum
 import com.projectronin.interop.proxy.server.hl7.MDMService
 import com.projectronin.interop.proxy.server.hl7.model.MDMPatientFields
 import com.projectronin.interop.proxy.server.hl7.model.MDMPractitionerFields
 import com.projectronin.interop.proxy.server.input.NoteInput
 import com.projectronin.interop.proxy.server.input.NoteSender
 import com.projectronin.interop.proxy.server.input.PatientIdType
+import com.projectronin.interop.proxy.server.util.asEnum
 import com.projectronin.interop.queue.QueueService
 import com.projectronin.interop.queue.model.HL7Message
 import com.projectronin.interop.tenant.config.TenantService

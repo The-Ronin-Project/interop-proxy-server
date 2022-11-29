@@ -1,5 +1,7 @@
 package com.projectronin.interop.proxy.server.model
 
+import com.projectronin.interop.fhir.r4.datatype.primitive.FHIRString
+import com.projectronin.interop.fhir.r4.datatype.primitive.asFHIR
 import com.projectronin.interop.fhir.r4.valueset.ContactPointSystem
 import com.projectronin.interop.fhir.r4.valueset.ContactPointUse
 import com.projectronin.interop.proxy.server.util.asCode
@@ -50,9 +52,27 @@ class ContactPointTest {
     @Test
     fun `can get value`() {
         val ehrContactPoint = relaxedMockk<R4ContactPoint> {
-            every { value } returns "value"
+            every { value } returns "value".asFHIR()
         }
         val contactPoint = ContactPoint(ehrContactPoint)
         assertEquals("value", contactPoint.value)
+    }
+
+    @Test
+    fun `can get null value`() {
+        val ehrContactPoint = relaxedMockk<R4ContactPoint> {
+            every { value } returns null
+        }
+        val contactPoint = ContactPoint(ehrContactPoint)
+        assertNull(contactPoint.value)
+    }
+
+    @Test
+    fun `can get value with null value`() {
+        val ehrContactPoint = relaxedMockk<R4ContactPoint> {
+            every { value } returns FHIRString(null)
+        }
+        val contactPoint = ContactPoint(ehrContactPoint)
+        assertNull(contactPoint.value)
     }
 }

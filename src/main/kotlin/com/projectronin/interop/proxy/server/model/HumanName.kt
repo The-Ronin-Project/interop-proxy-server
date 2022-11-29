@@ -9,8 +9,8 @@ data class HumanName(private val humanName: R4HumanName) {
     val use: String? = humanName.use?.value
 
     @GraphQLDescription("Family name (often called 'Surname')")
-    val family: String? = humanName.family
+    val family: String? = humanName.family?.value
 
     @GraphQLDescription("Given named (not always 'first'). Given names appear in the order they should be presented.")
-    val given: List<String> = humanName.given
+    val given: List<String> = humanName.given.mapNotNull { it.value }
 }

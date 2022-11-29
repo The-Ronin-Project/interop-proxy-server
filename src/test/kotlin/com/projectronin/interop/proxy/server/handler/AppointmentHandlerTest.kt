@@ -235,7 +235,7 @@ class AppointmentHandlerTest {
             every { identifier } returns listOf(
                 mockk {
                     every { system?.value } returns "test-system"
-                    every { value } returns "test-value"
+                    every { value?.value } returns "test-value"
                 }
             )
             every { status?.value } returns AppointmentStatus.BOOKED.code
@@ -243,39 +243,39 @@ class AppointmentHandlerTest {
                 every { coding } returns listOf(
                     mockk {
                         every { system?.value } returns "test-system"
-                        every { version } returns "test-version"
+                        every { version?.value } returns "test-version"
                         every { code?.value } returns "test-code"
-                        every { display } returns "test-appt-type"
-                        every { userSelected } returns true
+                        every { display?.value } returns "test-appt-type"
+                        every { userSelected?.value } returns true
                     }
                 )
-                every { text } returns "appt-type-text"
+                every { text?.value } returns "appt-type-text"
             }
             every { serviceType } returns listOf(
                 mockk {
                     every { coding } returns listOf(
                         mockk {
                             every { system?.value } returns "test-system"
-                            every { version } returns "test-version"
+                            every { version?.value } returns "test-version"
                             every { code?.value } returns "test-code"
-                            every { display } returns "test-service-type"
-                            every { userSelected } returns true
+                            every { display?.value } returns "test-service-type"
+                            every { userSelected?.value } returns true
                         }
                     )
-                    every { text } returns "service-type-text"
+                    every { text?.value } returns "service-type-text"
                 }
             )
             every { start?.value } returns "2025-01-21"
             every { participant } returns listOf(
                 mockk {
                     every { actor } returns mockk {
-                        every { reference } returns "test-reference"
-                        every { display } returns "test-display"
+                        every { reference?.value } returns "test-reference"
+                        every { display?.value } returns "test-display"
                         every { type } returns Uri("Practitioner")
-                        every { id } returns "test-id"
+                        every { id?.value } returns "test-id"
                         every { identifier } returns mockk {
                             every { system?.value } returns "test-system"
-                            every { value } returns "test-value"
+                            every { value?.value } returns "test-value"
                         }
                     }
                 }
@@ -341,7 +341,7 @@ class AppointmentHandlerTest {
             every { identifier } returns listOf(
                 mockk {
                     every { system?.value } returns "test-system"
-                    every { value } returns "test-value"
+                    every { value?.value } returns "test-value"
                 }
             )
             every { status?.value } returns AppointmentStatus.BOOKED.code
@@ -349,26 +349,26 @@ class AppointmentHandlerTest {
                 every { coding } returns listOf(
                     mockk {
                         every { system?.value } returns "test-system"
-                        every { version } returns "test-version"
+                        every { version?.value } returns "test-version"
                         every { code?.value } returns "test-code"
-                        every { display } returns "test-appt-type"
-                        every { userSelected } returns true
+                        every { display?.value } returns "test-appt-type"
+                        every { userSelected?.value } returns true
                     }
                 )
-                every { text } returns "appt-type-text"
+                every { text?.value } returns "appt-type-text"
             }
             every { serviceType } returns listOf(
                 mockk {
                     every { coding } returns listOf(
                         mockk {
                             every { system?.value } returns "test-system"
-                            every { version } returns "test-version"
+                            every { version?.value } returns "test-version"
                             every { code?.value } returns "test-code"
-                            every { display } returns "test-service-type"
-                            every { userSelected } returns true
+                            every { display?.value } returns "test-service-type"
+                            every { userSelected?.value } returns true
                         }
                     )
-                    every { text } returns "service-type-text"
+                    every { text?.value } returns "service-type-text"
                 }
             )
             every { start?.value } returns "2025-01-21"
