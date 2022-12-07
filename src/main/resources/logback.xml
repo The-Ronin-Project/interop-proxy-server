@@ -9,4 +9,9 @@
     <logger name="com.projectronin.interop.proxy.server.instrumentation" level="INFO" additivity="false">
         <appender-ref ref="STDOUT"/>
     </logger>
+    <!--
+    <logger name="com.projectronin.interop" level="INFO" additivity="false">
+        <appender-ref ref="STDOUT"/>
+    </logger>
+    -->
 </configuration>

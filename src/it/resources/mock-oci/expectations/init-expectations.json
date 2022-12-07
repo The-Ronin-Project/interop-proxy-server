@@ -1,0 +1,29 @@
+{
+  "httpRequest" : {
+    "method" : "GET",
+    "path" : "/n/.*/b/.*/o/DataNormalizationRegistry%2Fv1%2Fregistry.json"
+  },
+  "httpResponse" : {
+    "statusCode" : 200,
+    "headers" : {
+      "Content-Type" : [ "application/json;" ]
+    },
+    "body" :  [{
+      "registry_uuid": "uuidString",
+      "data_element": "dataString",
+      "filename": "filenameString",
+      "source_extension_url": "test",
+      "resource_type": "Patient",
+      "tenant_id": null,
+      "version" : "v1"
+    }]
+  },
+  "id" : "GetObjectExpectation",
+  "priority" : 0,
+  "timeToLive" : {
+    "unlimited" : true
+  },
+  "times" : {
+    "unlimited" : true
+  }
+}

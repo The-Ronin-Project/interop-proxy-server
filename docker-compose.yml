@@ -92,3 +92,16 @@ services:
       DD_LOGS_CONFIG_CONTAINER_COLLECT_ALL: 'true'
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
+
+  mock-server:
+    image: docker-proxy.devops.projectronin.io/mockserver/mockserver:latest
+    volumes:
+      - ./src/it/resources/mock-oci/config/mockserver.properties:/config/mockserver.properties
+      - ./src/it/resources/mock-oci/expectations:/expectations
+    ports:
+      - 1081:443
+    networks:
+      default:
+        aliases:
+          - oraclecloud.com
+          - objectstorage.us-phoenix-1.oraclecloud.com

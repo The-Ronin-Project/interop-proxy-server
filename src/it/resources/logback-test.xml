@@ -11,4 +11,9 @@
     <logger name="com.projectronin.interop.proxy.server.instrumentation" level="INFO" additivity="false">
         <appender-ref ref="STDOUT"/>
     </logger>
+    <!-- Uncomment to have our packages log more aggressively
+    <logger name="com.projectronin.interop" level="DEBUG" additivity="false">
+        <appender-ref ref="STDOUT"/>
+    </logger>
+    -->
 </configuration>
