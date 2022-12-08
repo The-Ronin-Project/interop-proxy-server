@@ -8,11 +8,11 @@ import com.projectronin.interop.ehr.inputs.EHRMessageInput
 import com.projectronin.interop.ehr.inputs.EHRRecipient
 import com.projectronin.interop.ehr.inputs.FHIRIdentifiers
 import com.projectronin.interop.ehr.inputs.IdentifierVendorIdentifier
+import com.projectronin.interop.fhir.r4.CodeSystem
 import com.projectronin.interop.fhir.r4.datatype.Identifier
 import com.projectronin.interop.fhir.r4.datatype.primitive.Id
 import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
 import com.projectronin.interop.fhir.r4.datatype.primitive.asFHIR
-import com.projectronin.interop.fhir.ronin.code.RoninCodeSystem
 import com.projectronin.interop.proxy.server.context.INTEROP_CONTEXT_KEY
 import com.projectronin.interop.proxy.server.context.InteropGraphQLContext
 import com.projectronin.interop.proxy.server.input.MessageInput
@@ -49,7 +49,7 @@ class MessageHandlerTest {
             every {
                 getPatientFHIRIds(
                     "TEST_TENANT",
-                    mapOf("MRN" to SystemValue(system = RoninCodeSystem.MRN.uri.value!!, value = "MRN#1"))
+                    mapOf("MRN" to SystemValue(system = CodeSystem.RONIN_MRN.uri.value!!, value = "MRN#1"))
                 )
             } returns mapOf("MRN" to "FHIRID")
         }
@@ -67,7 +67,7 @@ class MessageHandlerTest {
         every {
             patientService.getPatientFHIRIds(
                 "TEST_TENANT",
-                mapOf("MRN" to SystemValue(system = RoninCodeSystem.MRN.uri.value!!, value = "MRN#1"))
+                mapOf("MRN" to SystemValue(system = CodeSystem.RONIN_MRN.uri.value!!, value = "MRN#1"))
             )
         } returns emptyMap()
         val messageInput = MessageInput("Test Message", MessagePatientInput("MRN#1"), listOf())

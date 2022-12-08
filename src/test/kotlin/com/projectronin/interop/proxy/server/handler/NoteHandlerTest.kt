@@ -3,6 +3,7 @@ package com.projectronin.interop.proxy.server.handler
 import com.projectronin.interop.aidbox.PatientService
 import com.projectronin.interop.aidbox.PractitionerService
 import com.projectronin.interop.aidbox.model.SystemValue
+import com.projectronin.interop.fhir.r4.CodeSystem
 import com.projectronin.interop.fhir.r4.datatype.Address
 import com.projectronin.interop.fhir.r4.datatype.ContactPoint
 import com.projectronin.interop.fhir.r4.datatype.HumanName
@@ -14,7 +15,6 @@ import com.projectronin.interop.fhir.r4.resource.Patient
 import com.projectronin.interop.fhir.r4.resource.Practitioner
 import com.projectronin.interop.fhir.r4.valueset.AdministrativeGender
 import com.projectronin.interop.fhir.r4.valueset.ContactPointUse
-import com.projectronin.interop.fhir.ronin.code.RoninCodeSystem
 import com.projectronin.interop.proxy.server.context.INTEROP_CONTEXT_KEY
 import com.projectronin.interop.proxy.server.context.InteropGraphQLContext
 import com.projectronin.interop.proxy.server.hl7.MDMService
@@ -173,7 +173,7 @@ class NoteHandlerTest {
         every {
             patientService.getPatientFHIRIds(
                 "apposnd",
-                mapOf("key" to SystemValue(system = RoninCodeSystem.MRN.uri.value!!, value = noteInput.patientId))
+                mapOf("key" to SystemValue(system = CodeSystem.RONIN_MRN.uri.value!!, value = noteInput.patientId))
             ).getValue("key")
         } returns "PatientFhirId"
         every { patientService.getPatient("apposnd", "PatientFhirId") } returns oncologyPatient
@@ -213,7 +213,7 @@ class NoteHandlerTest {
         every {
             patientService.getPatientFHIRIds(
                 "apposnd",
-                mapOf("key" to SystemValue(system = RoninCodeSystem.MRN.uri.value!!, value = noteInput.patientId))
+                mapOf("key" to SystemValue(system = CodeSystem.RONIN_MRN.uri.value!!, value = noteInput.patientId))
             ).getValue("key")
         } returns "PatientFhirId"
         every { patientService.getPatient("apposnd", "PatientFhirId") } returns oncologyPatient

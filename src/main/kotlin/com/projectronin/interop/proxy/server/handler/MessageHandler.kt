@@ -11,8 +11,8 @@ import com.projectronin.interop.ehr.inputs.EHRMessageInput
 import com.projectronin.interop.ehr.inputs.EHRRecipient
 import com.projectronin.interop.ehr.inputs.FHIRIdentifiers
 import com.projectronin.interop.ehr.inputs.IdentifierVendorIdentifier
+import com.projectronin.interop.fhir.r4.CodeSystem
 import com.projectronin.interop.fhir.r4.datatype.primitive.Id
-import com.projectronin.interop.fhir.ronin.code.RoninCodeSystem
 import com.projectronin.interop.proxy.server.input.MessageInput
 import com.projectronin.interop.proxy.server.input.MessageRecipientInput
 import com.projectronin.interop.tenant.config.TenantService
@@ -45,7 +45,7 @@ class MessageHandler(
         // ensure patient exists in Aidbox
         patientService.getPatientFHIRIds(
             tenant.mnemonic,
-            mapOf("MRN" to SystemValue(system = RoninCodeSystem.MRN.uri.value!!, value = message.patient.mrn))
+            mapOf("MRN" to SystemValue(system = CodeSystem.RONIN_MRN.uri.value!!, value = message.patient.mrn))
         ).getOrElse("MRN") {
             val error =
                 "Attempted to send message for patient with MRN ${message.patient.mrn} who does not exist in Aidbox."

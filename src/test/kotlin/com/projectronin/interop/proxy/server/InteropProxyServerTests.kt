@@ -12,11 +12,11 @@ import com.projectronin.interop.ehr.inputs.EHRMessageInput
 import com.projectronin.interop.ehr.inputs.EHRRecipient
 import com.projectronin.interop.ehr.inputs.FHIRIdentifiers
 import com.projectronin.interop.ehr.inputs.IdentifierVendorIdentifier
+import com.projectronin.interop.fhir.r4.CodeSystem
 import com.projectronin.interop.fhir.r4.datatype.Identifier
 import com.projectronin.interop.fhir.r4.datatype.primitive.Id
 import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
 import com.projectronin.interop.fhir.r4.datatype.primitive.asFHIR
-import com.projectronin.interop.fhir.ronin.code.RoninCodeSystem
 import com.projectronin.interop.proxy.server.handler.findAndValidateTenant
 import com.projectronin.interop.tenant.config.model.Tenant
 import io.mockk.every
@@ -117,7 +117,7 @@ class InteropProxyServerTests {
         every {
             patientService.getPatientFHIRIds(
                 "tenant",
-                mapOf("MRN" to SystemValue(system = RoninCodeSystem.MRN.uri.value!!, value = "12345"))
+                mapOf("MRN" to SystemValue(system = CodeSystem.RONIN_MRN.uri.value!!, value = "12345"))
             )
         } returns mapOf("MRN" to "1234")
         every { ehrFactory.getVendorFactory(tenant) } returns mockk {

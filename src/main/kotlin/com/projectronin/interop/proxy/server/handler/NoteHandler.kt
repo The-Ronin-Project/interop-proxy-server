@@ -8,8 +8,8 @@ import com.projectronin.interop.aidbox.model.SystemValue
 import com.projectronin.interop.common.hl7.EventType
 import com.projectronin.interop.common.hl7.MessageType
 import com.projectronin.interop.common.logmarkers.getLogMarker
+import com.projectronin.interop.fhir.r4.CodeSystem
 import com.projectronin.interop.fhir.r4.valueset.AdministrativeGender
-import com.projectronin.interop.fhir.ronin.code.RoninCodeSystem
 import com.projectronin.interop.proxy.server.hl7.MDMService
 import com.projectronin.interop.proxy.server.hl7.model.MDMPatientFields
 import com.projectronin.interop.proxy.server.hl7.model.MDMPractitionerFields
@@ -73,7 +73,7 @@ class NoteHandler(
                 tenantId,
                 patientService.getPatientFHIRIds(
                     tenantId,
-                    mapOf("key" to SystemValue(system = RoninCodeSystem.MRN.uri.value!!, value = noteInput.patientId))
+                    mapOf("key" to SystemValue(system = CodeSystem.RONIN_MRN.uri.value!!, value = noteInput.patientId))
                 ).getValue("key")
             )
         }
