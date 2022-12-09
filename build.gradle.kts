@@ -11,14 +11,17 @@ dependencies {
     implementation(libs.interop.aidbox)
     implementation(libs.interop.common)
     implementation(libs.interop.commonHttp)
-    implementation(libs.interop.datalake)
+    implementation(libs.interop.datalake) {
+        // Exclude validation
+        exclude(group = "com.projectronin.interop.validation", module = "interop-validation-client")
+    }
     implementation(libs.interop.ehr.api)
     implementation(libs.interop.fhir)
     implementation(libs.interop.queue.api)
     implementation(libs.interop.ehr.tenant)
     implementation(libs.interop.ehr.fhir.ronin) {
-        // We're not ready to use the datalake portion.
-        exclude(group = "com.projectronin.interop.publish", module = "interop-datalake")
+        // Exclude validation
+        exclude(group = "com.projectronin.interop.validation", module = "interop-validation-client")
     }
     implementation(libs.interop.commonJackson)
 
@@ -37,8 +40,8 @@ dependencies {
     implementation(libs.dd.trace.api)
 
     runtimeOnly(libs.bundles.ehr.impls) {
-        // We're not ready to use the datalake portion.
-        exclude(group = "com.projectronin.interop.publish", module = "interop-datalake")
+        // Exclude validation
+        exclude(group = "com.projectronin.interop.validation", module = "interop-validation-client")
     }
     runtimeOnly(libs.interop.queue.db)
     runtimeOnly(libs.mysql.connector.java)
