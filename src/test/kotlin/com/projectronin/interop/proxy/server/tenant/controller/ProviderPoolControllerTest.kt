@@ -69,8 +69,8 @@ class ProviderPoolControllerTest {
             instanceName = tenant.vendor.instanceName
             vendorType = VendorType.EPIC
             clientId = tenant.vendor.clientId
-            publicKey = tenant.vendor.authenticationConfig.publicKey
-            privateKey = tenant.vendor.authenticationConfig.privateKey
+            publicKey = tenant.vendor.authenticationConfig.publicKey!!
+            privateKey = tenant.vendor.authenticationConfig.privateKey!!
         }
         availableBatchStart = null
         availableBatchEnd = null

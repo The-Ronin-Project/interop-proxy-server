@@ -7,3 +7,11 @@ identifier:
       text: EXTERNAL
   - value: ronin
     system: http://projectronin.com/id/tenantId
+  - type:
+      text: "FHIR STU3"
+      coding:
+        - system: "http://projectronin.com/id/fhir"
+          code: "STU3"
+          display: "FHIR STU3 ID"
+    system: "http://projectronin.com/id/fhir"
+    value: "PractitionerPoolFHIRID1"

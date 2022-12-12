@@ -61,15 +61,15 @@ class NoteHandler(
         logger.info { "Receiving Note for patient ${noteInput.patientIdType}: ${noteInput.patientId} from Practitioner ${noteInput.practitionerFhirId}" }
         parentDocumentId?.let { logger.info { "Attempting to addend parent document $it" } }
 
-        val practitioner = practitionerService.getPractitioner(tenantId, noteInput.practitionerFhirId)
+        val practitioner = practitionerService.getPractitionerByUDPId(tenantId, noteInput.practitionerFhirId)
         val mdmPractitionerFields = MDMPractitionerFields(
             practitioner.name,
             practitioner.identifier
         )
 
         val patient = when (noteInput.patientIdType) {
-            PatientIdType.FHIR -> patientService.getPatient(tenantId, noteInput.patientId)
-            PatientIdType.MRN -> patientService.getPatient(
+            PatientIdType.FHIR -> patientService.getPatientByUDPId(tenantId, noteInput.patientId)
+            PatientIdType.MRN -> patientService.getPatientByUDPId(
                 tenantId,
                 patientService.getPatientFHIRIds(
                     tenantId,

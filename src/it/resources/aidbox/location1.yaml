@@ -3,6 +3,14 @@
   identifier:
     - value: "E12345"
       system: "mockEHRDepartmentInternalSystem"
+    - type:
+        text: "FHIR STU3"
+        coding:
+          - system: "http://projectronin.com/id/fhir"
+            code: "STU3"
+            display: "FHIR STU3 ID"
+      system: "http://projectronin.com/id/fhir"
+      value: "LocationFHIRID1"
   status: "active"
   name: "South Wing, second floor"
   telecom:
