@@ -44,6 +44,7 @@ dependencies {
         exclude(group = "com.projectronin.interop.validation", module = "interop-validation-client")
     }
     runtimeOnly(libs.interop.queue.db)
+    runtimeOnly(libs.interop.queue.kafka)
     runtimeOnly(libs.mysql.connector.java)
 
     // Needed to format logs for DataDog

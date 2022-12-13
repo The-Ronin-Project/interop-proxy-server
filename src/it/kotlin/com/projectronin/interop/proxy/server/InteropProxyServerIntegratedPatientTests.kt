@@ -27,6 +27,9 @@ import org.springframework.security.oauth2.jwt.JwtDecoder
 import org.springframework.security.oauth2.jwt.JwtException
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
+import org.testcontainers.containers.DockerComposeContainer
+import org.testcontainers.containers.wait.strategy.Wait
+import java.io.File
 import java.net.URI
 import javax.sql.DataSource
 
@@ -56,6 +59,13 @@ class InteropProxyServerIntegratedPatientTests {
     init {
         httpHeaders.set("Content-Type", "application/graphql")
         httpHeaders.set("Authorization", "Fake Token")
+    }
+    companion object {
+        val docker =
+            DockerComposeContainer(File(InteropProxyServerIntegratedPatientTests::class.java.getResource("/kafka/docker-compose-kafka.yaml")!!.file)).waitingFor(
+                "kafka",
+                Wait.forLogMessage(".*\\[KafkaServer id=\\d+\\] started.*", 1)
+            ).start()
     }
 
     @BeforeEach
