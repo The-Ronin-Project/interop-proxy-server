@@ -13,7 +13,8 @@ import com.projectronin.interop.common.vendor.VendorType
     property = "type"
 )
 @JsonSubTypes(
-    JsonSubTypes.Type(value = Epic::class, name = "EPIC")
+    JsonSubTypes.Type(value = Epic::class, name = "EPIC"),
+    JsonSubTypes.Type(value = Cerner::class, name = "CERNER")
 )
 interface Vendor {
     val vendorType: VendorType

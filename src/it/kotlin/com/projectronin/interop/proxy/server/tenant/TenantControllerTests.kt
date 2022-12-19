@@ -1,6 +1,8 @@
 package com.projectronin.interop.proxy.server.tenant
 
+import com.projectronin.interop.common.vendor.VendorType
 import com.projectronin.interop.proxy.server.InteropProxyServerAuthInitializer
+import com.projectronin.interop.proxy.server.tenant.model.Cerner
 import com.projectronin.interop.proxy.server.tenant.model.Epic
 import com.projectronin.interop.proxy.server.tenant.model.Tenant
 import com.projectronin.interop.proxy.server.test.util.backupTables
@@ -42,7 +44,7 @@ class TenantControllerTests {
     private lateinit var ehrDatasource: DataSource
 
     // provider pools is just there or else the delete from io_tenant will fail
-    private val modifiedTables = listOf("io_tenant_provider_pool", "io_tenant_epic", "io_tenant")
+    private val modifiedTables = listOf("io_tenant_provider_pool", "io_tenant_epic", "io_tenant_cerner", "io_tenant")
 
     private val httpHeaders = HttpHeaders()
 
@@ -78,11 +80,15 @@ class TenantControllerTests {
         val tenantArray = responseEntity.body!!
 
         assertEquals(HttpStatus.OK, responseEntity.statusCode)
-        assertEquals(2, tenantArray.size)
+        assertEquals(3, tenantArray.size)
         assertEquals(1001, tenantArray[0].id)
         assertEquals("apposnd", tenantArray[0].mnemonic)
+        assertEquals(VendorType.EPIC, tenantArray[0].vendor.vendorType)
         assertEquals(1002, tenantArray[1].id)
         assertEquals("ronin", tenantArray[1].mnemonic)
+        assertEquals(2002, tenantArray[2].id)
+        assertEquals("cernerMn", tenantArray[2].mnemonic)
+        assertEquals(VendorType.CERNER, tenantArray[2].vendor.vendorType)
     }
 
     @Test
@@ -118,7 +124,7 @@ class TenantControllerTests {
     }
 
     @Test
-    fun `can insert a tenant`() {
+    fun `can insert a tenant - epic`() {
         val vendor = Epic(
             release = "1.0",
             serviceEndpoint = "https://apporchard.epic.com/interconnect-aocurprd-oauth",
@@ -134,6 +140,37 @@ class TenantControllerTests {
             hsi = null,
             instanceName = "Epic Sandbox",
             departmentInternalSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.2.686980"
+        )
+
+        val newTenant = Tenant(
+            id = 0,
+            mnemonic = "CoolNewBoi",
+            availableStart = LocalTime.of(22, 0),
+            availableEnd = LocalTime.of(6, 0),
+            vendor = vendor,
+            name = "coolest boi hospital",
+            timezone = "America/Chicago"
+        )
+        val httpEntity = HttpEntity(newTenant, httpHeaders)
+
+        val responseEntity = restTemplate.postForEntity(
+            URI("http://localhost:$port/tenants"),
+            httpEntity,
+            Tenant::class.java
+        )
+        val tenant = responseEntity.body!!
+
+        assertEquals(HttpStatus.CREATED, responseEntity.statusCode)
+        assertEquals(newTenant.mnemonic, tenant.mnemonic)
+        assertEquals(newTenant.vendor, tenant.vendor)
+    }
+
+    @Test
+    fun `can insert a tenant - cerner`() {
+        val vendor = Cerner(
+            serviceEndpoint = "serviceEndpoint",
+            patientMRNSystem = "patientMRNSystem",
+            instanceName = "Cerner Sandbox",
         )
 
         val newTenant = Tenant(
@@ -202,7 +239,7 @@ class TenantControllerTests {
     }
 
     @Test
-    fun `can update a tenant`() {
+    fun `can update a tenant - epic`() {
         val vendor = Epic(
             release = "2.0",
             serviceEndpoint = "https://apporchard.epic.com/interconnect-aocurprd-oauth",
@@ -223,6 +260,37 @@ class TenantControllerTests {
         val updatedTenant = Tenant(
             id = 1001,
             mnemonic = "apposnd",
+            availableStart = LocalTime.of(22, 0),
+            availableEnd = LocalTime.of(6, 0),
+            vendor = vendor,
+            name = "App Orchard Test",
+            timezone = "America/Denver"
+        )
+        val httpEntity = HttpEntity(updatedTenant, httpHeaders)
+
+        val responseEntity = restTemplate.exchange(
+            "http://localhost:$port/tenants/${updatedTenant.mnemonic}",
+            HttpMethod.PUT,
+            httpEntity,
+            Tenant::class.java
+        )
+        val tenant = responseEntity.body!!
+
+        assertEquals(HttpStatus.OK, responseEntity.statusCode)
+        assertEquals(updatedTenant, tenant)
+    }
+
+    @Test
+    fun `can update a tenant - cerner`() {
+        val vendor = Cerner(
+            serviceEndpoint = "serviceEndpoint",
+            patientMRNSystem = "patientMRNSystem",
+            instanceName = "Cerner Sandbox",
+        )
+
+        val updatedTenant = Tenant(
+            id = 2002,
+            mnemonic = "cernerMn",
             availableStart = LocalTime.of(22, 0),
             availableEnd = LocalTime.of(6, 0),
             vendor = vendor,

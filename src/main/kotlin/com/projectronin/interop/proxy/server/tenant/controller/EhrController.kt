@@ -1,5 +1,6 @@
 package com.projectronin.interop.proxy.server.tenant.controller
 
+import com.projectronin.interop.common.vendor.VendorType
 import com.projectronin.interop.proxy.server.tenant.model.Ehr
 import com.projectronin.interop.tenant.config.data.EhrDAO
 import com.projectronin.interop.tenant.config.data.model.EhrDO
@@ -62,12 +63,29 @@ class EhrController(private val ehrDAO: EhrDAO) {
     }
 
     fun EhrDO.toEhr(): Ehr {
+        return when (vendorType) {
+            VendorType.EPIC -> this.toEpicEHR()
+            VendorType.CERNER -> this.toCernerEHR()
+        }
+    }
+
+    fun EhrDO.toEpicEHR(): Ehr {
         return Ehr(
             vendorType = this.vendorType,
             instanceName = this.instanceName,
             clientId = this.clientId,
             publicKey = this.publicKey,
-            privateKey = this.privateKey
+            privateKey = this.privateKey,
+        )
+    }
+
+    fun EhrDO.toCernerEHR(): Ehr {
+        return Ehr(
+            vendorType = this.vendorType,
+            instanceName = this.instanceName,
+            clientId = this.clientId,
+            accountId = this.accountId,
+            secret = this.secret,
         )
     }
 
@@ -76,13 +94,35 @@ class EhrController(private val ehrDAO: EhrDAO) {
      * id to [newId]
      */
     fun Ehr.toEhrDO(newId: Int = 0): EhrDO {
+        return when (this.vendorType) {
+            VendorType.EPIC -> this.toEpicEhrDO(newId)
+            VendorType.CERNER -> this.toCernerEhrDO(newId)
+        }
+    }
+    fun Ehr.toEpicEhrDO(newId: Int): EhrDO {
+        if (this.publicKey == null || this.privateKey == null) {
+            throw IllegalStateException("EPIC EHRs require publicKey and privateKey")
+        }
         return EhrDO {
             id = newId
-            vendorType = this@toEhrDO.vendorType
-            instanceName = this@toEhrDO.instanceName
-            clientId = this@toEhrDO.clientId
-            publicKey = this@toEhrDO.publicKey
-            privateKey = this@toEhrDO.privateKey
+            vendorType = this@toEpicEhrDO.vendorType
+            instanceName = this@toEpicEhrDO.instanceName
+            clientId = this@toEpicEhrDO.clientId
+            publicKey = this@toEpicEhrDO.publicKey
+            privateKey = this@toEpicEhrDO.privateKey
+        }
+    }
+    fun Ehr.toCernerEhrDO(newId: Int): EhrDO {
+        if (this.accountId == null || this.secret == null) {
+            throw IllegalStateException("CERNER EHRs require accountId and secret")
+        }
+        return EhrDO {
+            id = newId
+            vendorType = this@toCernerEhrDO.vendorType
+            instanceName = this@toCernerEhrDO.instanceName
+            clientId = this@toCernerEhrDO.clientId
+            accountId = this@toCernerEhrDO.accountId
+            secret = this@toCernerEhrDO.secret
         }
     }
 }

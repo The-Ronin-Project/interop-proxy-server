@@ -43,7 +43,7 @@ class TenantController(private val tenantService: TenantService) {
     @Trace
     fun insert(@RequestBody tenant: Tenant): ResponseEntity<Tenant> {
         logger.info { "Inserting new tenant with mnemonic ${tenant.mnemonic}" }
-        val newTenant = tenantService.insertTenant(tenant.toTenantServerTenant())
+        val newTenant = tenantService.insertTenant(tenant.toTenantServerVendor())
         return ResponseEntity(newTenant.toProxyTenant(), HttpStatus.CREATED)
     }
 
@@ -55,7 +55,7 @@ class TenantController(private val tenantService: TenantService) {
         val tenantToUpdate = tenantService.getTenantForMnemonic(tenantMnemonic)
             ?: throw NoTenantFoundException("No tenant found for mnemonic $tenantMnemonic")
 
-        val newTenant = tenantService.updateTenant(tenant.toTenantServerTenant(tenantToUpdate.internalId))
+        val newTenant = tenantService.updateTenant(tenant.toTenantServerVendor(tenantToUpdate.internalId))
         return ResponseEntity(newTenant.toProxyTenant(), HttpStatus.OK)
     }
 

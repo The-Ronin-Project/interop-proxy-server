@@ -5,7 +5,6 @@ import ch.qos.logback.core.read.ListAppender
 import com.projectronin.interop.common.http.exceptions.ServiceUnavailableException
 import com.projectronin.interop.common.logmarkers.LogMarkers
 import com.projectronin.interop.common.resource.ResourceType
-import com.projectronin.interop.ehr.IdentifierService
 import com.projectronin.interop.ehr.PatientService
 import com.projectronin.interop.ehr.factory.EHRFactory
 import com.projectronin.interop.fhir.r4.datatype.Identifier
@@ -13,7 +12,6 @@ import com.projectronin.interop.fhir.r4.datatype.primitive.Date
 import com.projectronin.interop.fhir.r4.datatype.primitive.Id
 import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
 import com.projectronin.interop.fhir.r4.datatype.primitive.asFHIR
-import com.projectronin.interop.fhir.ronin.conceptmap.ConceptMapClient
 import com.projectronin.interop.fhir.ronin.resource.RoninPatient
 import com.projectronin.interop.proxy.server.context.INTEROP_CONTEXT_KEY
 import com.projectronin.interop.proxy.server.context.InteropGraphQLContext
@@ -30,7 +28,6 @@ import io.mockk.Runs
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
-import io.mockk.mockkConstructor
 import io.mockk.mockkObject
 import io.mockk.unmockkObject
 import org.junit.jupiter.api.AfterEach
@@ -55,9 +52,8 @@ class PatientHandlerTest {
     private lateinit var tenantService: TenantService
     private lateinit var queueService: QueueService
     private lateinit var patientHandler: PatientHandler
-    private lateinit var identifierService: IdentifierService
     private lateinit var dfe: DataFetchingEnvironment
-    private lateinit var conceptMapClient: ConceptMapClient
+    private lateinit var roninPatient: RoninPatient
 
     private val logger = LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME) as ch.qos.logback.classic.Logger
     private val logAppender = ListAppender<ILoggingEvent>()
@@ -78,10 +74,9 @@ class PatientHandlerTest {
         ehrFactory = mockk()
         tenantService = mockk()
         queueService = mockk()
-        identifierService = mockk()
         dfe = mockk()
-        conceptMapClient = mockk()
-        patientHandler = PatientHandler(ehrFactory, tenantService, queueService, conceptMapClient)
+        roninPatient = mockk()
+        patientHandler = PatientHandler(ehrFactory, tenantService, queueService, roninPatient)
     }
 
     @Test
@@ -284,9 +279,8 @@ class PatientHandlerTest {
                 givenName = "Josh"
             )
         } returns response
-        mockkConstructor(RoninPatient::class)
-        every { ehrFactory.getVendorFactory(tenant).identifierService } returns identifierService
-        every { anyConstructed<RoninPatient>().getRoninIdentifiers(patient1, tenant) } returns roninIdentifiers
+
+        every { roninPatient.getRoninIdentifiers(patient1, tenant) } returns roninIdentifiers
         mockkObject(JacksonUtil)
         every { JacksonUtil.writeJsonValue(patient1) } returns "raw JSON for patient"
         every {
@@ -379,9 +373,8 @@ class PatientHandlerTest {
                 givenName = "Josh"
             )
         } returns response
-        mockkConstructor(RoninPatient::class)
-        every { ehrFactory.getVendorFactory(tenant).identifierService } returns identifierService
-        every { anyConstructed<RoninPatient>().getRoninIdentifiers(patient1, tenant) } returns roninIdentifiers
+
+        every { roninPatient.getRoninIdentifiers(patient1, tenant) } returns roninIdentifiers
         mockkObject(JacksonUtil)
         every { JacksonUtil.writeJsonValue(patient1) } returns "raw JSON for patient"
         every {
@@ -473,9 +466,8 @@ class PatientHandlerTest {
                 givenName = "Josh"
             )
         } returns response
-        mockkConstructor(RoninPatient::class)
-        every { ehrFactory.getVendorFactory(tenant).identifierService } returns identifierService
-        every { anyConstructed<RoninPatient>().getRoninIdentifiers(patient1, tenant) } returns roninIdentifiers
+
+        every { roninPatient.getRoninIdentifiers(patient1, tenant) } returns roninIdentifiers
         every {
             queueService.enqueueMessages(
                 listOf(
@@ -628,9 +620,8 @@ class PatientHandlerTest {
                 value = "1234".asFHIR()
             )
         )
-        mockkConstructor(RoninPatient::class)
-        every { ehrFactory.getVendorFactory(tenant).identifierService } returns identifierService
-        every { anyConstructed<RoninPatient>().getRoninIdentifiers(patient1, tenant) } returns roninIdentifiers
+
+        every { roninPatient.getRoninIdentifiers(patient1, tenant) } returns roninIdentifiers
 
         val patientService = mockk<PatientService>()
         every { ehrFactory.getVendorFactory(tenant).patientService } returns patientService
@@ -740,9 +731,8 @@ class PatientHandlerTest {
                 value = "1234".asFHIR()
             )
         )
-        mockkConstructor(RoninPatient::class)
-        every { ehrFactory.getVendorFactory(tenant).identifierService } returns identifierService
-        every { anyConstructed<RoninPatient>().getRoninIdentifiers(patient1, tenant) } returns roninIdentifiers
+
+        every { roninPatient.getRoninIdentifiers(patient1, tenant) } returns roninIdentifiers
 
         val patientService = mockk<PatientService>()
         every { ehrFactory.getVendorFactory(tenant).patientService } returns patientService
@@ -895,10 +885,9 @@ class PatientHandlerTest {
                 value = "1234".asFHIR()
             )
         )
-        mockkConstructor(RoninPatient::class)
-        every { ehrFactory.getVendorFactory(tenant).identifierService } returns identifierService
-        every { anyConstructed<RoninPatient>().getRoninIdentifiers(patient1, tenant) } returns roninIdentifiers
-        every { anyConstructed<RoninPatient>().getRoninIdentifiers(patient2, tenant) } returns roninIdentifiers
+
+        every { roninPatient.getRoninIdentifiers(patient1, tenant) } returns roninIdentifiers
+        every { roninPatient.getRoninIdentifiers(patient2, tenant) } returns roninIdentifiers
 
         val patientService = mockk<PatientService>()
         every { ehrFactory.getVendorFactory(tenant).patientService } returns patientService
@@ -1011,10 +1000,9 @@ class PatientHandlerTest {
                 value = "1234".asFHIR()
             )
         )
-        mockkConstructor(RoninPatient::class)
-        every { ehrFactory.getVendorFactory(tenant).identifierService } returns identifierService
-        every { anyConstructed<RoninPatient>().getRoninIdentifiers(patient1, tenant) } returns roninIdentifiers
-        every { anyConstructed<RoninPatient>().getRoninIdentifiers(patient2, tenant) } returns roninIdentifiers
+
+        every { roninPatient.getRoninIdentifiers(patient1, tenant) } returns roninIdentifiers
+        every { roninPatient.getRoninIdentifiers(patient2, tenant) } returns roninIdentifiers
 
         val patientService = mockk<PatientService>()
         every { ehrFactory.getVendorFactory(tenant).patientService } returns patientService
@@ -1090,9 +1078,8 @@ class PatientHandlerTest {
                 value = "1234".asFHIR()
             )
         )
-        mockkConstructor(RoninPatient::class)
-        every { ehrFactory.getVendorFactory(tenant).identifierService } returns identifierService
-        every { anyConstructed<RoninPatient>().getRoninIdentifiers(patient1, tenant) } returns roninIdentifiers
+
+        every { roninPatient.getRoninIdentifiers(patient1, tenant) } returns roninIdentifiers
 
         val patientService = mockk<PatientService>()
         every { ehrFactory.getVendorFactory(tenant).patientService } returns patientService
@@ -1167,9 +1154,8 @@ class PatientHandlerTest {
                 value = "1234".asFHIR()
             )
         )
-        mockkConstructor(RoninPatient::class)
-        every { ehrFactory.getVendorFactory(tenant).identifierService } returns identifierService
-        every { anyConstructed<RoninPatient>().getRoninIdentifiers(patient1, tenant) } returns roninIdentifiers
+
+        every { roninPatient.getRoninIdentifiers(patient1, tenant) } returns roninIdentifiers
 
         val patientService = mockk<PatientService>()
         every { ehrFactory.getVendorFactory(tenant).patientService } returns patientService

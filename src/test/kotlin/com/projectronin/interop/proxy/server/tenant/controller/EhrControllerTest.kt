@@ -8,6 +8,7 @@ import com.projectronin.interop.tenant.config.exception.NoEHRFoundException
 import io.mockk.every
 import io.mockk.mockk
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
@@ -20,22 +21,24 @@ import java.sql.SQLIntegrityConstraintViolationException
 class EhrControllerTest {
     private lateinit var controller: EhrController
     private lateinit var dao: EhrDAO
-    private lateinit var ehrDO: EhrDO
-    private lateinit var ehrDO2: EhrDO
+    private lateinit var epicEhrDO: EhrDO
+    private lateinit var epicEhrDO2: EhrDO
+    private lateinit var cernerEHRDO: EhrDO
 
     @BeforeAll
     fun initTest() {
         dao = mockk()
         controller = EhrController(dao)
-        ehrDO = mockk {
+        epicEhrDO = mockk {
             every { id } returns 1
             every { vendorType } returns VendorType.EPIC
             every { instanceName } returns "instanceName1"
             every { clientId } returns "clientId1"
             every { publicKey } returns "publicKey1"
             every { privateKey } returns "privateKey1"
+            every { accountId } returns "wontBePopulatedNormally"
         }
-        ehrDO2 = mockk {
+        epicEhrDO2 = mockk {
             every { id } returns 2
             every { vendorType } returns VendorType.EPIC
             every { instanceName } returns "instanceName2"
@@ -43,16 +46,38 @@ class EhrControllerTest {
             every { publicKey } returns "publicKey2"
             every { privateKey } returns "privateKey3"
         }
+        cernerEHRDO = mockk {
+            every { id } returns 2
+            every { vendorType } returns VendorType.CERNER
+            every { instanceName } returns "instanceName2"
+            every { clientId } returns "clientId2"
+            every { publicKey } returns "wontBePopulatedNormally"
+            every { accountId } returns "accountId"
+            every { secret } returns "secret"
+        }
     }
 
     @Test
     fun `read test`() {
-        val foo: List<EhrDO> = listOf(ehrDO, ehrDO2)
+        val foo: List<EhrDO> = listOf(epicEhrDO, epicEhrDO2, cernerEHRDO)
         every { dao.read() } returns foo
 
         val get = controller.read()
-        assertTrue(get.body!!.isNotEmpty())
-        assertTrue(get.body!!.size == 2)
+        assertTrue(get.body?.isNotEmpty() == true)
+        assertEquals(3, get.body?.size)
+        val firstDO = get.body!!.first()
+        assertEquals(VendorType.EPIC, firstDO.vendorType)
+        assertEquals("publicKey1", firstDO.publicKey)
+        assertEquals("privateKey1", firstDO.privateKey)
+        assertNull(firstDO.accountId)
+        assertNull(firstDO.secret)
+
+        val lastDo = get.body!!.last()
+        assertEquals(VendorType.CERNER, lastDo.vendorType)
+        assertEquals("accountId", lastDo.accountId)
+        assertEquals("secret", lastDo.secret)
+        assertNull(lastDo.publicKey)
+        assertNull(lastDo.privateKey)
     }
 
     @Test
@@ -65,18 +90,68 @@ class EhrControllerTest {
     }
 
     @Test
-    fun `insert test`() {
+    fun `insert test - epic`() {
         val ehr = Ehr(
-            VendorType.EPIC,
-            "instanceName",
-            "clientId1",
-            "publicKey1",
-            "privateKey1"
+            vendorType = VendorType.EPIC,
+            instanceName = "instanceName",
+            clientId = "clientId1",
+            publicKey = "publicKey1",
+            privateKey = "privateKey1"
         )
-        every { dao.insert(any()) } returns ehrDO
+        every { dao.insert(any()) } returns epicEhrDO
 
         val post = controller.insert(ehr)
-        assertTrue(post.body?.clientId == "clientId1")
+        assertEquals("publicKey1", post.body?.publicKey)
+    }
+
+    @Test
+    fun `insert test - cerner`() {
+        val ehr = Ehr(
+            vendorType = VendorType.CERNER,
+            instanceName = "instanceName",
+            clientId = "clientId1",
+            accountId = "accountId",
+            secret = "secret"
+        )
+        every { dao.insert(any()) } returns cernerEHRDO
+
+        val post = controller.insert(ehr)
+        assertEquals("accountId", post.body?.accountId)
+    }
+
+    @Test
+    fun `bad inserts throw errors`() {
+        val cernerEHR = Ehr(
+            vendorType = VendorType.CERNER,
+            instanceName = "instanceName",
+            clientId = "clientId1",
+            publicKey = "publicKey1",
+            privateKey = "privateKey1"
+        )
+        val cernerEHR2 = Ehr(
+            vendorType = VendorType.CERNER,
+            instanceName = "instanceName",
+            clientId = "clientId1",
+            accountId = "accountId",
+        )
+        val epicEhr = Ehr(
+            vendorType = VendorType.EPIC,
+            instanceName = "instanceName",
+            clientId = "clientId1",
+            accountId = "accountId",
+            secret = "secret"
+        )
+        val epicEhr2 = Ehr(
+            vendorType = VendorType.EPIC,
+            instanceName = "instanceName",
+            clientId = "clientId1",
+            publicKey = "publicKey1",
+        )
+
+        assertThrows<IllegalStateException> { controller.insert(cernerEHR) }
+        assertThrows<IllegalStateException> { controller.insert(cernerEHR2) }
+        assertThrows<IllegalStateException> { controller.insert(epicEhr) }
+        assertThrows<IllegalStateException> { controller.insert(epicEhr2) }
     }
 
     @Test
@@ -88,8 +163,8 @@ class EhrControllerTest {
             "publicKey2",
             "privateKey2"
         )
-        every { dao.getByInstance(ehr.instanceName) } returns ehrDO2
-        every { dao.update(any()) } returns ehrDO2
+        every { dao.getByInstance(ehr.instanceName) } returns epicEhrDO2
+        every { dao.update(any()) } returns epicEhrDO2
 
         val put = controller.update(ehr.instanceName, ehr)
         assertTrue(put.body?.clientId == "clientId2")

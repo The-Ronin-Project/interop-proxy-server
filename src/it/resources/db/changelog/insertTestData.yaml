@@ -193,4 +193,63 @@ databaseChangeLog:
               - column:
                   name: pool_id
                   value: "14600"
-
+        - insert:
+            dbms: 'mysql'
+            tableName: io_ehr
+            columns:
+              - column:
+                  name: io_ehr_id
+                  value: "202"
+              - column:
+                  name: instance_name
+                  value: "Cerner Sandbox"
+              - column:
+                  name: name
+                  value: "CERNER"
+              - column:
+                  name: client_id
+                  value: "client"
+              - column:
+                  name: account_id
+                  value: "acc"
+              - column:
+                  name: secret
+                  value: "secret"
+        - insert:
+            dbms: 'mysql'
+            tableName: io_tenant
+            columns:
+              - column:
+                  name: io_tenant_id
+                  value: "2002"
+              - column:
+                  name: mnemonic
+                  value: "cernerMn"
+              - column:
+                  name: full_name
+                  value: "Cerner Sandbox"
+              - column:
+                  name: io_ehr_id
+                  value: "202"
+              - column:
+                  name: available_batch_start
+                  value: "22:00:00"
+              - column:
+                  name: available_batch_end
+                  value: "06:00:00"
+              - column:
+                  name: timezone
+                  value: "Etc/UTC"
+        - insert:
+            dbms: 'mysql'
+            tableName: io_tenant_cerner
+            columns:
+              - column:
+                  name: io_tenant_id
+                  value: "2002"
+              - column:
+                  name: service_endpoint
+                  value: "http://mockehr:8080/cerner"
+              - column:
+                  name: mrn_system
+                  value: "mockEHRMRNSystem"

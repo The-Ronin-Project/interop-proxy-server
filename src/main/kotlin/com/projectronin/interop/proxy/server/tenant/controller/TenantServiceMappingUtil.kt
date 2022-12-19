@@ -1,12 +1,18 @@
 package com.projectronin.interop.proxy.server.tenant.controller
 
-import com.projectronin.interop.tenant.config.model.AuthenticationConfig
+import com.projectronin.interop.common.vendor.VendorType
 import com.projectronin.interop.tenant.config.model.BatchConfig
+import com.projectronin.interop.tenant.config.model.CernerAuthenticationConfig
+import com.projectronin.interop.tenant.config.model.EpicAuthenticationConfig
 import java.time.ZoneId
+import com.projectronin.interop.proxy.server.tenant.model.Cerner as ProxyCerner
 import com.projectronin.interop.proxy.server.tenant.model.Epic as ProxyEpic
 import com.projectronin.interop.proxy.server.tenant.model.Tenant as ProxyTenant
+import com.projectronin.interop.proxy.server.tenant.model.Vendor as ProxyVendor
 import com.projectronin.interop.tenant.config.model.Tenant as TenantServiceTenant
+import com.projectronin.interop.tenant.config.model.vendor.Cerner as TenantServiceCerner
 import com.projectronin.interop.tenant.config.model.vendor.Epic as TenantServiceEpic
+import com.projectronin.interop.tenant.config.model.vendor.Vendor as TenantServerVendor
 
 fun TenantServiceTenant.toProxyTenant(): ProxyTenant {
     return ProxyTenant(
@@ -16,14 +22,14 @@ fun TenantServiceTenant.toProxyTenant(): ProxyTenant {
         timezone = timezone.id,
         availableStart = batchConfig?.availableStart,
         availableEnd = batchConfig?.availableEnd,
-        vendor = (vendor as TenantServiceEpic).toProxyEpic()
+        vendor = vendor.toProxyVendor(),
     )
 }
 
 /**
  * Creates a new [TenantServiceTenant], but gives it the passed [newId]
  */
-fun ProxyTenant.toTenantServerTenant(newId: Int): TenantServiceTenant {
+fun ProxyTenant.toTenantServerVendor(newId: Int = this.id): TenantServiceTenant {
     return TenantServiceTenant(
         internalId = newId,
         mnemonic = mnemonic,
@@ -34,12 +40,21 @@ fun ProxyTenant.toTenantServerTenant(newId: Int): TenantServiceTenant {
                 BatchConfig(start, end)
             }
         },
-        vendor = (vendor as ProxyEpic).toTenantServerEpic()
+        vendor = vendor.toTenantServerVendor()
     )
 }
 
-fun ProxyTenant.toTenantServerTenant(): TenantServiceTenant {
-    return toTenantServerTenant(id)
+fun TenantServerVendor.toProxyVendor(): ProxyVendor {
+    return when (this.type) {
+        VendorType.EPIC -> (this as TenantServiceEpic).toProxyEpic()
+        VendorType.CERNER -> (this as TenantServiceCerner).toProxyCerner()
+    }
+}
+fun ProxyVendor.toTenantServerVendor(): TenantServerVendor {
+    return when (this.vendorType) {
+        VendorType.EPIC -> (this as ProxyEpic).toTenantServerEpic()
+        VendorType.CERNER -> (this as ProxyCerner).toTenantServerCerner()
+    }
 }
 
 fun ProxyEpic.toTenantServerEpic(): TenantServiceEpic {
@@ -57,8 +72,18 @@ fun ProxyEpic.toTenantServerEpic(): TenantServiceEpic {
         hsi = hsi,
         clientId = "",
         instanceName = instanceName,
-        authenticationConfig = AuthenticationConfig(authEndpoint, "", ""),
+        authenticationConfig = EpicAuthenticationConfig(authEndpoint, "", ""),
         departmentInternalSystem = departmentInternalSystem
+    )
+}
+
+fun ProxyCerner.toTenantServerCerner(): TenantServiceCerner {
+    return TenantServiceCerner(
+        serviceEndpoint = serviceEndpoint,
+        patientMRNSystem = patientMRNSystem,
+        instanceName = instanceName,
+        clientId = "",
+        authenticationConfig = CernerAuthenticationConfig(serviceEndpoint, "", ""),
     )
 }
 
@@ -78,5 +103,13 @@ fun TenantServiceEpic.toProxyEpic(): ProxyEpic {
         hsi = hsi,
         instanceName = instanceName,
         departmentInternalSystem = departmentInternalSystem
+    )
+}
+
+fun TenantServiceCerner.toProxyCerner(): ProxyCerner {
+    return ProxyCerner(
+        serviceEndpoint = serviceEndpoint,
+        patientMRNSystem = patientMRNSystem,
+        instanceName = instanceName,
     )
 }

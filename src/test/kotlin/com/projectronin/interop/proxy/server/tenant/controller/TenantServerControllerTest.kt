@@ -5,63 +5,40 @@ import com.projectronin.interop.common.hl7.ProcessingID
 import com.projectronin.interop.proxy.server.tenant.model.TenantServer
 import com.projectronin.interop.tenant.config.TenantService
 import com.projectronin.interop.tenant.config.data.TenantServerDAO
-import com.projectronin.interop.tenant.config.data.model.TenantDO
 import com.projectronin.interop.tenant.config.data.model.TenantServerDO
 import com.projectronin.interop.tenant.config.exception.NoTenantFoundException
 import com.projectronin.interop.tenant.config.model.Tenant
-import com.projectronin.interop.tenant.config.model.vendor.Epic
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.mockkStatic
+import io.mockk.unmockkAll
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.springframework.http.HttpStatus
 import java.sql.SQLIntegrityConstraintViolationException
-import java.time.ZoneId
+import com.projectronin.interop.proxy.server.tenant.model.Tenant as ProxyTenant
 
 class TenantServerControllerTest {
     private lateinit var dao: TenantServerDAO
     private lateinit var controller: TenantServerController
     private lateinit var tenantService: TenantService
-    private val tenantDO = mockk<TenantDO> {
-        every { id } returns 1
-        every { mnemonic } returns "tenant"
-        every { name } returns "full name"
-    }
 
-    private val tenantServerDO = mockk<TenantServerDO> {
-        every { tenant } returns tenantDO
+    private val mockTenantServerDO = mockk<TenantServerDO> {
+        every { tenant } returns mockk {}
         every { id } returns 1
         every { address } returns "127.0.0.1"
         every { port } returns 80
         every { messageType } returns MessageType.MDM
         every { serverType } returns ProcessingID.VALIDATION
     }
-    private val mockTenantServiceEpic = mockk<Epic> {
-        every { release } returns "release"
-        every { serviceEndpoint } returns "serviceEndpoint"
-        every { authenticationConfig } returns mockk { every { authEndpoint } returns "auth" }
-        every { ehrUserId } returns "123"
-        every { messageType } returns "123"
-        every { practitionerProviderSystem } returns "123"
-        every { practitionerUserSystem } returns "123"
-        every { patientMRNSystem } returns "123"
-        every { patientInternalSystem } returns "123"
-        every { encounterCSNSystem } returns "123"
-        every { patientMRNTypeText } returns "MRN"
-        every { hsi } returns null
-        every { instanceName } returns "Epic Instance"
-        every { departmentInternalSystem } returns "456"
-    }
     private val mockTenantServiceTenant = mockk<Tenant> {
         every { internalId } returns 1
-        every { mnemonic } returns "first"
-        every { name } returns "full name"
-        every { batchConfig } returns null
-        every { vendor } returns mockTenantServiceEpic
-        every { name } returns "Epic Tenant"
-        every { timezone } returns ZoneId.of("America/New_York")
+    }
+    private val mockTenant = mockk<ProxyTenant> {
+        every { id } returns 1
     }
 
     @BeforeEach
@@ -69,11 +46,18 @@ class TenantServerControllerTest {
         dao = mockk()
         tenantService = mockk()
         controller = TenantServerController(dao, tenantService)
+        mockkStatic("com.projectronin.interop.proxy.server.tenant.controller.TenantServiceMappingUtilKt")
+        every { mockTenantServiceTenant.toProxyTenant() } returns mockTenant
+    }
+
+    @AfterEach
+    fun teardown() {
+        unmockkAll()
     }
 
     @Test
     fun `get works with mnemonic`() {
-        every { dao.getTenantServers("tenant") } returns listOf(tenantServerDO)
+        every { dao.getTenantServers("tenant") } returns listOf(mockTenantServerDO)
         val results = controller.get("tenant")
         assertEquals(1, results.body?.size)
         assertEquals("127.0.0.1", results.body?.first()?.address)
@@ -88,7 +72,7 @@ class TenantServerControllerTest {
 
     @Test
     fun `get works with mnemonic and type`() {
-        every { dao.getTenantServers("tenant", MessageType.MDM) } returns listOf(tenantServerDO)
+        every { dao.getTenantServers("tenant", MessageType.MDM) } returns listOf(mockTenantServerDO)
         val results = controller.getWithType("tenant", "MDM")
         assertEquals("127.0.0.1", results.body?.address)
     }
@@ -103,7 +87,7 @@ class TenantServerControllerTest {
     @Test
     fun `insert works`() {
         every { tenantService.getTenantForMnemonic("first") } returns mockTenantServiceTenant
-        every { dao.insertTenantServer(any()) } returns tenantServerDO
+        every { dao.insertTenantServer(any()) } returns mockTenantServerDO
         val tenantServer = TenantServer(
             id = 1,
             messageType = "MDM",
@@ -132,7 +116,7 @@ class TenantServerControllerTest {
     @Test
     fun `update works`() {
         every { tenantService.getTenantForMnemonic("first") } returns mockTenantServiceTenant
-        every { dao.updateTenantServer(any()) } returns tenantServerDO
+        every { dao.updateTenantServer(any()) } returns mockTenantServerDO
         val tenantServer = TenantServer(
             id = 1,
             messageType = "MDM",

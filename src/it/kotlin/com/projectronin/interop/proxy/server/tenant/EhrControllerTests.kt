@@ -47,7 +47,7 @@ class EhrControllerTests {
 
     @BeforeEach
     fun setup() {
-        backupTables(ehrDatasource, listOf("io_tenant_epic", "io_tenant_provider_pool", "io_tenant", "io_ehr"))
+        backupTables(ehrDatasource, listOf("io_tenant_epic", "io_tenant_cerner", "io_tenant_provider_pool", "io_tenant", "io_ehr"))
     }
 
     @AfterEach
@@ -77,7 +77,7 @@ class EhrControllerTests {
     }
 
     @Test
-    fun `post ehr when none exists`() {
+    fun `post ehr when none exists - epic`() {
         emptyDb()
         val query = """
             {
@@ -102,10 +102,57 @@ class EhrControllerTests {
     }
 
     @Test
+    fun `post ehr when none exists - cerner`() {
+        emptyDb()
+        val query = """
+            {
+                "vendorType": "CERNER", 
+                "instanceName": "Cerner Sandbox",
+                "clientId": "clientID",
+                "accountId": "accountId",
+                "secret": "secret"
+            }
+        """.trimIndent()
+        val httpEntity = HttpEntity(query, httpHeaders)
+        val responseEntity =
+            restTemplate.postForEntity(
+                URI("http://localhost:$port/ehrs"),
+                httpEntity,
+                Ehr::class.java
+            )
+        assertEquals(HttpStatus.CREATED, responseEntity.statusCode)
+        (responseEntity.body!!.clientId == "clientID")
+
+        emptyDb()
+    }
+
+    @Test
     fun `post fails when ehr exists`() {
         val query = """
             {
                 "vendorType": "EPIC", 
+                "instanceName": "Epic Sandbox",
+                "clientId": "clientID",
+                "publicKey": "public",
+                "privateKey": "private"
+            }
+        """.trimIndent()
+        val httpEntity = HttpEntity(query, httpHeaders)
+        val responseEntity =
+            restTemplate.postForEntity(
+                URI("http://localhost:$port/ehrs"),
+                httpEntity,
+                String::class.java
+            )
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, responseEntity.statusCode)
+    }
+
+    @Test
+    fun `post fails when missing needed values`() {
+        emptyDb()
+        val query = """
+            {
+                "vendorType": "CERNER", 
                 "instanceName": "Epic Sandbox",
                 "clientId": "clientID",
                 "publicKey": "public",
@@ -173,15 +220,15 @@ class EhrControllerTests {
     }
 
     private fun emptyDb() {
-        truncateTables(ehrDatasource, listOf("io_tenant_epic", "io_tenant_provider_pool", "io_tenant", "io_ehr"))
+        truncateTables(ehrDatasource, listOf("io_tenant_epic", "io_tenant_cerner", "io_tenant_provider_pool", "io_tenant", "io_ehr"))
     }
 
     private fun populateDb() {
-        restoreTables(ehrDatasource, listOf("io_tenant_epic", "io_tenant_provider_pool", "io_tenant", "io_ehr"))
+        restoreTables(ehrDatasource, listOf("io_tenant_epic", "io_tenant_cerner", "io_tenant_provider_pool", "io_tenant", "io_ehr"))
         removeBackups()
     }
 
     private fun removeBackups() {
-        removeBackupTables(ehrDatasource, listOf("io_tenant_epic", "io_tenant_provider_pool", "io_tenant", "io_ehr"))
+        removeBackupTables(ehrDatasource, listOf("io_tenant_epic", "io_tenant_cerner", "io_tenant_provider_pool", "io_tenant", "io_ehr"))
     }
 }

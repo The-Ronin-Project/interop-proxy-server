@@ -8,7 +8,6 @@ import com.projectronin.interop.common.resource.ResourceType
 import com.projectronin.interop.ehr.factory.EHRFactory
 import com.projectronin.interop.fhir.r4.datatype.primitive.Date
 import com.projectronin.interop.fhir.r4.datatype.primitive.FHIRString
-import com.projectronin.interop.fhir.ronin.conceptmap.ConceptMapClient
 import com.projectronin.interop.fhir.ronin.resource.RoninPatient
 import com.projectronin.interop.proxy.server.util.DateUtil
 import com.projectronin.interop.proxy.server.util.JacksonUtil
@@ -34,7 +33,7 @@ class PatientHandler(
     private val ehrFactory: EHRFactory,
     private val tenantService: TenantService,
     private val queueService: QueueService,
-    private val conceptMapClient: ConceptMapClient,
+    private val roninPatient: RoninPatient
 ) : Query {
     private val logger = KotlinLogging.logger { }
     private val dateFormatter = DateUtil()
@@ -107,9 +106,7 @@ class PatientHandler(
         tenant: Tenant,
     ): List<ProxyServerPatient> {
         if (fhirPatients.isEmpty()) return emptyList()
-        val oncologyPatient =
-            RoninPatient.create(ehrFactory.getVendorFactory(tenant).identifierService, conceptMapClient)
-        return fhirPatients.map { ProxyServerPatient(it, tenant, oncologyPatient.getRoninIdentifiers(it, tenant)) }
+        return fhirPatients.map { ProxyServerPatient(it, tenant, roninPatient.getRoninIdentifiers(it, tenant)) }
     }
 
     private fun postSearchPatientMatch(

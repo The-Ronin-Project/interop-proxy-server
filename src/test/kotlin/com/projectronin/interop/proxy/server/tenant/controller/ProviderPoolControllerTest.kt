@@ -8,7 +8,7 @@ import com.projectronin.interop.tenant.config.data.model.EhrDO
 import com.projectronin.interop.tenant.config.data.model.ProviderPoolDO
 import com.projectronin.interop.tenant.config.data.model.TenantDO
 import com.projectronin.interop.tenant.config.exception.NoTenantFoundException
-import com.projectronin.interop.tenant.config.model.AuthenticationConfig
+import com.projectronin.interop.tenant.config.model.EpicAuthenticationConfig
 import com.projectronin.interop.tenant.config.model.Tenant
 import com.projectronin.interop.tenant.config.model.vendor.Epic
 import io.mockk.every
@@ -36,7 +36,7 @@ class ProviderPoolControllerTest {
             clientId = "clientId",
             release = "release",
             serviceEndpoint = "serviceEndpoint",
-            authenticationConfig = AuthenticationConfig(
+            authenticationConfig = EpicAuthenticationConfig(
                 authEndpoint = "authEndpoint",
                 publicKey = "publicKey",
                 privateKey = "privateKey"
@@ -62,15 +62,16 @@ class ProviderPoolControllerTest {
     )
 
     private val tenantDO = TenantDO {
+        val vendor = tenant.vendorAs<Epic>()
         id = 1
         mnemonic = tenant.mnemonic
         name = tenant.name
         ehr = EhrDO {
-            instanceName = tenant.vendor.instanceName
+            instanceName = vendor.instanceName
             vendorType = VendorType.EPIC
-            clientId = tenant.vendor.clientId
-            publicKey = tenant.vendor.authenticationConfig.publicKey!!
-            privateKey = tenant.vendor.authenticationConfig.privateKey!!
+            clientId = vendor.clientId
+            publicKey = vendor.authenticationConfig.publicKey
+            privateKey = vendor.authenticationConfig.privateKey
         }
         availableBatchStart = null
         availableBatchEnd = null

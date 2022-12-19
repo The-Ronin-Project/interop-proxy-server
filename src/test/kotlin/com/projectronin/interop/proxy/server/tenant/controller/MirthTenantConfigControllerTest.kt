@@ -7,9 +7,11 @@ import com.projectronin.interop.tenant.config.data.model.MirthTenantConfigDO
 import com.projectronin.interop.tenant.config.data.model.TenantDO
 import com.projectronin.interop.tenant.config.exception.NoTenantFoundException
 import com.projectronin.interop.tenant.config.model.Tenant
-import com.projectronin.interop.tenant.config.model.vendor.Epic
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.mockkStatic
+import io.mockk.unmockkAll
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -17,11 +19,13 @@ import org.junit.jupiter.api.assertThrows
 import org.springframework.http.HttpStatus
 import java.sql.SQLIntegrityConstraintViolationException
 import java.time.ZoneId
+import com.projectronin.interop.proxy.server.tenant.model.Tenant as ProxyTenant
 
 class MirthTenantConfigControllerTest {
     private lateinit var dao: MirthTenantConfigDAO
     private lateinit var tenantService: TenantService
     private lateinit var controller: MirthTenantConfigController
+
     private val tenantDO = mockk<TenantDO> {
         every { id } returns 1
         every { mnemonic } returns "first"
@@ -32,31 +36,15 @@ class MirthTenantConfigControllerTest {
         every { locationIds } returns "bleep,blorp,bloop"
     }
 
-    // these two are just needed to properly mock the tenantService objects
-    // potentially there's a way to properly mock the .toProxyEpic and .toProxyTenant,
-    // but that doesn't seem to work easily
-    private val mockTenantServiceEpic = mockk<Epic> {
-        every { release } returns "release"
-        every { serviceEndpoint } returns "serviceEndpoint"
-        every { authenticationConfig } returns mockk { every { authEndpoint } returns "auth" }
-        every { ehrUserId } returns "123"
-        every { messageType } returns "123"
-        every { practitionerProviderSystem } returns "123"
-        every { practitionerUserSystem } returns "123"
-        every { patientMRNSystem } returns "123"
-        every { patientInternalSystem } returns "123"
-        every { encounterCSNSystem } returns "123"
-        every { patientMRNTypeText } returns "MRN"
-        every { hsi } returns null
-        every { instanceName } returns "Epic Instance"
-        every { departmentInternalSystem } returns "456"
+    private val mockProxyTenant = mockk<ProxyTenant> {
+        every { id } returns 1
     }
     private val mockTenantServiceTenant = mockk<Tenant> {
         every { internalId } returns 1
         every { mnemonic } returns "first"
         every { name } returns "full name"
         every { batchConfig } returns null
-        every { vendor } returns mockTenantServiceEpic
+        every { vendor } returns mockk()
         every { name } returns "Epic Tenant"
         every { timezone } returns ZoneId.of("America/New_York")
     }
@@ -66,6 +54,12 @@ class MirthTenantConfigControllerTest {
         dao = mockk()
         tenantService = mockk()
         controller = MirthTenantConfigController(dao, tenantService)
+        mockkStatic("com.projectronin.interop.proxy.server.tenant.controller.TenantServiceMappingUtilKt")
+        every { mockTenantServiceTenant.toProxyTenant() } returns mockProxyTenant
+    }
+    @AfterEach
+    fun teardown() {
+        unmockkAll()
     }
 
     @Test

@@ -5,20 +5,20 @@ import com.projectronin.interop.tenant.config.exception.NoEHRFoundException
 import com.projectronin.interop.tenant.config.exception.NoTenantFoundException
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.mockkStatic
+import io.mockk.unmockkAll
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.springframework.http.HttpStatus
 import java.sql.SQLIntegrityConstraintViolationException
 import java.time.LocalTime
-import java.time.ZoneId
 import com.projectronin.interop.proxy.server.tenant.model.Epic as ProxyEpic
 import com.projectronin.interop.proxy.server.tenant.model.Tenant as ProxyTenant
-import com.projectronin.interop.tenant.config.model.AuthenticationConfig as TenantServiceAuthenticationConfig
-import com.projectronin.interop.tenant.config.model.BatchConfig as TenantServiceBatchConfig
 import com.projectronin.interop.tenant.config.model.Tenant as TenantServiceTenant
-import com.projectronin.interop.tenant.config.model.vendor.Epic as TenantServiceEpic
 
 class TenantControllerTest {
     private var tenantService = mockk<TenantService>()
@@ -40,29 +40,6 @@ class TenantControllerTest {
         instanceName = "instanceName",
         departmentInternalSystem = "departmentInternalSystem"
     )
-    private val proxyVendorWithCustomMrn = proxyVendor.copy(patientMRNTypeText = "Custom MRN")
-    private val tenantServiceVendor = TenantServiceEpic(
-        clientId = "shouldn'tmatter",
-        instanceName = "instanceName",
-        authenticationConfig = TenantServiceAuthenticationConfig(
-            authEndpoint = "authEndpoint",
-            publicKey = "doesn'tmatter",
-            privateKey = "doesn'tmatter"
-        ),
-        serviceEndpoint = "serviceEndpoint",
-        release = "release",
-        ehrUserId = "ehrUserId",
-        messageType = "messageType",
-        practitionerProviderSystem = "providerSystemExample",
-        practitionerUserSystem = "userSystemExample",
-        patientMRNSystem = "mrnSystemExample",
-        patientInternalSystem = "internalSystemExample",
-        encounterCSNSystem = "encounterCSNSystem",
-        patientMRNTypeText = "patientMRNTypeText",
-        departmentInternalSystem = "departmentInternalSystem"
-    )
-    private val tenantServiceVendorWithCustomMrn = tenantServiceVendor.copy(patientMRNTypeText = "Custom MRN")
-
     private val proxyTenant = ProxyTenant(
         id = 1,
         mnemonic = "mnemonic1",
@@ -72,19 +49,9 @@ class TenantControllerTest {
         name = "test tenant",
         timezone = "America/Los_Angeles"
     )
-    private val proxyTenantWithCustomMrn = proxyTenant.copy(vendor = proxyVendorWithCustomMrn)
-    private val tenantServiceTenant = TenantServiceTenant(
-        internalId = 1,
-        mnemonic = "mnemonic1",
-        batchConfig = TenantServiceBatchConfig(
-            availableStart = LocalTime.of(20, 0),
-            availableEnd = LocalTime.of(6, 0)
-        ),
-        vendor = tenantServiceVendor,
-        name = "test tenant",
-        timezone = ZoneId.of("America/Los_Angeles")
-    )
-    private val tenantServiceTenantWithCustomMrn = tenantServiceTenant.copy(vendor = tenantServiceVendorWithCustomMrn)
+    private val tenantServiceTenant = mockk<TenantServiceTenant> {
+        every { internalId } returns 1
+    }
     private val proxyTenantNoTimes = ProxyTenant(
         id = 2,
         mnemonic = "mnemonic2",
@@ -94,15 +61,19 @@ class TenantControllerTest {
         name = "test tenant2",
         timezone = "America/Denver"
     )
-    private val tenantServiceTenantNoBatch = TenantServiceTenant(
-        internalId = 2,
-        mnemonic = "mnemonic2",
-        batchConfig = null,
-        vendor = tenantServiceVendor,
-        name = "test tenant2",
-        timezone = ZoneId.of("America/Denver")
-    )
-
+    private val tenantServiceTenantNoBatch = mockk<TenantServiceTenant> {}
+    @BeforeEach
+    fun setup() {
+        mockkStatic("com.projectronin.interop.proxy.server.tenant.controller.TenantServiceMappingUtilKt")
+        every { tenantServiceTenant.toProxyTenant() } returns proxyTenant
+        every { tenantServiceTenantNoBatch.toProxyTenant() } returns proxyTenantNoTimes
+        every { proxyTenant.toTenantServerVendor() } returns tenantServiceTenant
+        every { proxyTenantNoTimes.toTenantServerVendor() } returns tenantServiceTenantNoBatch
+    }
+    @AfterEach
+    fun teardown() {
+        unmockkAll()
+    }
     @Test
     fun `can read all tenants`() {
         every { tenantService.getAllTenants() } returns listOf(tenantServiceTenant, tenantServiceTenantNoBatch)
@@ -150,14 +121,6 @@ class TenantControllerTest {
     }
 
     @Test
-    fun `can insert a tenant with custom MRN`() {
-        every { tenantService.insertTenant(any()) } returns tenantServiceTenantWithCustomMrn
-        val response = tenantController.insert(proxyTenantWithCustomMrn)
-        assertEquals(HttpStatus.CREATED, response.statusCode)
-        assertEquals(proxyTenantWithCustomMrn, response.body)
-    }
-
-    @Test
     fun `insert with just a start doesn't create batch config`() {
         val proxyTenantNoStart = ProxyTenant(
             id = 2,
@@ -168,6 +131,7 @@ class TenantControllerTest {
             name = "test tenant2",
             timezone = "America/Denver"
         )
+        every { proxyTenantNoStart.toTenantServerVendor() } returns mockk()
         every { tenantService.insertTenant(any()) } returns tenantServiceTenantNoBatch
         val response = tenantController.insert(proxyTenantNoStart)
         assertEquals(HttpStatus.CREATED, response.statusCode)
@@ -185,6 +149,7 @@ class TenantControllerTest {
             name = "test tenant2",
             timezone = "America/Denver"
         )
+        every { proxyTenantNoEnd.toTenantServerVendor() } returns mockk()
         every { tenantService.insertTenant(any()) } returns tenantServiceTenantNoBatch
         val response = tenantController.insert(proxyTenantNoEnd)
         assertEquals(HttpStatus.CREATED, response.statusCode)
@@ -193,25 +158,19 @@ class TenantControllerTest {
 
     @Test
     fun `can update a tenant`() {
-        every { tenantService.getTenantForMnemonic(tenantServiceTenant.mnemonic) } returns tenantServiceTenant
+        every { tenantService.getTenantForMnemonic("mnemonic1") } returns tenantServiceTenant
         every { tenantService.updateTenant(any()) } returns tenantServiceTenant
-        val response = tenantController.update("mnemonic1", proxyTenant)
+        val tenant = mockk<ProxyTenant> {}
+        every { tenant.toTenantServerVendor(1) } returns tenantServiceTenant
+        every { tenantServiceTenant.toProxyTenant() } returns tenant
+        val response = tenantController.update("mnemonic1", tenant)
         assertEquals(HttpStatus.OK, response.statusCode)
-        assertEquals(proxyTenant, response.body)
-    }
-
-    @Test
-    fun `can update a tenant with custom MRN`() {
-        every { tenantService.getTenantForMnemonic(tenantServiceTenant.mnemonic) } returns tenantServiceTenant
-        every { tenantService.updateTenant(any()) } returns tenantServiceTenantWithCustomMrn
-        val response = tenantController.update("mnemonic1", proxyTenantWithCustomMrn)
-        assertEquals(HttpStatus.OK, response.statusCode)
-        assertEquals(proxyTenantWithCustomMrn, response.body)
+        assertEquals(tenant, response.body)
     }
 
     @Test
     fun `update fails due to no tenant found`() {
-        every { tenantService.getTenantForMnemonic(tenantServiceTenant.mnemonic) } returns null
+        every { tenantService.getTenantForMnemonic("mnemonic1") } returns null
         assertThrows<NoTenantFoundException> {
             tenantController.update("mnemonic1", proxyTenant)
         }

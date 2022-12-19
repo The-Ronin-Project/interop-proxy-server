@@ -9,11 +9,15 @@ import com.projectronin.interop.common.vendor.VendorType
  * @property clientId The client ID associated with this EHR vendor.
  * @property publicKey The public key used for authentication.
  * @property privateKey The private key used for authentication.
+ * @property accountId The Cerner account ID
+ * @property secret The cerner secret
  */
 data class Ehr(
     val vendorType: VendorType,
     val instanceName: String,
     val clientId: String,
-    val publicKey: String,
-    val privateKey: String
+    val publicKey: String? = null,
+    val privateKey: String? = null,
+    val accountId: String? = null,
+    val secret: String? = null
 )
