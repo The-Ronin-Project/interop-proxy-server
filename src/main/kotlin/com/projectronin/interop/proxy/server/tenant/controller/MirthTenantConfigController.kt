@@ -1,11 +1,11 @@
 package com.projectronin.interop.proxy.server.tenant.controller
 
 import com.projectronin.interop.proxy.server.tenant.model.MirthTenantConfig
-import com.projectronin.interop.proxy.server.tenant.model.Tenant
+import com.projectronin.interop.proxy.server.tenant.model.converters.toMirthTenantConfigDO
+import com.projectronin.interop.proxy.server.tenant.model.converters.toProxyMirthTenantConfig
+import com.projectronin.interop.proxy.server.tenant.model.converters.toProxyTenant
 import com.projectronin.interop.tenant.config.TenantService
 import com.projectronin.interop.tenant.config.data.MirthTenantConfigDAO
-import com.projectronin.interop.tenant.config.data.model.MirthTenantConfigDO
-import com.projectronin.interop.tenant.config.data.model.TenantDO
 import com.projectronin.interop.tenant.config.exception.NoTenantFoundException
 import datadog.trace.api.Trace
 import mu.KotlinLogging
@@ -37,7 +37,7 @@ class MirthTenantConfigController(
         val mirthTenantConfigs = mirthTenantConfigDAO.getByTenantMnemonic(tenantMnemonic)
             ?: throw NoTenantFoundException("No Mirth Config Found with that mnemonic")
 
-        return ResponseEntity(mirthTenantConfigs.toMirthTenantConfig(), HttpStatus.OK)
+        return ResponseEntity(mirthTenantConfigs.toProxyMirthTenantConfig(), HttpStatus.OK)
     }
 
     @PostMapping
@@ -52,7 +52,7 @@ class MirthTenantConfigController(
         val insertMirthTenantConfig = mirthTenantConfig.toMirthTenantConfigDO(tenant.toProxyTenant())
 
         val inserted = mirthTenantConfigDAO.insertConfig(insertMirthTenantConfig)
-        return ResponseEntity(inserted.toMirthTenantConfig(), HttpStatus.CREATED)
+        return ResponseEntity(inserted.toProxyMirthTenantConfig(), HttpStatus.CREATED)
     }
 
     @PutMapping
@@ -68,7 +68,7 @@ class MirthTenantConfigController(
         val result = mirthTenantConfigDAO.updateConfig(updatedMirthTenantConfig)
         val status = result?.let { HttpStatus.OK } ?: HttpStatus.NOT_FOUND
 
-        return ResponseEntity(result?.toMirthTenantConfig(), status)
+        return ResponseEntity(result?.toProxyMirthTenantConfig(), status)
     }
 
     @ExceptionHandler(value = [(NoTenantFoundException::class)])
@@ -81,25 +81,5 @@ class MirthTenantConfigController(
     fun handleException(e: Exception): ResponseEntity<String> {
         logger.warn(e) { "Unspecified error occurred during MirthTenantConfigController ${e.message}" }
         return ResponseEntity(e.message, HttpStatus.INTERNAL_SERVER_ERROR)
-    }
-
-    fun MirthTenantConfigDO.toMirthTenantConfig(): MirthTenantConfig {
-        return MirthTenantConfig(
-            locationIds =
-            if (locationIds.isEmpty()) {
-                emptyList()
-            } else {
-                locationIds.split(",")
-            }
-        )
-    }
-
-    fun MirthTenantConfig.toMirthTenantConfigDO(proxyTenant: Tenant): MirthTenantConfigDO {
-        return MirthTenantConfigDO {
-            locationIds = this@toMirthTenantConfigDO.locationIds.joinToString(",")
-            tenant = TenantDO {
-                id = proxyTenant.id
-            }
-        }
     }
 }

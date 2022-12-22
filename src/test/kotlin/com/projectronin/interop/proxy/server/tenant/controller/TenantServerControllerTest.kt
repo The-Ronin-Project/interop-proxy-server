@@ -3,6 +3,7 @@ package com.projectronin.interop.proxy.server.tenant.controller
 import com.projectronin.interop.common.hl7.MessageType
 import com.projectronin.interop.common.hl7.ProcessingID
 import com.projectronin.interop.proxy.server.tenant.model.TenantServer
+import com.projectronin.interop.proxy.server.tenant.model.converters.toProxyTenant
 import com.projectronin.interop.tenant.config.TenantService
 import com.projectronin.interop.tenant.config.data.TenantServerDAO
 import com.projectronin.interop.tenant.config.data.model.TenantServerDO
@@ -46,7 +47,7 @@ class TenantServerControllerTest {
         dao = mockk()
         tenantService = mockk()
         controller = TenantServerController(dao, tenantService)
-        mockkStatic("com.projectronin.interop.proxy.server.tenant.controller.TenantServiceMappingUtilKt")
+        mockkStatic("com.projectronin.interop.proxy.server.tenant.model.converters.TenantConvertersKt")
         every { mockTenantServiceTenant.toProxyTenant() } returns mockTenant
     }
 

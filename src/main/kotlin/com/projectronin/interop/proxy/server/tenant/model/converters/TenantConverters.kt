@@ -1,4 +1,4 @@
-package com.projectronin.interop.proxy.server.tenant.controller
+package com.projectronin.interop.proxy.server.tenant.model.converters
 
 import com.projectronin.interop.common.vendor.VendorType
 import com.projectronin.interop.tenant.config.model.BatchConfig
@@ -26,10 +26,44 @@ fun TenantServiceTenant.toProxyTenant(): ProxyTenant {
     )
 }
 
+private fun TenantServerVendor.toProxyVendor(): ProxyVendor {
+    return when (this.type) {
+        VendorType.EPIC -> (this as TenantServiceEpic).toProxyEpic()
+        VendorType.CERNER -> (this as TenantServiceCerner).toProxyCerner()
+    }
+}
+
+private fun TenantServiceEpic.toProxyEpic(): ProxyEpic {
+    return ProxyEpic(
+        release = release,
+        serviceEndpoint = serviceEndpoint,
+        authEndpoint = authenticationConfig.authEndpoint,
+        ehrUserId = ehrUserId,
+        messageType = messageType,
+        practitionerProviderSystem = practitionerProviderSystem,
+        practitionerUserSystem = practitionerUserSystem,
+        patientMRNSystem = patientMRNSystem,
+        patientInternalSystem = patientInternalSystem,
+        patientMRNTypeText = patientMRNTypeText,
+        encounterCSNSystem = encounterCSNSystem,
+        hsi = hsi,
+        instanceName = instanceName,
+        departmentInternalSystem = departmentInternalSystem
+    )
+}
+
+private fun TenantServiceCerner.toProxyCerner(): ProxyCerner {
+    return ProxyCerner(
+        serviceEndpoint = serviceEndpoint,
+        patientMRNSystem = patientMRNSystem,
+        instanceName = instanceName,
+    )
+}
+
 /**
  * Creates a new [TenantServiceTenant], but gives it the passed [newId]
  */
-fun ProxyTenant.toTenantServerVendor(newId: Int = this.id): TenantServiceTenant {
+fun ProxyTenant.toTenantServerTenant(newId: Int = this.id): TenantServiceTenant {
     return TenantServiceTenant(
         internalId = newId,
         mnemonic = mnemonic,
@@ -40,24 +74,18 @@ fun ProxyTenant.toTenantServerVendor(newId: Int = this.id): TenantServiceTenant 
                 BatchConfig(start, end)
             }
         },
-        vendor = vendor.toTenantServerVendor()
+        vendor = vendor.toTenantServerTenant()
     )
 }
 
-fun TenantServerVendor.toProxyVendor(): ProxyVendor {
-    return when (this.type) {
-        VendorType.EPIC -> (this as TenantServiceEpic).toProxyEpic()
-        VendorType.CERNER -> (this as TenantServiceCerner).toProxyCerner()
-    }
-}
-fun ProxyVendor.toTenantServerVendor(): TenantServerVendor {
+fun ProxyVendor.toTenantServerTenant(): TenantServerVendor {
     return when (this.vendorType) {
         VendorType.EPIC -> (this as ProxyEpic).toTenantServerEpic()
         VendorType.CERNER -> (this as ProxyCerner).toTenantServerCerner()
     }
 }
 
-fun ProxyEpic.toTenantServerEpic(): TenantServiceEpic {
+private fun ProxyEpic.toTenantServerEpic(): TenantServiceEpic {
     return TenantServiceEpic(
         release = release,
         serviceEndpoint = serviceEndpoint,
@@ -77,39 +105,12 @@ fun ProxyEpic.toTenantServerEpic(): TenantServiceEpic {
     )
 }
 
-fun ProxyCerner.toTenantServerCerner(): TenantServiceCerner {
+private fun ProxyCerner.toTenantServerCerner(): TenantServiceCerner {
     return TenantServiceCerner(
         serviceEndpoint = serviceEndpoint,
         patientMRNSystem = patientMRNSystem,
         instanceName = instanceName,
         clientId = "",
         authenticationConfig = CernerAuthenticationConfig(serviceEndpoint, "", ""),
-    )
-}
-
-fun TenantServiceEpic.toProxyEpic(): ProxyEpic {
-    return ProxyEpic(
-        release = release,
-        serviceEndpoint = serviceEndpoint,
-        authEndpoint = authenticationConfig.authEndpoint,
-        ehrUserId = ehrUserId,
-        messageType = messageType,
-        practitionerProviderSystem = practitionerProviderSystem,
-        practitionerUserSystem = practitionerUserSystem,
-        patientMRNSystem = patientMRNSystem,
-        patientInternalSystem = patientInternalSystem,
-        patientMRNTypeText = patientMRNTypeText,
-        encounterCSNSystem = encounterCSNSystem,
-        hsi = hsi,
-        instanceName = instanceName,
-        departmentInternalSystem = departmentInternalSystem
-    )
-}
-
-fun TenantServiceCerner.toProxyCerner(): ProxyCerner {
-    return ProxyCerner(
-        serviceEndpoint = serviceEndpoint,
-        patientMRNSystem = patientMRNSystem,
-        instanceName = instanceName,
     )
 }

@@ -1,6 +1,8 @@
 package com.projectronin.interop.proxy.server.tenant.controller
 
 import com.projectronin.interop.proxy.server.tenant.model.Tenant
+import com.projectronin.interop.proxy.server.tenant.model.converters.toProxyTenant
+import com.projectronin.interop.proxy.server.tenant.model.converters.toTenantServerTenant
 import com.projectronin.interop.tenant.config.TenantService
 import com.projectronin.interop.tenant.config.exception.NoEHRFoundException
 import com.projectronin.interop.tenant.config.exception.NoTenantFoundException
@@ -43,7 +45,7 @@ class TenantController(private val tenantService: TenantService) {
     @Trace
     fun insert(@RequestBody tenant: Tenant): ResponseEntity<Tenant> {
         logger.info { "Inserting new tenant with mnemonic ${tenant.mnemonic}" }
-        val newTenant = tenantService.insertTenant(tenant.toTenantServerVendor())
+        val newTenant = tenantService.insertTenant(tenant.toTenantServerTenant())
         return ResponseEntity(newTenant.toProxyTenant(), HttpStatus.CREATED)
     }
 
@@ -55,7 +57,7 @@ class TenantController(private val tenantService: TenantService) {
         val tenantToUpdate = tenantService.getTenantForMnemonic(tenantMnemonic)
             ?: throw NoTenantFoundException("No tenant found for mnemonic $tenantMnemonic")
 
-        val newTenant = tenantService.updateTenant(tenant.toTenantServerVendor(tenantToUpdate.internalId))
+        val newTenant = tenantService.updateTenant(tenant.toTenantServerTenant(tenantToUpdate.internalId))
         return ResponseEntity(newTenant.toProxyTenant(), HttpStatus.OK)
     }
 

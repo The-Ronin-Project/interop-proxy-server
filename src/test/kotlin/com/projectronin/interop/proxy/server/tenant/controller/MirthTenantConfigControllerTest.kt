@@ -1,6 +1,7 @@
 package com.projectronin.interop.proxy.server.tenant.controller
 
 import com.projectronin.interop.proxy.server.tenant.model.MirthTenantConfig
+import com.projectronin.interop.proxy.server.tenant.model.converters.toProxyTenant
 import com.projectronin.interop.tenant.config.TenantService
 import com.projectronin.interop.tenant.config.data.MirthTenantConfigDAO
 import com.projectronin.interop.tenant.config.data.model.MirthTenantConfigDO
@@ -54,7 +55,7 @@ class MirthTenantConfigControllerTest {
         dao = mockk()
         tenantService = mockk()
         controller = MirthTenantConfigController(dao, tenantService)
-        mockkStatic("com.projectronin.interop.proxy.server.tenant.controller.TenantServiceMappingUtilKt")
+        mockkStatic("com.projectronin.interop.proxy.server.tenant.model.converters.TenantConvertersKt")
         every { mockTenantServiceTenant.toProxyTenant() } returns mockProxyTenant
     }
     @AfterEach

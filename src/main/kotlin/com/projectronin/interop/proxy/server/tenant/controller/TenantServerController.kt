@@ -1,13 +1,12 @@
 package com.projectronin.interop.proxy.server.tenant.controller
 
 import com.projectronin.interop.common.hl7.MessageType
-import com.projectronin.interop.common.hl7.ProcessingID
-import com.projectronin.interop.proxy.server.tenant.model.Tenant
 import com.projectronin.interop.proxy.server.tenant.model.TenantServer
+import com.projectronin.interop.proxy.server.tenant.model.converters.toProxyTenant
+import com.projectronin.interop.proxy.server.tenant.model.converters.toProxyTenantServer
+import com.projectronin.interop.proxy.server.tenant.model.converters.toTenantServerDO
 import com.projectronin.interop.tenant.config.TenantService
 import com.projectronin.interop.tenant.config.data.TenantServerDAO
-import com.projectronin.interop.tenant.config.data.model.TenantDO
-import com.projectronin.interop.tenant.config.data.model.TenantServerDO
 import com.projectronin.interop.tenant.config.exception.NoTenantFoundException
 import datadog.trace.api.Trace
 import mu.KotlinLogging
@@ -36,7 +35,7 @@ class TenantServerController(private val tenantServerDAO: TenantServerDAO, priva
         logger.info { "Retrieving TenantServer with mnemonic $tenantMnemonic and type $type" }
         val tenantServerList = tenantServerDAO.getTenantServers(tenantMnemonic, MessageType.valueOf(type))
         if (tenantServerList.isEmpty()) return ResponseEntity(HttpStatus.NOT_FOUND)
-        return ResponseEntity(tenantServerList.single().toTenantServer(), HttpStatus.OK)
+        return ResponseEntity(tenantServerList.single().toProxyTenantServer(), HttpStatus.OK)
     }
 
     @GetMapping
@@ -45,7 +44,7 @@ class TenantServerController(private val tenantServerDAO: TenantServerDAO, priva
         logger.info { "Retrieving TenantServer with mnemonic $tenantMnemonic" }
         val tenantServerList = tenantServerDAO.getTenantServers(tenantMnemonic)
         if (tenantServerList.isEmpty()) return ResponseEntity(HttpStatus.NOT_FOUND)
-        return ResponseEntity(tenantServerList.map { it.toTenantServer() }, HttpStatus.OK)
+        return ResponseEntity(tenantServerList.map { it.toProxyTenantServer() }, HttpStatus.OK)
     }
 
     @PostMapping
@@ -59,7 +58,7 @@ class TenantServerController(private val tenantServerDAO: TenantServerDAO, priva
             ?: throw NoTenantFoundException("No Tenant With that mnemonic")
         val tenantServerDO = tenantServer.toTenantServerDO(tenant.toProxyTenant())
         val inserted = tenantServerDAO.insertTenantServer(tenantServerDO)
-        return ResponseEntity(inserted.toTenantServer(), HttpStatus.CREATED)
+        return ResponseEntity(inserted.toProxyTenantServer(), HttpStatus.CREATED)
     }
 
     @PutMapping
@@ -75,7 +74,7 @@ class TenantServerController(private val tenantServerDAO: TenantServerDAO, priva
         val updated = tenantServerDAO.updateTenantServer(tenantServerDO)
         val status = updated?.let { HttpStatus.OK } ?: HttpStatus.NOT_FOUND
 
-        return ResponseEntity(updated?.toTenantServer(), status)
+        return ResponseEntity(updated?.toProxyTenantServer(), status)
     }
 
     @ExceptionHandler(value = [(NoTenantFoundException::class)])
@@ -88,28 +87,5 @@ class TenantServerController(private val tenantServerDAO: TenantServerDAO, priva
     fun handleException(e: Exception): ResponseEntity<String> {
         logger.warn(e) { "Unspecified error occurred during TenantServerController ${e.message}" }
         return ResponseEntity(e.message, HttpStatus.INTERNAL_SERVER_ERROR)
-    }
-
-    fun TenantServerDO.toTenantServer(): TenantServer {
-        return TenantServer(
-            id = id,
-            messageType = messageType.name,
-            address = address,
-            port = port,
-            serverType = serverType.abbreviation
-        )
-    }
-
-    fun TenantServer.toTenantServerDO(proxyTenant: Tenant): TenantServerDO {
-        return TenantServerDO {
-            id = this@toTenantServerDO.id
-            messageType = MessageType.valueOf(this@toTenantServerDO.messageType)
-            address = this@toTenantServerDO.address
-            port = this@toTenantServerDO.port
-            serverType = ProcessingID.values().first { it.abbreviation == this@toTenantServerDO.serverType }
-            tenant = TenantDO {
-                id = proxyTenant.id
-            }
-        }
     }
 }

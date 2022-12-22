@@ -1,31 +1,28 @@
-package com.projectronin.interop.proxy.server.tenant.controller
+package com.projectronin.interop.proxy.server.tenant.model.converters
 
+import com.projectronin.interop.proxy.server.tenant.model.Cerner
+import com.projectronin.interop.proxy.server.tenant.model.Epic
 import com.projectronin.interop.tenant.config.model.BatchConfig
 import com.projectronin.interop.tenant.config.model.CernerAuthenticationConfig
 import com.projectronin.interop.tenant.config.model.EpicAuthenticationConfig
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNotNull
+import com.projectronin.interop.tenant.config.model.Tenant
+import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import java.time.LocalTime
 import java.time.ZoneId
-import com.projectronin.interop.proxy.server.tenant.model.Cerner as ProxyCerner
-import com.projectronin.interop.proxy.server.tenant.model.Epic as ProxyEpic
-import com.projectronin.interop.proxy.server.tenant.model.Tenant as ProxyTenant
-import com.projectronin.interop.tenant.config.model.Tenant as TenantServiceTenant
-import com.projectronin.interop.tenant.config.model.vendor.Cerner as TenantServiceCerner
-import com.projectronin.interop.tenant.config.model.vendor.Epic as TenantServiceEpic
-class TenantServiceUtilsTest {
+
+class TenantConvertersTest {
 
     @Test
     fun `toProxyTenant - cerner`() {
-        val tenantServerCerner = TenantServiceCerner(
+        val tenantServerCerner = com.projectronin.interop.tenant.config.model.vendor.Cerner(
             serviceEndpoint = "serviceEndpoint",
             patientMRNSystem = "patientMRNSystem",
             instanceName = "instanceName",
             clientId = "notLeaked",
             authenticationConfig = CernerAuthenticationConfig("serviceEndpoint", "notleaked", "notleaked"),
         )
-        val tenantServiceTenant = TenantServiceTenant(
+        val tenantServiceTenant = Tenant(
             internalId = 1,
             mnemonic = "mnemonic",
             name = "name",
@@ -34,16 +31,16 @@ class TenantServiceUtilsTest {
             vendor = tenantServerCerner
         )
         val proxyTenant = tenantServiceTenant.toProxyTenant()
-        assertNotNull(proxyTenant)
-        val cerner = proxyTenant.vendor as ProxyCerner
-        assertEquals("serviceEndpoint", cerner.serviceEndpoint)
-        assertEquals("patientMRNSystem", cerner.patientMRNSystem)
-        assertEquals("instanceName", cerner.instanceName)
+        Assertions.assertNotNull(proxyTenant)
+        val cerner = proxyTenant.vendor as Cerner
+        Assertions.assertEquals("serviceEndpoint", cerner.serviceEndpoint)
+        Assertions.assertEquals("patientMRNSystem", cerner.patientMRNSystem)
+        Assertions.assertEquals("instanceName", cerner.instanceName)
     }
 
     @Test
     fun `toProxyTenant - epic`() {
-        val tenantServerEpic = TenantServiceEpic(
+        val tenantServerEpic = com.projectronin.interop.tenant.config.model.vendor.Epic(
             clientId = "notLeaked",
             instanceName = "instanceName",
             authenticationConfig = EpicAuthenticationConfig(
@@ -63,7 +60,7 @@ class TenantServiceUtilsTest {
             patientMRNTypeText = "patientMRNTypeText",
             departmentInternalSystem = "departmentInternalSystem"
         )
-        val tenantServiceTenant = TenantServiceTenant(
+        val tenantServiceTenant = Tenant(
             internalId = 1,
             mnemonic = "mnemonic",
             name = "name",
@@ -72,44 +69,44 @@ class TenantServiceUtilsTest {
             vendor = tenantServerEpic
         )
         val proxyTenant = tenantServiceTenant.toProxyTenant()
-        assertNotNull(proxyTenant)
-        val epic = proxyTenant.vendor as ProxyEpic
-        assertEquals("serviceEndpoint", epic.serviceEndpoint)
-        assertEquals("mrnSystemExample", epic.patientMRNSystem)
-        assertEquals("instanceName", epic.instanceName)
+        Assertions.assertNotNull(proxyTenant)
+        val epic = proxyTenant.vendor as Epic
+        Assertions.assertEquals("serviceEndpoint", epic.serviceEndpoint)
+        Assertions.assertEquals("mrnSystemExample", epic.patientMRNSystem)
+        Assertions.assertEquals("instanceName", epic.instanceName)
     }
 
     @Test
     fun `toTenantServer - cerner`() {
-        val proxyTenant = ProxyTenant(
+        val proxyTenant = com.projectronin.interop.proxy.server.tenant.model.Tenant(
             id = 1,
             mnemonic = "mnemonic",
             name = "name",
             availableStart = LocalTime.of(12, 0),
             availableEnd = LocalTime.of(12, 0),
             timezone = "America/Los_Angeles",
-            vendor = ProxyCerner(
+            vendor = Cerner(
                 "serviceEndpoint",
                 instanceName = "instanceName",
                 patientMRNSystem = "patientMRNSystem"
             )
         )
-        val tenantServerTenant = proxyTenant.toTenantServerVendor()
-        assertEquals(1, tenantServerTenant.internalId)
-        val cerner = tenantServerTenant.vendor as TenantServiceCerner
-        assertEquals("serviceEndpoint", cerner.serviceEndpoint)
+        val tenantServerTenant = proxyTenant.toTenantServerTenant()
+        Assertions.assertEquals(1, tenantServerTenant.internalId)
+        val cerner = tenantServerTenant.vendor as com.projectronin.interop.tenant.config.model.vendor.Cerner
+        Assertions.assertEquals("serviceEndpoint", cerner.serviceEndpoint)
     }
 
     @Test
     fun `toTenantServer - epic`() {
-        val proxyTenant = ProxyTenant(
+        val proxyTenant = com.projectronin.interop.proxy.server.tenant.model.Tenant(
             id = 1,
             mnemonic = "mnemonic",
             name = "name",
             availableStart = null,
             availableEnd = null,
             timezone = "America/Los_Angeles",
-            vendor = ProxyEpic(
+            vendor = Epic(
                 release = "release",
                 serviceEndpoint = "serviceEndpoint",
                 authEndpoint = "authEndpoint",
@@ -126,31 +123,31 @@ class TenantServiceUtilsTest {
                 departmentInternalSystem = "departmentInternalSystem"
             )
         )
-        val tenantServerTenant = proxyTenant.toTenantServerVendor()
-        assertEquals(1, tenantServerTenant.internalId)
-        val epic = tenantServerTenant.vendor as TenantServiceEpic
-        assertEquals("serviceEndpoint", epic.serviceEndpoint)
+        val tenantServerTenant = proxyTenant.toTenantServerTenant()
+        Assertions.assertEquals(1, tenantServerTenant.internalId)
+        val epic = tenantServerTenant.vendor as com.projectronin.interop.tenant.config.model.vendor.Epic
+        Assertions.assertEquals("serviceEndpoint", epic.serviceEndpoint)
     }
 
     // code cov test
     @Test
     fun `toTenantServerTenant() - batch start but no end and new id`() {
-        val proxyTenant = ProxyTenant(
+        val proxyTenant = com.projectronin.interop.proxy.server.tenant.model.Tenant(
             id = 1,
             mnemonic = "mnemonic",
             name = "name",
             availableStart = LocalTime.of(12, 0),
             availableEnd = null,
             timezone = "America/Los_Angeles",
-            vendor = ProxyCerner(
+            vendor = Cerner(
                 "serviceEndpoint",
                 instanceName = "instanceName",
                 patientMRNSystem = "patientMRNSystem"
             )
         )
-        val newTenantServerTenant = proxyTenant.toTenantServerVendor(999)
-        assertEquals(999, newTenantServerTenant.internalId)
-        val newCerner = newTenantServerTenant.vendor as TenantServiceCerner
-        assertEquals("serviceEndpoint", newCerner.serviceEndpoint)
+        val newTenantServerTenant = proxyTenant.toTenantServerTenant(999)
+        Assertions.assertEquals(999, newTenantServerTenant.internalId)
+        val newCerner = newTenantServerTenant.vendor as com.projectronin.interop.tenant.config.model.vendor.Cerner
+        Assertions.assertEquals("serviceEndpoint", newCerner.serviceEndpoint)
     }
 }

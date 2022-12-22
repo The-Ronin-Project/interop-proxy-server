@@ -1,5 +1,7 @@
 package com.projectronin.interop.proxy.server.tenant.controller
 
+import com.projectronin.interop.proxy.server.tenant.model.converters.toProxyTenant
+import com.projectronin.interop.proxy.server.tenant.model.converters.toTenantServerTenant
 import com.projectronin.interop.tenant.config.TenantService
 import com.projectronin.interop.tenant.config.exception.NoEHRFoundException
 import com.projectronin.interop.tenant.config.exception.NoTenantFoundException
@@ -64,11 +66,11 @@ class TenantControllerTest {
     private val tenantServiceTenantNoBatch = mockk<TenantServiceTenant> {}
     @BeforeEach
     fun setup() {
-        mockkStatic("com.projectronin.interop.proxy.server.tenant.controller.TenantServiceMappingUtilKt")
+        mockkStatic("com.projectronin.interop.proxy.server.tenant.model.converters.TenantConvertersKt")
         every { tenantServiceTenant.toProxyTenant() } returns proxyTenant
         every { tenantServiceTenantNoBatch.toProxyTenant() } returns proxyTenantNoTimes
-        every { proxyTenant.toTenantServerVendor() } returns tenantServiceTenant
-        every { proxyTenantNoTimes.toTenantServerVendor() } returns tenantServiceTenantNoBatch
+        every { proxyTenant.toTenantServerTenant() } returns tenantServiceTenant
+        every { proxyTenantNoTimes.toTenantServerTenant() } returns tenantServiceTenantNoBatch
     }
     @AfterEach
     fun teardown() {
@@ -131,7 +133,7 @@ class TenantControllerTest {
             name = "test tenant2",
             timezone = "America/Denver"
         )
-        every { proxyTenantNoStart.toTenantServerVendor() } returns mockk()
+        every { proxyTenantNoStart.toTenantServerTenant() } returns mockk()
         every { tenantService.insertTenant(any()) } returns tenantServiceTenantNoBatch
         val response = tenantController.insert(proxyTenantNoStart)
         assertEquals(HttpStatus.CREATED, response.statusCode)
@@ -149,7 +151,7 @@ class TenantControllerTest {
             name = "test tenant2",
             timezone = "America/Denver"
         )
-        every { proxyTenantNoEnd.toTenantServerVendor() } returns mockk()
+        every { proxyTenantNoEnd.toTenantServerTenant() } returns mockk()
         every { tenantService.insertTenant(any()) } returns tenantServiceTenantNoBatch
         val response = tenantController.insert(proxyTenantNoEnd)
         assertEquals(HttpStatus.CREATED, response.statusCode)
@@ -161,7 +163,7 @@ class TenantControllerTest {
         every { tenantService.getTenantForMnemonic("mnemonic1") } returns tenantServiceTenant
         every { tenantService.updateTenant(any()) } returns tenantServiceTenant
         val tenant = mockk<ProxyTenant> {}
-        every { tenant.toTenantServerVendor(1) } returns tenantServiceTenant
+        every { tenant.toTenantServerTenant(1) } returns tenantServiceTenant
         every { tenantServiceTenant.toProxyTenant() } returns tenant
         val response = tenantController.update("mnemonic1", tenant)
         assertEquals(HttpStatus.OK, response.statusCode)
