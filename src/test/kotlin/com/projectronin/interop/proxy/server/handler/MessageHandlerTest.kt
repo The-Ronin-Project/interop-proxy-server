@@ -140,11 +140,11 @@ class MessageHandlerTest {
                 "Test Message",
                 "MRN#1",
                 listOf(
-                    EHRRecipient("doc1", identifierVendorIdentifier)
+                    EHRRecipient("TEST_TENANT-doc1", identifierVendorIdentifier)
                 )
             )
         val fhirIdentifiers = FHIRIdentifiers(
-            id = Id("doc1"),
+            id = Id("TEST_TENANT-doc1"),
             identifiers = listOf(identifier)
         )
 
@@ -159,7 +159,11 @@ class MessageHandlerTest {
         every { practitionerService.getPractitionerIdentifiers("TEST_TENANT", "doc1") } returns listOf(identifier)
 
         val messageInput =
-            MessageInput("Test Message", MessagePatientInput("MRN#1"), listOf(MessageRecipientInput("doc1")))
+            MessageInput(
+                "Test Message",
+                MessagePatientInput("MRN#1"),
+                listOf(MessageRecipientInput("TEST_TENANT-doc1"))
+            )
         val actualResponse = messageHandler.sendMessage("TEST_TENANT", messageInput, dfe).data
 
         assertEquals("sent", actualResponse)
@@ -178,21 +182,21 @@ class MessageHandlerTest {
                 "MRN#1",
                 listOf(
                     EHRRecipient(
-                        "doc1",
+                        "TEST_TENANT-doc1",
                         identifierVendorIdentifier
                     ),
                     EHRRecipient(
-                        "pool1",
+                        "TEST_TENANT-pool1",
                         identifierVendorIdentifier
                     )
                 )
             )
         val fhirIdentifiersDoc = FHIRIdentifiers(
-            id = Id("doc1"),
+            id = Id("TEST_TENANT-doc1"),
             identifiers = listOf(identifier)
         )
         val fhirIdentifiersPool = FHIRIdentifiers(
-            id = Id("pool1"),
+            id = Id("TEST_TENANT-pool1"),
             identifiers = listOf(identifier)
         )
 
@@ -214,7 +218,7 @@ class MessageHandlerTest {
             MessageInput(
                 "Test Message",
                 MessagePatientInput("MRN#1"),
-                listOf(MessageRecipientInput("doc1"), MessageRecipientInput("pool1"))
+                listOf(MessageRecipientInput("TEST_TENANT-doc1"), MessageRecipientInput("TEST_TENANT-pool1"))
             )
 
         every { practitionerService.getPractitionerIdentifiers("TEST_TENANT", "doc1") } returns listOf(identifier)

@@ -39,7 +39,12 @@ private var setupDone = false
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("it")
 @ContextConfiguration(initializers = [(InteropProxyServerAuthInitializer::class)])
-@AidboxData("aidbox/practitioner1.yaml", "aidbox/practitioner2.yaml", "aidbox/practitionerPool.yaml", "aidbox/patient2.yaml")
+@AidboxData(
+    "aidbox/practitioner1.yaml",
+    "aidbox/practitioner2.yaml",
+    "aidbox/practitionerPool.yaml",
+    "aidbox/patient2.yaml"
+)
 @AidboxTest
 class InteropProxyServerIntegratedMessageTests {
     @LocalServerPort
@@ -98,7 +103,7 @@ class InteropProxyServerIntegratedMessageTests {
     fun `server handles message mutation`() {
         val tenantId = "ronin"
         val mrn = "202497"
-        val id = "PractitionerFHIRID1"
+        val id = "ronin-PractitionerFHIRID1"
         val message = "Test message"
         val mutation =
             """mutation sendMessage (${'$'}message: MessageInput!, ${'$'}tenantId: String!) {sendMessage (message: ${'$'}message, tenantId: ${'$'}tenantId)}"""
@@ -139,7 +144,7 @@ class InteropProxyServerIntegratedMessageTests {
     fun `server handles pool provider`() {
         val tenantId = "ronin"
         val mrn = "202497"
-        val id = "PractitionerPoolFHIRID1"
+        val id = "ronin-PractitionerPoolFHIRID1"
         val message = "Test pool message"
         val mutation =
             """mutation sendMessage (${'$'}message: MessageInput!, ${'$'}tenantId: String!) {sendMessage (message: ${'$'}message, tenantId: ${'$'}tenantId)}"""
@@ -180,8 +185,8 @@ class InteropProxyServerIntegratedMessageTests {
     fun `server handles pool and non-pool providers`() {
         val tenantId = "ronin"
         val mrn = "202497"
-        val idPool = "PractitionerPoolFHIRID1"
-        val idNotPool = "PractitionerFHIRID1"
+        val idPool = "ronin-PractitionerPoolFHIRID1"
+        val idNotPool = "ronin-PractitionerFHIRID1"
         val message = "Test pool message"
         val mutation =
             """mutation sendMessage (${'$'}message: MessageInput!, ${'$'}tenantId: String!) {sendMessage (message: ${'$'}message, tenantId: ${'$'}tenantId)}"""
@@ -227,7 +232,7 @@ class InteropProxyServerIntegratedMessageTests {
     fun `server handles bad tenant`() {
         val tenantId = "fake"
         val mrn = "202497"
-        val id = "PractitionerFHIRID1"
+        val id = "ronin-PractitionerFHIRID1"
         val message = "Test message"
         val mutation =
             """mutation sendMessage (${'$'}message: MessageInput!, ${'$'}tenantId: String!) {sendMessage (message: ${'$'}message, tenantId: ${'$'}tenantId)}"""
@@ -270,7 +275,7 @@ class InteropProxyServerIntegratedMessageTests {
     fun `server handles epic bad data response`() {
         val tenantId = "ronin"
         val mrn = "fake"
-        val id = "PractitionerFHIRIDI1"
+        val id = "ronin-PractitionerFHIRIDI1"
         val message = "Test message"
         val mutation =
             """mutation sendMessage (${'$'}message: MessageInput!, ${'$'}tenantId: String!) {sendMessage (message: ${'$'}message, tenantId: ${'$'}tenantId)}"""
@@ -308,7 +313,7 @@ class InteropProxyServerIntegratedMessageTests {
     fun `server handles epic missing data`() {
         val tenantId = "ronin"
         val mrn = "202497"
-        val id = "PractitionerFHIRIDI1"
+        val id = "ronin-PractitionerFHIRIDI1"
         val mutation =
             """mutation sendMessage (${'$'}message: MessageInput!, ${'$'}tenantId: String!) {sendMessage (message: ${'$'}message, tenantId: ${'$'}tenantId)}"""
 
@@ -344,7 +349,7 @@ class InteropProxyServerIntegratedMessageTests {
     fun `server accepts valid m2m auth`() {
         val tenantId = "ronin"
         val mrn = "202497"
-        val id = "PractitionerFHIRID1"
+        val id = "ronin-PractitionerFHIRID1"
         val message = "Test message"
         val mutation =
             """mutation sendMessage (${'$'}message: MessageInput!, ${'$'}tenantId: String!) {sendMessage (message: ${'$'}message, tenantId: ${'$'}tenantId)}"""
@@ -396,7 +401,7 @@ class InteropProxyServerIntegratedMessageTests {
     fun `server handles provider tenant mismatch`() {
         val tenantId = "ronin"
         val mrn = "202497"
-        val id = "7e52ab01-0393-4e97-afd8-5b0649ab49e2"
+        val id = "ronin-7e52ab01-0393-4e97-afd8-5b0649ab49e2"
         val message = "Test message"
         val mutation =
             """mutation sendMessage (${'$'}message: MessageInput!, ${'$'}tenantId: String!) {sendMessage (message: ${'$'}message, tenantId: ${'$'}tenantId)}"""
@@ -431,7 +436,7 @@ class InteropProxyServerIntegratedMessageTests {
         assertEquals(HttpStatus.OK, responseEntity.statusCode)
         assertTrue(
             errorJSONObject["message"].asText()
-                .contains("No practitioner user identifier with system 'mockEHRUserSystem' found for resource with FHIR id '7e52ab01-0393-4e97-afd8-5b0649ab49e2")
+                .contains("No practitioner user identifier with system 'mockEHRUserSystem' found for resource with FHIR id 'ronin-7e52ab01-0393-4e97-afd8-5b0649ab49e2")
         )
     }
 }

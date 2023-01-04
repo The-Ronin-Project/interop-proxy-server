@@ -69,7 +69,7 @@ class NoteHandler(
 
         val patient = when (noteInput.patientIdType) {
             PatientIdType.FHIR -> patientService.getPatientByUDPId(tenantId, noteInput.patientId)
-            PatientIdType.MRN -> patientService.getPatientByUDPId(
+            PatientIdType.MRN -> patientService.getPatientByFHIRId(
                 tenantId,
                 patientService.getPatientFHIRIds(
                     tenantId,

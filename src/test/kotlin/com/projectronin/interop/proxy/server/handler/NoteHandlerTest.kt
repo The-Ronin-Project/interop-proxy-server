@@ -92,7 +92,12 @@ class NoteHandlerTest {
         val tenant = mockk<Tenant>()
 
         every { dfe.graphQlContext.get<InteropGraphQLContext>(INTEROP_CONTEXT_KEY).authzTenantId } returns "apposnd"
-        every { practitionerService.getPractitionerByUDPId("apposnd", "PractitionerTestId") } returns oncologyPractitioner
+        every {
+            practitionerService.getPractitionerByUDPId(
+                "apposnd",
+                "PractitionerTestId"
+            )
+        } returns oncologyPractitioner
         every { patientService.getPatientByUDPId("apposnd", "PatientTestId") } returns oncologyPatient
         every { tenantService.getTenantForMnemonic("apposnd") } returns tenant
         every {
@@ -125,7 +130,12 @@ class NoteHandlerTest {
         val tenant = mockk<Tenant>()
 
         every { dfe.graphQlContext.get<InteropGraphQLContext>(INTEROP_CONTEXT_KEY).authzTenantId } returns "apposnd"
-        every { practitionerService.getPractitionerByUDPId("apposnd", "PractitionerTestId") } returns oncologyPractitioner
+        every {
+            practitionerService.getPractitionerByUDPId(
+                "apposnd",
+                "PractitionerTestId"
+            )
+        } returns oncologyPractitioner
         every { patientService.getPatientByUDPId("apposnd", "PatientTestId") } returns oncologyPatient
         every { tenantService.getTenantForMnemonic("apposnd") } returns tenant
         every {
@@ -159,7 +169,12 @@ class NoteHandlerTest {
 
         every { dfe.graphQlContext.get<InteropGraphQLContext>(INTEROP_CONTEXT_KEY).authzTenantId } returns "apposnd"
         every { tenantService.getTenantForMnemonic("apposnd") } returns tenant
-        every { practitionerService.getPractitionerByUDPId("apposnd", "PractitionerTestId") } returns oncologyPractitioner
+        every {
+            practitionerService.getPractitionerByUDPId(
+                "apposnd",
+                "PractitionerTestId"
+            )
+        } returns oncologyPractitioner
         val noteInput =
             NoteInput(
                 "PatientMRNId",
@@ -176,7 +191,7 @@ class NoteHandlerTest {
                 mapOf("key" to SystemValue(system = CodeSystem.RONIN_MRN.uri.value!!, value = noteInput.patientId))
             ).getValue("key")
         } returns "PatientFhirId"
-        every { patientService.getPatientByUDPId("apposnd", "PatientFhirId") } returns oncologyPatient
+        every { patientService.getPatientByFHIRId("apposnd", "PatientFhirId") } returns oncologyPatient
         every {
             mdmService.generateMDM(
                 "apposnd",
@@ -199,7 +214,12 @@ class NoteHandlerTest {
 
         every { dfe.graphQlContext.get<InteropGraphQLContext>(INTEROP_CONTEXT_KEY).authzTenantId } returns "apposnd"
         every { tenantService.getTenantForMnemonic("apposnd") } returns tenant
-        every { practitionerService.getPractitionerByUDPId("apposnd", "PractitionerTestId") } returns oncologyPractitioner
+        every {
+            practitionerService.getPractitionerByUDPId(
+                "apposnd",
+                "PractitionerTestId"
+            )
+        } returns oncologyPractitioner
         val noteInput =
             NoteInput(
                 "PatientMRNId",
@@ -216,7 +236,7 @@ class NoteHandlerTest {
                 mapOf("key" to SystemValue(system = CodeSystem.RONIN_MRN.uri.value!!, value = noteInput.patientId))
             ).getValue("key")
         } returns "PatientFhirId"
-        every { patientService.getPatientByUDPId("apposnd", "PatientFhirId") } returns oncologyPatient
+        every { patientService.getPatientByFHIRId("apposnd", "PatientFhirId") } returns oncologyPatient
         every {
             mdmService.generateMDM(
                 "apposnd",

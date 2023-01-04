@@ -13,6 +13,7 @@ import com.projectronin.interop.ehr.inputs.FHIRIdentifiers
 import com.projectronin.interop.ehr.inputs.IdentifierVendorIdentifier
 import com.projectronin.interop.fhir.r4.CodeSystem
 import com.projectronin.interop.fhir.r4.datatype.primitive.Id
+import com.projectronin.interop.fhir.ronin.util.unlocalize
 import com.projectronin.interop.proxy.server.input.MessageInput
 import com.projectronin.interop.proxy.server.input.MessageRecipientInput
 import com.projectronin.interop.tenant.config.TenantService
@@ -70,7 +71,7 @@ class MessageHandler(
 
     private fun mapEHRRecipient(tenant: Tenant, recipientInput: MessageRecipientInput): EHRRecipient {
         val practitionerIdentifiers =
-            practitionerService.getPractitionerIdentifiers(tenant.mnemonic, recipientInput.fhirId)
+            practitionerService.getPractitionerIdentifiers(tenant.mnemonic, recipientInput.fhirId.unlocalize(tenant))
         val vendorIdentifier = ehrFactory.getVendorFactory(tenant).identifierService.getPractitionerUserIdentifier(
             tenant,
             FHIRIdentifiers(

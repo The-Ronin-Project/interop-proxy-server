@@ -71,8 +71,8 @@ class InteropProxyServerIntegratedNoteTests {
     @Test
     fun `server handles note mutation with patient FHIR Id`() {
         val notetext = "Test Note"
-        val patientid = "654321"
-        val practitionerid = "654321"
+        val patientid = "ronin-654321"
+        val practitionerid = "ronin-654321"
         val tenantId = "ronin"
         val mutation =
             """mutation sendNote(${'$'}noteInput: NoteInput!, ${'$'}tenantId: String!) {sendNote(noteInput: ${'$'}noteInput, tenantId: ${'$'}tenantId)}"""
@@ -107,8 +107,8 @@ class InteropProxyServerIntegratedNoteTests {
     @Test
     fun `server handles note mutation with patient FHIR Id and M2M auth`() {
         val notetext = "Test Note"
-        val patientid = "654321"
-        val practitionerid = "654321"
+        val patientid = "ronin-654321"
+        val practitionerid = "ronin-654321"
         val tenantId = "ronin"
         val mutation =
             """mutation sendNote(${'$'}noteInput: NoteInput!, ${'$'}tenantId: String!) {sendNote(noteInput: ${'$'}noteInput, tenantId: ${'$'}tenantId)}"""
@@ -158,7 +158,7 @@ class InteropProxyServerIntegratedNoteTests {
     fun `server handles note mutation with patient MRN`() {
         val notetext = "Test Note"
         val patientid = "123456"
-        val practitionerid = "654321"
+        val practitionerid = "ronin-654321"
         val tenantId = "ronin"
         val mutation =
             """mutation sendNote(${'$'}noteInput: NoteInput!, ${'$'}tenantId: String!) {sendNote(noteInput: ${'$'}noteInput, tenantId: ${'$'}tenantId)}"""

@@ -1,28 +1,28 @@
 - resourceType: "Practitioner"
   id: "ronin-PractitionerFHIRID1"
   identifier:
-  - value: "   E1000"
-    system: "mockEHRProviderSystem"
-    type:
-      text: "Internal"
-  - value: "ronin"
-    system: "http://projectronin.com/id/tenantId"
-    type:
-      text: "External"
-  - value: "fhirId1"
-    system: "urn:oid:1.2.840.114350.1.13.0.1.7.2.836982"
-    type:
-      text: "Internal"
-  - type:
-      text: "FHIR STU3"
-      coding:
-        - system: "http://projectronin.com/id/fhir"
-          code: "STU3"
-          display: "FHIR STU3 ID"
-    system: "http://projectronin.com/id/fhir"
-    value: "PractitionerFHIRID1"
+    - value: "   E1000"
+      system: "mockEHRProviderSystem"
+      type:
+        text: "Internal"
+    - value: "ronin"
+      system: "http://projectronin.com/id/tenantId"
+      type:
+        text: "External"
+    - value: "fhirId1"
+      system: "urn:oid:1.2.840.114350.1.13.0.1.7.2.836982"
+      type:
+        text: "Internal"
+    - type:
+        text: "FHIR STU3"
+        coding:
+          - system: "http://projectronin.com/id/fhir"
+            code: "STU3"
+            display: "FHIR STU3 ID"
+      system: "http://projectronin.com/id/fhir"
+      value: "PractitionerFHIRID1"
 - resourceType: "Practitioner"
-  id: "fhirId2"
+  id: "ronin-fhirId2"
   identifier:
     - value: "12345"
       system: "urn:oid:1.2.840.114350.1.13.0.1.7.2.836982"

@@ -1,5 +1,5 @@
 resourceType: "Practitioner"
-id: "PractitionerFHIRID2"
+id: "ronin-PractitionerFHIRID2"
 identifier:
   - value: IPMD2
     system: mockEHRUserSystem

@@ -1,5 +1,5 @@
 resourceType: "Practitioner"
-id: "PractitionerPoolFHIRID1"
+id: "ronin-PractitionerPoolFHIRID1"
 identifier:
   - value: ProviderWithPool
     system: mockEHRUserSystem
