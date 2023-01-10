@@ -13,8 +13,8 @@ import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
 import com.projectronin.interop.fhir.r4.datatype.CodeableConcept as R4CodeableConcept
 import com.projectronin.interop.fhir.r4.datatype.Identifier as R4Identifier
-import com.projectronin.interop.fhir.r4.datatype.Participant as R4Participant
 import com.projectronin.interop.fhir.r4.resource.Appointment as R4Appointment
+import com.projectronin.interop.fhir.r4.resource.Participant as R4Participant
 
 internal class AppointmentTest {
     private val mockTenant = mockk<Tenant> {

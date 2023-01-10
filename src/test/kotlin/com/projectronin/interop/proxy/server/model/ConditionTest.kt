@@ -17,13 +17,13 @@ import org.junit.jupiter.api.assertThrows
 import com.projectronin.interop.fhir.r4.datatype.Age as R4Age
 import com.projectronin.interop.fhir.r4.datatype.Annotation as R4Annotation
 import com.projectronin.interop.fhir.r4.datatype.CodeableConcept as R4CodeableConcept
-import com.projectronin.interop.fhir.r4.datatype.ConditionEvidence as R4ConditionEvidence
-import com.projectronin.interop.fhir.r4.datatype.ConditionStage as R4ConditionStage
 import com.projectronin.interop.fhir.r4.datatype.Identifier as R4Identifier
 import com.projectronin.interop.fhir.r4.datatype.Period as R4Period
 import com.projectronin.interop.fhir.r4.datatype.Range as R4Range
 import com.projectronin.interop.fhir.r4.datatype.Reference as R4Reference
 import com.projectronin.interop.fhir.r4.resource.Condition as R4Condition
+import com.projectronin.interop.fhir.r4.resource.ConditionEvidence as R4ConditionEvidence
+import com.projectronin.interop.fhir.r4.resource.ConditionStage as R4ConditionStage
 
 internal class ConditionTest {
     private val mockTenant = mockk<Tenant> {

@@ -7,8 +7,8 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
-import com.projectronin.interop.fhir.r4.datatype.ConditionStage as R4Stage
 import com.projectronin.interop.fhir.r4.datatype.Reference as R4Reference
+import com.projectronin.interop.fhir.r4.resource.ConditionStage as R4Stage
 
 internal class StageTest {
     private val mockTenant = relaxedMockk<Tenant>()

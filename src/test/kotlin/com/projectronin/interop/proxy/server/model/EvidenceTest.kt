@@ -6,8 +6,8 @@ import io.mockk.every
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import com.projectronin.interop.fhir.r4.datatype.CodeableConcept as R4CodeableConcept
-import com.projectronin.interop.fhir.r4.datatype.ConditionEvidence as R4Evidence
 import com.projectronin.interop.fhir.r4.datatype.Reference as R4Reference
+import com.projectronin.interop.fhir.r4.resource.ConditionEvidence as R4Evidence
 
 internal class EvidenceTest {
     private val mockTenant = relaxedMockk<Tenant>()

@@ -1,7 +1,7 @@
 package com.projectronin.interop.proxy.server.model
 
 import com.expediagroup.graphql.generator.annotations.GraphQLDescription
-import com.projectronin.interop.fhir.r4.datatype.ConditionEvidence
+import com.projectronin.interop.fhir.r4.resource.ConditionEvidence
 import com.projectronin.interop.tenant.config.model.Tenant
 
 @GraphQLDescription("Supporting evidence")
