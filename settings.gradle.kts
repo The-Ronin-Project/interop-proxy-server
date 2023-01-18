@@ -6,7 +6,7 @@ pluginManagement {
         id("com.projectronin.interop.gradle.spring-boot") version "2.2.1"
         id("com.projectronin.interop.gradle.integration") version "2.2.1"
 
-        id("com.expediagroup.graphql") version "6.3.3"
+        id("com.expediagroup.graphql") version "6.3.5"
     }
 
     repositories {
