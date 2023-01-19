@@ -9,6 +9,7 @@ import com.projectronin.interop.ehr.factory.EHRFactory
 import com.projectronin.interop.fhir.r4.datatype.primitive.Date
 import com.projectronin.interop.fhir.r4.datatype.primitive.FHIRString
 import com.projectronin.interop.fhir.ronin.resource.RoninPatient
+import com.projectronin.interop.proxy.server.model.PatientsByTenant
 import com.projectronin.interop.proxy.server.util.DateUtil
 import com.projectronin.interop.proxy.server.util.JacksonUtil
 import com.projectronin.interop.queue.QueueService
@@ -20,8 +21,12 @@ import graphql.GraphQLError
 import graphql.GraphQLException
 import graphql.execution.DataFetcherResult
 import graphql.schema.DataFetchingEnvironment
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.runBlocking
 import mu.KotlinLogging
 import org.springframework.stereotype.Component
+import java.util.Collections
 import com.projectronin.interop.fhir.r4.resource.Patient as R4Patient
 import com.projectronin.interop.proxy.server.model.Patient as ProxyServerPatient
 
@@ -54,7 +59,69 @@ class PatientHandler(
         // make sure requested tenant is valid
         val tenant = findAndValidateTenant(dfe, tenantService, tenantId, false)
 
-        // Call patient service
+        val patients = searchPatients(tenant, family, given, birthdate, findPatientErrors)
+        queuePatients(patients, tenant)
+
+        // Translate for return
+        return DataFetcherResult.newResult<List<ProxyServerPatient>>()
+            .data(mapFHIRPatients(patients, tenant))
+            .errors(findPatientErrors).build()
+    }
+
+    @GraphQLDescription("Finds patient(s) across the supplied tenants that exactly match on family name, given name, and birthdate (YYYY-mm-dd format).")
+    @Trace
+    fun patientsByTenants(
+        tenantIds: List<String>,
+        family: String,
+        given: String,
+        birthdate: String,
+        dfe: DataFetchingEnvironment // automatically added to request calls
+    ): DataFetcherResult<List<PatientsByTenant>> {
+        logger.info { "Processing patient query for tenants: $tenantIds" }
+
+        val patientSearchErrors = Collections.synchronizedList(mutableListOf<GraphQLError>())
+
+        val patientsByTenants = runBlocking {
+            val requests = tenantIds.map {
+                async {
+                    val tenant = runCatching { findTenant(tenantService, it) }.fold(
+                        onSuccess = { it },
+                        onFailure = {
+                            patientSearchErrors.add(GraphQLException(it.message).toGraphQLError())
+                            null
+                        }
+                    )
+
+                    val patients = tenant?.let { searchPatients(tenant, family, given, birthdate, patientSearchErrors) }
+                        ?: emptyList()
+                    tenant to patients
+                }
+            }
+            awaitAll(*requests.toTypedArray())
+        }
+
+        val responseData = patientsByTenants.mapNotNull { (tenant, patients) ->
+            tenant?.let {
+                queuePatients(patients, tenant)
+
+                PatientsByTenant(
+                    tenant.mnemonic,
+                    mapFHIRPatients(patients, tenant)
+                )
+            }
+        }
+
+        return DataFetcherResult.newResult<List<PatientsByTenant>>()
+            .data(responseData).errors(patientSearchErrors).build()
+    }
+
+    private fun searchPatients(
+        tenant: Tenant,
+        family: String,
+        given: String,
+        birthdate: String,
+        errors: MutableList<GraphQLError>
+    ): List<R4Patient> {
         val patients = try {
             val patientService = ehrFactory.getVendorFactory(tenant).patientService
 
@@ -65,23 +132,25 @@ class PatientHandler(
                 birthDate = dateFormatter.parseDateString(birthdate)
             )
         } catch (e: Exception) {
-            findPatientErrors.add(GraphQLException(e.message).toGraphQLError())
-            logger.error(e.getLogMarker(), e) { "Patient query for tenant $tenantId contains errors" }
+            errors.add(GraphQLException(e.message).toGraphQLError())
+            logger.error(e.getLogMarker(), e) { "Patient query for tenant ${tenant.mnemonic} contains errors" }
             listOf()
         }
-        logger.debug { "Patient query for tenant $tenantId returned ${patients.size} patients." }
+        logger.debug { "Patient query for tenant ${tenant.mnemonic} returned ${patients.size} patients." }
         // post search matching
         val postMatchPatients = postSearchPatientMatch(patients, family, given, birthdate)
-        logger.debug { "Patient post filtering for tenant $tenantId returned ${postMatchPatients.size} patients." }
+        logger.debug { "Patient post filtering for tenant ${tenant.mnemonic} returned ${postMatchPatients.size} patients." }
+        return postMatchPatients
+    }
 
-        // Send patients to queue service
+    private fun queuePatients(patients: List<R4Patient>, tenant: Tenant) {
         try {
             queueService.enqueueMessages(
-                postMatchPatients.map {
+                patients.map {
                     ApiMessage(
                         id = null,
                         resourceType = ResourceType.PATIENT,
-                        tenant = tenantId,
+                        tenant = tenant.mnemonic,
                         text = JacksonUtil.writeJsonValue(it)
                     )
                 }
@@ -90,12 +159,7 @@ class PatientHandler(
             logger.warn { "Exception sending patients to queue: ${e.message}" }
         }
 
-        logger.debug { "Patient results for $tenantId sent to queue" }
-
-        // Translate for return
-        return DataFetcherResult.newResult<List<ProxyServerPatient>>()
-            .data(mapFHIRPatients(postMatchPatients, tenant))
-            .errors(findPatientErrors).build()
+        logger.debug { "Patient results for ${tenant.mnemonic} sent to queue" }
     }
 
     /**

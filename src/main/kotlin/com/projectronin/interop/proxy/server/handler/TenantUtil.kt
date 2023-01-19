@@ -34,7 +34,14 @@ fun findAndValidateTenant(
         )
     }
 
-    return tenantService.getTenantForMnemonic(requestedTenantId) ?: throw HttpClientErrorException(
-        NOT_FOUND, "Invalid Tenant: $requestedTenantId"
-    )
+    return findTenant(tenantService, requestedTenantId)
 }
+
+/**
+ * Retrieves the Tenant for the requested [tenantId] using the [tenantService]. [HttpClientErrorException] is returned indicating [NOT_FOUND] if no tenant was found for the [tenantId].
+ */
+fun findTenant(tenantService: TenantService, tenantId: String): Tenant =
+    tenantService.getTenantForMnemonic(tenantId) ?: throw HttpClientErrorException(
+        NOT_FOUND,
+        "Invalid Tenant: $tenantId"
+    )

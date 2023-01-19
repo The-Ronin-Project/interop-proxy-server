@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
@@ -60,6 +61,7 @@ class InteropProxyServerIntegratedPatientTests {
         httpHeaders.set("Content-Type", "application/graphql")
         httpHeaders.set("Authorization", "Fake Token")
     }
+
     companion object {
         val docker =
             DockerComposeContainer(File(InteropProxyServerIntegratedPatientTests::class.java.getResource("/kafka/docker-compose-kafka.yaml")!!.file)).waitingFor(
@@ -245,5 +247,42 @@ class InteropProxyServerIntegratedPatientTests {
         assertEquals(HttpStatus.OK, responseEntity.statusCode)
         assertFalse(resultJSONObject.has("errors"))
         assertEquals(expectedJSONObject.toString(), resultJSONObject.toString())
+    }
+
+    @Disabled("We do not currently have a good or easy way to stand up multiple Mock EHRs to allow us to do this test properly")
+    @Test
+    fun `patientsByTenants can support searching multiple tenants`() {
+    }
+
+    @Test
+    fun `patientsByTenants handles unknown tenant and known tenant together`() {
+        val query = this::class.java.getResource("/graphql/patientsByTenants.graphql")!!.readText()
+
+        val m2mHeaders = HttpHeaders()
+
+        val header = PlainHeader.Builder().contentType("JWT").build()
+        val payload = JWTClaimsSet.Builder().issuer("https://dev-euweyz5a.us.auth0.com/").audience("proxy").build()
+        val jwtM2M = PlainJWT(header, payload).serialize()
+
+        m2mHeaders.set("Content-Type", "application/graphql")
+        m2mHeaders.set("Authorization", "Bearer $jwtM2M")
+
+        every { m2mJwtDecoder.decode(jwtM2M) } returns (mockk<Jwt>())
+
+        val httpEntity = HttpEntity(query, m2mHeaders)
+
+        val responseEntity =
+            restTemplate.postForEntity(URI("http://localhost:$port/graphql"), httpEntity, String::class.java)
+
+        val resultJSONObject = objectMapper.readTree(responseEntity.body)
+
+        assertEquals(HttpStatus.OK, responseEntity.statusCode)
+
+        assertEquals("404 Invalid Tenant: unknown", resultJSONObject["errors"][0]["message"].asText())
+
+        val roninTenant = resultJSONObject["data"]["patientsByTenants"][0]
+        assertEquals("ronin", roninTenant["tenantId"].asText())
+        assertEquals(1, roninTenant["patients"].size())
+        assertEquals("ronin-PatientFHIRID1", roninTenant["patients"][0]["id"].asText())
     }
 }

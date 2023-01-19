@@ -1,0 +1,31 @@
+query {
+    patientsByTenants(tenantIds: ["ronin", "unknown"], family: "Mychart", given: "Allison", birthdate: "1987-01-15") {
+        tenantId
+        patients {
+            address {
+                city
+                line
+                postalCode
+                state
+                use
+            }
+            birthDate
+            gender
+            id
+            identifier {
+                system
+                value
+            }
+            name {
+                family
+                given
+                use
+            }
+            telecom {
+                system
+                use
+                value
+            }
+        }
+    }
+}

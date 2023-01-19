@@ -12,6 +12,8 @@ import com.projectronin.interop.fhir.r4.datatype.primitive.Date
 import com.projectronin.interop.fhir.r4.datatype.primitive.Id
 import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
 import com.projectronin.interop.fhir.r4.datatype.primitive.asFHIR
+import com.projectronin.interop.fhir.r4.valueset.AdministrativeGender
+import com.projectronin.interop.fhir.r4.valueset.NameUse.USUAL
 import com.projectronin.interop.fhir.ronin.resource.RoninPatient
 import com.projectronin.interop.proxy.server.context.INTEROP_CONTEXT_KEY
 import com.projectronin.interop.proxy.server.context.InteropGraphQLContext
@@ -232,7 +234,7 @@ class PatientHandlerTest {
             )
             every { name } returns listOf(
                 mockk {
-                    every { use } returns com.projectronin.interop.fhir.r4.valueset.NameUse.USUAL.asCode()
+                    every { use } returns USUAL.asCode()
                     every { family?.value } returns "Smith"
                     every { given } returns listOf("Josh").asFHIR()
                 }
@@ -325,7 +327,7 @@ class PatientHandlerTest {
             )
             every { name } returns listOf(
                 mockk {
-                    every { use } returns com.projectronin.interop.fhir.r4.valueset.NameUse.USUAL.asCode()
+                    every { use } returns USUAL.asCode()
                     every { family?.value } returns "Smith"
                     every { given } returns listOf("Josh").asFHIR()
                 }
@@ -419,7 +421,7 @@ class PatientHandlerTest {
             )
             every { name } returns listOf(
                 mockk {
-                    every { use } returns com.projectronin.interop.fhir.r4.valueset.NameUse.USUAL.asCode()
+                    every { use } returns USUAL.asCode()
                     every { family?.value } returns "Smith"
                     every { given } returns listOf("Josh").asFHIR()
                 }
@@ -550,7 +552,7 @@ class PatientHandlerTest {
             )
             every { name } returns listOf(
                 mockk {
-                    every { use } returns com.projectronin.interop.fhir.r4.valueset.NameUse.USUAL.asCode()
+                    every { use } returns USUAL.asCode()
                     every { family?.value } returns "Smith"
                     every { given } returns listOf("Josh").asFHIR()
                 }
@@ -584,7 +586,7 @@ class PatientHandlerTest {
             )
             every { name } returns listOf(
                 mockk {
-                    every { use } returns com.projectronin.interop.fhir.r4.valueset.NameUse.USUAL.asCode()
+                    every { use } returns USUAL.asCode()
                     every { family?.value } returns "Potato"
                     every { given } returns listOf("Tomato").asFHIR()
                 }
@@ -660,7 +662,7 @@ class PatientHandlerTest {
             )
             every { name } returns listOf(
                 mockk {
-                    every { use } returns com.projectronin.interop.fhir.r4.valueset.NameUse.USUAL.asCode()
+                    every { use } returns USUAL.asCode()
                     every { family?.value } returns "Smith"
                     every { given } returns listOf("Josh").asFHIR()
                 }
@@ -694,7 +696,7 @@ class PatientHandlerTest {
             )
             every { name } returns listOf(
                 mockk {
-                    every { use } returns com.projectronin.interop.fhir.r4.valueset.NameUse.USUAL.asCode()
+                    every { use } returns USUAL.asCode()
                     every { family?.value } returns "Potato"
                     every { given } returns listOf("Tomato").asFHIR()
                 }
@@ -772,12 +774,12 @@ class PatientHandlerTest {
             )
             every { name } returns listOf(
                 mockk {
-                    every { use } returns com.projectronin.interop.fhir.r4.valueset.NameUse.USUAL.asCode()
+                    every { use } returns USUAL.asCode()
                     every { family?.value } returns "Smyth"
                     every { given } returns listOf("Josh").asFHIR()
                 },
                 mockk {
-                    every { use } returns com.projectronin.interop.fhir.r4.valueset.NameUse.USUAL.asCode()
+                    every { use } returns USUAL.asCode()
                     every { family?.value } returns "Smith"
                     every { given } returns listOf("Joshua").asFHIR()
                 }
@@ -813,7 +815,7 @@ class PatientHandlerTest {
             )
             every { name } returns listOf(
                 mockk {
-                    every { use } returns com.projectronin.interop.fhir.r4.valueset.NameUse.USUAL.asCode()
+                    every { use } returns USUAL.asCode()
                     every { family?.value } returns "Smith"
                     every { given } returns listOf("Josh").asFHIR()
                 }
@@ -849,7 +851,7 @@ class PatientHandlerTest {
             )
             every { name } returns listOf(
                 mockk {
-                    every { use } returns com.projectronin.interop.fhir.r4.valueset.NameUse.USUAL.asCode()
+                    every { use } returns USUAL.asCode()
                     every { family?.value } returns "Smith"
                     every { given } returns listOf("Josh").asFHIR()
                 }
@@ -925,7 +927,7 @@ class PatientHandlerTest {
             )
             every { name } returns listOf(
                 mockk {
-                    every { use } returns com.projectronin.interop.fhir.r4.valueset.NameUse.USUAL.asCode()
+                    every { use } returns USUAL.asCode()
                     every { family?.value } returns "Smith"
                     every { given } returns listOf("Josh").asFHIR()
                 }
@@ -959,12 +961,12 @@ class PatientHandlerTest {
             )
             every { name } returns listOf(
                 mockk {
-                    every { use } returns com.projectronin.interop.fhir.r4.valueset.NameUse.USUAL.asCode()
+                    every { use } returns USUAL.asCode()
                     every { family?.value } returns "Smith"
                     every { given } returns listOf("Josh", "Potato").asFHIR()
                 },
                 mockk {
-                    every { use } returns com.projectronin.interop.fhir.r4.valueset.NameUse.USUAL.asCode()
+                    every { use } returns USUAL.asCode()
                     every { family?.value } returns "Tomato"
                     every { given } returns listOf("Josh", "Potato").asFHIR()
                 }
@@ -1042,7 +1044,7 @@ class PatientHandlerTest {
             )
             every { name } returns listOf(
                 mockk {
-                    every { use } returns com.projectronin.interop.fhir.r4.valueset.NameUse.USUAL.asCode()
+                    every { use } returns USUAL.asCode()
                     every { family?.value } returns "Cyrus"
                     every { given } returns listOf("Billy", "Ray").asFHIR()
                 }
@@ -1118,7 +1120,7 @@ class PatientHandlerTest {
             )
             every { name } returns listOf(
                 mockk {
-                    every { use } returns com.projectronin.interop.fhir.r4.valueset.NameUse.USUAL.asCode()
+                    every { use } returns USUAL.asCode()
                     every { family?.value } returns "Cyrus"
                     every { given } returns listOf("Billy Ray").asFHIR()
                 }
@@ -1180,5 +1182,249 @@ class PatientHandlerTest {
         val patients = actualResponse.data
         assertEquals(1, patients.size)
         assertEquals(Patient(patient1, tenant, roninIdentifiers), patients[0])
+    }
+
+    @Test
+    fun `patientsByTenants - no matching tenants`() {
+        every { tenantService.getTenantForMnemonic(any()) } returns null
+
+        val response =
+            patientHandler.patientsByTenants(listOf("tenant1", "tenant2"), "Smith", "Josh", "2001-02-03", dfe)
+        assertEquals(0, response.data.size)
+        assertEquals(2, response.errors.size)
+        assertEquals("404 Invalid Tenant: tenant1", response.errors[0].message)
+        assertEquals("404 Invalid Tenant: tenant2", response.errors[1].message)
+    }
+
+    @Test
+    fun `patientsByTenants - no patients found`() {
+        val tenant1 = mockk<Tenant> {
+            every { mnemonic } returns "tenant1"
+        }
+        val tenant2 = mockk<Tenant> {
+            every { mnemonic } returns "tenant2"
+        }
+        every { tenantService.getTenantForMnemonic("tenant1") } returns tenant1
+        every { tenantService.getTenantForMnemonic("tenant2") } returns tenant2
+
+        every { ehrFactory.getVendorFactory(tenant1) } returns mockk {
+            every { patientService } returns mockk {
+                every { findPatient(tenant1, LocalDate.of(2001, 2, 3), "Josh", "Smith") } returns emptyList()
+            }
+        }
+        every { ehrFactory.getVendorFactory(tenant2) } returns mockk {
+            every { patientService } returns mockk {
+                every { findPatient(tenant2, LocalDate.of(2001, 2, 3), "Josh", "Smith") } returns emptyList()
+            }
+        }
+
+        val response =
+            patientHandler.patientsByTenants(listOf("tenant1", "tenant2"), "Smith", "Josh", "2001-02-03", dfe)
+        assertEquals(2, response.data.size)
+
+        val dataByTenant = response.data.associateBy { it.tenantId }
+        assertEquals(0, dataByTenant["tenant1"]!!.patients.size)
+        assertEquals(0, dataByTenant["tenant2"]!!.patients.size)
+
+        assertEquals(0, response.errors.size)
+    }
+
+    @Test
+    fun `patientsByTenants - patients found for all`() {
+        val tenant1 = mockk<Tenant> {
+            every { mnemonic } returns "tenant1"
+        }
+        val tenant2 = mockk<Tenant> {
+            every { mnemonic } returns "tenant2"
+        }
+        every { tenantService.getTenantForMnemonic("tenant1") } returns tenant1
+        every { tenantService.getTenantForMnemonic("tenant2") } returns tenant2
+
+        val patient1 = mockk<R4Patient>(relaxed = true) {
+            every { id } returns Id("Patient-UUID-1")
+            every { name } returns listOf(
+                mockk {
+                    every { use } returns USUAL.asCode()
+                    every { family?.value } returns "Smith"
+                    every { given } returns listOf("Josh").asFHIR()
+                }
+            )
+            every { birthDate } returns Date("2001-02-03")
+            every { gender } returns AdministrativeGender.MALE.asCode()
+        }
+        val patient2 = mockk<R4Patient>(relaxed = true) {
+            every { id } returns Id("Patient-UUID-1")
+            every { name } returns listOf(
+                mockk {
+                    every { use } returns USUAL.asCode()
+                    every { family?.value } returns "Smith"
+                    every { given } returns listOf("Josh").asFHIR()
+                }
+            )
+            every { birthDate } returns Date("2001-02-03")
+            every { gender } returns AdministrativeGender.MALE.asCode()
+        }
+
+        every { ehrFactory.getVendorFactory(tenant1) } returns mockk {
+            every { patientService } returns mockk {
+                every { findPatient(tenant1, LocalDate.of(2001, 2, 3), "Josh", "Smith") } returns listOf(patient1)
+            }
+        }
+        every { ehrFactory.getVendorFactory(tenant2) } returns mockk {
+            every { patientService } returns mockk {
+                every { findPatient(tenant2, LocalDate.of(2001, 2, 3), "Josh", "Smith") } returns listOf(patient2)
+            }
+        }
+
+        every { roninPatient.getRoninIdentifiers(patient1, tenant1) } returns emptyList()
+        every { roninPatient.getRoninIdentifiers(patient2, tenant2) } returns emptyList()
+
+        val response =
+            patientHandler.patientsByTenants(listOf("tenant1", "tenant2"), "Smith", "Josh", "2001-02-03", dfe)
+        assertEquals(2, response.data.size)
+
+        val dataByTenant = response.data.associateBy { it.tenantId }
+
+        assertEquals(1, dataByTenant["tenant1"]!!.patients.size)
+        val tenant1Patient1 = dataByTenant["tenant1"]!!.patients[0]
+        assertEquals("tenant1-Patient-UUID-1", tenant1Patient1.id)
+        assertEquals(0, tenant1Patient1.identifier.size)
+        assertEquals(1, tenant1Patient1.name.size)
+        assertEquals("usual", tenant1Patient1.name[0].use)
+        assertEquals("Smith", tenant1Patient1.name[0].family)
+        assertEquals(1, tenant1Patient1.name[0].given.size)
+        assertEquals("Josh", tenant1Patient1.name[0].given[0])
+        assertEquals("2001-02-03", tenant1Patient1.birthDate)
+        assertEquals("male", tenant1Patient1.gender)
+        assertEquals(0, tenant1Patient1.telecom.size)
+        assertEquals(0, tenant1Patient1.address.size)
+
+        assertEquals(1, dataByTenant["tenant2"]!!.patients.size)
+        val tenant2Patient1 = dataByTenant["tenant2"]!!.patients[0]
+        assertEquals("tenant2-Patient-UUID-1", tenant2Patient1.id)
+        assertEquals(0, tenant2Patient1.identifier.size)
+        assertEquals(1, tenant2Patient1.name.size)
+        assertEquals("usual", tenant2Patient1.name[0].use)
+        assertEquals("Smith", tenant2Patient1.name[0].family)
+        assertEquals(1, tenant2Patient1.name[0].given.size)
+        assertEquals("Josh", tenant2Patient1.name[0].given[0])
+        assertEquals("2001-02-03", tenant2Patient1.birthDate)
+        assertEquals("male", tenant2Patient1.gender)
+        assertEquals(0, tenant2Patient1.telecom.size)
+        assertEquals(0, tenant2Patient1.address.size)
+
+        assertEquals(0, response.errors.size)
+    }
+
+    @Test
+    fun `patientsByTenants - mixed results for each tenant`() {
+        val tenant1 = mockk<Tenant> {
+            every { mnemonic } returns "tenant1"
+        }
+        val tenant2 = mockk<Tenant> {
+            every { mnemonic } returns "tenant2"
+        }
+        every { tenantService.getTenantForMnemonic("tenant1") } returns tenant1
+        every { tenantService.getTenantForMnemonic("tenant2") } returns tenant2
+        every { tenantService.getTenantForMnemonic("tenant3") } returns null
+
+        val patient1 = mockk<R4Patient>(relaxed = true) {
+            every { id } returns Id("Patient-UUID-1")
+            every { name } returns listOf(
+                mockk {
+                    every { use } returns USUAL.asCode()
+                    every { family?.value } returns "Smith"
+                    every { given } returns listOf("Josh").asFHIR()
+                }
+            )
+            every { birthDate } returns Date("2001-02-03")
+            every { gender } returns AdministrativeGender.MALE.asCode()
+        }
+
+        every { ehrFactory.getVendorFactory(tenant1) } returns mockk {
+            every { patientService } returns mockk {
+                every { findPatient(tenant1, LocalDate.of(2001, 2, 3), "Josh", "Smith") } returns listOf(patient1)
+            }
+        }
+        every { ehrFactory.getVendorFactory(tenant2) } returns mockk {
+            every { patientService } returns mockk {
+                every { findPatient(tenant2, LocalDate.of(2001, 2, 3), "Josh", "Smith") } returns emptyList()
+            }
+        }
+
+        every { roninPatient.getRoninIdentifiers(patient1, tenant1) } returns emptyList()
+
+        val response =
+            patientHandler.patientsByTenants(
+                listOf("tenant1", "tenant2", "tenant3"),
+                "Smith",
+                "Josh",
+                "2001-02-03",
+                dfe
+            )
+        assertEquals(2, response.data.size)
+
+        val dataByTenant = response.data.associateBy { it.tenantId }
+
+        assertEquals(1, dataByTenant["tenant1"]!!.patients.size)
+        val tenant1Patient1 = dataByTenant["tenant1"]!!.patients[0]
+        assertEquals("tenant1-Patient-UUID-1", tenant1Patient1.id)
+        assertEquals(0, tenant1Patient1.identifier.size)
+        assertEquals(1, tenant1Patient1.name.size)
+        assertEquals("usual", tenant1Patient1.name[0].use)
+        assertEquals("Smith", tenant1Patient1.name[0].family)
+        assertEquals(1, tenant1Patient1.name[0].given.size)
+        assertEquals("Josh", tenant1Patient1.name[0].given[0])
+        assertEquals("2001-02-03", tenant1Patient1.birthDate)
+        assertEquals("male", tenant1Patient1.gender)
+        assertEquals(0, tenant1Patient1.telecom.size)
+        assertEquals(0, tenant1Patient1.address.size)
+
+        assertEquals(0, dataByTenant["tenant2"]!!.patients.size)
+
+        assertEquals(1, response.errors.size)
+        assertEquals("404 Invalid Tenant: tenant3", response.errors[0].message)
+    }
+
+    @Test
+    fun `patientsByTenants - honors match filtering`() {
+        val tenant1 = mockk<Tenant> {
+            every { mnemonic } returns "tenant1"
+        }
+        every { tenantService.getTenantForMnemonic("tenant1") } returns tenant1
+
+        val patient1 = mockk<R4Patient>(relaxed = true) {
+            every { id } returns Id("Patient-UUID-1")
+            every { name } returns listOf(
+                mockk {
+                    every { use } returns USUAL.asCode()
+                    every { family?.value } returns "Smith"
+                    every { given } returns listOf("Travis").asFHIR()
+                }
+            )
+            every { birthDate } returns Date("2001-02-03")
+            every { gender } returns AdministrativeGender.MALE.asCode()
+        }
+
+        every { ehrFactory.getVendorFactory(tenant1) } returns mockk {
+            every { patientService } returns mockk {
+                every { findPatient(tenant1, LocalDate.of(2001, 2, 3), "Josh", "Smith") } returns listOf(patient1)
+            }
+        }
+
+        val response =
+            patientHandler.patientsByTenants(
+                listOf("tenant1"),
+                "Smith",
+                "Josh",
+                "2001-02-03",
+                dfe
+            )
+        assertEquals(1, response.data.size)
+
+        val dataByTenant = response.data.associateBy { it.tenantId }
+        assertEquals(0, dataByTenant["tenant1"]!!.patients.size)
+
+        assertEquals(0, response.errors.size)
     }
 }

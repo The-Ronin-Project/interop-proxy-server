@@ -247,6 +247,14 @@ type Patient {
   telecom: [ContactPoint!]!
 }
 
+"A grouping of Patients by a tenant"
+type PatientsByTenant {
+  "A List of patients matching the requested search for the tenant"
+  patients: [Patient!]!
+  "The identifier for the tenant. This will always be a value that was supplied in the request"
+  tenantId: String!
+}
+
 "Time range defined by start and end date/time"
 type Period {
   "End time with inclusive boundary, if not ongoing"
@@ -290,6 +298,8 @@ type Query {
   getPractitionerByProvider(providerId: String!, tenantId: String!): Practitioner!
   "Finds patient(s) that exactly match on family name, given name, and birthdate (YYYY-mm-dd format)."
   patientsByNameAndDOB(birthdate: String!, family: String!, given: String!, tenantId: String!): [Patient!]!
+  "Finds patient(s) across the supplied tenants that exactly match on family name, given name, and birthdate (YYYY-mm-dd format)."
+  patientsByTenants(birthdate: String!, family: String!, given: String!, tenantIds: [String!]!): [PatientsByTenant!]!
 }
 
 "Set of values bounded by low and high"
