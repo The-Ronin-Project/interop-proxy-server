@@ -127,6 +127,30 @@ class EhrControllerTests {
     }
 
     @Test
+    fun `post ehr when none exists - cerner system auth`() {
+        emptyDb()
+        val query = """
+            {
+                "vendorType": "CERNER", 
+                "instanceName": "Cerner Sandbox",
+                "accountId": "accountId",
+                "secret": "secret"
+            }
+        """.trimIndent()
+        val httpEntity = HttpEntity(query, httpHeaders)
+        val responseEntity =
+            restTemplate.postForEntity(
+                URI("http://localhost:$port/ehrs"),
+                httpEntity,
+                Ehr::class.java
+            )
+        assertEquals(HttpStatus.CREATED, responseEntity.statusCode)
+        (responseEntity.body!!.clientId == "clientID")
+
+        emptyDb()
+    }
+
+    @Test
     fun `post fails when ehr exists`() {
         val query = """
             {

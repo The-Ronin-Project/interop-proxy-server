@@ -15,7 +15,7 @@ import com.projectronin.interop.common.vendor.VendorType
 data class Ehr(
     val vendorType: VendorType,
     val instanceName: String,
-    val clientId: String,
+    val clientId: String? = null,
     val publicKey: String? = null,
     val privateKey: String? = null,
     val accountId: String? = null,

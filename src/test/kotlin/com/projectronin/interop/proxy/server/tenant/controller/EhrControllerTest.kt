@@ -120,6 +120,20 @@ class EhrControllerTest {
     }
 
     @Test
+    fun `insert test - cerner no clientId`() {
+        val ehr = Ehr(
+            vendorType = VendorType.CERNER,
+            instanceName = "instanceName",
+            accountId = "accountId",
+            secret = "secret"
+        )
+        every { dao.insert(any()) } returns cernerEHRDO
+
+        val post = controller.insert(ehr)
+        assertEquals("accountId", post.body?.accountId)
+    }
+
+    @Test
     fun `bad inserts throw errors`() {
         val cernerEHR = Ehr(
             vendorType = VendorType.CERNER,
