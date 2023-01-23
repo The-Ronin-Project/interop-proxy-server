@@ -13,6 +13,7 @@ interop-commonJackson = "com.projectronin.interop:interop-common-jackson:3.2.1"
 interop-commonTestDb = "com.projectronin.interop:interop-common-test-db:3.2.1"
 interop-datalake = "com.projectronin.interop.publish:interop-datalake:7.1.0"
 interop-ehr-api = "com.projectronin.interop.ehr:interop-ehr:8.2.0"
+interop-ehr-cerner = "com.projectronin.interop.ehr:interop-ehr-cerner:8.2.0"
 interop-ehr-fhir-ronin = "com.projectronin.interop.ehr:interop-fhir-ronin:8.2.0"
 interop-ehr-epic = "com.projectronin.interop.ehr:interop-ehr-epic:8.2.0"
 interop-ehr-liquibase = "com.projectronin.interop.ehr:interop-ehr-liquibase:8.2.0"
@@ -36,7 +37,7 @@ spring-security-oauth2-jose = { module = "org.springframework.security:spring-se
 testcontainers-bom = "org.testcontainers:testcontainers-bom:1.17.6"
 
 [bundles]
-ehr-impls = ["interop-ehr-epic"]
+ehr-impls = ["interop-ehr-epic", "interop-ehr-cerner"]
 graphql = ["graphql-kotlin-spring-server", "graphql-kotlin-schema-generator"]
 spring-security = ["spring-security-oauth2-core", "spring-security-oauth2-jose"]
 hl7v2 = ["hapi-hl7v2-251", "hapi-hl7v2-base"]
