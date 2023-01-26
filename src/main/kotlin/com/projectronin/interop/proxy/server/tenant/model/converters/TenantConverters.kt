@@ -55,6 +55,7 @@ private fun TenantServiceEpic.toProxyEpic(): ProxyEpic {
 private fun TenantServiceCerner.toProxyCerner(): ProxyCerner {
     return ProxyCerner(
         serviceEndpoint = serviceEndpoint,
+        authEndpoint = authenticationConfig.authEndpoint,
         patientMRNSystem = patientMRNSystem,
         instanceName = instanceName,
     )
@@ -111,6 +112,10 @@ private fun ProxyCerner.toTenantServerCerner(): TenantServiceCerner {
         patientMRNSystem = patientMRNSystem,
         instanceName = instanceName,
         clientId = "",
-        authenticationConfig = CernerAuthenticationConfig(serviceEndpoint, "", ""),
+        authenticationConfig = CernerAuthenticationConfig(
+            authEndpoint = authEndpoint,
+            accountId = "",
+            secret = ""
+        ),
     )
 }

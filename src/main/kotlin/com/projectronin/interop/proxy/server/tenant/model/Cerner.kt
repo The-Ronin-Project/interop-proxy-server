@@ -6,6 +6,7 @@ import com.projectronin.interop.common.vendor.VendorType
 @JsonTypeName("CERNER")
 data class Cerner(
     val serviceEndpoint: String,
+    val authEndpoint: String,
     val patientMRNSystem: String,
     override val instanceName: String
 ) : Vendor {

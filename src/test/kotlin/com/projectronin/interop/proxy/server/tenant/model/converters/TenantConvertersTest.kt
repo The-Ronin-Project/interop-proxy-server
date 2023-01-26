@@ -6,7 +6,8 @@ import com.projectronin.interop.tenant.config.model.BatchConfig
 import com.projectronin.interop.tenant.config.model.CernerAuthenticationConfig
 import com.projectronin.interop.tenant.config.model.EpicAuthenticationConfig
 import com.projectronin.interop.tenant.config.model.Tenant
-import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test
 import java.time.LocalTime
 import java.time.ZoneId
@@ -31,11 +32,11 @@ class TenantConvertersTest {
             vendor = tenantServerCerner
         )
         val proxyTenant = tenantServiceTenant.toProxyTenant()
-        Assertions.assertNotNull(proxyTenant)
+        assertNotNull(proxyTenant)
         val cerner = proxyTenant.vendor as Cerner
-        Assertions.assertEquals("serviceEndpoint", cerner.serviceEndpoint)
-        Assertions.assertEquals("patientMRNSystem", cerner.patientMRNSystem)
-        Assertions.assertEquals("instanceName", cerner.instanceName)
+        assertEquals("serviceEndpoint", cerner.serviceEndpoint)
+        assertEquals("patientMRNSystem", cerner.patientMRNSystem)
+        assertEquals("instanceName", cerner.instanceName)
     }
 
     @Test
@@ -69,11 +70,11 @@ class TenantConvertersTest {
             vendor = tenantServerEpic
         )
         val proxyTenant = tenantServiceTenant.toProxyTenant()
-        Assertions.assertNotNull(proxyTenant)
+        assertNotNull(proxyTenant)
         val epic = proxyTenant.vendor as Epic
-        Assertions.assertEquals("serviceEndpoint", epic.serviceEndpoint)
-        Assertions.assertEquals("mrnSystemExample", epic.patientMRNSystem)
-        Assertions.assertEquals("instanceName", epic.instanceName)
+        assertEquals("serviceEndpoint", epic.serviceEndpoint)
+        assertEquals("mrnSystemExample", epic.patientMRNSystem)
+        assertEquals("instanceName", epic.instanceName)
     }
 
     @Test
@@ -86,15 +87,17 @@ class TenantConvertersTest {
             availableEnd = LocalTime.of(12, 0),
             timezone = "America/Los_Angeles",
             vendor = Cerner(
-                "serviceEndpoint",
+                serviceEndpoint = "serviceEndpoint",
+                authEndpoint = "authEndpoint",
                 instanceName = "instanceName",
                 patientMRNSystem = "patientMRNSystem"
             )
         )
         val tenantServerTenant = proxyTenant.toTenantServerTenant()
-        Assertions.assertEquals(1, tenantServerTenant.internalId)
+        assertEquals(1, tenantServerTenant.internalId)
         val cerner = tenantServerTenant.vendor as com.projectronin.interop.tenant.config.model.vendor.Cerner
-        Assertions.assertEquals("serviceEndpoint", cerner.serviceEndpoint)
+        assertEquals("serviceEndpoint", cerner.serviceEndpoint)
+        assertEquals("authEndpoint", cerner.authenticationConfig.authEndpoint)
     }
 
     @Test
@@ -124,9 +127,9 @@ class TenantConvertersTest {
             )
         )
         val tenantServerTenant = proxyTenant.toTenantServerTenant()
-        Assertions.assertEquals(1, tenantServerTenant.internalId)
+        assertEquals(1, tenantServerTenant.internalId)
         val epic = tenantServerTenant.vendor as com.projectronin.interop.tenant.config.model.vendor.Epic
-        Assertions.assertEquals("serviceEndpoint", epic.serviceEndpoint)
+        assertEquals("serviceEndpoint", epic.serviceEndpoint)
     }
 
     // code cov test
@@ -140,14 +143,16 @@ class TenantConvertersTest {
             availableEnd = null,
             timezone = "America/Los_Angeles",
             vendor = Cerner(
-                "serviceEndpoint",
+                serviceEndpoint = "serviceEndpoint",
+                authEndpoint = "authEndpoint",
                 instanceName = "instanceName",
                 patientMRNSystem = "patientMRNSystem"
             )
         )
         val newTenantServerTenant = proxyTenant.toTenantServerTenant(999)
-        Assertions.assertEquals(999, newTenantServerTenant.internalId)
+        assertEquals(999, newTenantServerTenant.internalId)
         val newCerner = newTenantServerTenant.vendor as com.projectronin.interop.tenant.config.model.vendor.Cerner
-        Assertions.assertEquals("serviceEndpoint", newCerner.serviceEndpoint)
+        assertEquals("serviceEndpoint", newCerner.serviceEndpoint)
+        assertEquals("authEndpoint", newCerner.authenticationConfig.authEndpoint)
     }
 }

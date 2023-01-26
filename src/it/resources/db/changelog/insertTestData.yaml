@@ -251,5 +251,8 @@ databaseChangeLog:
                   name: service_endpoint
                   value: "http://mockehr:8080/cerner"
               - column:
+                  name: auth_endpoint
+                  value: "http://mockehr:8080/cerner/oauth2/token"
+              - column:
                   name: mrn_system
                   value: "mockEHRMRNSystem"

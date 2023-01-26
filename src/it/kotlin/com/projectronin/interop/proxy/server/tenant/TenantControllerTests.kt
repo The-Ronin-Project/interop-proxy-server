@@ -169,6 +169,7 @@ class TenantControllerTests {
     fun `can insert a tenant - cerner`() {
         val vendor = Cerner(
             serviceEndpoint = "serviceEndpoint",
+            authEndpoint = "authEndpoint",
             patientMRNSystem = "patientMRNSystem",
             instanceName = "Cerner Sandbox",
         )
@@ -283,8 +284,9 @@ class TenantControllerTests {
     @Test
     fun `can update a tenant - cerner`() {
         val vendor = Cerner(
-            serviceEndpoint = "serviceEndpoint",
-            patientMRNSystem = "patientMRNSystem",
+            serviceEndpoint = "new serviceEndpoint",
+            authEndpoint = "new authEndpoint",
+            patientMRNSystem = "new patientMRNSystem",
             instanceName = "Cerner Sandbox",
         )
 
