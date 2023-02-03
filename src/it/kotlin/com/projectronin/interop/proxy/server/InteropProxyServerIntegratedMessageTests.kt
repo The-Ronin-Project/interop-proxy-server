@@ -3,42 +3,24 @@ package com.projectronin.interop.proxy.server
 import com.nimbusds.jose.PlainHeader
 import com.nimbusds.jwt.JWTClaimsSet
 import com.nimbusds.jwt.PlainJWT
-import com.ninjasquad.springmockk.MockkBean
 import com.projectronin.interop.aidbox.testcontainer.AidboxData
 import com.projectronin.interop.aidbox.testcontainer.AidboxTest
 import com.projectronin.interop.aidbox.testcontainer.container.AidboxContainer
 import com.projectronin.interop.aidbox.testcontainer.container.AidboxDatabaseContainer
 import com.projectronin.interop.common.jackson.JacksonManager.Companion.objectMapper
-import com.projectronin.interop.mock.ehr.testcontainer.MockEHRTestcontainer
 import io.mockk.every
 import io.mockk.mockk
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.boot.test.web.client.TestRestTemplate
-import org.springframework.boot.test.web.server.LocalServerPort
-import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.security.oauth2.jwt.Jwt
-import org.springframework.security.oauth2.jwt.JwtDecoder
-import org.springframework.test.context.ActiveProfiles
-import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.DynamicPropertyRegistry
 import org.springframework.test.context.DynamicPropertySource
 import org.testcontainers.junit.jupiter.Container
-import java.net.URI
-import javax.sql.DataSource
 
-private var setupDone = false
-
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@ActiveProfiles("it")
-@ContextConfiguration(initializers = [(InteropProxyServerAuthInitializer::class)])
 @AidboxData(
     "aidbox/practitioner1.yaml",
     "aidbox/practitioner2.yaml",
@@ -46,29 +28,11 @@ private var setupDone = false
     "aidbox/patient2.yaml"
 )
 @AidboxTest
-class InteropProxyServerIntegratedMessageTests {
-    @LocalServerPort
-    private var port = 0
+class InteropProxyServerIntegratedMessageTests : InteropProxyServerIntegratedTestsBase() {
 
-    @Autowired
-    private lateinit var mockEHR: MockEHRTestcontainer
-
-    @Autowired
-    private lateinit var restTemplate: TestRestTemplate
-
-    @MockkBean
-    private lateinit var m2mJwtDecoder: JwtDecoder
-
-    @Autowired
-    private lateinit var ehrDatasource: DataSource
-
-    private val httpHeaders = HttpHeaders()
-
-    init {
-        httpHeaders.set("Content-Type", "application/json")
-        httpHeaders.set("Authorization", "Fake Token")
-    }
-
+    override val resourcesToAdd = listOf(
+        ResourceToAdd("Patient", "/mockEHR/r4Patient.json", "PatientFHIRID1")
+    )
     companion object {
         @Container
         val aidboxDatabaseContainer = AidboxDatabaseContainer()
@@ -84,19 +48,9 @@ class InteropProxyServerIntegratedMessageTests {
         }
     }
 
-    @BeforeEach
-    fun setup() {
-        if (!setupDone) {
-            // we need to change the service address of "Epic" after instantiation since the Testcontainer has a dynamic port
-            val connection = ehrDatasource.connection
-            val statement = connection.createStatement()
-            statement.execute("update io_tenant_epic set service_endpoint = '${mockEHR.getURL()}/epic' where io_tenant_id = 1002;")
-            statement.execute("update io_tenant_epic set auth_endpoint = '${mockEHR.getURL()}/epic/oauth2/token' where io_tenant_id = 1002;")
-
-            val createPat = this::class.java.getResource("/mockEHR/r4Patient.json")!!.readText()
-            mockEHR.addR4Resource("Patient", createPat, "PatientFHIRID1")
-            setupDone = true
-        }
+    init {
+        httpHeaders.set("Content-Type", "application/json")
+        httpHeaders.set("Authorization", "Fake Token")
     }
 
     @Test
@@ -127,10 +81,7 @@ class InteropProxyServerIntegratedMessageTests {
         """.trimMargin()
         val expectedJSON = """{"data":{"sendMessage":"sent"}}"""
 
-        val httpEntity = HttpEntity(query, httpHeaders)
-
-        val responseEntity =
-            restTemplate.postForEntity(URI("http://localhost:$port/graphql"), httpEntity, String::class.java)
+        val responseEntity = multiVendorQuery(query, "epic")
 
         val resultJSONObject = objectMapper.readTree(responseEntity.body)
         val expectedJSONObject = objectMapper.readTree(expectedJSON)
@@ -168,10 +119,7 @@ class InteropProxyServerIntegratedMessageTests {
         """.trimMargin()
 
         val expectedJSON = """{"data":{"sendMessage":"sent"}}"""
-        val httpEntity = HttpEntity(query, httpHeaders)
-
-        val responseEntity =
-            restTemplate.postForEntity(URI("http://localhost:$port/graphql"), httpEntity, String::class.java)
+        val responseEntity = multiVendorQuery(query, "epic")
 
         val resultJSONObject = objectMapper.readTree(responseEntity.body)
         val expectedJSONObject = objectMapper.readTree(expectedJSON)
@@ -215,10 +163,7 @@ class InteropProxyServerIntegratedMessageTests {
         """.trimMargin()
 
         val expectedJSON = """{"data":{"sendMessage":"sent"}}"""
-        val httpEntity = HttpEntity(query, httpHeaders)
-
-        val responseEntity =
-            restTemplate.postForEntity(URI("http://localhost:$port/graphql"), httpEntity, String::class.java)
+        val responseEntity = multiVendorQuery(query, "epic")
 
         val resultJSONObject = objectMapper.readTree(responseEntity.body)
         val expectedJSONObject = objectMapper.readTree(expectedJSON)
@@ -255,10 +200,7 @@ class InteropProxyServerIntegratedMessageTests {
             |}
         """.trimMargin()
 
-        val httpEntity = HttpEntity(query, httpHeaders)
-
-        val responseEntity =
-            restTemplate.postForEntity(URI("http://localhost:$port/graphql"), httpEntity, String::class.java)
+        val responseEntity = multiVendorQuery(query, "epic")
 
         val resultJSONObject = objectMapper.readTree(responseEntity.body)
         val errorJSONObject = resultJSONObject["errors"][0]
@@ -298,10 +240,7 @@ class InteropProxyServerIntegratedMessageTests {
             |}
         """.trimMargin()
 
-        val httpEntity = HttpEntity(query, httpHeaders)
-
-        val responseEntity =
-            restTemplate.postForEntity(URI("http://localhost:$port/graphql"), httpEntity, String::class.java)
+        val responseEntity = multiVendorQuery(query, "epic")
 
         val resultJSONObject = objectMapper.readTree(responseEntity.body)
 
@@ -334,10 +273,7 @@ class InteropProxyServerIntegratedMessageTests {
         |}
     """.trimMargin()
 
-        val httpEntity = HttpEntity(query, httpHeaders)
-
-        val responseEntity =
-            restTemplate.postForEntity(URI("http://localhost:$port/graphql"), httpEntity, String::class.java)
+        val responseEntity = multiVendorQuery(query, "epic")
 
         val resultJSONObject = objectMapper.readTree(responseEntity.body)
 
@@ -384,10 +320,7 @@ class InteropProxyServerIntegratedMessageTests {
 
         every { m2mJwtDecoder.decode(jwtM2M) } returns (mockk<Jwt>())
 
-        val httpEntity = HttpEntity(query, m2mHeaders)
-
-        val responseEntity =
-            restTemplate.postForEntity(URI("http://localhost:$port/graphql"), httpEntity, String::class.java)
+        val responseEntity = multiVendorQuery(query, "epic", m2mHeaders)
 
         val resultJSONObject = objectMapper.readTree(responseEntity.body)
         val expectedJSONObject = objectMapper.readTree(expectedJSON)
@@ -424,11 +357,7 @@ class InteropProxyServerIntegratedMessageTests {
             |}
         """.trimMargin()
 
-        val httpEntity = HttpEntity(query, httpHeaders)
-
-        val responseEntity =
-            restTemplate.postForEntity(URI("http://localhost:$port/graphql"), httpEntity, String::class.java)
-
+        val responseEntity = multiVendorQuery(query, "epic")
         val resultJSONObject = objectMapper.readTree(responseEntity.body)
         val errorJSONObject = resultJSONObject["errors"][0]
         println(errorJSONObject)

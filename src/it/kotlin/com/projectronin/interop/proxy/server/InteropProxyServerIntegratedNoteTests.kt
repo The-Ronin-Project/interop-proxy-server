@@ -3,7 +3,6 @@ package com.projectronin.interop.proxy.server
 import com.nimbusds.jose.PlainHeader
 import com.nimbusds.jwt.JWTClaimsSet
 import com.nimbusds.jwt.PlainJWT
-import com.ninjasquad.springmockk.MockkBean
 import com.projectronin.interop.aidbox.testcontainer.AidboxData
 import com.projectronin.interop.aidbox.testcontainer.AidboxTest
 import com.projectronin.interop.aidbox.testcontainer.container.AidboxContainer
@@ -15,28 +14,19 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.boot.test.web.client.TestRestTemplate
-import org.springframework.boot.test.web.server.LocalServerPort
-import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
-import org.springframework.security.oauth2.jwt.JwtDecoder
-import org.springframework.test.context.ActiveProfiles
-import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.DynamicPropertyRegistry
 import org.springframework.test.context.DynamicPropertySource
 import org.testcontainers.junit.jupiter.Container
-import java.net.URI
 import java.text.SimpleDateFormat
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@ActiveProfiles("it")
-@ContextConfiguration(initializers = [(InteropProxyServerAuthInitializer::class)])
 @AidboxData("aidbox/practitioner3.yaml", "aidbox/patient1.yaml")
 @AidboxTest
-class InteropProxyServerIntegratedNoteTests {
+class InteropProxyServerIntegratedNoteTests : InteropProxyServerIntegratedTestsBase() {
+
+    override val resourcesToAdd = listOf<ResourceToAdd>()
+
     companion object {
         @Container
         val aidboxDatabaseContainer = AidboxDatabaseContainer()
@@ -51,17 +41,6 @@ class InteropProxyServerIntegratedNoteTests {
             registry.add("aidbox.url") { "http://localhost:${aidbox.port()}" }
         }
     }
-
-    @LocalServerPort
-    private var port = 0
-
-    @Autowired
-    private lateinit var restTemplate: TestRestTemplate
-
-    @MockkBean
-    private lateinit var m2mJwtDecoder: JwtDecoder
-
-    private val httpHeaders = HttpHeaders()
 
     init {
         httpHeaders.set("Content-Type", "application/json")
@@ -93,9 +72,7 @@ class InteropProxyServerIntegratedNoteTests {
             |   }
             |}
         """.trimMargin()
-        val httpEntity = HttpEntity(query, httpHeaders)
-        val responseEntity =
-            restTemplate.postForEntity(URI("http://localhost:$port/graphql"), httpEntity, String::class.java)
+        val responseEntity = multiVendorQuery(query, "epic")
         val dateformat = SimpleDateFormat("yyyyMMdd")
         val docId = "RoninNote" + dateformat.format(java.util.Date())
         val resultJSONObject = JacksonManager.objectMapper.readTree(responseEntity.body)
@@ -141,10 +118,7 @@ class InteropProxyServerIntegratedNoteTests {
 
         every { m2mJwtDecoder.decode(jwtM2M) } returns (mockk())
 
-        val httpEntity = HttpEntity(query, m2mHeaders)
-
-        val responseEntity =
-            restTemplate.postForEntity(URI("http://localhost:$port/graphql"), httpEntity, String::class.java)
+        val responseEntity = multiVendorQuery(query, "epic", m2mHeaders)
         val dateformat = SimpleDateFormat("yyyyMMdd")
         val docId = "RoninNote" + dateformat.format(java.util.Date())
         val resultJSONObject = JacksonManager.objectMapper.readTree(responseEntity.body)
@@ -179,9 +153,7 @@ class InteropProxyServerIntegratedNoteTests {
             |   }
             |}
         """.trimMargin()
-        val httpEntity = HttpEntity(query, httpHeaders)
-        val responseEntity =
-            restTemplate.postForEntity(URI("http://localhost:$port/graphql"), httpEntity, String::class.java)
+        val responseEntity = multiVendorQuery(query, "epic")
         val dateformat = SimpleDateFormat("yyyyMMdd")
         val docId = "RoninNote" + dateformat.format(java.util.Date())
         val resultJSONObject = JacksonManager.objectMapper.readTree(responseEntity.body)
@@ -215,9 +187,7 @@ class InteropProxyServerIntegratedNoteTests {
             |   }
             |}
         """.trimMargin()
-        val httpEntity = HttpEntity(query, httpHeaders)
-        val responseEntity =
-            restTemplate.postForEntity(URI("http://localhost:$port/graphql"), httpEntity, String::class.java)
+        val responseEntity = multiVendorQuery(query, "epic")
         val resultJSONObject = JacksonManager.objectMapper.readTree(responseEntity.body)
         assertEquals(HttpStatus.OK, responseEntity.statusCode)
         assertTrue(resultJSONObject.has("errors"))
@@ -253,9 +223,7 @@ class InteropProxyServerIntegratedNoteTests {
             |   }
             |}
         """.trimMargin()
-        val httpEntity = HttpEntity(query, httpHeaders)
-        val responseEntity =
-            restTemplate.postForEntity(URI("http://localhost:$port/graphql"), httpEntity, String::class.java)
+        val responseEntity = multiVendorQuery(query, "epic")
         val resultJSONObject = JacksonManager.objectMapper.readTree(responseEntity.body)
         assertEquals(HttpStatus.OK, responseEntity.statusCode)
         assertTrue(resultJSONObject.has("errors"))
@@ -291,9 +259,7 @@ class InteropProxyServerIntegratedNoteTests {
             |   }
             |}
         """.trimMargin()
-        val httpEntity = HttpEntity(query, httpHeaders)
-        val responseEntity =
-            restTemplate.postForEntity(URI("http://localhost:$port/graphql"), httpEntity, String::class.java)
+        val responseEntity = multiVendorQuery(query, "epic")
         val resultJSONObject = JacksonManager.objectMapper.readTree(responseEntity.body)
 
         assertEquals(HttpStatus.OK, responseEntity.statusCode)

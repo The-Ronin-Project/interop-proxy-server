@@ -118,7 +118,7 @@ databaseChangeLog:
                   value: "1002"
               - column:
                   name: mnemonic
-                  value: "ronin"
+                  value: "epic"
               - column:
                   name: full_name
                   value: "Ronin Mock Hospital"
@@ -133,7 +133,7 @@ databaseChangeLog:
                   value: "06:00:00"
               - column:
                   name: timezone
-                  value: "America/Los_Angeles"
+                  value: "Etc/UTC"
         - insert:
             dbms: 'mysql'
             tableName: io_tenant_epic
@@ -224,10 +224,10 @@ databaseChangeLog:
                   value: "2002"
               - column:
                   name: mnemonic
-                  value: "cernerMn"
+                  value: "cerner"
               - column:
                   name: full_name
-                  value: "Cerner Sandbox"
+                  value: "Cerner Mock EHR"
               - column:
                   name: io_ehr_id
                   value: "202"
@@ -249,7 +249,7 @@ databaseChangeLog:
                   value: "2002"
               - column:
                   name: service_endpoint
-                  value: "http://mockehr:8080/cerner"
+                  value: "http://mockehr:8080/cerner/fhir/r4"
               - column:
                   name: auth_endpoint
                   value: "http://mockehr:8080/cerner/oauth2/token"

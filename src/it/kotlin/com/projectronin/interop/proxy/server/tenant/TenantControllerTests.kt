@@ -85,9 +85,9 @@ class TenantControllerTests {
         assertEquals("apposnd", tenantArray[0].mnemonic)
         assertEquals(VendorType.EPIC, tenantArray[0].vendor.vendorType)
         assertEquals(1002, tenantArray[1].id)
-        assertEquals("ronin", tenantArray[1].mnemonic)
+        assertEquals("epic", tenantArray[1].mnemonic)
         assertEquals(2002, tenantArray[2].id)
-        assertEquals("cernerMn", tenantArray[2].mnemonic)
+        assertEquals("cerner", tenantArray[2].mnemonic)
         assertEquals(VendorType.CERNER, tenantArray[2].vendor.vendorType)
     }
 
@@ -292,7 +292,7 @@ class TenantControllerTests {
 
         val updatedTenant = Tenant(
             id = 2002,
-            mnemonic = "cernerMn",
+            mnemonic = "cerner",
             availableStart = LocalTime.of(22, 0),
             availableEnd = LocalTime.of(6, 0),
             vendor = vendor,

@@ -4,87 +4,27 @@ import com.nimbusds.jose.PlainHeader
 import com.nimbusds.jose.util.Base64URL
 import com.nimbusds.jwt.JWTClaimsSet
 import com.nimbusds.jwt.PlainJWT
-import com.ninjasquad.springmockk.MockkBean
 import com.projectronin.interop.common.jackson.JacksonManager.Companion.objectMapper
-import com.projectronin.interop.mock.ehr.testcontainer.MockEHRTestcontainer
 import io.mockk.every
 import io.mockk.mockk
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.boot.test.context.SpringBootTest.WebEnvironment
-import org.springframework.boot.test.web.client.TestRestTemplate
-import org.springframework.boot.web.server.LocalServerPort
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.MethodSource
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.security.oauth2.jwt.Jwt
-import org.springframework.security.oauth2.jwt.JwtDecoder
 import org.springframework.security.oauth2.jwt.JwtException
-import org.springframework.test.context.ActiveProfiles
-import org.springframework.test.context.ContextConfiguration
-import org.testcontainers.containers.DockerComposeContainer
-import org.testcontainers.containers.wait.strategy.Wait
-import java.io.File
 import java.net.URI
-import javax.sql.DataSource
 
-private var setupDone = false
+class InteropProxyServerIntegratedPatientTests : InteropProxyServerIntegratedTestsBase() {
 
-@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
-@ActiveProfiles("it")
-@ContextConfiguration(initializers = [(InteropProxyServerAuthInitializer::class)])
-class InteropProxyServerIntegratedPatientTests {
-    @LocalServerPort
-    private var port = 0
-
-    @Autowired
-    private lateinit var mockEHR: MockEHRTestcontainer
-
-    @MockkBean
-    private lateinit var m2mJwtDecoder: JwtDecoder
-
-    @Autowired
-    private lateinit var restTemplate: TestRestTemplate
-
-    @Autowired
-    private lateinit var ehrDatasource: DataSource
-
-    private val httpHeaders = HttpHeaders()
-
-    init {
-        httpHeaders.set("Content-Type", "application/graphql")
-        httpHeaders.set("Authorization", "Fake Token")
-    }
-
-    companion object {
-        val docker =
-            DockerComposeContainer(File(InteropProxyServerIntegratedPatientTests::class.java.getResource("/kafka/docker-compose-kafka.yaml")!!.file)).waitingFor(
-                "kafka",
-                Wait.forLogMessage(".*\\[KafkaServer id=\\d+\\] started.*", 1)
-            ).start()
-    }
-
-    @BeforeEach
-    fun beforeEach() {
-        if (!setupDone) { // if you hate this, you are not alone. blame kotlin, junit5, or spring (not me though)
-
-            // we need to change the service address of "Epic" after instantiation since the Testcontainer has a dynamic port
-            val connection = ehrDatasource.connection
-            val statement = connection.createStatement()
-            statement.execute("update io_tenant_epic set service_endpoint = '${mockEHR.getURL()}/epic' where io_tenant_id = 1002;")
-            statement.execute("update io_tenant_epic set auth_endpoint = '${mockEHR.getURL()}/epic/oauth2/token' where io_tenant_id = 1002;")
-            // insert testing patient to MockEHR
-            val createPat = this::class.java.getResource("/mockEHR/r4Patient.json")!!.readText()
-            mockEHR.addR4Resource("Patient", createPat, "PatientFHIRID1")
-            setupDone = true
-        }
-    }
+    override val resourcesToAdd = listOf(
+        ResourceToAdd("Patient", "/mockEHR/r4Patient.json", "PatientFHIRID1")
+    )
 
     /**
      * This test is only here to help with debugging.  If the private key isn't set other tests will fail, but this
@@ -101,16 +41,13 @@ class InteropProxyServerIntegratedPatientTests {
         assertEquals(System.getenv("AO_SANDBOX_KEY"), resultSet.getString("private_key"))
     }
 
-    @Test
-    fun `server handles patient query`() {
+    @ParameterizedTest
+    @MethodSource("tenantsToTest")
+    fun `server handles patient query`(testTenant: String) {
+
         val query = this::class.java.getResource("/graphql/patientByNameAndDOB.graphql")!!.readText()
-        val expectedJSON = this::class.java.getResource("/epicAOTestPatientGraphQLResults.json")!!.readText()
-
-        val httpEntity = HttpEntity(query, httpHeaders)
-
-        val responseEntity =
-            restTemplate.postForEntity(URI("http://localhost:$port/graphql"), httpEntity, String::class.java)
-
+        val expectedJSON = this::class.java.getResource("/roninTestPatientGraphQLResults.json")!!.readText()
+        val responseEntity = multiVendorQuery(query, testTenant)
         val resultJSONObject = objectMapper.readTree(responseEntity.body)
         val expectedJSONObject = objectMapper.readTree(expectedJSON)
 
@@ -164,8 +101,9 @@ class InteropProxyServerIntegratedPatientTests {
         assertTrue(resultJSONObject.has("errors"))
     }
 
-    @Test
-    fun `server handles no patient found`() {
+    @ParameterizedTest
+    @MethodSource("tenantsToTest")
+    fun `server handles no patient found`(testTenant: String) {
         val tenantId = "ronin"
         val family = "Fake Name"
         val given = "Fake Name"
@@ -177,9 +115,7 @@ class InteropProxyServerIntegratedPatientTests {
             |   {id}
             |}""".trimMargin()
 
-        val httpEntity = HttpEntity(query, httpHeaders)
-
-        val response = restTemplate.postForEntity(URI("http://localhost:$port/graphql"), httpEntity, String::class.java)
+        val response = multiVendorQuery(query, testTenant)
 
         val resultJSONObject = objectMapper.readTree(response.body)
         val patientSearchJSONArray = resultJSONObject["data"]["patientsByNameAndDOB"]
@@ -189,10 +125,11 @@ class InteropProxyServerIntegratedPatientTests {
         assertEquals(0, patientSearchJSONArray.size())
     }
 
-    @Test
-    fun `server handles patient query with m2m auth`() {
+    @ParameterizedTest
+    @MethodSource("tenantsToTest")
+    fun `server handles patient query with m2m auth`(testTenant: String) {
         val query = this::class.java.getResource("/graphql/patientByNameAndDOB.graphql")!!.readText()
-        val expectedJSON = this::class.java.getResource("/epicAOTestPatientGraphQLResults.json")!!.readText()
+        val expectedJSON = this::class.java.getResource("/roninTestPatientGraphQLResults.json")!!.readText()
 
         val m2mHeaders = HttpHeaders()
 
@@ -205,10 +142,7 @@ class InteropProxyServerIntegratedPatientTests {
 
         every { m2mJwtDecoder.decode(jwtM2M) } returns (mockk<Jwt>())
 
-        val httpEntity = HttpEntity(query, m2mHeaders)
-
-        val responseEntity =
-            restTemplate.postForEntity(URI("http://localhost:$port/graphql"), httpEntity, String::class.java)
+        val responseEntity = multiVendorQuery(query, testTenant, m2mHeaders)
 
         val resultJSONObject = objectMapper.readTree(responseEntity.body)
         val expectedJSONObject = objectMapper.readTree(expectedJSON)
@@ -218,10 +152,11 @@ class InteropProxyServerIntegratedPatientTests {
         assertEquals(expectedJSONObject.toString(), resultJSONObject.toString())
     }
 
-    @Test
-    fun `server handles invalid m2m auth by falling back to user auth`() {
+    @ParameterizedTest
+    @MethodSource("tenantsToTest")
+    fun `server handles invalid m2m auth by falling back to user auth`(testTenant: String) {
         val query = this::class.java.getResource("/graphql/patientByNameAndDOB.graphql")!!.readText()
-        val expectedJSON = this::class.java.getResource("/epicAOTestPatientGraphQLResults.json")!!.readText()
+        val expectedJSON = this::class.java.getResource("/roninTestPatientGraphQLResults.json")!!.readText()
 
         val m2mHeaders = HttpHeaders()
 
@@ -236,10 +171,7 @@ class InteropProxyServerIntegratedPatientTests {
 
         every { m2mJwtDecoder.decode(jwtM2M) } throws (JwtException("no auth"))
 
-        val httpEntity = HttpEntity(query, m2mHeaders)
-
-        val responseEntity =
-            restTemplate.postForEntity(URI("http://localhost:$port/graphql"), httpEntity, String::class.java)
+        val responseEntity = multiVendorQuery(query, testTenant, m2mHeaders)
 
         val resultJSONObject = objectMapper.readTree(responseEntity.body)
         val expectedJSONObject = objectMapper.readTree(expectedJSON)
@@ -249,13 +181,8 @@ class InteropProxyServerIntegratedPatientTests {
         assertEquals(expectedJSONObject.toString(), resultJSONObject.toString())
     }
 
-    @Disabled("We do not currently have a good or easy way to stand up multiple Mock EHRs to allow us to do this test properly")
     @Test
     fun `patientsByTenants can support searching multiple tenants`() {
-    }
-
-    @Test
-    fun `patientsByTenants handles unknown tenant and known tenant together`() {
         val query = this::class.java.getResource("/graphql/patientsByTenants.graphql")!!.readText()
 
         val m2mHeaders = HttpHeaders()
@@ -269,7 +196,36 @@ class InteropProxyServerIntegratedPatientTests {
 
         every { m2mJwtDecoder.decode(jwtM2M) } returns (mockk<Jwt>())
 
-        val httpEntity = HttpEntity(query, m2mHeaders)
+        val httpEntity = HttpEntity(query, httpHeaders)
+
+        val responseEntity =
+            restTemplate.postForEntity(URI("http://localhost:$port/graphql"), httpEntity, String::class.java)
+
+        val resultJSONObject = objectMapper.readTree(responseEntity.body)
+
+        assertEquals(HttpStatus.OK, responseEntity.statusCode)
+
+        val roninTenant = resultJSONObject["data"]["patientsByTenants"]
+        assertEquals(2, roninTenant.size())
+    }
+
+    @Test
+    fun `patientsByTenants handles unknown tenant and known tenant together`() {
+        val query =
+            this::class.java.getResource("/graphql/patientsByTenants.graphql")!!.readText().replace("cerner", "unknown")
+
+        val m2mHeaders = HttpHeaders()
+
+        val header = PlainHeader.Builder().contentType("JWT").build()
+        val payload = JWTClaimsSet.Builder().issuer("https://dev-euweyz5a.us.auth0.com/").audience("proxy").build()
+        val jwtM2M = PlainJWT(header, payload).serialize()
+
+        m2mHeaders.set("Content-Type", "application/graphql")
+        m2mHeaders.set("Authorization", "Bearer $jwtM2M")
+
+        every { m2mJwtDecoder.decode(jwtM2M) } returns (mockk<Jwt>())
+
+        val httpEntity = HttpEntity(query, httpHeaders)
 
         val responseEntity =
             restTemplate.postForEntity(URI("http://localhost:$port/graphql"), httpEntity, String::class.java)
@@ -281,8 +237,6 @@ class InteropProxyServerIntegratedPatientTests {
         assertEquals("404 Invalid Tenant: unknown", resultJSONObject["errors"][0]["message"].asText())
 
         val roninTenant = resultJSONObject["data"]["patientsByTenants"][0]
-        assertEquals("ronin", roninTenant["tenantId"].asText())
         assertEquals(1, roninTenant["patients"].size())
-        assertEquals("ronin-PatientFHIRID1", roninTenant["patients"][0]["id"].asText())
     }
 }

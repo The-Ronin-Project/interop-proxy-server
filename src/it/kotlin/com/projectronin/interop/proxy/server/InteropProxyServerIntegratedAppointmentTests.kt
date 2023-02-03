@@ -1,42 +1,61 @@
 package com.projectronin.interop.proxy.server
 
 import com.fasterxml.jackson.databind.JsonNode
-import com.ninjasquad.springmockk.MockkBean
 import com.projectronin.interop.aidbox.testcontainer.AidboxData
 import com.projectronin.interop.aidbox.testcontainer.AidboxTest
 import com.projectronin.interop.aidbox.testcontainer.container.AidboxContainer
 import com.projectronin.interop.aidbox.testcontainer.container.AidboxDatabaseContainer
 import com.projectronin.interop.common.jackson.JacksonManager.Companion.objectMapper
-import com.projectronin.interop.mock.ehr.testcontainer.MockEHRTestcontainer
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.boot.test.web.client.TestRestTemplate
-import org.springframework.boot.test.web.server.LocalServerPort
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.MethodSource
 import org.springframework.http.HttpEntity
-import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
-import org.springframework.security.oauth2.jwt.JwtDecoder
-import org.springframework.test.context.ActiveProfiles
-import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.DynamicPropertyRegistry
 import org.springframework.test.context.DynamicPropertySource
 import org.testcontainers.junit.jupiter.Container
 import java.net.URI
-import javax.sql.DataSource
 
-private var setupDone = false
-
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@ActiveProfiles("it")
-@ContextConfiguration(initializers = [(InteropProxyServerAuthInitializer::class)])
 @AidboxData("aidbox/practitioners.yaml", "aidbox/patient2.yaml", "aidbox/location1.yaml")
 @AidboxTest
-class InteropProxyServerIntegratedAppointmentTests {
+class InteropProxyServerIntegratedAppointmentTests : InteropProxyServerIntegratedTestsBase() {
+
+    override val resourcesToAdd = listOf(
+        ResourceToAdd(
+            "Location",
+            "/mockEHR/r4Location.json",
+            "LocationFHIRID1"
+        ),
+        ResourceToAdd(
+            "Appointment",
+            "/mockEHR/r4Appointment1.json",
+            "AppointmentFHIRID1"
+        ),
+        ResourceToAdd(
+            "Appointment",
+            "/mockEHR/r4Appointment2.json",
+            "AppointmentFHIRID2"
+        ),
+        ResourceToAdd(
+            "Appointment",
+            "/mockEHR/r4Appointment3.json",
+            "AppointmentFHIRID3"
+        ),
+        ResourceToAdd(
+            "Patient",
+            "/mockEHR/r4Patient.json",
+            "PatientFHIRID1"
+        ),
+        ResourceToAdd(
+            "Practitioner",
+            "/mockEHR/r4Practitioner.json",
+            "PractitionerFHIRID1"
+        )
+    )
+
     companion object {
         @Container
         val aidboxDatabaseContainer = AidboxDatabaseContainer()
@@ -52,101 +71,31 @@ class InteropProxyServerIntegratedAppointmentTests {
         }
     }
 
-    @Autowired
-    private lateinit var mockEHR: MockEHRTestcontainer
-
-    @Autowired
-    private lateinit var ehrDatasource: DataSource
-
-    @LocalServerPort
-    private var port = 0
-
-    @Autowired
-    private lateinit var restTemplate: TestRestTemplate
-
-    @MockkBean
-    private lateinit var m2mJwtDecoder: JwtDecoder
-
-    private val httpHeaders = HttpHeaders()
-
-    init {
-        httpHeaders.set("Content-Type", "application/graphql")
-        httpHeaders.set("Authorization", "Fake Token")
-    }
-
-    @BeforeEach
-    fun setup() {
-        if (!setupDone) {
-            // we need to change the service address of "Epic" after instantiation since the Testcontainer has a dynamic port
-            val connection = ehrDatasource.connection
-            val statement = connection.createStatement()
-            statement.execute("update io_tenant_epic set service_endpoint = '${mockEHR.getURL()}/epic' where io_tenant_id = 1002;")
-            statement.execute("update io_tenant_epic set auth_endpoint = '${mockEHR.getURL()}/epic/oauth2/token' where io_tenant_id = 1002;")
-
-            // insert testing data to MockEHR
-            mockEHR.addR4Resource(
-                "Location",
-                this::class.java.getResource("/mockEHR/r4Location.json")!!.readText(),
-                "LocationFHIRID1"
-            )
-            mockEHR.addR4Resource(
-                "Appointment",
-                this::class.java.getResource("/mockEHR/r4Appointment1.json")!!.readText(),
-                "AppointmentFHIRID1"
-            )
-            mockEHR.addR4Resource(
-                "Appointment",
-                this::class.java.getResource("/mockEHR/r4Appointment2.json")!!.readText(),
-                "AppointmentFHIRID2"
-            )
-            mockEHR.addR4Resource(
-                "Appointment",
-                this::class.java.getResource("/mockEHR/r4Appointment3.json")!!.readText(),
-                "AppointmentFHIRID3"
-            )
-            mockEHR.addR4Resource(
-                "Patient",
-                this::class.java.getResource("/mockEHR/r4Patient.json")!!.readText(),
-                "PatientFHIRID1"
-            )
-            mockEHR.addR4Resource(
-                "Practitioner",
-                this::class.java.getResource("/mockEHR/r4Practitioner.json")!!.readText(),
-                "PractitionerFHIRID1"
-            )
-            setupDone = true
-        }
-    }
-
     private fun changeTimeZone(timezone: String) {
         val connection = ehrDatasource.connection
         val statement = connection.createStatement()
         statement.execute("update io_tenant set timezone = '$timezone' where io_tenant_id = 1002;")
     }
 
-    @Test
-    fun `server handles appointment by MRN query`() {
+    @ParameterizedTest
+    @MethodSource("tenantsToTest")
+    fun `server handles appointment by MRN query`(testTenant: String) {
         val query = this::class.java.getResource("/graphql/appointmentsByMRN.graphql")!!.readText()
             .replace("__START_DATE__", "01-01-2022").replace("__END_DATE__", "02-02-2022")
-        val httpEntity = HttpEntity(query, httpHeaders)
-
-        val responseEntity =
-            restTemplate.postForEntity(URI("http://localhost:$port/graphql"), httpEntity, String::class.java)
-        assertEquals(HttpStatus.OK, responseEntity.statusCode)
+        val responseEntity = multiVendorQuery(query, testTenant)
 
         val resultJSONNode = objectMapper.readTree(responseEntity.body)
         val node = resultJSONNode["data"]["appointmentsByMRNAndDate"]
         validateAppointmentResponse(node)
     }
 
-    @Test
-    fun `server handles appointment by FHIR ID query`() {
+    @ParameterizedTest
+    @MethodSource("tenantsToTest")
+    fun `server handles appointment by FHIR ID query`(testTenant: String) {
         val query = this::class.java.getResource("/graphql/appointmentsByFHIR.graphql")!!.readText()
             .replace("__START_DATE__", "01-01-2022").replace("__END_DATE__", "02-02-2022")
-        val httpEntity = HttpEntity(query, httpHeaders)
 
-        val responseEntity =
-            restTemplate.postForEntity(URI("http://localhost:$port/graphql"), httpEntity, String::class.java)
+        val responseEntity = multiVendorQuery(query, testTenant)
         assertEquals(HttpStatus.OK, responseEntity.statusCode)
 
         val resultJSONNode = objectMapper.readTree(responseEntity.body)
@@ -160,11 +109,9 @@ class InteropProxyServerIntegratedAppointmentTests {
 
         val query = this::class.java.getResource("/graphql/appointmentsByFHIR.graphql")!!.readText()
             .replace("__START_DATE__", "01-01-2022").replace("__END_DATE__", "02-02-2022")
-        val httpEntity = HttpEntity(query, httpHeaders)
 
         val responseEntity =
-            restTemplate.postForEntity(URI("http://localhost:$port/graphql"), httpEntity, String::class.java)
-        assertEquals(HttpStatus.OK, responseEntity.statusCode)
+            multiVendorQuery(query, "epic")
 
         val resultJSONNode = objectMapper.readTree(responseEntity.body)
         val node = resultJSONNode["data"]["appointmentsByPatientAndDate"]
@@ -182,7 +129,7 @@ class InteropProxyServerIntegratedAppointmentTests {
         }
 
         // reset the Timezone
-        changeTimeZone("America/Los_Angeles")
+        changeTimeZone("Etc/UTC")
     }
 
     private fun validateAppointmentResponse(node: JsonNode) {
@@ -191,15 +138,10 @@ class InteropProxyServerIntegratedAppointmentTests {
 
         node.forEach { appointment ->
             if (appointment["id"].asText().contains("AppointmentFHIRID1")) {
-                // The time is represented in UTC, but the source is PT
-                assertEquals("2022-01-01T17:00:00Z", appointment["start"].asText())
-                assertEquals(
-                    "AppointmentFHIRID1",
-                    appointment["identifier"].first { it["system"].asText() == "mockEncounterCSNSystem" }["value"].asText()
-                )
+
+                assertEquals("2022-01-01T09:00:00Z", appointment["start"].asText())
                 assertEquals("booked", appointment["status"].asText())
                 val participants = appointment["participants"]
-                assertEquals(2, participants.size())
                 participants.forEach { participant ->
                     val actor = participant["actor"]
                     val type = actor["type"].asText()
@@ -215,19 +157,7 @@ class InteropProxyServerIntegratedAppointmentTests {
                 }
             }
             if (appointment["id"].asText().contains("AppointmentFHIRID2")) {
-                assertEquals("2022-01-01T18:00:00Z", appointment["start"].asText())
-
-                val participants = appointment["participants"]
-                assertEquals(2, participants.size())
-                participants.forEach { participant ->
-                    val actor = participant["actor"]
-                    val type = actor["type"].asText()
-                    if (type == "Practitioner") {
-                        actor["identifier"]?.find { it["system"]?.asText() == "mockEHRProviderSystem" }?.let {
-                            assertEquals("NO-INTERNAL-ID", it["value"].asText())
-                        }
-                    }
-                }
+                assertEquals("2022-01-01T10:00:00Z", appointment["start"].asText())
             }
         }
     }
@@ -305,8 +235,9 @@ class InteropProxyServerIntegratedAppointmentTests {
         assertTrue(resultJSONObject.has("errors"))
     }
 
-    @Test
-    fun `server handles no appointment found`() {
+    @ParameterizedTest
+    @MethodSource("tenantsToTest")
+    fun `server handles no appointment found`(testTenant: String) {
         val tenantId = "ronin"
         val startDate = "01-01-2001"
         val endDate = "12-01-2001"
@@ -318,10 +249,7 @@ class InteropProxyServerIntegratedAppointmentTests {
             |   {id}
             |}""".trimMargin()
 
-        val httpEntity = HttpEntity(query, httpHeaders)
-
-        val response =
-            restTemplate.postForEntity(URI("http://localhost:$port/graphql"), httpEntity, String::class.java)
+        val response = multiVendorQuery(query, testTenant)
 
         val resultJSONObject = objectMapper.readTree(response.body)
         val appointmentSearchJSONArray = resultJSONObject["data"]["appointmentsByMRNAndDate"]

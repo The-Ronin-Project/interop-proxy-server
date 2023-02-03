@@ -1,5 +1,5 @@
 query {
-    patientsByTenants(tenantIds: ["ronin", "unknown"], family: "Mychart", given: "Allison", birthdate: "1987-01-15") {
+    patientsByTenants(tenantIds: ["epic", "cerner"], family: "Mychart", given: "Allison", birthdate: "1987-01-15") {
         tenantId
         patients {
             address {
