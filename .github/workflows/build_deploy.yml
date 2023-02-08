@@ -3,9 +3,9 @@ name: Build and push to Nexus; Deploy to ArgoCD DEV
 on:
   workflow_dispatch:
   workflow_run:
-    workflows: [Tests]
-    types: [completed]
-    branches: [master]
+    workflows: [ Tests ]
+    types: [ completed ]
+    branches: [ main ]
 
 jobs:
   image-push-latest:
@@ -36,7 +36,7 @@ jobs:
 
   argocd_dev:
     uses: projectronin/github/.github/workflows/argocd_deploy.yml@master
-    needs: [image-push-sha]
+    needs: [ image-push-sha ]
     with:
       environment: dev
       image-tag: ${{ github.sha }}
