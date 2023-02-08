@@ -14,6 +14,8 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.MethodSource
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.security.oauth2.jwt.Jwt
@@ -33,6 +35,7 @@ class InteropProxyServerIntegratedMessageTests : InteropProxyServerIntegratedTes
     override val resourcesToAdd = listOf(
         ResourceToAdd("Patient", "/mockEHR/r4Patient.json", "PatientFHIRID1")
     )
+
     companion object {
         @Container
         val aidboxDatabaseContainer = AidboxDatabaseContainer()
@@ -53,9 +56,9 @@ class InteropProxyServerIntegratedMessageTests : InteropProxyServerIntegratedTes
         httpHeaders.set("Authorization", "Fake Token")
     }
 
-    @Test
-    fun `server handles message mutation`() {
-        val tenantId = "ronin"
+    @ParameterizedTest
+    @MethodSource("tenantsToTest")
+    fun `server handles message mutation`(testTenant: String) {
         val mrn = "202497"
         val id = "ronin-PractitionerFHIRID1"
         val message = "Test message"
@@ -74,14 +77,14 @@ class InteropProxyServerIntegratedMessageTests : InteropProxyServerIntegratedTes
             |         },
             |         "text": "$message"
             |      },
-            |      "tenantId": "$tenantId"
+            |      "tenantId": "ronin"
             |   },
             |   "query": "$mutation"
             |}
         """.trimMargin()
         val expectedJSON = """{"data":{"sendMessage":"sent"}}"""
 
-        val responseEntity = multiVendorQuery(query, "epic")
+        val responseEntity = multiVendorQuery(query, testTenant)
 
         val resultJSONObject = objectMapper.readTree(responseEntity.body)
         val expectedJSONObject = objectMapper.readTree(expectedJSON)
@@ -91,9 +94,9 @@ class InteropProxyServerIntegratedMessageTests : InteropProxyServerIntegratedTes
         assertEquals(expectedJSONObject, resultJSONObject)
     }
 
-    @Test
-    fun `server handles pool provider`() {
-        val tenantId = "ronin"
+    @ParameterizedTest
+    @MethodSource("tenantsToTest")
+    fun `server handles pool provider`(testTenant: String) {
         val mrn = "202497"
         val id = "ronin-PractitionerPoolFHIRID1"
         val message = "Test pool message"
@@ -112,14 +115,14 @@ class InteropProxyServerIntegratedMessageTests : InteropProxyServerIntegratedTes
             |         },
             |         "text": "$message"
             |      },
-            |      "tenantId": "$tenantId"
+            |      "tenantId": "ronin"
             |   },
             |   "query": "$mutation"
             |}
         """.trimMargin()
 
         val expectedJSON = """{"data":{"sendMessage":"sent"}}"""
-        val responseEntity = multiVendorQuery(query, "epic")
+        val responseEntity = multiVendorQuery(query, testTenant)
 
         val resultJSONObject = objectMapper.readTree(responseEntity.body)
         val expectedJSONObject = objectMapper.readTree(expectedJSON)
@@ -129,9 +132,9 @@ class InteropProxyServerIntegratedMessageTests : InteropProxyServerIntegratedTes
         assertEquals(expectedJSONObject, resultJSONObject)
     }
 
-    @Test
-    fun `server handles pool and non-pool providers`() {
-        val tenantId = "ronin"
+    @ParameterizedTest
+    @MethodSource("tenantsToTest")
+    fun `server handles pool and non-pool providers`(testTenant: String) {
         val mrn = "202497"
         val idPool = "ronin-PractitionerPoolFHIRID1"
         val idNotPool = "ronin-PractitionerFHIRID1"
@@ -156,14 +159,14 @@ class InteropProxyServerIntegratedMessageTests : InteropProxyServerIntegratedTes
             |         ],
             |         "text": "$message"
             |      },
-            |      "tenantId": "$tenantId"
+            |      "tenantId": "ronin"
             |   },
             |   "query": "$mutation"
             |}
         """.trimMargin()
 
         val expectedJSON = """{"data":{"sendMessage":"sent"}}"""
-        val responseEntity = multiVendorQuery(query, "epic")
+        val responseEntity = multiVendorQuery(query, testTenant)
 
         val resultJSONObject = objectMapper.readTree(responseEntity.body)
         val expectedJSONObject = objectMapper.readTree(expectedJSON)
@@ -215,7 +218,6 @@ class InteropProxyServerIntegratedMessageTests : InteropProxyServerIntegratedTes
 
     @Test
     fun `server handles epic bad data response`() {
-        val tenantId = "ronin"
         val mrn = "fake"
         val id = "ronin-PractitionerFHIRIDI1"
         val message = "Test message"
@@ -234,7 +236,7 @@ class InteropProxyServerIntegratedMessageTests : InteropProxyServerIntegratedTes
             |         },
             |         "text": "$message"
             |      },
-            |      "tenantId": "$tenantId"
+            |      "tenantId": "ronin"
             |   },
             |   "query": "$mutation"
             |}
@@ -250,7 +252,6 @@ class InteropProxyServerIntegratedMessageTests : InteropProxyServerIntegratedTes
 
     @Test
     fun `server handles epic missing data`() {
-        val tenantId = "ronin"
         val mrn = "202497"
         val id = "ronin-PractitionerFHIRIDI1"
         val mutation =
@@ -267,7 +268,7 @@ class InteropProxyServerIntegratedMessageTests : InteropProxyServerIntegratedTes
         |             "fhirId": "$id"
         |         }
         |      },
-        |      "tenantId": "$tenantId"
+        |      "tenantId": "ronin"
         |   },
         |   "query": "$mutation"
         |}
@@ -281,9 +282,9 @@ class InteropProxyServerIntegratedMessageTests : InteropProxyServerIntegratedTes
         assertTrue(resultJSONObject.has("errors"))
     }
 
-    @Test
-    fun `server accepts valid m2m auth`() {
-        val tenantId = "ronin"
+    @ParameterizedTest
+    @MethodSource("tenantsToTest")
+    fun `server accepts valid m2m auth`(testTenant: String) {
         val mrn = "202497"
         val id = "ronin-PractitionerFHIRID1"
         val message = "Test message"
@@ -302,7 +303,7 @@ class InteropProxyServerIntegratedMessageTests : InteropProxyServerIntegratedTes
             |         },
             |         "text": "$message"
             |      },
-            |      "tenantId": "$tenantId"
+            |      "tenantId": "ronin"
             |   },
             |   "query": "$mutation"
             |}
@@ -320,7 +321,7 @@ class InteropProxyServerIntegratedMessageTests : InteropProxyServerIntegratedTes
 
         every { m2mJwtDecoder.decode(jwtM2M) } returns (mockk<Jwt>())
 
-        val responseEntity = multiVendorQuery(query, "epic", m2mHeaders)
+        val responseEntity = multiVendorQuery(query, testTenant, m2mHeaders)
 
         val resultJSONObject = objectMapper.readTree(responseEntity.body)
         val expectedJSONObject = objectMapper.readTree(expectedJSON)
@@ -332,7 +333,6 @@ class InteropProxyServerIntegratedMessageTests : InteropProxyServerIntegratedTes
 
     @Test
     fun `server handles provider tenant mismatch`() {
-        val tenantId = "ronin"
         val mrn = "202497"
         val id = "ronin-7e52ab01-0393-4e97-afd8-5b0649ab49e2"
         val message = "Test message"
@@ -351,7 +351,7 @@ class InteropProxyServerIntegratedMessageTests : InteropProxyServerIntegratedTes
             |         },
             |         "text": "$message"
             |      },
-            |      "tenantId": "$tenantId"
+            |      "tenantId": "ronin"
             |   },
             |   "query": "$mutation"
             |}

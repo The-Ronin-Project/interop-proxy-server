@@ -172,6 +172,10 @@ class TenantControllerTests {
             authEndpoint = "authEndpoint",
             patientMRNSystem = "patientMRNSystem",
             instanceName = "Cerner Sandbox",
+            messagePractitioner = "Practitioner1",
+            messageTopic = "Ronin Alert",
+            messageCategory = "alert",
+            messagePriority = "routine"
         )
 
         val newTenant = Tenant(
@@ -288,6 +292,10 @@ class TenantControllerTests {
             authEndpoint = "new authEndpoint",
             patientMRNSystem = "new patientMRNSystem",
             instanceName = "Cerner Sandbox",
+            messagePractitioner = "NewPractitioner1",
+            messageTopic = null,
+            messageCategory = null,
+            messagePriority = null
         )
 
         val updatedTenant = Tenant(

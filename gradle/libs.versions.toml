@@ -6,18 +6,22 @@ graphql-spring-boot-starter-test = "com.graphql-java-kickstart:graphql-spring-bo
 hapi-hl7v2-251 = "ca.uhn.hapi:hapi-structures-v251:2.3"
 hapi-hl7v2-base = "ca.uhn.hapi:hapi-base:2.3"
 
+interop-aidbox = "com.projectronin.interop.publish:interop-aidbox:7.2.1"
+
 interop-common = "com.projectronin.interop:interop-common:3.3.0"
 interop-commonHttp = "com.projectronin.interop:interop-common-http:3.3.0"
 interop-commonJackson = "com.projectronin.interop:interop-common-jackson:3.3.0"
 interop-commonTestDb = "com.projectronin.interop:interop-common-test-db:3.3.0"
-interop-aidbox = "com.projectronin.interop.publish:interop-aidbox:7.2.1"
+
 interop-datalake = "com.projectronin.interop.publish:interop-datalake:7.2.1"
-interop-ehr-api = "com.projectronin.interop.ehr:interop-ehr:8.4.0"
-interop-ehr-cerner = "com.projectronin.interop.ehr:interop-ehr-cerner:8.4.0"
-interop-ehr-fhir-ronin = "com.projectronin.interop.ehr:interop-fhir-ronin:8.4.0"
-interop-ehr-epic = "com.projectronin.interop.ehr:interop-ehr-epic:8.4.0"
-interop-ehr-liquibase = "com.projectronin.interop.ehr:interop-ehr-liquibase:8.4.0"
-interop-ehr-tenant = "com.projectronin.interop.ehr:interop-tenant:8.4.0"
+
+interop-ehr-api = "com.projectronin.interop.ehr:interop-ehr:8.5.0"
+interop-ehr-cerner = "com.projectronin.interop.ehr:interop-ehr-cerner:8.5.0"
+interop-ehr-fhir-ronin = "com.projectronin.interop.ehr:interop-fhir-ronin:8.5.0"
+interop-ehr-epic = "com.projectronin.interop.ehr:interop-ehr-epic:8.5.0"
+interop-ehr-liquibase = "com.projectronin.interop.ehr:interop-ehr-liquibase:8.5.0"
+interop-ehr-tenant = "com.projectronin.interop.ehr:interop-tenant:8.5.0"
+
 interop-fhir = "com.projectronin.interop.fhir:interop-fhir:7.0.0"
 
 interop-queue-api = "com.projectronin.interop.queue:interop-queue:1.4.2"

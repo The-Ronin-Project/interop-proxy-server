@@ -58,6 +58,10 @@ private fun TenantServiceCerner.toProxyCerner(): ProxyCerner {
         authEndpoint = authenticationConfig.authEndpoint,
         patientMRNSystem = patientMRNSystem,
         instanceName = instanceName,
+        messagePractitioner = messagePractitioner,
+        messageTopic = messageTopic,
+        messageCategory = messageCategory,
+        messagePriority = messagePriority
     )
 }
 
@@ -112,10 +116,14 @@ private fun ProxyCerner.toTenantServerCerner(): TenantServiceCerner {
         patientMRNSystem = patientMRNSystem,
         instanceName = instanceName,
         clientId = "",
+        messagePractitioner = messagePractitioner,
+        messageTopic = messageTopic,
         authenticationConfig = CernerAuthenticationConfig(
             authEndpoint = authEndpoint,
             accountId = "",
             secret = ""
         ),
+        messageCategory = messageCategory,
+        messagePriority = messagePriority
     )
 }

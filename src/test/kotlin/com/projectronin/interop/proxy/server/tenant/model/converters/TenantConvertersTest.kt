@@ -22,6 +22,10 @@ class TenantConvertersTest {
             instanceName = "instanceName",
             clientId = "notLeaked",
             authenticationConfig = CernerAuthenticationConfig("serviceEndpoint", "notleaked", "notleaked"),
+            messagePractitioner = "Practitioner1",
+            messageTopic = "topic",
+            messageCategory = "category",
+            messagePriority = "priority"
         )
         val tenantServiceTenant = Tenant(
             internalId = 1,
@@ -37,6 +41,10 @@ class TenantConvertersTest {
         assertEquals("serviceEndpoint", cerner.serviceEndpoint)
         assertEquals("patientMRNSystem", cerner.patientMRNSystem)
         assertEquals("instanceName", cerner.instanceName)
+        assertEquals("Practitioner1", cerner.messagePractitioner)
+        assertEquals("topic", cerner.messageTopic)
+        assertEquals("category", cerner.messageCategory)
+        assertEquals("priority", cerner.messagePriority)
     }
 
     @Test
@@ -90,7 +98,11 @@ class TenantConvertersTest {
                 serviceEndpoint = "serviceEndpoint",
                 authEndpoint = "authEndpoint",
                 instanceName = "instanceName",
-                patientMRNSystem = "patientMRNSystem"
+                patientMRNSystem = "patientMRNSystem",
+                messagePractitioner = "practitioner",
+                messageTopic = "topic",
+                messageCategory = "category",
+                messagePriority = "priority"
             )
         )
         val tenantServerTenant = proxyTenant.toTenantServerTenant()
@@ -98,6 +110,10 @@ class TenantConvertersTest {
         val cerner = tenantServerTenant.vendor as com.projectronin.interop.tenant.config.model.vendor.Cerner
         assertEquals("serviceEndpoint", cerner.serviceEndpoint)
         assertEquals("authEndpoint", cerner.authenticationConfig.authEndpoint)
+        assertEquals("practitioner", cerner.messagePractitioner)
+        assertEquals("topic", cerner.messageTopic)
+        assertEquals("category", cerner.messageCategory)
+        assertEquals("priority", cerner.messagePriority)
     }
 
     @Test
@@ -146,7 +162,11 @@ class TenantConvertersTest {
                 serviceEndpoint = "serviceEndpoint",
                 authEndpoint = "authEndpoint",
                 instanceName = "instanceName",
-                patientMRNSystem = "patientMRNSystem"
+                patientMRNSystem = "patientMRNSystem",
+                messagePractitioner = "practitioner",
+                messageTopic = "topic",
+                messageCategory = "category",
+                messagePriority = "priority"
             )
         )
         val newTenantServerTenant = proxyTenant.toTenantServerTenant(999)
@@ -154,5 +174,9 @@ class TenantConvertersTest {
         val newCerner = newTenantServerTenant.vendor as com.projectronin.interop.tenant.config.model.vendor.Cerner
         assertEquals("serviceEndpoint", newCerner.serviceEndpoint)
         assertEquals("authEndpoint", newCerner.authenticationConfig.authEndpoint)
+        assertEquals("practitioner", newCerner.messagePractitioner)
+        assertEquals("topic", newCerner.messageTopic)
+        assertEquals("category", newCerner.messageCategory)
+        assertEquals("priority", newCerner.messagePriority)
     }
 }
