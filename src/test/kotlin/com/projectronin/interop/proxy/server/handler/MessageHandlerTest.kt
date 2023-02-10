@@ -70,7 +70,7 @@ class MessageHandlerTest {
                 mapOf("MRN" to SystemValue(system = CodeSystem.RONIN_MRN.uri.value!!, value = "MRN#1"))
             )
         } returns emptyMap()
-        val messageInput = MessageInput("Test Message", MessagePatientInput("MRN#1"), listOf())
+        val messageInput = MessageInput("Test Message", MessagePatientInput("MRN#1", null), listOf())
         assertEquals(
             messageHandler.sendMessage("TEST_TENANT", messageInput, dfe).errors.first().message,
             "Attempted to send message for patient with MRN MRN#1 who does not exist in Aidbox."
@@ -82,7 +82,7 @@ class MessageHandlerTest {
         every { dfe.graphQlContext.get<InteropGraphQLContext>(INTEROP_CONTEXT_KEY).authzTenantId } returns "TEST_TENANT"
         every { tenantService.getTenantForMnemonic("TEST_TENANT") } returns null
 
-        val messageInput = MessageInput("Test Message", MessagePatientInput("MRN#1"), listOf())
+        val messageInput = MessageInput("Test Message", MessagePatientInput("MRN#1", null), listOf())
         val exception = assertThrows<HttpClientErrorException> {
             messageHandler.sendMessage("TEST_TENANT", messageInput, dfe)
         }
@@ -100,7 +100,7 @@ class MessageHandlerTest {
 
         every { ehrFactory.getVendorFactory(tenant) } throws IllegalStateException("Error")
 
-        val messageInput = MessageInput("Test Message", MessagePatientInput("MRN#1"), listOf())
+        val messageInput = MessageInput("Test Message", MessagePatientInput("MRN#1", null), listOf())
         val exception = assertThrows<IllegalStateException> {
             messageHandler.sendMessage("TEST_TENANT", messageInput, dfe)
         }
@@ -115,14 +115,14 @@ class MessageHandlerTest {
             every { mnemonic } returns "TEST_TENANT"
         }
         every { tenantService.getTenantForMnemonic("TEST_TENANT") } returns tenant
-        val expectedEHRMessageInput = EHRMessageInput("Test Message", "MRN#1", listOf())
+        val expectedEHRMessageInput = EHRMessageInput("Test Message", "FHIRID", listOf())
         every { ehrFactory.getVendorFactory(tenant) } returns mockk {
             every { messageService } returns mockk {
                 every { sendMessage(tenant, expectedEHRMessageInput) } returns ("messageId#1")
             }
         }
 
-        val messageInput = MessageInput("Test Message", MessagePatientInput("MRN#1"), listOf())
+        val messageInput = MessageInput("Test Message", MessagePatientInput("MRN#1", null), listOf())
         val actualResponse = messageHandler.sendMessage("TEST_TENANT", messageInput, dfe).data
 
         assertEquals("sent", actualResponse)
@@ -138,7 +138,7 @@ class MessageHandlerTest {
         val expectedEHRMessageInput =
             EHRMessageInput(
                 "Test Message",
-                "MRN#1",
+                "FHIRID",
                 listOf(
                     EHRRecipient("TEST_TENANT-doc1", identifierVendorIdentifier)
                 )
@@ -161,7 +161,7 @@ class MessageHandlerTest {
         val messageInput =
             MessageInput(
                 "Test Message",
-                MessagePatientInput("MRN#1"),
+                MessagePatientInput("MRN#1", null),
                 listOf(MessageRecipientInput("TEST_TENANT-doc1"))
             )
         val actualResponse = messageHandler.sendMessage("TEST_TENANT", messageInput, dfe).data
@@ -179,7 +179,7 @@ class MessageHandlerTest {
         val expectedEHRMessageInput =
             EHRMessageInput(
                 "Test Message",
-                "MRN#1",
+                "FHIRID",
                 listOf(
                     EHRRecipient(
                         "TEST_TENANT-doc1",
@@ -217,7 +217,7 @@ class MessageHandlerTest {
         val messageInput =
             MessageInput(
                 "Test Message",
-                MessagePatientInput("MRN#1"),
+                MessagePatientInput("MRN#1", null),
                 listOf(MessageRecipientInput("TEST_TENANT-doc1"), MessageRecipientInput("TEST_TENANT-pool1"))
             )
 
@@ -226,5 +226,47 @@ class MessageHandlerTest {
         val actualResponse = messageHandler.sendMessage("TEST_TENANT", messageInput, dfe).data
 
         assertEquals("sent", actualResponse)
+    }
+
+    @Test
+    fun `ensure message can be sent when sent without mrn`() {
+        every { dfe.graphQlContext.get<InteropGraphQLContext>(INTEROP_CONTEXT_KEY).authzTenantId } returns "TEST_TENANT"
+        val tenant = mockk<Tenant> {
+            every { mnemonic } returns "TEST_TENANT"
+        }
+        every { tenantService.getTenantForMnemonic("TEST_TENANT") } returns tenant
+        val expectedEHRMessageInput = EHRMessageInput("Test Message", "fhirId", listOf())
+        every { ehrFactory.getVendorFactory(tenant) } returns mockk {
+            every { messageService } returns mockk {
+                every { sendMessage(tenant, expectedEHRMessageInput) } returns ("messageId#1")
+            }
+        }
+        patientService = mockk {
+            every {
+                getPatientFHIRIds(
+                    "TEST_TENANT",
+                    mapOf("MRN" to SystemValue(system = CodeSystem.RONIN_MRN.uri.value!!, value = "MRN#1"))
+                )
+            } throws Exception("shouldn't be hit")
+        }
+
+        val messageInput = MessageInput("Test Message", MessagePatientInput(null, "TEST_TENANT-fhirId"), listOf())
+        val actualResponse = messageHandler.sendMessage("TEST_TENANT", messageInput, dfe).data
+
+        assertEquals("sent", actualResponse)
+    }
+
+    @Test
+    fun `ensure error when no input`() {
+        every { dfe.graphQlContext.get<InteropGraphQLContext>(INTEROP_CONTEXT_KEY).authzTenantId } returns "TEST_TENANT"
+        val tenant = mockk<Tenant> {
+            every { mnemonic } returns "TEST_TENANT"
+        }
+        every { tenantService.getTenantForMnemonic("TEST_TENANT") } returns tenant
+        val messageInput = MessageInput("Test Message", MessagePatientInput(null, null), listOf())
+        assertEquals(
+            messageHandler.sendMessage("TEST_TENANT", messageInput, dfe).errors.first().message,
+            "Either MRN or Ronin ID must be specified"
+        )
     }
 }

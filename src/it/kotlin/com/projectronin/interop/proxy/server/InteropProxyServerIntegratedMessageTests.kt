@@ -27,13 +27,13 @@ import org.testcontainers.junit.jupiter.Container
     "aidbox/practitioner1.yaml",
     "aidbox/practitioner2.yaml",
     "aidbox/practitionerPool.yaml",
-    "aidbox/patient2.yaml"
+    "aidbox/patient3.yaml"
 )
 @AidboxTest
 class InteropProxyServerIntegratedMessageTests : InteropProxyServerIntegratedTestsBase() {
 
     override val resourcesToAdd = listOf(
-        ResourceToAdd("Patient", "/mockEHR/r4Patient.json", "PatientFHIRID1")
+        ResourceToAdd("Patient", "/mockEHR/r4Patient3.json", "patientFHIRID3")
     )
 
     companion object {
@@ -59,7 +59,7 @@ class InteropProxyServerIntegratedMessageTests : InteropProxyServerIntegratedTes
     @ParameterizedTest
     @MethodSource("tenantsToTest")
     fun `server handles message mutation`(testTenant: String) {
-        val mrn = "202497"
+        val mrn = "111"
         val id = "ronin-PractitionerFHIRID1"
         val message = "Test message"
         val mutation =
@@ -97,7 +97,7 @@ class InteropProxyServerIntegratedMessageTests : InteropProxyServerIntegratedTes
     @ParameterizedTest
     @MethodSource("tenantsToTest")
     fun `server handles pool provider`(testTenant: String) {
-        val mrn = "202497"
+        val mrn = "111"
         val id = "ronin-PractitionerPoolFHIRID1"
         val message = "Test pool message"
         val mutation =
@@ -135,7 +135,7 @@ class InteropProxyServerIntegratedMessageTests : InteropProxyServerIntegratedTes
     @ParameterizedTest
     @MethodSource("tenantsToTest")
     fun `server handles pool and non-pool providers`(testTenant: String) {
-        val mrn = "202497"
+        val mrn = "111"
         val idPool = "ronin-PractitionerPoolFHIRID1"
         val idNotPool = "ronin-PractitionerFHIRID1"
         val message = "Test pool message"
@@ -179,7 +179,7 @@ class InteropProxyServerIntegratedMessageTests : InteropProxyServerIntegratedTes
     @Test
     fun `server handles bad tenant`() {
         val tenantId = "fake"
-        val mrn = "202497"
+        val mrn = "111"
         val id = "ronin-PractitionerFHIRID1"
         val message = "Test message"
         val mutation =
@@ -252,7 +252,7 @@ class InteropProxyServerIntegratedMessageTests : InteropProxyServerIntegratedTes
 
     @Test
     fun `server handles epic missing data`() {
-        val mrn = "202497"
+        val mrn = "111"
         val id = "ronin-PractitionerFHIRIDI1"
         val mutation =
             """mutation sendMessage (${'$'}message: MessageInput!, ${'$'}tenantId: String!) {sendMessage (message: ${'$'}message, tenantId: ${'$'}tenantId)}"""
@@ -285,7 +285,7 @@ class InteropProxyServerIntegratedMessageTests : InteropProxyServerIntegratedTes
     @ParameterizedTest
     @MethodSource("tenantsToTest")
     fun `server accepts valid m2m auth`(testTenant: String) {
-        val mrn = "202497"
+        val mrn = "111"
         val id = "ronin-PractitionerFHIRID1"
         val message = "Test message"
         val mutation =
@@ -333,7 +333,7 @@ class InteropProxyServerIntegratedMessageTests : InteropProxyServerIntegratedTes
 
     @Test
     fun `server handles provider tenant mismatch`() {
-        val mrn = "202497"
+        val mrn = "111"
         val id = "ronin-7e52ab01-0393-4e97-afd8-5b0649ab49e2"
         val message = "Test message"
         val mutation =
@@ -367,5 +367,43 @@ class InteropProxyServerIntegratedMessageTests : InteropProxyServerIntegratedTes
             errorJSONObject["message"].asText()
                 .contains("No practitioner user identifier with system 'mockEHRUserSystem' found for resource with FHIR id 'ronin-7e52ab01-0393-4e97-afd8-5b0649ab49e2")
         )
+    }
+
+    @ParameterizedTest
+    @MethodSource("tenantsToTest")
+    fun `server handles patient FHIR ID`(testTenant: String) {
+        val id = "ronin-PractitionerFHIRID1"
+        val patientId = "ronin-patientFHIRID3"
+        val message = "Test message"
+        val mutation =
+            """mutation sendMessage (${'$'}message: MessageInput!, ${'$'}tenantId: String!) {sendMessage (message: ${'$'}message, tenantId: ${'$'}tenantId)}"""
+
+        val query = """
+            |{
+            |   "variables": {
+            |      "message": {
+            |          "patient": {
+            |              "patientFhirId": "$patientId"
+            |          },
+            |         "recipients": {
+            |             "fhirId": "$id"
+            |         },
+            |         "text": "$message"
+            |      },
+            |      "tenantId": "ronin"
+            |   },
+            |   "query": "$mutation"
+            |}
+        """.trimMargin()
+        val expectedJSON = """{"data":{"sendMessage":"sent"}}"""
+
+        val responseEntity = multiVendorQuery(query, testTenant)
+
+        val resultJSONObject = objectMapper.readTree(responseEntity.body)
+        val expectedJSONObject = objectMapper.readTree(expectedJSON)
+
+        assertEquals(HttpStatus.OK, responseEntity.statusCode)
+        assertFalse(resultJSONObject.has("errors"))
+        assertEquals(expectedJSONObject, resultJSONObject)
     }
 }

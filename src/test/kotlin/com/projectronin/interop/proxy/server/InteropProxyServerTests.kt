@@ -119,7 +119,7 @@ class InteropProxyServerTests {
                 "tenant",
                 mapOf("MRN" to SystemValue(system = CodeSystem.RONIN_MRN.uri.value!!, value = "12345"))
             )
-        } returns mapOf("MRN" to "1234")
+        } returns mapOf("MRN" to "patientFhirId")
         every { ehrFactory.getVendorFactory(tenant) } returns mockk {
             every { messageService } returns mockk {
                 every {
@@ -127,7 +127,7 @@ class InteropProxyServerTests {
                         tenant,
                         EHRMessageInput(
                             "This is my text",
-                            "12345",
+                            "patientFhirId",
                             listOf(
                                 EHRRecipient(
                                     "1234",

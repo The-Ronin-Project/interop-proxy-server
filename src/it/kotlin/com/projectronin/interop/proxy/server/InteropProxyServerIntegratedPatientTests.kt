@@ -23,7 +23,7 @@ import java.net.URI
 class InteropProxyServerIntegratedPatientTests : InteropProxyServerIntegratedTestsBase() {
 
     override val resourcesToAdd = listOf(
-        ResourceToAdd("Patient", "/mockEHR/r4Patient.json", "PatientFHIRID1")
+        ResourceToAdd("Patient", "/mockEHR/r4Patient1.json", "PatientFHIRID1")
     )
 
     /**

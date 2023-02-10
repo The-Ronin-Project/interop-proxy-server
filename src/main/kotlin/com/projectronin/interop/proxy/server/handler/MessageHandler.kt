@@ -41,31 +41,38 @@ class MessageHandler(
     @Trace
     fun sendMessage(tenantId: String, message: MessageInput, dfe: DataFetchingEnvironment): DataFetcherResult<String> {
         logger.info { "Sending message to $tenantId" }
-
         val tenant = findAndValidateTenant(dfe, tenantService, tenantId, false)
-        // ensure patient exists in Aidbox
-        patientService.getPatientFHIRIds(
-            tenant.mnemonic,
-            mapOf("MRN" to SystemValue(system = CodeSystem.RONIN_MRN.uri.value!!, value = message.patient.mrn))
-        ).getOrElse("MRN") {
-            val error =
-                "Attempted to send message for patient with MRN ${message.patient.mrn} who does not exist in Aidbox."
-            logger.error { error }
-            return DataFetcherResult.newResult<String>().errors(listOf(GraphQLException(error).toGraphQLError()))
+        val patientFHIRID = if (message.patient.patientFhirId != null) {
+            message.patient.patientFhirId.unlocalize(tenant)
+        } else if (message.patient.mrn != null) {
+            logger.info { "sendMessage called with MRN" }
+            // ensure patient exists in Aidbox
+            patientService.getPatientFHIRIds(
+                tenant.mnemonic,
+                mapOf("MRN" to SystemValue(system = CodeSystem.RONIN_MRN.uri.value!!, value = message.patient.mrn))
+            ).getOrElse("MRN") {
+                val error =
+                    "Attempted to send message for patient with MRN ${message.patient.mrn} who does not exist in Aidbox."
+                logger.error { error }
+                return DataFetcherResult.newResult<String>().errors(listOf(GraphQLException(error).toGraphQLError()))
+                    .build()
+            }
+        } else {
+            return DataFetcherResult.newResult<String>().errors(listOf(GraphQLException("Either MRN or Ronin ID must be specified").toGraphQLError()))
                 .build()
         }
         val messageService = ehrFactory.getVendorFactory(tenant).messageService
 
-        val messageId = messageService.sendMessage(tenant, mapEHRMessage(tenant, message))
+        val messageId = messageService.sendMessage(tenant, mapEHRMessage(tenant, message, patientFHIRID))
         logger.info { "Message, id $messageId, sent to $tenantId" }
         return DataFetcherResult.newResult<String>().data("sent").build()
     }
 
-    private fun mapEHRMessage(tenant: Tenant, message: MessageInput): EHRMessageInput {
+    private fun mapEHRMessage(tenant: Tenant, message: MessageInput, patientFHIRID: String): EHRMessageInput {
         return EHRMessageInput(
             text = message.text,
-            patientMRN = message.patient.mrn,
-            recipients = message.recipients.map { mapEHRRecipient(tenant, it) }.toList()
+            patientFHIRID = patientFHIRID,
+            recipients = message.recipients.map { mapEHRRecipient(tenant, it) }.toList(),
         )
     }
 

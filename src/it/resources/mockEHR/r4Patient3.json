@@ -1,0 +1,103 @@
+{
+  "resourceType": "Patient",
+  "id": "patientFHIRID3",
+  "address": [
+    {
+      "city": "Madison",
+      "line": [
+        "123 Main St."
+      ],
+      "postalCode": "53703",
+      "state": "WI",
+      "use": "old"
+    },
+    {
+      "city": "Madison",
+      "line": [
+        "123 Main St."
+      ],
+      "postalCode": "53703",
+      "state": "WI",
+      "use": "home"
+    }
+  ],
+  "birthDate": "1990-01-15",
+  "gender": "female",
+  "identifier": [
+    {
+      "system": "mockEHRMRNSystem",
+      "value": "111"
+    },
+    {
+      "system": "urn:oid:1.2.840.114350.1.13.0.1.7.2.698084",
+      "value": "Z4572"
+    },
+    {
+      "system": "http://open.epic.com/FHIR/StructureDefinition/patient-dstu2-fhir-id",
+      "value": "TJgJ7wgwgI32QvHx3YBhDm4egjwdyhmAhfdtE7bQsPYYB"
+    },
+    {
+      "system": "http://open.epic.com/FHIR/StructureDefinition/patient-fhir-id",
+      "value": "eJzlzKe3KPzAV5TtkxmNivQ3"
+    },
+    {
+      "system": "mockPatientInternalSystem",
+      "value": "     Z4572"
+    },
+    {
+      "system": "urn:oid:1.2.840.114350.1.13.0.1.7.5.737384.14",
+      "value": "123456"
+    },
+    {
+      "system": "urn:oid:1.2.840.114350.1.13.0.1.7.3.878082.110",
+      "value": "MYCHARTALLISON"
+    },
+    {
+      "system": "urn:oid:1.2.840.114350.1.13.0.1.7.2.878082",
+      "value": "16"
+    },
+    {
+      "system": "https://open.epic.com/FHIR/StructureDefinition/PayerMemberId",
+      "value": "987654321A"
+    },
+    {
+      "system": "https://open.epic.com/FHIR/StructureDefinition/PayerMemberId",
+      "value": "BC654"
+    }
+  ],
+  "name": [
+    {
+      "family": "Mychart",
+      "given": [
+        "Ali"
+      ],
+      "use": "old"
+    },
+    {
+      "family": "Mychart",
+      "given": [
+        "Allison"
+      ],
+      "use": "official"
+    },
+    {
+      "family": "Mychart",
+      "given": [
+        "Ali"
+      ],
+      "use": "usual"
+    }
+  ],
+  "telecom": [
+    {
+      "system": "phone",
+      "use": "home",
+      "value": "608-123-4567"
+    },
+    {
+      "system": "email",
+      "use": null,
+      "value": "beau@beau.com"
+    }
+  ]
+}

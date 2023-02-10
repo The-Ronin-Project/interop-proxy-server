@@ -15,7 +15,7 @@ import java.net.URI
 class InteropProxyServerIntegratedConditionTests : InteropProxyServerIntegratedTestsBase() {
 
     override val resourcesToAdd = listOf(
-        ResourceToAdd("Patient", "/mockEHR/r4Patient.json", "PatientFHIRID1"),
+        ResourceToAdd("Patient", "/mockEHR/r4Patient1.json", "PatientFHIRID1"),
         ResourceToAdd("Condition", "/mockEHR/r4Condition.json", "ConditionFHIRID1")
     )
 

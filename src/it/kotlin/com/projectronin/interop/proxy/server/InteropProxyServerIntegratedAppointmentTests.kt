@@ -46,7 +46,7 @@ class InteropProxyServerIntegratedAppointmentTests : InteropProxyServerIntegrate
         ),
         ResourceToAdd(
             "Patient",
-            "/mockEHR/r4Patient.json",
+            "/mockEHR/r4Patient1.json",
             "PatientFHIRID1"
         ),
         ResourceToAdd(

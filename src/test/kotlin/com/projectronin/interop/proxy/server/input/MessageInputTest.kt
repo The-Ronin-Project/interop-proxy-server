@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test
 class MessageInputTest {
     @Test
     fun `Ensure MessageInput can be created and accessed`() {
-        val patient = MessagePatientInput("12345")
+        val patient = MessagePatientInput("12345", null)
         val recipient1 = MessageRecipientInput("1234")
         val recipient2 = MessageRecipientInput("5678")
         val input = MessageInput("Message text", patient, listOf(recipient1, recipient2))
