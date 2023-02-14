@@ -22,3 +22,4 @@ jobs:
     needs: [argocd_stage]
     with:
       deploy-env: stage
+      commit-sha: ${{ inputs.image_tag }}
