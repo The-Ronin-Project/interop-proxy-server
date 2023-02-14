@@ -5,9 +5,15 @@ plugins {
     id("com.projectronin.interop.gradle.spring-boot")
     id("com.projectronin.interop.gradle.integration")
     id("com.expediagroup.graphql")
+    id("org.owasp.dependencycheck")
 }
 
 dependencies {
+    // Force versions
+    implementation(libs.kafka.clients) {
+        isForce = true
+    }
+
     implementation(libs.interop.aidbox)
     implementation(libs.interop.common)
     implementation(libs.interop.commonHttp)
@@ -29,13 +35,24 @@ dependencies {
 
     implementation(platform(libs.spring.boot.parent)) {
         exclude(group = "org.jetbrains.kotlinx")
+        // We don't use YAML config, and snakeyaml has some vulnerabilities.
+        exclude(group = "org.yaml", module = "snakeyaml")
     }
     // Pull in just the security dependencies we need, as we are not using the full security suite.
     implementation(libs.bundles.spring.security)
-    implementation("org.springframework.boot:spring-boot-starter-jdbc")
-    implementation("org.springframework.boot:spring-boot-starter-actuator")
+    implementation("org.springframework.boot:spring-boot-starter-jdbc") {
+        // We don't use YAML config, and snakeyaml has some vulnerabilities.
+        exclude(group = "org.yaml", module = "snakeyaml")
+    }
+    implementation("org.springframework.boot:spring-boot-starter-actuator") {
+        // We don't use YAML config, and snakeyaml has some vulnerabilities.
+        exclude(group = "org.yaml", module = "snakeyaml")
+    }
 
-    implementation(libs.bundles.graphql)
+    implementation(libs.bundles.graphql) {
+        // We don't use YAML config, and snakeyaml has some vulnerabilities.
+        exclude(group = "org.yaml", module = "snakeyaml")
+    }
     implementation(libs.bundles.hl7v2)
     implementation(libs.dd.trace.api)
 
@@ -58,6 +75,7 @@ dependencies {
         exclude(module = "mockito-core")
     }
 
+    testImplementation(libs.mockk)
     testImplementation(platform(libs.testcontainers.bom))
     testImplementation("org.testcontainers:testcontainers")
     testImplementation("org.testcontainers:junit-jupiter")
@@ -93,3 +111,9 @@ val graphqlGenerateSDL by tasks.getting(GraphQLGenerateSDLTask::class) {
 
 // We want to tie the GraphQL schema generation to the kotlin compile step.
 tasks.compileKotlin.get().finalizedBy(graphqlGenerateSDL)
+
+dependencyCheck {
+    scanConfigurations = listOf("compileClasspath", "runtimeClasspath")
+    skipTestGroups = true
+    suppressionFile = "conf/owasp-suppress.xml"
+}

@@ -31,10 +31,12 @@ interop-testcontainer-aidbox = "com.projectronin.interop.publish:interop-aidbox-
 interop-testcontainer-mockehr = "com.projectronin.interop.mock:interop-mock-ehr-testcontainer:1.2.1"
 
 junit-pioneer = "org.junit-pioneer:junit-pioneer:2.0.0"
+kafka-clients = "org.apache.kafka:kafka-clients:3.4.0"
 kotlinx-coroutines-bom = "org.jetbrains.kotlinx:kotlinx-coroutines-bom:1.6.4"
 logstash-logback-encoder = "net.logstash.logback:logstash-logback-encoder:7.2"
+mockk = "io.mockk:mockk:1.13.4"
 mysql-connector-java = "com.mysql:mysql-connector-j:8.0.32"
-spring-boot-parent = "org.springframework.boot:spring-boot-parent:2.7.5"
+spring-boot-parent = "org.springframework.boot:spring-boot-parent:2.7.8"
 spring-mockk = "com.ninja-squad:springmockk:3.1.2"
 spring-security-oauth2-core = { module = "org.springframework.security:spring-security-oauth2-core" }
 spring-security-oauth2-jose = { module = "org.springframework.security:spring-security-oauth2-jose" }

@@ -409,7 +409,7 @@ input MessageInput {
 "The patient for whom the message is being sent"
 input MessagePatientInput {
   "The MRN of the patient"
-  mrn: String @deprecated(reason : "Please use patientRoninID")
+  mrn: String @deprecated(reason : "Please use patientFhirId")
   "The Ronin ID of the patient"
   patientFhirId: String
 }

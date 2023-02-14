@@ -47,7 +47,10 @@ Graphql schema is generated directly from the corresponding Kotlin data classes 
 at [interopSchema.graphql](interopSchema.graphql). This is currently done automatically during compile.
 
 ### Generating a container
-The following commands will first build a jar file with all of the relevant classes and dependencies, then create an image using this [Dockerfile](Dockerfile):
+
+The following commands will first build a jar file with all of the relevant classes and dependencies, then create an
+image using this [Dockerfile](Dockerfile):
+
 ```shell
 ./gradlew bootJar
 docker build . -t image_name:tag
@@ -87,7 +90,8 @@ export SERVICE_CALL_JWT_SECRET=SECRET_VALUE
 #### Machine to Machine Auth (Auth0)
 
 Additional configuration is required for supporting Machine to Machine calls, prefixed by "ronin.server.auth.m2m". These
-can either be configured via the applications.properties ([example](src/test/resources/application-test.properties)) in the environment
+can either be configured via the applications.properties ([example](src/test/resources/application-test.properties)) in
+the environment
 or via the following env variables, both are defaulted to dev values should not need manual configuration while running
 locally.
 
@@ -123,6 +127,18 @@ export DD_API_KEY=API_KEY
 
 Once you have a DataDog account, API keys can be found [here](https://app.datadoghq.com/organization-settings/api-keys).
 
+## OWASP Dependency Check
+
+The OWASP Dependency Check tool can be run with the following command:
+
+```shell
+./gradlew clean dependencyCheckAnalyze
+```
+
+This will generate a HTML report at `build/reports/dependency-check-report.html`.
+
+Any new suppressions should be added [here](conf/owasp-suppress.xml).
+
 ## Running the Service
 
 ### Running integration tests
@@ -138,7 +154,9 @@ similar to a unit test.
 
 ### Running locally via Docker
 
-The proxy server can also be run via docker compose with the following command using this [docker compose](docker-compose.yml) file:
+The proxy server can also be run via docker compose with the following command using
+this [docker compose](docker-compose.yml) file:
+
 ```shell
 ./gradlew clean bootJar && docker compose build --no-cache && docker compose up --force-recreate
 ```
