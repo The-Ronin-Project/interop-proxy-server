@@ -183,7 +183,7 @@ class MirthTenantConfigControllerTests {
     private fun populateDb() {
         val connection = ehrDatasource.connection
         val query =
-            """insert into io_mirth_tenant_config values (1001, '1,2,3')"""
+            """insert into io_mirth_tenant_config values (1001, '1,2,3', null)"""
         val sqlStatement = connection.createStatement()
         sqlStatement.addBatch(query)
         sqlStatement.executeBatch()

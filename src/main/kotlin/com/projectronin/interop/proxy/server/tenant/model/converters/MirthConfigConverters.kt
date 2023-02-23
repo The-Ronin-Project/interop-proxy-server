@@ -12,7 +12,8 @@ fun MirthTenantConfigDO.toProxyMirthTenantConfig(): MirthTenantConfig {
             emptyList()
         } else {
             locationIds.split(",")
-        }
+        },
+        lastUpdated = lastUpdated
     )
 }
 

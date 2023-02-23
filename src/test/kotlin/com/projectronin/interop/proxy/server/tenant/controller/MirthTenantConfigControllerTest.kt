@@ -19,7 +19,9 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.springframework.http.HttpStatus
 import java.sql.SQLIntegrityConstraintViolationException
+import java.time.OffsetDateTime
 import java.time.ZoneId
+import java.time.ZoneOffset
 import com.projectronin.interop.proxy.server.tenant.model.Tenant as ProxyTenant
 
 class MirthTenantConfigControllerTest {
@@ -35,6 +37,10 @@ class MirthTenantConfigControllerTest {
     private val configDO = mockk<MirthTenantConfigDO> {
         every { tenant } returns tenantDO
         every { locationIds } returns "bleep,blorp,bloop"
+        every { lastUpdated } returns OffsetDateTime.of(
+            2023, 1, 1, 1, 1, 1, 1,
+            ZoneOffset.UTC
+        )
     }
 
     private val mockProxyTenant = mockk<ProxyTenant> {
@@ -58,6 +64,7 @@ class MirthTenantConfigControllerTest {
         mockkStatic("com.projectronin.interop.proxy.server.tenant.model.converters.TenantConvertersKt")
         every { mockTenantServiceTenant.toProxyTenant() } returns mockProxyTenant
     }
+
     @AfterEach
     fun teardown() {
         unmockkAll()
@@ -80,7 +87,13 @@ class MirthTenantConfigControllerTest {
     fun `insert works`() {
         every { tenantService.getTenantForMnemonic("first") } returns mockTenantServiceTenant
         every { dao.insertConfig(any()) } returns configDO
-        val mirthTenantConfig = MirthTenantConfig(listOf("bleep", "blorp", "bloop"))
+        val mirthTenantConfig = MirthTenantConfig(
+            listOf("bleep", "blorp", "bloop"),
+            OffsetDateTime.of(
+                2023, 1, 1, 1, 1, 1, 1,
+                ZoneOffset.UTC
+            )
+        )
         val result = controller.insert("first", mirthTenantConfig)
         assertEquals(HttpStatus.CREATED, result.statusCode)
         assertEquals(mirthTenantConfig, result.body)
@@ -91,6 +104,7 @@ class MirthTenantConfigControllerTest {
         val emptyConfigDO = mockk<MirthTenantConfigDO> {
             every { tenant } returns tenantDO
             every { locationIds } returns ""
+            every { lastUpdated } returns null
         }
 
         every { tenantService.getTenantForMnemonic("first") } returns mockTenantServiceTenant
