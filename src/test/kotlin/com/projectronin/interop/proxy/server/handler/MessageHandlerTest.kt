@@ -140,11 +140,11 @@ class MessageHandlerTest {
                 "Test Message",
                 "FHIRID",
                 listOf(
-                    EHRRecipient("TEST_TENANT-doc1", identifierVendorIdentifier)
+                    EHRRecipient("doc1", identifierVendorIdentifier)
                 )
             )
         val fhirIdentifiers = FHIRIdentifiers(
-            id = Id("TEST_TENANT-doc1"),
+            id = Id("doc1"),
             identifiers = listOf(identifier)
         )
 
@@ -182,21 +182,21 @@ class MessageHandlerTest {
                 "FHIRID",
                 listOf(
                     EHRRecipient(
-                        "TEST_TENANT-doc1",
+                        "doc1",
                         identifierVendorIdentifier
                     ),
                     EHRRecipient(
-                        "TEST_TENANT-pool1",
+                        "pool1",
                         identifierVendorIdentifier
                     )
                 )
             )
         val fhirIdentifiersDoc = FHIRIdentifiers(
-            id = Id("TEST_TENANT-doc1"),
+            id = Id("doc1"),
             identifiers = listOf(identifier)
         )
         val fhirIdentifiersPool = FHIRIdentifiers(
-            id = Id("TEST_TENANT-pool1"),
+            id = Id("pool1"),
             identifiers = listOf(identifier)
         )
 
@@ -218,7 +218,7 @@ class MessageHandlerTest {
             MessageInput(
                 "Test Message",
                 MessagePatientInput("MRN#1", null),
-                listOf(MessageRecipientInput("TEST_TENANT-doc1"), MessageRecipientInput("TEST_TENANT-pool1"))
+                listOf(MessageRecipientInput("doc1"), MessageRecipientInput("pool1"))
             )
 
         every { practitionerService.getPractitionerIdentifiers("TEST_TENANT", "doc1") } returns listOf(identifier)

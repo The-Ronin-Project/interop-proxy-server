@@ -272,7 +272,7 @@ class InteropProxyServerIntegratedMessageTests : InteropProxyServerIntegratedTes
         |   },
         |   "query": "$mutation"
         |}
-    """.trimMargin()
+        """.trimMargin()
 
         val responseEntity = multiVendorQuery(query, "epic")
 
@@ -365,7 +365,7 @@ class InteropProxyServerIntegratedMessageTests : InteropProxyServerIntegratedTes
         assertEquals(HttpStatus.OK, responseEntity.statusCode)
         assertTrue(
             errorJSONObject["message"].asText()
-                .contains("No practitioner user identifier with system 'mockEHRUserSystem' found for resource with FHIR id 'ronin-7e52ab01-0393-4e97-afd8-5b0649ab49e2")
+                .contains("No practitioner user identifier with system 'mockEHRUserSystem' found for resource with FHIR id '7e52ab01-0393-4e97-afd8-5b0649ab49e2")
         )
     }
 

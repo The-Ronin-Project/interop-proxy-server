@@ -33,7 +33,7 @@ class MessageHandler(
     private val ehrFactory: EHRFactory,
     private val tenantService: TenantService,
     private val practitionerService: PractitionerService,
-    private val patientService: PatientService,
+    private val patientService: PatientService
 ) : Mutation {
     private val logger = KotlinLogging.logger { }
 
@@ -72,21 +72,23 @@ class MessageHandler(
         return EHRMessageInput(
             text = message.text,
             patientFHIRID = patientFHIRID,
-            recipients = message.recipients.map { mapEHRRecipient(tenant, it) }.toList(),
+            recipients = message.recipients.map { mapEHRRecipient(tenant, it) }.toList()
         )
     }
 
     private fun mapEHRRecipient(tenant: Tenant, recipientInput: MessageRecipientInput): EHRRecipient {
+        val recipientUnlocalizedFhirId = recipientInput.fhirId.unlocalize(tenant)
+
         val practitionerIdentifiers =
-            practitionerService.getPractitionerIdentifiers(tenant.mnemonic, recipientInput.fhirId.unlocalize(tenant))
+            practitionerService.getPractitionerIdentifiers(tenant.mnemonic, recipientUnlocalizedFhirId)
         val vendorIdentifier = ehrFactory.getVendorFactory(tenant).identifierService.getPractitionerUserIdentifier(
             tenant,
             FHIRIdentifiers(
-                id = Id(recipientInput.fhirId),
+                id = Id(recipientUnlocalizedFhirId),
                 identifiers = practitionerIdentifiers
             )
         )
 
-        return EHRRecipient(id = recipientInput.fhirId, identifier = IdentifierVendorIdentifier(vendorIdentifier))
+        return EHRRecipient(id = recipientUnlocalizedFhirId, identifier = IdentifierVendorIdentifier(vendorIdentifier))
     }
 }
