@@ -7,7 +7,7 @@ pluginManagement {
         id("com.projectronin.interop.gradle.integration") version "2.2.1"
 
         id("com.expediagroup.graphql") version "6.4.0"
-        id("org.owasp.dependencycheck") version "8.1.0"
+        id("org.owasp.dependencycheck") version "8.1.2"
     }
 
     repositories {
