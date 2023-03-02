@@ -10,10 +10,10 @@ hapi-hl7v2-base = "ca.uhn.hapi:hapi-base:2.3"
 
 interop-aidbox = "com.projectronin.interop.publish:interop-aidbox:7.3.0"
 
-interop-common = "com.projectronin.interop:interop-common:3.3.0"
-interop-commonHttp = "com.projectronin.interop:interop-common-http:3.3.0"
-interop-commonJackson = "com.projectronin.interop:interop-common-jackson:3.3.0"
-interop-commonTestDb = "com.projectronin.interop:interop-common-test-db:3.3.0"
+interop-common = "com.projectronin.interop:interop-common:3.4.0"
+interop-commonHttp = "com.projectronin.interop:interop-common-http:3.4.0"
+interop-commonJackson = "com.projectronin.interop:interop-common-jackson:3.4.0"
+interop-commonTestDb = "com.projectronin.interop:interop-common-test-db:3.4.0"
 
 interop-datalake = "com.projectronin.interop.publish:interop-datalake:7.3.0"
 
