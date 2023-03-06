@@ -23,7 +23,7 @@ interop-ehr-fhir-ronin = "com.projectronin.interop.ehr:interop-fhir-ronin:9.2.1"
 interop-ehr-epic = "com.projectronin.interop.ehr:interop-ehr-epic:9.2.1"
 interop-ehr-liquibase = "com.projectronin.interop.ehr:interop-ehr-liquibase:9.2.1"
 interop-ehr-tenant = "com.projectronin.interop.ehr:interop-tenant:9.2.1"
-interop-fhir = "com.projectronin.interop.fhir:interop-fhir:7.1.1"
+interop-fhir = "com.projectronin.interop.fhir:interop-fhir:7.3.0"
 
 interop-queue-api = "com.projectronin.interop.queue:interop-queue:1.5.0"
 interop-queue-db = "com.projectronin.interop.queue:interop-queue-db:1.5.0"
