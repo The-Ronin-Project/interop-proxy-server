@@ -360,12 +360,11 @@ class InteropProxyServerIntegratedMessageTests : InteropProxyServerIntegratedTes
         val responseEntity = multiVendorQuery(query, "epic")
         val resultJSONObject = objectMapper.readTree(responseEntity.body)
         val errorJSONObject = resultJSONObject["errors"][0]
-        println(errorJSONObject)
 
         assertEquals(HttpStatus.OK, responseEntity.statusCode)
         assertTrue(
             errorJSONObject["message"].asText()
-                .contains("No practitioner user identifier with system 'mockEHRUserSystem' found for resource with FHIR id '7e52ab01-0393-4e97-afd8-5b0649ab49e2")
+                .contains("Received 404 Not Found when calling Aidbox")
         )
     }
 

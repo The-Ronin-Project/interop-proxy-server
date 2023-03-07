@@ -104,9 +104,11 @@ class InteropProxyServerTests {
     @Test
     fun `Handles message input`() {
 
-        val identifier = Identifier(value = "IdentifierID".asFHIR(), system = Uri("system"))
-
-        every { practitionerService.getPractitionerIdentifiers("tenant", "1234") } returns listOf(identifier)
+        val provIdentifier = Identifier(value = "IdentifierID".asFHIR(), system = Uri("system"))
+        val provFhirIdentifier = Identifier(value = "1234".asFHIR(), system = CodeSystem.RONIN_FHIR_ID.uri)
+        every { practitionerService.getPractitionerByUDPId("tenant", "tenant-1234") } returns mockk {
+            every { identifier } returns listOf(provIdentifier, provFhirIdentifier)
+        }
         val tenant = mockk<Tenant> {
             every { mnemonic } returns "tenant"
         }
@@ -131,7 +133,7 @@ class InteropProxyServerTests {
                             listOf(
                                 EHRRecipient(
                                     "1234",
-                                    IdentifierVendorIdentifier(identifier)
+                                    IdentifierVendorIdentifier(provIdentifier)
                                 )
                             )
                         )
@@ -144,10 +146,10 @@ class InteropProxyServerTests {
                         tenant,
                         FHIRIdentifiers(
                             id = Id("1234"),
-                            identifiers = listOf(identifier)
+                            identifiers = listOf(provIdentifier, provFhirIdentifier)
                         )
                     )
-                } returns identifier
+                } returns provIdentifier
                 every {
                     getPractitionerUserIdentifier(
                         tenant,
@@ -171,7 +173,7 @@ class InteropProxyServerTests {
 
         val recipientsArray = messageInput.putArray("recipients")
         val recipientInput = objectMapper.createObjectNode()
-        recipientInput.put("fhirId", "1234")
+        recipientInput.put("fhirId", "tenant-1234")
         recipientsArray.add(recipientInput)
 
         val objectNode = objectMapper.createObjectNode()

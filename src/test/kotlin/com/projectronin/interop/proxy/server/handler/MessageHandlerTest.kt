@@ -37,8 +37,10 @@ class MessageHandlerTest {
     private lateinit var patientService: PatientService
     private lateinit var dfe: DataFetchingEnvironment
 
-    private var identifier = Identifier(system = Uri("system"), value = "1234".asFHIR())
-    private var identifierVendorIdentifier = IdentifierVendorIdentifier(identifier)
+    private var provIdentifier = Identifier(system = Uri("system"), value = "1234".asFHIR())
+    private var fhirIdentifier1 = Identifier(system = CodeSystem.RONIN_FHIR_ID.uri, value = "doc1".asFHIR())
+    private var fhirIdentifier2 = Identifier(system = CodeSystem.RONIN_FHIR_ID.uri, value = "pool1".asFHIR())
+    private var identifierVendorIdentifier = IdentifierVendorIdentifier(provIdentifier)
 
     @BeforeEach
     fun initTest() {
@@ -145,7 +147,7 @@ class MessageHandlerTest {
             )
         val fhirIdentifiers = FHIRIdentifiers(
             id = Id("doc1"),
-            identifiers = listOf(identifier)
+            identifiers = listOf(provIdentifier, fhirIdentifier1)
         )
 
         every { ehrFactory.getVendorFactory(tenant) } returns mockk {
@@ -153,10 +155,12 @@ class MessageHandlerTest {
                 every { sendMessage(tenant, expectedEHRMessageInput) } returns ("messageId#1")
             }
             every { identifierService } returns mockk {
-                every { getPractitionerUserIdentifier(tenant, fhirIdentifiers) } returns (identifier)
+                every { getPractitionerUserIdentifier(tenant, fhirIdentifiers) } returns (provIdentifier)
             }
         }
-        every { practitionerService.getPractitionerIdentifiers("TEST_TENANT", "doc1") } returns listOf(identifier)
+        every { practitionerService.getPractitionerByUDPId("TEST_TENANT", "TEST_TENANT-doc1") } returns mockk {
+            every { identifier } returns listOf(provIdentifier, fhirIdentifier1)
+        }
 
         val messageInput =
             MessageInput(
@@ -193,11 +197,11 @@ class MessageHandlerTest {
             )
         val fhirIdentifiersDoc = FHIRIdentifiers(
             id = Id("doc1"),
-            identifiers = listOf(identifier)
+            identifiers = listOf(provIdentifier, fhirIdentifier1)
         )
         val fhirIdentifiersPool = FHIRIdentifiers(
             id = Id("pool1"),
-            identifiers = listOf(identifier)
+            identifiers = listOf(provIdentifier, fhirIdentifier2)
         )
 
         every { ehrFactory.getVendorFactory(tenant) } returns mockk {
@@ -205,24 +209,28 @@ class MessageHandlerTest {
                 every { sendMessage(tenant, expectedEHRMessageInput) } returns ("messageId#1")
             }
             every { identifierService } returns mockk {
-                every { getPractitionerUserIdentifier(tenant, fhirIdentifiersDoc) } returns (identifier)
+                every { getPractitionerUserIdentifier(tenant, fhirIdentifiersDoc) } returns (provIdentifier)
                 every {
                     getPractitionerUserIdentifier(
                         tenant,
                         fhirIdentifiersPool
                     )
-                } returns (identifier)
+                } returns (provIdentifier)
             }
         }
         val messageInput =
             MessageInput(
                 "Test Message",
                 MessagePatientInput("MRN#1", null),
-                listOf(MessageRecipientInput("doc1"), MessageRecipientInput("pool1"))
+                listOf(MessageRecipientInput("TEST_TENANT-doc1"), MessageRecipientInput("TEST_TENANT-pool1"))
             )
 
-        every { practitionerService.getPractitionerIdentifiers("TEST_TENANT", "doc1") } returns listOf(identifier)
-        every { practitionerService.getPractitionerIdentifiers("TEST_TENANT", "pool1") } returns listOf(identifier)
+        every { practitionerService.getPractitionerByUDPId("TEST_TENANT", "TEST_TENANT-doc1") } returns mockk {
+            every { identifier } returns listOf(provIdentifier, fhirIdentifier1)
+        }
+        every { practitionerService.getPractitionerByUDPId("TEST_TENANT", "TEST_TENANT-pool1") } returns mockk {
+            every { identifier } returns listOf(provIdentifier, fhirIdentifier2)
+        }
         val actualResponse = messageHandler.sendMessage("TEST_TENANT", messageInput, dfe).data
 
         assertEquals("sent", actualResponse)
@@ -241,13 +249,22 @@ class MessageHandlerTest {
                 every { sendMessage(tenant, expectedEHRMessageInput) } returns ("messageId#1")
             }
         }
-        patientService = mockk {
-            every {
-                getPatientFHIRIds(
-                    "TEST_TENANT",
-                    mapOf("MRN" to SystemValue(system = CodeSystem.RONIN_MRN.uri.value!!, value = "MRN#1"))
-                )
-            } throws Exception("shouldn't be hit")
+        every {
+            patientService.getPatientFHIRIds(
+                "TEST_TENANT",
+                mapOf("MRN" to SystemValue(system = CodeSystem.RONIN_MRN.uri.value!!, value = "MRN#1"))
+            )
+        } throws Exception("shouldn't be hit")
+
+        every {
+            patientService.getPatientByUDPId("TEST_TENANT", "TEST_TENANT-fhirId")
+        } returns mockk {
+            every { identifier } returns listOf(
+                mockk {
+                    every { system } returns CodeSystem.RONIN_FHIR_ID.uri
+                    every { value } returns "fhirId".asFHIR()
+                }
+            )
         }
 
         val messageInput = MessageInput("Test Message", MessagePatientInput(null, "TEST_TENANT-fhirId"), listOf())

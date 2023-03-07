@@ -6,6 +6,7 @@ import com.expediagroup.graphql.server.operations.Mutation
 import com.projectronin.interop.aidbox.PatientService
 import com.projectronin.interop.aidbox.PractitionerService
 import com.projectronin.interop.aidbox.model.SystemValue
+import com.projectronin.interop.aidbox.utils.findFhirID
 import com.projectronin.interop.ehr.factory.EHRFactory
 import com.projectronin.interop.ehr.inputs.EHRMessageInput
 import com.projectronin.interop.ehr.inputs.EHRRecipient
@@ -13,7 +14,6 @@ import com.projectronin.interop.ehr.inputs.FHIRIdentifiers
 import com.projectronin.interop.ehr.inputs.IdentifierVendorIdentifier
 import com.projectronin.interop.fhir.r4.CodeSystem
 import com.projectronin.interop.fhir.r4.datatype.primitive.Id
-import com.projectronin.interop.fhir.ronin.util.unlocalize
 import com.projectronin.interop.proxy.server.input.MessageInput
 import com.projectronin.interop.proxy.server.input.MessageRecipientInput
 import com.projectronin.interop.tenant.config.TenantService
@@ -43,7 +43,12 @@ class MessageHandler(
         logger.info { "Sending message to $tenantId" }
         val tenant = findAndValidateTenant(dfe, tenantService, tenantId, false)
         val patientFHIRID = if (message.patient.patientFhirId != null) {
-            message.patient.patientFhirId.unlocalize(tenant)
+            // check that the inputted UDP ID is correct
+            val patient = patientService.getPatientByUDPId(
+                tenantMnemonic = tenant.mnemonic,
+                udpId = message.patient.patientFhirId
+            )
+            patient.identifier.findFhirID()
         } else if (message.patient.mrn != null) {
             logger.info { "sendMessage called with MRN" }
             // ensure patient exists in Aidbox
@@ -77,18 +82,19 @@ class MessageHandler(
     }
 
     private fun mapEHRRecipient(tenant: Tenant, recipientInput: MessageRecipientInput): EHRRecipient {
-        val recipientUnlocalizedFhirId = recipientInput.fhirId.unlocalize(tenant)
+        val recipientUDPId = recipientInput.fhirId
+        val practitioner = practitionerService.getPractitionerByUDPId(tenant.mnemonic, recipientUDPId)
+        val practitionerIdentifiers = practitioner.identifier
+        val practitionerFhirID = practitionerIdentifiers.findFhirID()
 
-        val practitionerIdentifiers =
-            practitionerService.getPractitionerIdentifiers(tenant.mnemonic, recipientUnlocalizedFhirId)
         val vendorIdentifier = ehrFactory.getVendorFactory(tenant).identifierService.getPractitionerUserIdentifier(
             tenant,
             FHIRIdentifiers(
-                id = Id(recipientUnlocalizedFhirId),
+                id = Id(practitionerFhirID),
                 identifiers = practitionerIdentifiers
             )
         )
 
-        return EHRRecipient(id = recipientUnlocalizedFhirId, identifier = IdentifierVendorIdentifier(vendorIdentifier))
+        return EHRRecipient(id = practitionerFhirID, identifier = IdentifierVendorIdentifier(vendorIdentifier))
     }
 }
