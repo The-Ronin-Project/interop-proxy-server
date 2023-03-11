@@ -51,7 +51,8 @@ class ProviderPoolControllerTest {
             patientMRNTypeText = "patientMRNTypeText",
             hsi = "hsi",
             instanceName = "instanceName",
-            departmentInternalSystem = "departmentInternalSystem"
+            departmentInternalSystem = "departmentInternalSystem",
+            patientOnboardedFlagId = "flagId"
         )
     )
 

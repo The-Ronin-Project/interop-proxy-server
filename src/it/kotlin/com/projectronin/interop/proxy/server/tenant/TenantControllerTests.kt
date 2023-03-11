@@ -139,7 +139,8 @@ class TenantControllerTests {
             patientMRNTypeText = "MRN",
             hsi = null,
             instanceName = "Epic Sandbox",
-            departmentInternalSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.2.686980"
+            departmentInternalSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.2.686980",
+            patientOnboardedFlagId = null
         )
 
         val newTenant = Tenant(
@@ -217,7 +218,8 @@ class TenantControllerTests {
             patientMRNTypeText = "Custom MRN",
             hsi = null,
             instanceName = "Epic Sandbox",
-            departmentInternalSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.2.686980"
+            departmentInternalSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.2.686980",
+            patientOnboardedFlagId = null
         )
 
         val newTenant = Tenant(
@@ -259,7 +261,8 @@ class TenantControllerTests {
             patientMRNTypeText = "MRN",
             hsi = null,
             instanceName = "Epic Sandbox",
-            departmentInternalSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.2.686980"
+            departmentInternalSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.2.686980",
+            patientOnboardedFlagId = "135124"
         )
 
         val updatedTenant = Tenant(
@@ -337,7 +340,8 @@ class TenantControllerTests {
             patientMRNTypeText = "Custom MRN",
             hsi = null,
             instanceName = "Epic Sandbox",
-            departmentInternalSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.2.686980"
+            departmentInternalSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.2.686980",
+            patientOnboardedFlagId = null
         )
 
         val updatedTenant = Tenant(

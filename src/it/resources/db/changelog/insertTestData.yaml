@@ -177,6 +177,9 @@ databaseChangeLog:
               - column:
                   name: department_internal_system
                   value: "mockEHRDepartmentInternalSystem"
+              - column:
+                  name: patient_onboarded_flag_id
+                  value: "135124"
         - insert:
             dbms: 'mysql'
             tableName: io_tenant_provider_pool

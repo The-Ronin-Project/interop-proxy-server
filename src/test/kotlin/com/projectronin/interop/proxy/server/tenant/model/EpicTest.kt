@@ -23,7 +23,8 @@ internal class EpicTest {
             patientMRNTypeText = "patientMRNTypeText",
             hsi = "hsi",
             instanceName = "instanceName",
-            departmentInternalSystem = "departmentInternalSystem"
+            departmentInternalSystem = "departmentInternalSystem",
+            patientOnboardedFlagId = "flagId"
         )
 
         assertEquals(VendorType.EPIC, epic.vendorType)
@@ -56,7 +57,8 @@ internal class EpicTest {
             patientMRNTypeText = "patientMRNTypeText",
             hsi = "hsi",
             instanceName = "instanceName",
-            departmentInternalSystem = "departmentInternalSystem"
+            departmentInternalSystem = "departmentInternalSystem",
+            patientOnboardedFlagId = "flagId"
         )
         val json = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(epic)
 
@@ -78,6 +80,7 @@ internal class EpicTest {
               "hsi" : "hsi",
               "instanceName" : "instanceName",
               "departmentInternalSystem" : "departmentInternalSystem",
+              "patientOnboardedFlagId" : "flagId",
               "vendorType" : "EPIC"
             }
         """.trimIndent()
@@ -103,7 +106,8 @@ internal class EpicTest {
             patientMRNTypeText = "patientMRNTypeText",
             hsi = null,
             instanceName = "instanceName",
-            departmentInternalSystem = "departmentInternalSystem"
+            departmentInternalSystem = "departmentInternalSystem",
+            patientOnboardedFlagId = null
         )
         val json = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(epic)
 

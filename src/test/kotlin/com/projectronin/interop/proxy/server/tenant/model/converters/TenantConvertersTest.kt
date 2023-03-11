@@ -139,7 +139,8 @@ class TenantConvertersTest {
                 patientMRNTypeText = "patientMRNTypeText",
                 hsi = null,
                 instanceName = "instanceName",
-                departmentInternalSystem = "departmentInternalSystem"
+                departmentInternalSystem = "departmentInternalSystem",
+                patientOnboardedFlagId = null
             )
         )
         val tenantServerTenant = proxyTenant.toTenantServerTenant()

@@ -48,7 +48,8 @@ private fun TenantServiceEpic.toProxyEpic(): ProxyEpic {
         encounterCSNSystem = encounterCSNSystem,
         hsi = hsi,
         instanceName = instanceName,
-        departmentInternalSystem = departmentInternalSystem
+        departmentInternalSystem = departmentInternalSystem,
+        patientOnboardedFlagId = patientOnboardedFlagId
     )
 }
 
@@ -106,7 +107,8 @@ private fun ProxyEpic.toTenantServerEpic(): TenantServiceEpic {
         clientId = "",
         instanceName = instanceName,
         authenticationConfig = EpicAuthenticationConfig(authEndpoint, "", ""),
-        departmentInternalSystem = departmentInternalSystem
+        departmentInternalSystem = departmentInternalSystem,
+        patientOnboardedFlagId = patientOnboardedFlagId
     )
 }
 

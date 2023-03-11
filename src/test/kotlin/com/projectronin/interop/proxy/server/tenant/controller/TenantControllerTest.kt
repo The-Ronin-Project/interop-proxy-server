@@ -40,7 +40,8 @@ class TenantControllerTest {
         patientMRNTypeText = "patientMRNTypeText",
         hsi = null,
         instanceName = "instanceName",
-        departmentInternalSystem = "departmentInternalSystem"
+        departmentInternalSystem = "departmentInternalSystem",
+        patientOnboardedFlagId = "flagId"
     )
     private val proxyTenant = ProxyTenant(
         id = 1,

@@ -30,7 +30,8 @@ class TenantTest {
                 patientMRNTypeText = "patientMRNTypeText",
                 hsi = null,
                 instanceName = "instanceName",
-                departmentInternalSystem = "departmentInternalSystem"
+                departmentInternalSystem = "departmentInternalSystem",
+                patientOnboardedFlagId = null
             )
         )
 
@@ -65,7 +66,8 @@ class TenantTest {
                 patientMRNTypeText = "patientMRNTypeText",
                 hsi = null,
                 instanceName = "Epic Sandbox",
-                departmentInternalSystem = "departmentInternalSystem"
+                departmentInternalSystem = "departmentInternalSystem",
+                patientOnboardedFlagId = null
             )
         )
         val json = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(tenant)
