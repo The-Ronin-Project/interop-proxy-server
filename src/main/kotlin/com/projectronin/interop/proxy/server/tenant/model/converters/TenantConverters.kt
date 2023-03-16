@@ -22,7 +22,7 @@ fun TenantServiceTenant.toProxyTenant(): ProxyTenant {
         timezone = timezone.id,
         availableStart = batchConfig?.availableStart,
         availableEnd = batchConfig?.availableEnd,
-        vendor = vendor.toProxyVendor(),
+        vendor = vendor.toProxyVendor()
     )
 }
 

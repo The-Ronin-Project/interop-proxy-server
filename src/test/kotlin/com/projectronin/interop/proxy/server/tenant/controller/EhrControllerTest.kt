@@ -146,7 +146,7 @@ class EhrControllerTest {
             vendorType = VendorType.CERNER,
             instanceName = "instanceName",
             clientId = "clientId1",
-            accountId = "accountId",
+            accountId = "accountId"
         )
         val epicEhr = Ehr(
             vendorType = VendorType.EPIC,
@@ -159,7 +159,7 @@ class EhrControllerTest {
             vendorType = VendorType.EPIC,
             instanceName = "instanceName",
             clientId = "clientId1",
-            publicKey = "publicKey1",
+            publicKey = "publicKey1"
         )
 
         assertThrows<IllegalStateException> { controller.insert(cernerEHR) }

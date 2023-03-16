@@ -54,7 +54,6 @@ internal class AnnotationTest {
 
     @Test
     fun `can get string author`() {
-
         val ehrAnnotation = relaxedMockk<R4Annotation> {
             every { author?.value } returns "author"
             every { author?.type } returns DynamicValueType.STRING

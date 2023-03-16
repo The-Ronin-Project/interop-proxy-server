@@ -38,7 +38,13 @@ class MirthTenantConfigControllerTest {
         every { tenant } returns tenantDO
         every { locationIds } returns "bleep,blorp,bloop"
         every { lastUpdated } returns OffsetDateTime.of(
-            2023, 1, 1, 1, 1, 1, 1,
+            2023,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
             ZoneOffset.UTC
         )
     }
@@ -90,7 +96,13 @@ class MirthTenantConfigControllerTest {
         val mirthTenantConfig = MirthTenantConfig(
             listOf("bleep", "blorp", "bloop"),
             OffsetDateTime.of(
-                2023, 1, 1, 1, 1, 1, 1,
+                2023,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
                 ZoneOffset.UTC
             )
         )

@@ -31,7 +31,7 @@ class ProviderPoolController(private val providerPoolDAO: ProviderPoolDAO, priva
     @Trace
     fun get(
         @PathVariable tenantMnemonic: String,
-        @RequestParam(required = false) providerIds: List<String>? = null,
+        @RequestParam(required = false) providerIds: List<String>? = null
     ): ResponseEntity<List<ProviderPool>> {
         val tenant = tenantService.getTenantForMnemonic(tenantMnemonic)
             ?: throw NoTenantFoundException("No Tenant With that mnemonic")
@@ -78,7 +78,7 @@ class ProviderPoolController(private val providerPoolDAO: ProviderPoolDAO, priva
     fun update(
         @PathVariable tenantMnemonic: String,
         @PathVariable providerPoolId: Int,
-        @RequestBody providerPool: ProviderPool,
+        @RequestBody providerPool: ProviderPool
     ): ResponseEntity<ProviderPool?> {
         val tenant = tenantService.getTenantForMnemonic(tenantMnemonic)
             ?: throw NoTenantFoundException("No Tenant With that mnemonic")

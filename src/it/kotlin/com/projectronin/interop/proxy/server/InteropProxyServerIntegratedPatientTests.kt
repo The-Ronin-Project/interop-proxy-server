@@ -44,7 +44,6 @@ class InteropProxyServerIntegratedPatientTests : InteropProxyServerIntegratedTes
     @ParameterizedTest
     @MethodSource("tenantsToTest")
     fun `server handles patient query`(testTenant: String) {
-
         val query = this::class.java.getResource("/graphql/patientByNameAndDOB.graphql")!!.readText()
         val expectedJSON = this::class.java.getResource("/roninTestPatientGraphQLResults.json")!!.readText()
         val responseEntity = multiVendorQuery(query, testTenant)
@@ -67,7 +66,8 @@ class InteropProxyServerIntegratedPatientTests : InteropProxyServerIntegratedTes
             |query {
             |   patientsByNameAndDOB(tenantId: "$tenantId", family: "$family", given: "$given", birthdate: "$birthdate") 
             |   {id}
-            |}""".trimMargin()
+            |}
+        """.trimMargin()
 
         val httpEntity = HttpEntity(query, httpHeaders)
 
@@ -89,7 +89,8 @@ class InteropProxyServerIntegratedPatientTests : InteropProxyServerIntegratedTes
             |query {
             |   patientsByNameAndDOB(tenantId: "$tenantId", given: "$given", birthdate: "$birthdate") 
             |   {id}
-            |}""".trimMargin()
+            |}
+        """.trimMargin()
 
         val httpEntity = HttpEntity(query, httpHeaders)
 
@@ -113,7 +114,8 @@ class InteropProxyServerIntegratedPatientTests : InteropProxyServerIntegratedTes
             |query {
             |   patientsByNameAndDOB(tenantId: "$tenantId", family: "$family", given: "$given", birthdate: "$birthdate") 
             |   {id}
-            |}""".trimMargin()
+            |}
+        """.trimMargin()
 
         val response = multiVendorQuery(query, testTenant)
 

@@ -65,6 +65,7 @@ class TenantControllerTest {
         timezone = "America/Denver"
     )
     private val tenantServiceTenantNoBatch = mockk<TenantServiceTenant> {}
+
     @BeforeEach
     fun setup() {
         mockkStatic("com.projectronin.interop.proxy.server.tenant.model.converters.TenantConvertersKt")
@@ -73,10 +74,12 @@ class TenantControllerTest {
         every { proxyTenant.toTenantServerTenant() } returns tenantServiceTenant
         every { proxyTenantNoTimes.toTenantServerTenant() } returns tenantServiceTenantNoBatch
     }
+
     @AfterEach
     fun teardown() {
         unmockkAll()
     }
+
     @Test
     fun `can read all tenants`() {
         every { tenantService.getAllTenants() } returns listOf(tenantServiceTenant, tenantServiceTenantNoBatch)

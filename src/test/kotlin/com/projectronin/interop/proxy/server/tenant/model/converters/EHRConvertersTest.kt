@@ -83,7 +83,7 @@ class EHRConvertersTest {
             vendorType = VendorType.CERNER,
             instanceName = "instanceName",
             clientId = "clientId1",
-            accountId = "accountId",
+            accountId = "accountId"
         )
         val epicEhr = Ehr(
             vendorType = VendorType.EPIC,
@@ -96,7 +96,7 @@ class EHRConvertersTest {
             vendorType = VendorType.EPIC,
             instanceName = "instanceName",
             clientId = "clientId1",
-            publicKey = "publicKey1",
+            publicKey = "publicKey1"
         )
 
         assertThrows<IllegalStateException> { cernerEHR.toEhrDO() }

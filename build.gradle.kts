@@ -9,9 +9,11 @@ plugins {
 }
 
 dependencies {
-    // Force versions
-    implementation(libs.kafka.clients) {
-        isForce = true
+    implementation(libs.kafka.clients)
+    configurations.all {
+        resolutionStrategy {
+            force(libs.kafka.clients)
+        }
     }
 
     implementation(libs.interop.aidbox)
@@ -90,18 +92,29 @@ dependencies {
     // Allows us to change environment variables
     testImplementation(libs.junit.pioneer)
 
-    testImplementation(platform(libs.testcontainers.bom))
-    testImplementation("org.testcontainers:testcontainers")
-    testImplementation("org.testcontainers:junit-jupiter")
+    itImplementation(platform(libs.spring.boot.parent))
+    itImplementation("com.squareup.okhttp3:mockwebserver")
+    itImplementation("org.springframework:spring-web")
+    itImplementation("org.springframework:spring-test")
+    itImplementation("org.springframework.boot:spring-boot-starter-test")
+    itImplementation("org.testcontainers:testcontainers")
+    itImplementation("org.testcontainers:junit-jupiter")
+    itImplementation(libs.interop.testcontainer.aidbox)
+    itImplementation(libs.interop.testcontainer.mockehr)
+    itImplementation(libs.spring.mockk)
+    itImplementation(libs.kafka.clients)
+    itImplementation(libs.interop.aidbox)
+    itImplementation(libs.interop.common)
+    itImplementation(libs.interop.commonHttp)
+    itImplementation(libs.interop.queue.liquibase)
+    itImplementation(libs.interop.ehr.liquibase)
+    itImplementation("org.springframework.security:spring-security-oauth2-jose")
+    itImplementation("org.liquibase:liquibase-core")
 }
 
 tasks.withType(Test::class) {
     jvmArgs("--add-opens=java.base/java.util=ALL-UNNAMED")
-}
-
-// We need to exclude some dependencies from our it testSet
-configurations.getByName("itImplementation") {
-    exclude(module = "graphql-spring-boot-starter-test")
+    jvmArgs("--add-opens=java.base/java.lang=ALL-UNNAMED")
 }
 
 val graphqlGenerateSDL by tasks.getting(GraphQLGenerateSDLTask::class) {

@@ -8,7 +8,7 @@ import com.projectronin.interop.fhir.r4.resource.Practitioner as R4Practitioner
 @GraphQLDescription("A practitioner")
 data class Practitioner(
     private val practitioner: R4Practitioner,
-    private val tenant: Tenant,
+    private val tenant: Tenant
 ) {
     @GraphQLDescription("The internal identifier for this patient")
     val id: String? by lazy {

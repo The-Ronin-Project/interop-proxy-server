@@ -240,7 +240,6 @@ internal class ConditionTest {
 
     @Test
     fun `can get string onset`() {
-
         val ehrCondition = relaxedMockk<R4Condition> {
             every { onset?.value } returns "recently"
             every { onset?.type } returns DynamicValueType.STRING

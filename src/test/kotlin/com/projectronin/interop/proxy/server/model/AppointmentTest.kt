@@ -101,6 +101,7 @@ internal class AppointmentTest {
         val appointment = Appointment(ehrAppointment, mockTenant)
         assertNull(appointment.appointmentType)
     }
+
     @Test
     fun `get participants when practitioners null`() {
         val mockEHRParticipant = relaxedMockk<R4Participant> {

@@ -31,7 +31,7 @@ class NoteHandler(
     private val practitionerService: PractitionerService,
     private val queueService: QueueService,
     private val tenantService: TenantService,
-    private val mdmService: MDMService,
+    private val mdmService: MDMService
 ) : Mutation {
     private val logger = KotlinLogging.logger { }
 

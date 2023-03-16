@@ -167,7 +167,6 @@ class MDMService {
         parentDocumentId: String?,
         documentStatus: String
     ) {
-
         val txa: TXA = mdm.txa
         txa.setIDTXA.value = "1"
         txa.documentType.value = "PR"

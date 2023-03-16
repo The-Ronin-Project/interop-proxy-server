@@ -31,9 +31,8 @@ class MirthTenantConfigController(
     @GetMapping
     @Trace
     fun get(
-        @PathVariable tenantMnemonic: String,
+        @PathVariable tenantMnemonic: String
     ): ResponseEntity<MirthTenantConfig?> {
-
         val mirthTenantConfigs = mirthTenantConfigDAO.getByTenantMnemonic(tenantMnemonic)
             ?: throw NoTenantFoundException("No Mirth Config Found with that mnemonic")
 

@@ -30,7 +30,8 @@ fun findAndValidateTenant(
     if (authorizedTenantId != null && requestedTenantId != authorizedTenantId) {
         // Always check the authorized tenant (always sent from User Auth) against the requested.
         throw HttpClientErrorException(
-            FORBIDDEN, "Requested Tenant '$requestedTenantId' does not match authorized Tenant '$authorizedTenantId'"
+            FORBIDDEN,
+            "Requested Tenant '$requestedTenantId' does not match authorized Tenant '$authorizedTenantId'"
         )
     }
 

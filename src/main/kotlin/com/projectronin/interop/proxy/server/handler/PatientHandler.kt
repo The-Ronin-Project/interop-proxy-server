@@ -167,7 +167,7 @@ class PatientHandler(
      */
     private fun mapFHIRPatients(
         fhirPatients: List<R4Patient>,
-        tenant: Tenant,
+        tenant: Tenant
     ): List<ProxyServerPatient> {
         if (fhirPatients.isEmpty()) return emptyList()
         return fhirPatients.map { ProxyServerPatient(it, tenant, roninPatient.getRoninIdentifiers(it, tenant)) }

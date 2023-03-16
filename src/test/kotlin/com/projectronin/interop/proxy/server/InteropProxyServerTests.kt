@@ -96,14 +96,12 @@ class InteropProxyServerTests {
 
     @Test
     fun `Server handles condition query`() {
-
         val response = graphQLTestTemplate.postForResource("graphql/conditionsByPatientAndCategory.graphql")
         assertEquals(HttpStatus.OK, response.statusCode)
     }
 
     @Test
     fun `Handles message input`() {
-
         val provIdentifier = Identifier(value = "IdentifierID".asFHIR(), system = Uri("system"))
         val provFhirIdentifier = Identifier(value = "1234".asFHIR(), system = CodeSystem.RONIN_FHIR_ID.uri)
         every { practitionerService.getPractitionerByUDPId("tenant", "tenant-1234") } returns mockk {

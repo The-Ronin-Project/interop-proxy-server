@@ -67,7 +67,7 @@ class AppointmentHandler(
         patientFhirId: String,
         startDate: String,
         endDate: String,
-        patientMrn: String? = null,
+        patientMrn: String? = null
     ): DataFetcherResult<List<ProxyServerAppointment>> {
         logger.info { "Processing appointment query for tenant: ${tenant.name}" }
 
@@ -92,21 +92,22 @@ class AppointmentHandler(
         logger.debug { "Appointment query for tenant ${tenant.name} returned" }
 
         // send appointments to queue service
-        if (appointments.isNotEmpty()) try {
-            queueService.enqueueMessages(
-                appointments.map {
-                    ApiMessage(
-                        id = null,
-                        resourceType = ResourceType.APPOINTMENT,
-                        tenant = tenant.mnemonic,
-                        text = JacksonUtil.writeJsonValue(it)
-                    )
-                }
-            )
-        } catch (e: Exception) {
-            logger.warn { "Exception sending appointments to queue: ${e.message}" }
+        if (appointments.isNotEmpty()) {
+            try {
+                queueService.enqueueMessages(
+                    appointments.map {
+                        ApiMessage(
+                            id = null,
+                            resourceType = ResourceType.APPOINTMENT,
+                            tenant = tenant.mnemonic,
+                            text = JacksonUtil.writeJsonValue(it)
+                        )
+                    }
+                )
+            } catch (e: Exception) {
+                logger.warn { "Exception sending appointments to queue: ${e.message}" }
+            }
         }
-
         logger.info { "Appointments for ${tenant.name} sent to queue" }
 
         // translate for return

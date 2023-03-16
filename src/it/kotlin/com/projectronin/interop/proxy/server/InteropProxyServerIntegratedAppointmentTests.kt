@@ -138,7 +138,6 @@ class InteropProxyServerIntegratedAppointmentTests : InteropProxyServerIntegrate
 
         node.forEach { appointment ->
             if (appointment["id"].asText().contains("AppointmentFHIRID1")) {
-
                 assertEquals("2022-01-01T09:00:00Z", appointment["start"].asText())
                 assertEquals("booked", appointment["status"].asText())
                 val participants = appointment["participants"]
@@ -173,7 +172,8 @@ class InteropProxyServerIntegratedAppointmentTests : InteropProxyServerIntegrate
             |query {
             |   appointmentsByMRNAndDate(endDate: "$endDate", mrn: "$mrn", startDate: "$startDate", tenantId: "$tenantId")
             |   {id}
-            |}""".trimMargin()
+            |}
+        """.trimMargin()
 
         val httpEntity = HttpEntity(query, httpHeaders)
 
@@ -201,7 +201,8 @@ class InteropProxyServerIntegratedAppointmentTests : InteropProxyServerIntegrate
             |query {
             |   appointmentsByMRNAndDate(endDate: "$endDate", mrn: "$mrn", startDate: "$startDate", tenantId: "$tenantId")
             |   {id}
-            |}""".trimMargin()
+            |}
+        """.trimMargin()
 
         val httpEntity = HttpEntity(query, httpHeaders)
 
@@ -223,7 +224,8 @@ class InteropProxyServerIntegratedAppointmentTests : InteropProxyServerIntegrate
             |query {
             |   appointmentsByMRNAndDate(mrn: "$mrn", startDate: "$startDate", tenantId: "$tenantId")
             |   {id}
-            |}""".trimMargin()
+            |}
+        """.trimMargin()
 
         val httpEntity = HttpEntity(query, httpHeaders)
 
@@ -247,7 +249,8 @@ class InteropProxyServerIntegratedAppointmentTests : InteropProxyServerIntegrate
             |query {
             |   appointmentsByMRNAndDate(endDate: "$endDate", mrn: "$mrn", startDate: "$startDate", tenantId: "$tenantId")
             |   {id}
-            |}""".trimMargin()
+            |}
+        """.trimMargin()
 
         val response = multiVendorQuery(query, testTenant)
 
