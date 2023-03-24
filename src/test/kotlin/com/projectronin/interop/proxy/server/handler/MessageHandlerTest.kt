@@ -13,8 +13,7 @@ import com.projectronin.interop.fhir.r4.datatype.Identifier
 import com.projectronin.interop.fhir.r4.datatype.primitive.Id
 import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
 import com.projectronin.interop.fhir.r4.datatype.primitive.asFHIR
-import com.projectronin.interop.proxy.server.context.INTEROP_CONTEXT_KEY
-import com.projectronin.interop.proxy.server.context.InteropGraphQLContext
+import com.projectronin.interop.proxy.server.context.getAuthorizedTenantId
 import com.projectronin.interop.proxy.server.input.MessageInput
 import com.projectronin.interop.proxy.server.input.MessagePatientInput
 import com.projectronin.interop.proxy.server.input.MessageRecipientInput
@@ -61,7 +60,7 @@ class MessageHandlerTest {
 
     @Test
     fun `patient not found`() {
-        every { dfe.graphQlContext.get<InteropGraphQLContext>(INTEROP_CONTEXT_KEY).authzTenantId } returns "TEST_TENANT"
+        every { dfe.getAuthorizedTenantId() } returns "TEST_TENANT"
         val tenant = mockk<Tenant> {
             every { mnemonic } returns "TEST_TENANT"
         }
@@ -81,7 +80,7 @@ class MessageHandlerTest {
 
     @Test
     fun `unknown tenant returns an error`() {
-        every { dfe.graphQlContext.get<InteropGraphQLContext>(INTEROP_CONTEXT_KEY).authzTenantId } returns "TEST_TENANT"
+        every { dfe.getAuthorizedTenantId() } returns "TEST_TENANT"
         every { tenantService.getTenantForMnemonic("TEST_TENANT") } returns null
 
         val messageInput = MessageInput("Test Message", MessagePatientInput("MRN#1", null), listOf())
@@ -94,7 +93,7 @@ class MessageHandlerTest {
 
     @Test
     fun `unknown vendor returns an error`() {
-        every { dfe.graphQlContext.get<InteropGraphQLContext>(INTEROP_CONTEXT_KEY).authzTenantId } returns "TEST_TENANT"
+        every { dfe.getAuthorizedTenantId() } returns "TEST_TENANT"
         val tenant = mockk<Tenant> {
             every { mnemonic } returns "TEST_TENANT"
         }
@@ -112,7 +111,7 @@ class MessageHandlerTest {
 
     @Test
     fun `ensure message can be sent`() {
-        every { dfe.graphQlContext.get<InteropGraphQLContext>(INTEROP_CONTEXT_KEY).authzTenantId } returns "TEST_TENANT"
+        every { dfe.getAuthorizedTenantId() } returns "TEST_TENANT"
         val tenant = mockk<Tenant> {
             every { mnemonic } returns "TEST_TENANT"
         }
@@ -132,7 +131,7 @@ class MessageHandlerTest {
 
     @Test
     fun `ensure message with one recipient can be sent`() {
-        every { dfe.graphQlContext.get<InteropGraphQLContext>(INTEROP_CONTEXT_KEY).authzTenantId } returns "TEST_TENANT"
+        every { dfe.getAuthorizedTenantId() } returns "TEST_TENANT"
         val tenant = mockk<Tenant>()
         every { tenant.mnemonic } returns "TEST_TENANT"
         every { tenantService.getTenantForMnemonic("TEST_TENANT") } returns tenant
@@ -175,7 +174,7 @@ class MessageHandlerTest {
 
     @Test
     fun `ensure message with multiple recipients can be sent`() {
-        every { dfe.graphQlContext.get<InteropGraphQLContext>(INTEROP_CONTEXT_KEY).authzTenantId } returns "TEST_TENANT"
+        every { dfe.getAuthorizedTenantId() } returns "TEST_TENANT"
         val tenant = mockk<Tenant>()
         every { tenant.mnemonic } returns "TEST_TENANT"
         every { tenantService.getTenantForMnemonic("TEST_TENANT") } returns tenant
@@ -238,7 +237,7 @@ class MessageHandlerTest {
 
     @Test
     fun `ensure message can be sent when sent without mrn`() {
-        every { dfe.graphQlContext.get<InteropGraphQLContext>(INTEROP_CONTEXT_KEY).authzTenantId } returns "TEST_TENANT"
+        every { dfe.getAuthorizedTenantId() } returns "TEST_TENANT"
         val tenant = mockk<Tenant> {
             every { mnemonic } returns "TEST_TENANT"
         }
@@ -275,7 +274,7 @@ class MessageHandlerTest {
 
     @Test
     fun `ensure error when no input`() {
-        every { dfe.graphQlContext.get<InteropGraphQLContext>(INTEROP_CONTEXT_KEY).authzTenantId } returns "TEST_TENANT"
+        every { dfe.getAuthorizedTenantId() } returns "TEST_TENANT"
         val tenant = mockk<Tenant> {
             every { mnemonic } returns "TEST_TENANT"
         }

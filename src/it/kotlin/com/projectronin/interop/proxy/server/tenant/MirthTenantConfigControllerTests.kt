@@ -14,7 +14,7 @@ import org.junit.jupiter.api.TestInstance
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.web.client.TestRestTemplate
-import org.springframework.boot.web.server.LocalServerPort
+import org.springframework.boot.test.web.server.LocalServerPort
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
@@ -67,7 +67,7 @@ class MirthTenantConfigControllerTests {
         val httpEntity = HttpEntity<HttpHeaders>(httpHeaders)
 
         val responseEntity = restTemplate.exchange(
-            "http://localhost:$port/tenants/$tenantMnemonic/mirth-config/",
+            "http://localhost:$port/tenants/$tenantMnemonic/mirth-config",
             HttpMethod.GET,
             httpEntity,
             MirthTenantConfig::class.java
@@ -87,7 +87,7 @@ class MirthTenantConfigControllerTests {
         val httpEntity = HttpEntity<HttpHeaders>(httpHeaders)
 
         val responseEntity = restTemplate.exchange(
-            "http://localhost:$port/tenants/$tenantMnemonic/mirth-config/",
+            "http://localhost:$port/tenants/$tenantMnemonic/mirth-config",
             HttpMethod.GET,
             httpEntity,
             String::class.java
@@ -106,7 +106,7 @@ class MirthTenantConfigControllerTests {
         val httpEntity = HttpEntity(insertMirthConfig, httpHeaders)
 
         val responseEntity = restTemplate.exchange(
-            "http://localhost:$port/tenants/$tenantMnemonic/mirth-config/",
+            "http://localhost:$port/tenants/$tenantMnemonic/mirth-config",
             HttpMethod.POST,
             httpEntity,
             MirthTenantConfig::class.java
@@ -128,7 +128,7 @@ class MirthTenantConfigControllerTests {
         val httpEntity = HttpEntity(insertMirthConfig, httpHeaders)
 
         val responseEntity = restTemplate.exchange(
-            "http://localhost:$port/tenants/$tenantMnemonic/mirth-config/",
+            "http://localhost:$port/tenants/$tenantMnemonic/mirth-config",
             HttpMethod.POST,
             httpEntity,
             String::class.java
@@ -149,7 +149,7 @@ class MirthTenantConfigControllerTests {
         val httpEntity = HttpEntity(updated, httpHeaders)
 
         val responseEntity = restTemplate.exchange(
-            "http://localhost:$port/tenants/$tenantMnemonic/mirth-config/",
+            "http://localhost:$port/tenants/$tenantMnemonic/mirth-config",
             HttpMethod.PUT,
             httpEntity,
             String::class.java
@@ -170,7 +170,7 @@ class MirthTenantConfigControllerTests {
         val httpEntity = HttpEntity(updated, httpHeaders)
 
         val responseEntity = restTemplate.exchange(
-            "http://localhost:$port/tenants/$tenantMnemonic/mirth-config/",
+            "http://localhost:$port/tenants/$tenantMnemonic/mirth-config",
             HttpMethod.PUT,
             httpEntity,
             String::class.java

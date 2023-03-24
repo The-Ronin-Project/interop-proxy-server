@@ -1,4 +1,5 @@
 import com.expediagroup.graphql.plugin.gradle.tasks.GraphQLGenerateSDLTask
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     java
@@ -110,6 +111,16 @@ dependencies {
     itImplementation(libs.interop.ehr.liquibase)
     itImplementation("org.springframework.security:spring-security-oauth2-jose")
     itImplementation("org.liquibase:liquibase-core")
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_17
+}
+
+tasks.withType(KotlinCompile::class) {
+    compilerOptions {
+        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
+    }
 }
 
 tasks.withType(Test::class) {

@@ -9,8 +9,7 @@ import com.projectronin.interop.ehr.factory.EHRFactory
 import com.projectronin.interop.fhir.r4.datatype.primitive.Id
 import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
 import com.projectronin.interop.fhir.r4.valueset.AppointmentStatus
-import com.projectronin.interop.proxy.server.context.INTEROP_CONTEXT_KEY
-import com.projectronin.interop.proxy.server.context.InteropGraphQLContext
+import com.projectronin.interop.proxy.server.context.getAuthorizedTenantId
 import com.projectronin.interop.proxy.server.model.Appointment
 import com.projectronin.interop.proxy.server.util.JacksonUtil
 import com.projectronin.interop.queue.QueueService
@@ -76,7 +75,7 @@ class AppointmentHandlerTest {
     @Test
     fun `unknown tenant returns an error`() {
         every { tenantService.getTenantForMnemonic("tenantId") } returns null
-        every { dfe.graphQlContext.get<InteropGraphQLContext>(INTEROP_CONTEXT_KEY).authzTenantId } returns "tenantId"
+        every { dfe.getAuthorizedTenantId() } returns "tenantId"
 
         // Run Test
         val exception = assertThrows<HttpClientErrorException> {
@@ -95,7 +94,7 @@ class AppointmentHandlerTest {
     fun `unauthorized user returns an error`() {
         val tenant = mockk<Tenant>()
         every { tenantService.getTenantForMnemonic("tenantId") } returns tenant
-        every { dfe.graphQlContext.get<InteropGraphQLContext>(INTEROP_CONTEXT_KEY).authzTenantId } returns null
+        every { dfe.getAuthorizedTenantId() } returns null
 
         // Run Test
         val exception = assertThrows<HttpClientErrorException> {
@@ -115,7 +114,7 @@ class AppointmentHandlerTest {
     fun `unauthorized tenant returns an error`() {
         val tenant = mockk<Tenant>()
         every { tenantService.getTenantForMnemonic("tenantId") } returns tenant
-        every { dfe.graphQlContext.get<InteropGraphQLContext>(INTEROP_CONTEXT_KEY).authzTenantId } returns "differentTenantId"
+        every { dfe.getAuthorizedTenantId() } returns "differentTenantId"
 
         // Run Test
         val exception = assertThrows<HttpClientErrorException> {
@@ -138,7 +137,7 @@ class AppointmentHandlerTest {
     fun `unknown vendor returns an error`() {
         val tenant = mockk<Tenant>()
         every { tenantService.getTenantForMnemonic("tenantId") } returns tenant
-        every { dfe.graphQlContext.get<InteropGraphQLContext>(INTEROP_CONTEXT_KEY).authzTenantId } returns "tenantId"
+        every { dfe.getAuthorizedTenantId() } returns "tenantId"
 
         every { ehrFactory.getVendorFactory(tenant) } throws IllegalStateException("Error")
 
@@ -160,7 +159,7 @@ class AppointmentHandlerTest {
         val tenant = mockk<Tenant>()
         every { tenant.mnemonic } returns "tenantId"
         every { tenantService.getTenantForMnemonic("tenantId") } returns tenant
-        every { dfe.graphQlContext.get<InteropGraphQLContext>(INTEROP_CONTEXT_KEY).authzTenantId } returns "tenantId"
+        every { dfe.getAuthorizedTenantId() } returns "tenantId"
 
         every { ehrFactory.getVendorFactory(tenant) } returns mockk {
             every { appointmentService } returns mockk {
@@ -196,7 +195,7 @@ class AppointmentHandlerTest {
         val tenant = mockk<Tenant>()
         every { tenant.mnemonic } returns "tenantId"
         every { tenantService.getTenantForMnemonic("tenantId") } returns tenant
-        every { dfe.graphQlContext.get<InteropGraphQLContext>(INTEROP_CONTEXT_KEY).authzTenantId } returns "tenantId"
+        every { dfe.getAuthorizedTenantId() } returns "tenantId"
 
         every { ehrFactory.getVendorFactory(tenant) } returns mockk {
             every { appointmentService } returns mockk {
@@ -286,7 +285,7 @@ class AppointmentHandlerTest {
         val tenant = mockk<Tenant>()
         every { tenant.mnemonic } returns "tenantId"
         every { tenantService.getTenantForMnemonic("tenantId") } returns tenant
-        every { dfe.graphQlContext.get<InteropGraphQLContext>(INTEROP_CONTEXT_KEY).authzTenantId } returns "tenantId"
+        every { dfe.getAuthorizedTenantId() } returns "tenantId"
 
         every { ehrFactory.getVendorFactory(tenant) } returns mockk {
             every { appointmentService } returns mockk {
@@ -379,7 +378,7 @@ class AppointmentHandlerTest {
         val tenant = mockk<Tenant>()
         every { tenant.mnemonic } returns "tenantId"
         every { tenantService.getTenantForMnemonic("tenantId") } returns tenant
-        every { dfe.graphQlContext.get<InteropGraphQLContext>(INTEROP_CONTEXT_KEY).authzTenantId } returns "tenantId"
+        every { dfe.getAuthorizedTenantId() } returns "tenantId"
 
         every { ehrFactory.getVendorFactory(tenant) } returns mockk {
             every { appointmentService } returns mockk {
@@ -433,7 +432,7 @@ class AppointmentHandlerTest {
         val tenant = mockk<Tenant>()
         every { tenant.mnemonic } returns "tenantId"
         every { tenantService.getTenantForMnemonic("tenantId") } returns tenant
-        every { dfe.graphQlContext.get<InteropGraphQLContext>(INTEROP_CONTEXT_KEY).authzTenantId } returns "tenantId"
+        every { dfe.getAuthorizedTenantId() } returns "tenantId"
 
         every { ehrFactory.getVendorFactory(tenant) } returns mockk {
             every { appointmentService } returns mockk {
@@ -470,7 +469,7 @@ class AppointmentHandlerTest {
         val tenant = mockk<Tenant>()
         every { tenant.mnemonic } returns "tenantId"
         every { tenantService.getTenantForMnemonic("tenantId") } returns tenant
-        every { dfe.graphQlContext.get<InteropGraphQLContext>(INTEROP_CONTEXT_KEY).authzTenantId } returns "tenantId"
+        every { dfe.getAuthorizedTenantId() } returns "tenantId"
 
         every { tenant.vendor } returns mockk<Epic> {
             every { patientMRNSystem } returns "MRNSYSTEM"

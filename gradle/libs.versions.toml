@@ -1,21 +1,21 @@
 [libraries]
 dd-trace-api = "com.datadoghq:dd-trace-api:1.10.1"
 
-graphql-kotlin-schema-generator = "com.expediagroup:graphql-kotlin-schema-generator:6.4.0"
-graphql-kotlin-spring-server = "com.expediagroup:graphql-kotlin-spring-server:6.4.0"
+graphql-kotlin-schema-generator = "com.expediagroup:graphql-kotlin-schema-generator:7.0.0-alpha.4"
+graphql-kotlin-spring-server = "com.expediagroup:graphql-kotlin-spring-server:7.0.0-alpha.4"
 
-graphql-spring-boot-starter-test = "com.graphql-java-kickstart:graphql-spring-boot-starter-test:14.1.0"
+graphql-spring-boot-starter-test = "com.graphql-java-kickstart:graphql-spring-boot-starter-test:15.0.0"
 hapi-hl7v2-251 = "ca.uhn.hapi:hapi-structures-v251:2.3"
 hapi-hl7v2-base = "ca.uhn.hapi:hapi-base:2.3"
 
-interop-aidbox = "com.projectronin.interop.publish:interop-aidbox:7.4.3"
+interop-aidbox = "com.projectronin.interop.publish:interop-aidbox:7.4.5"
 
 interop-common = "com.projectronin.interop:interop-common:3.4.0"
 interop-commonHttp = "com.projectronin.interop:interop-common-http:3.4.0"
 interop-commonJackson = "com.projectronin.interop:interop-common-jackson:3.4.0"
 interop-commonTestDb = "com.projectronin.interop:interop-common-test-db:3.4.0"
 
-interop-datalake = "com.projectronin.interop.publish:interop-datalake:7.4.3"
+interop-datalake = "com.projectronin.interop.publish:interop-datalake:7.4.5"
 
 interop-ehr-api = "com.projectronin.interop.ehr:interop-ehr:9.3.1"
 interop-ehr-cerner = "com.projectronin.interop.ehr:interop-ehr-cerner:9.3.1"
@@ -24,13 +24,13 @@ interop-ehr-epic = "com.projectronin.interop.ehr:interop-ehr-epic:9.3.1"
 interop-ehr-liquibase = "com.projectronin.interop.ehr:interop-ehr-liquibase:9.3.1"
 interop-ehr-tenant = "com.projectronin.interop.ehr:interop-tenant:9.3.1"
 
-interop-fhir = "com.projectronin.interop.fhir:interop-fhir:7.5.0"
+interop-fhir = "com.projectronin.interop.fhir:interop-fhir:7.6.0"
 
 interop-queue-api = "com.projectronin.interop.queue:interop-queue:1.5.0"
 interop-queue-db = "com.projectronin.interop.queue:interop-queue-db:1.5.0"
 interop-queue-liquibase = "com.projectronin.interop.queue:interop-queue-liquibase:1.5.0"
 interop-queue-kafka = "com.projectronin.interop.queue:interop-queue-kafka:1.5.0"
-interop-testcontainer-aidbox = "com.projectronin.interop.publish:interop-aidbox-testcontainer:7.4.3"
+interop-testcontainer-aidbox = "com.projectronin.interop.publish:interop-aidbox-testcontainer:7.4.5"
 interop-testcontainer-mockehr = "com.projectronin.interop.mock:interop-mock-ehr-testcontainer:1.2.1"
 
 junit-pioneer = "org.junit-pioneer:junit-pioneer:2.0.0"
@@ -39,8 +39,8 @@ kotlinx-coroutines-bom = "org.jetbrains.kotlinx:kotlinx-coroutines-bom:1.6.4"
 logstash-logback-encoder = "net.logstash.logback:logstash-logback-encoder:7.3"
 mockk = "io.mockk:mockk:1.13.4"
 mysql-connector-java = "com.mysql:mysql-connector-j:8.0.32"
-spring-boot-parent = "org.springframework.boot:spring-boot-parent:2.7.8"
-spring-mockk = "com.ninja-squad:springmockk:3.1.2"
+spring-boot-parent = "org.springframework.boot:spring-boot-parent:3.0.5"
+spring-mockk = "com.ninja-squad:springmockk:4.0.2"
 spring-security-oauth2-core = { module = "org.springframework.security:spring-security-oauth2-core" }
 spring-security-oauth2-jose = { module = "org.springframework.security:spring-security-oauth2-jose" }
 testcontainers-bom = "org.testcontainers:testcontainers-bom:1.17.6"

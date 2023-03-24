@@ -10,34 +10,20 @@ import org.springframework.mock.web.reactive.function.server.MockServerRequest
 
 class InteropGraphQLContextFactoryTest {
     @Test
-    fun `creates context map without headers`() {
-        val request = MockServerRequest.builder().build()
-        val contextMap = runBlocking { InteropGraphQLContextFactory().generateContextMap(request) }
-        val context = contextMap[INTEROP_CONTEXT_KEY] as InteropGraphQLContext
-
-        assertNotNull(context)
-        assertEquals(request, context.request)
-        assertNull(context.authzTenantId)
-    }
-
-    @Test
-    fun `creates context map with authorized Tenant`() {
-        val request = MockServerRequest.builder().header(AUTHZ_TENANT_HEADER, "MyAuthzTenant").build()
-        val contextMap = runBlocking { InteropGraphQLContextFactory().generateContextMap(request) }
-        val context = contextMap[INTEROP_CONTEXT_KEY] as InteropGraphQLContext
-
-        assertNotNull(context)
-        assertEquals(request, context.request)
-        assertEquals("MyAuthzTenant", context.authzTenantId)
-    }
-
-    @Test
     fun `creates context with authorized Tenant`() {
         val request = MockServerRequest.builder().header(AUTHZ_TENANT_HEADER, "MyAuthzTenant").build()
         val context = runBlocking { InteropGraphQLContextFactory().generateContext(request) }
 
         assertNotNull(context)
-        assertEquals(request, context?.request)
-        assertEquals("MyAuthzTenant", context?.authzTenantId)
+        assertEquals("MyAuthzTenant", context.get(AUTHZ_TENANT_ID))
+    }
+
+    @Test
+    fun `creates context without authorized Tenant`() {
+        val request = MockServerRequest.builder().build()
+        val context = runBlocking { InteropGraphQLContextFactory().generateContext(request) }
+
+        assertNotNull(context)
+        assertNull(context.get(AUTHZ_TENANT_ID))
     }
 }

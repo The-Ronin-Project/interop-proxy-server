@@ -15,8 +15,7 @@ import com.projectronin.interop.fhir.r4.resource.Patient
 import com.projectronin.interop.fhir.r4.resource.Practitioner
 import com.projectronin.interop.fhir.r4.valueset.AdministrativeGender
 import com.projectronin.interop.fhir.r4.valueset.ContactPointUse
-import com.projectronin.interop.proxy.server.context.INTEROP_CONTEXT_KEY
-import com.projectronin.interop.proxy.server.context.InteropGraphQLContext
+import com.projectronin.interop.proxy.server.context.getAuthorizedTenantId
 import com.projectronin.interop.proxy.server.hl7.MDMService
 import com.projectronin.interop.proxy.server.input.NoteInput
 import com.projectronin.interop.proxy.server.input.NoteSender
@@ -91,7 +90,7 @@ class NoteHandlerTest {
     fun `accepts note with patient FHIR Id`() {
         val tenant = mockk<Tenant>()
 
-        every { dfe.graphQlContext.get<InteropGraphQLContext>(INTEROP_CONTEXT_KEY).authzTenantId } returns "apposnd"
+        every { dfe.getAuthorizedTenantId() } returns "apposnd"
         every {
             practitionerService.getPractitionerByUDPId(
                 "apposnd",
@@ -129,7 +128,7 @@ class NoteHandlerTest {
     fun `accepts addendum note with patient FHIR Id`() {
         val tenant = mockk<Tenant>()
 
-        every { dfe.graphQlContext.get<InteropGraphQLContext>(INTEROP_CONTEXT_KEY).authzTenantId } returns "apposnd"
+        every { dfe.getAuthorizedTenantId() } returns "apposnd"
         every {
             practitionerService.getPractitionerByUDPId(
                 "apposnd",
@@ -167,7 +166,7 @@ class NoteHandlerTest {
     fun `accepts note with patient MRN`() {
         val tenant = mockk<Tenant>()
 
-        every { dfe.graphQlContext.get<InteropGraphQLContext>(INTEROP_CONTEXT_KEY).authzTenantId } returns "apposnd"
+        every { dfe.getAuthorizedTenantId() } returns "apposnd"
         every { tenantService.getTenantForMnemonic("apposnd") } returns tenant
         every {
             practitionerService.getPractitionerByUDPId(
@@ -212,7 +211,7 @@ class NoteHandlerTest {
     fun `accepts note with patient MRN but not an alert`() {
         val tenant = mockk<Tenant>()
 
-        every { dfe.graphQlContext.get<InteropGraphQLContext>(INTEROP_CONTEXT_KEY).authzTenantId } returns "apposnd"
+        every { dfe.getAuthorizedTenantId() } returns "apposnd"
         every { tenantService.getTenantForMnemonic("apposnd") } returns tenant
         every {
             practitionerService.getPractitionerByUDPId(
@@ -255,7 +254,7 @@ class NoteHandlerTest {
 
     @Test
     fun `handles bad tenant`() {
-        every { dfe.graphQlContext.get<InteropGraphQLContext>(INTEROP_CONTEXT_KEY).authzTenantId } returns "apposnd"
+        every { dfe.getAuthorizedTenantId() } returns "apposnd"
         every { tenantService.getTenantForMnemonic("apposnd") } returns null
 
         val noteInput = NoteInput(
