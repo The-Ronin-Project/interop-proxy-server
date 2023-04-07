@@ -43,7 +43,7 @@ class PatientHandler(
     private val logger = KotlinLogging.logger { }
     private val dateFormatter = DateUtil()
 
-    @GraphQLDescription("Finds patient(s) that exactly match on family name, given name, and birthdate (YYYY-mm-dd format).")
+    @GraphQLDescription("Finds patient(s) that exactly match on family name, given name, and birthdate (YYYY-mm-dd format). Requires M2M Authorization or User Auth matching to the requested tenant or will result in an error with no results.")
     @Trace
     fun patientsByNameAndDOB(
         tenantId: String,
@@ -68,7 +68,7 @@ class PatientHandler(
             .errors(findPatientErrors).build()
     }
 
-    @GraphQLDescription("Finds patient(s) across the supplied tenants that exactly match on family name, given name, and birthdate (YYYY-mm-dd format).")
+    @GraphQLDescription("Finds patient(s) across the supplied tenants that exactly match on family name, given name, and birthdate (YYYY-mm-dd format). Requires M2M Authorization or User Auth matching to the requested tenant or will result in an error with no results.")
     @Trace
     fun patientsByTenants(
         tenantIds: List<String>,

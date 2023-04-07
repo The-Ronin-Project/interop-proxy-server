@@ -38,14 +38,14 @@ class NoteHandler(
     /**
      * Handler for Notes going to downstream EHRs. Sends notes to the queue to be sent to the tenant's EHR system based on tenant Id and noteInput
      */
-    @GraphQLDescription("Takes in note from product and processes it for downstream services")
+    @GraphQLDescription("Takes in note from product and processes it for downstream services. Requires M2M Authorization or User Auth matching to the requested tenant or will result in an error with no results.")
     @Trace
     fun sendNote(noteInput: NoteInput, tenantId: String, dfe: DataFetchingEnvironment): String {
         findAndValidateTenant(dfe, tenantService, tenantId, false)
         return enqueueHL7(noteInput, tenantId)
     }
 
-    @GraphQLDescription("Takes in addendum note from product and processes it for downstream services")
+    @GraphQLDescription("Takes in addendum note from product and processes it for downstream services. Requires M2M Authorization or User Auth matching to the requested tenant or will result in an error with no results.")
     @Trace
     fun sendNoteAddendum(
         noteInput: NoteInput,

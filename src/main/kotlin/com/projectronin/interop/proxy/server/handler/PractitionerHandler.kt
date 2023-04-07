@@ -32,7 +32,7 @@ class PractitionerHandler(
 ) : Query {
     private val logger = KotlinLogging.logger { }
 
-    @GraphQLDescription("Searches the EHR for a FHIR Practitioner by an internal identifier, and adds it to the Aidbox queue.")
+    @GraphQLDescription("Searches the EHR for a FHIR Practitioner by an internal identifier, and adds it to the Aidbox queue. Requires M2M Authorization or User Auth matching to the requested tenant or will result in an error with no results.")
     @Trace
     fun getPractitionerByProvider(
         tenantId: String,
@@ -47,7 +47,7 @@ class PractitionerHandler(
         )
     }
 
-    @GraphQLDescription("Retrieves a FHIR Practitioner from the EHR, and adds it to the Aidbox queue.")
+    @GraphQLDescription("Retrieves a FHIR Practitioner from the EHR, and adds it to the Aidbox queue. Requires M2M Authorization or User Auth matching to the requested tenant or will result in an error with no results.")
     @Trace
     fun getPractitionerById(
         tenantId: String,

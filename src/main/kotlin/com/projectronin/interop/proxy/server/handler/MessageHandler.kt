@@ -37,7 +37,7 @@ class MessageHandler(
 ) : Mutation {
     private val logger = KotlinLogging.logger { }
 
-    @GraphQLDescription("Sends a message and returns the current status.")
+    @GraphQLDescription("Sends a message and returns the current status. Requires M2M Authorization or User Auth matching to the requested tenant or will result in an error with no results.")
     @Trace
     fun sendMessage(tenantId: String, message: MessageInput, dfe: DataFetchingEnvironment): DataFetcherResult<String> {
         logger.info { "Sending message to $tenantId" }

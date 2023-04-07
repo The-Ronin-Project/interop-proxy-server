@@ -34,7 +34,7 @@ class AppointmentHandler(
     private val logger = KotlinLogging.logger { }
     private val dateFormatter = DateUtil()
 
-    @GraphQLDescription("Finds appointments for a given MRN and date range. Requires User Auth.")
+    @GraphQLDescription("Finds appointments for a given MRN and date range. Requires User Auth matching to the requested tenant or will result in an error with no results.")
     @Deprecated("This query is deprecated.", ReplaceWith("appointmentsByPatientAndDate"))
     @Trace
     fun appointmentsByMRNAndDate(
@@ -49,7 +49,7 @@ class AppointmentHandler(
         return appointmentHandler(tenant, patientFHIRID, startDate, endDate, mrn)
     }
 
-    @GraphQLDescription("Finds appointments for a given patient UDP ID and date range. Requires User Auth.")
+    @GraphQLDescription("Finds appointments for a given patient UDP ID and date range. Requires User Auth matching to the requested tenant or will result in an error with no results.")
     @Trace
     fun appointmentsByPatientAndDate(
         tenantId: String,
