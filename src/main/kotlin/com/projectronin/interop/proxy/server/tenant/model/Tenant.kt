@@ -12,5 +12,9 @@ data class Tenant(
     val availableStart: LocalTime?,
     val availableEnd: LocalTime?,
     val vendor: Vendor,
-    val timezone: String
+    val timezone: String,
+
+    // If the caller doesn't include the 'monitoredIndicator' flag, set it to true.  They can always turn it off later
+    // and better safe than sorry.
+    val monitoredIndicator: Boolean? = true
 )

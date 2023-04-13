@@ -22,7 +22,8 @@ fun TenantServiceTenant.toProxyTenant(): ProxyTenant {
         timezone = timezone.id,
         availableStart = batchConfig?.availableStart,
         availableEnd = batchConfig?.availableEnd,
-        vendor = vendor.toProxyVendor()
+        vendor = vendor.toProxyVendor(),
+        monitoredIndicator = monitoredIndicator
     )
 }
 
@@ -80,7 +81,8 @@ fun ProxyTenant.toTenantServerTenant(newId: Int = this.id): TenantServiceTenant 
                 BatchConfig(start, end)
             }
         },
-        vendor = vendor.toTenantServerTenant()
+        vendor = vendor.toTenantServerTenant(),
+        monitoredIndicator = monitoredIndicator
     )
 }
 

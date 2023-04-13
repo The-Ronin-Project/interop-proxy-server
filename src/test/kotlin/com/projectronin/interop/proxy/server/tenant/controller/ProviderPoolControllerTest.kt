@@ -53,7 +53,8 @@ class ProviderPoolControllerTest {
             instanceName = "instanceName",
             departmentInternalSystem = "departmentInternalSystem",
             patientOnboardedFlagId = "flagId"
-        )
+        ),
+        monitoredIndicator = null
     )
 
     private val providerPool = ProviderPool(
@@ -76,6 +77,7 @@ class ProviderPoolControllerTest {
         }
         availableBatchStart = null
         availableBatchEnd = null
+        monitoredIndicator = null
     }
 
     private val providerPoolDO = ProviderPoolDO {

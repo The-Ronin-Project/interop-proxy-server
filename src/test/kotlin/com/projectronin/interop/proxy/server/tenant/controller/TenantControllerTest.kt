@@ -50,7 +50,8 @@ class TenantControllerTest {
         availableEnd = LocalTime.of(6, 0),
         vendor = proxyVendor,
         name = "test tenant",
-        timezone = "America/Los_Angeles"
+        timezone = "America/Los_Angeles",
+        monitoredIndicator = null
     )
     private val tenantServiceTenant = mockk<TenantServiceTenant> {
         every { internalId } returns 1
@@ -62,7 +63,8 @@ class TenantControllerTest {
         availableEnd = null,
         vendor = proxyVendor,
         name = "test tenant2",
-        timezone = "America/Denver"
+        timezone = "America/Denver",
+        monitoredIndicator = null
     )
     private val tenantServiceTenantNoBatch = mockk<TenantServiceTenant> {}
 
@@ -135,7 +137,8 @@ class TenantControllerTest {
             availableEnd = LocalTime.of(6, 0),
             vendor = proxyVendor,
             name = "test tenant2",
-            timezone = "America/Denver"
+            timezone = "America/Denver",
+            monitoredIndicator = null
         )
         every { proxyTenantNoStart.toTenantServerTenant() } returns mockk()
         every { tenantService.insertTenant(any()) } returns tenantServiceTenantNoBatch
@@ -153,7 +156,8 @@ class TenantControllerTest {
             availableEnd = null,
             vendor = proxyVendor,
             name = "test tenant2",
-            timezone = "America/Denver"
+            timezone = "America/Denver",
+            monitoredIndicator = null
         )
         every { proxyTenantNoEnd.toTenantServerTenant() } returns mockk()
         every { tenantService.insertTenant(any()) } returns tenantServiceTenantNoBatch

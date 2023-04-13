@@ -33,7 +33,8 @@ class TenantConvertersTest {
             name = "name",
             timezone = ZoneId.of("America/Los_Angeles"),
             batchConfig = BatchConfig(availableStart = LocalTime.of(12, 0), availableEnd = LocalTime.of(12, 0)),
-            vendor = tenantServerCerner
+            vendor = tenantServerCerner,
+            monitoredIndicator = null
         )
         val proxyTenant = tenantServiceTenant.toProxyTenant()
         assertNotNull(proxyTenant)
@@ -75,7 +76,8 @@ class TenantConvertersTest {
             name = "name",
             timezone = ZoneId.of("America/Los_Angeles"),
             batchConfig = null,
-            vendor = tenantServerEpic
+            vendor = tenantServerEpic,
+            monitoredIndicator = null
         )
         val proxyTenant = tenantServiceTenant.toProxyTenant()
         assertNotNull(proxyTenant)
@@ -103,7 +105,8 @@ class TenantConvertersTest {
                 messageTopic = "topic",
                 messageCategory = "category",
                 messagePriority = "priority"
-            )
+            ),
+            monitoredIndicator = null
         )
         val tenantServerTenant = proxyTenant.toTenantServerTenant()
         assertEquals(1, tenantServerTenant.internalId)
@@ -141,7 +144,8 @@ class TenantConvertersTest {
                 instanceName = "instanceName",
                 departmentInternalSystem = "departmentInternalSystem",
                 patientOnboardedFlagId = null
-            )
+            ),
+            monitoredIndicator = null
         )
         val tenantServerTenant = proxyTenant.toTenantServerTenant()
         assertEquals(1, tenantServerTenant.internalId)
@@ -168,7 +172,8 @@ class TenantConvertersTest {
                 messageTopic = "topic",
                 messageCategory = "category",
                 messagePriority = "priority"
-            )
+            ),
+            monitoredIndicator = null
         )
         val newTenantServerTenant = proxyTenant.toTenantServerTenant(999)
         assertEquals(999, newTenantServerTenant.internalId)
