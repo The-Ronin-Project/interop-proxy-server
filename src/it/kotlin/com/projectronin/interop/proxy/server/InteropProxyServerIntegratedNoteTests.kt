@@ -25,7 +25,10 @@ import java.text.SimpleDateFormat
 @AidboxTest
 class InteropProxyServerIntegratedNoteTests : InteropProxyServerIntegratedTestsBase() {
 
-    override val resourcesToAdd = listOf<ResourceToAdd>()
+    override val resourcesToAdd = listOf(
+        ResourceToAdd("Patient", "/mockEHR/r4Patient1.json", "PatientFHIRID1"),
+        ResourceToAdd("Practitioner", "/mockEHR/r4Practitioner.json", "PractitionerFHIRID1")
+    )
 
     companion object {
         @Container
@@ -48,7 +51,7 @@ class InteropProxyServerIntegratedNoteTests : InteropProxyServerIntegratedTestsB
     }
 
     @Test
-    fun `server handles note mutation with patient FHIR Id`() {
+    fun `server handles note mutation with patient UDP ID`() {
         val notetext = "Test Note"
         val patientid = "ronin-654321"
         val practitionerid = "ronin-654321"
@@ -82,7 +85,7 @@ class InteropProxyServerIntegratedNoteTests : InteropProxyServerIntegratedTestsB
     }
 
     @Test
-    fun `server handles note mutation with patient FHIR Id and M2M auth`() {
+    fun `server handles note mutation with patient UDP ID and M2M auth`() {
         val notetext = "Test Note"
         val patientid = "ronin-654321"
         val practitionerid = "ronin-654321"
@@ -163,10 +166,10 @@ class InteropProxyServerIntegratedNoteTests : InteropProxyServerIntegratedTestsB
     }
 
     @Test
-    fun `practitioner not found`() {
+    fun `practitioner UDP ID not found in Aidbox, no EHR fallback for practitioner UDP ID not found`() {
         val notetext = "Test Note"
-        val patientid = "654321"
-        val practitionerid = "123456"
+        val patientid = "ronin-654321"
+        val practitionerid = "ronin-123456"
         val tenantId = "ronin"
         val mutation =
             """mutation sendNote(${'$'}noteInput: NoteInput!, ${'$'}tenantId: String!) {sendNote(noteInput: ${'$'}noteInput, tenantId: ${'$'}tenantId)}"""
@@ -194,15 +197,15 @@ class InteropProxyServerIntegratedNoteTests : InteropProxyServerIntegratedTestsB
         val errorJSONObject = resultJSONObject["errors"][0]
         assertTrue(
             errorJSONObject["message"].asText()
-                .contains("404 Not Found")
+                .contains("404 Not Found") // Aidbox
         )
     }
 
     @Test
-    fun `patient not found`() {
+    fun `practitioner UDP ID found in Aidbox, patient UDP ID not found in Aidbox, no EHR fallback for patient UDP ID not found`() {
         val notetext = "Test Note"
-        val patientid = "123456"
-        val practitionerid = "654321"
+        val patientid = "ronin-123456"
+        val practitionerid = "ronin-654321"
         val tenantId = "ronin"
         val mutation =
             """mutation sendNote(${'$'}noteInput: NoteInput!, ${'$'}tenantId: String!) {sendNote(noteInput: ${'$'}noteInput, tenantId: ${'$'}tenantId)}"""
@@ -230,7 +233,184 @@ class InteropProxyServerIntegratedNoteTests : InteropProxyServerIntegratedTestsB
         val errorJSONObject = resultJSONObject["errors"][0]
         assertTrue(
             errorJSONObject["message"].asText()
-                .contains("404 Not Found")
+                .contains("404 Not Found") // Aidbox
+        )
+    }
+
+    @Test
+    fun `practitioner non-UDP ID not found in Aidbox, practitioner not found in MockEHR`() {
+        val notetext = "Test Note"
+        val patientid = "PatientFHIRID1"
+        val practitionerid = "PractitionerFHIRID999"
+        val tenantId = "ronin"
+        val mutation =
+            """mutation sendNote(${'$'}noteInput: NoteInput!, ${'$'}tenantId: String!) {sendNote(noteInput: ${'$'}noteInput, tenantId: ${'$'}tenantId)}"""
+        val query = """
+            |{
+            |   "query": "$mutation",
+            |   "variables": {
+            |      "noteInput": {
+            |         "datetime": "202206011250",
+            |         "patientId":  "$patientid",
+            |         "patientIdType":  "FHIR",
+            |         "practitionerFhirId": "$practitionerid",
+            |         "noteText": "$notetext",
+            |         "noteSender": "PRACTITIONER",
+            |         "isAlert" : "False"
+            |      },
+            |      "tenantId": "$tenantId"
+            |   }
+            |}
+        """.trimMargin()
+        val responseEntity = multiVendorQuery(query, "epic")
+        val resultJSONObject = JacksonManager.objectMapper.readTree(responseEntity.body)
+        assertEquals(HttpStatus.OK, responseEntity.statusCode)
+        assertTrue(resultJSONObject.has("errors"))
+        val errorJSONObject = resultJSONObject["errors"][0]
+        assertTrue(
+            errorJSONObject["message"].asText()
+                .contains("Received 404") // MockEHR
+        )
+    }
+
+    @Test
+    fun `practitioner non-UDP ID not found in Aidbox, practitioner found in MockEHR, patient UDP ID found in Aidbox`() {
+        val notetext = "Test Note"
+        val patientid = "ronin-654321"
+        val practitionerid = "PractitionerFHIRID1"
+        val tenantId = "ronin"
+        val mutation =
+            """mutation sendNote(${'$'}noteInput: NoteInput!, ${'$'}tenantId: String!) {sendNote(noteInput: ${'$'}noteInput, tenantId: ${'$'}tenantId)}"""
+        val query = """
+            |{
+            |   "query": "$mutation",
+            |   "variables": {
+            |      "noteInput": {
+            |         "datetime": "202206011250",
+            |         "patientId":  "$patientid",
+            |         "patientIdType":  "FHIR",
+            |         "practitionerFhirId": "$practitionerid",
+            |         "noteText": "$notetext",
+            |         "noteSender": "PRACTITIONER",
+            |         "isAlert" : "False"
+            |      },
+            |      "tenantId": "$tenantId"
+            |   }
+            |}
+        """.trimMargin()
+        val responseEntity = multiVendorQuery(query, "epic")
+        val dateformat = SimpleDateFormat("yyyyMMdd")
+        val docId = "RoninNote" + dateformat.format(java.util.Date())
+        val resultJSONObject = JacksonManager.objectMapper.readTree(responseEntity.body)
+        assertEquals(HttpStatus.OK, responseEntity.statusCode)
+        assertFalse(resultJSONObject.has("errors"))
+        assertTrue(resultJSONObject["data"]["sendNote"].asText().startsWith(docId))
+    }
+
+    @Test
+    fun `practitioner non-UDP ID not found in Aidbox, practitioner found in MockEHR, patient UDP ID not found in Aidbox, no EHR fallback for this case`() {
+        val notetext = "Test Note"
+        val patientid = "PatientFHIRID1999"
+        val practitionerid = "PractitionerFHIRID1"
+        val tenantId = "ronin"
+        val mutation =
+            """mutation sendNote(${'$'}noteInput: NoteInput!, ${'$'}tenantId: String!) {sendNote(noteInput: ${'$'}noteInput, tenantId: ${'$'}tenantId)}"""
+        val query = """
+            |{
+            |   "query": "$mutation",
+            |   "variables": {
+            |      "noteInput": {
+            |         "datetime": "202206011250",
+            |         "patientId":  "$patientid",
+            |         "patientIdType":  "FHIR",
+            |         "practitionerFhirId": "$practitionerid",
+            |         "noteText": "$notetext",
+            |         "noteSender": "PRACTITIONER",
+            |         "isAlert" : "False"
+            |      },
+            |      "tenantId": "$tenantId"
+            |   }
+            |}
+        """.trimMargin()
+        val responseEntity = multiVendorQuery(query, "epic")
+        val resultJSONObject = JacksonManager.objectMapper.readTree(responseEntity.body)
+        assertEquals(HttpStatus.OK, responseEntity.statusCode)
+        assertTrue(resultJSONObject.has("errors"))
+        val errorJSONObject = resultJSONObject["errors"][0]
+        assertTrue(
+            errorJSONObject["message"].asText()
+                .contains("404 Not Found") // Aidbox
+        )
+    }
+
+    @Test
+    fun `practitioner non-UDP ID not found in Aidbox, practitioner found in MockEHR, patient MRN not found in Aidbox, patient MRN found in MockEHR`() {
+        val notetext = "Test Note"
+        val patientid = "202497"
+        val practitionerid = "PractitionerFHIRID1"
+        val tenantId = "ronin"
+        val mutation =
+            """mutation sendNote(${'$'}noteInput: NoteInput!, ${'$'}tenantId: String!) {sendNote(noteInput: ${'$'}noteInput, tenantId: ${'$'}tenantId)}"""
+        val query = """
+            |{
+            |   "query": "$mutation",
+            |   "variables": {
+            |      "noteInput": {
+            |         "datetime": "202206011250",
+            |         "patientId":  "$patientid",
+            |         "patientIdType":  "MRN",
+            |         "practitionerFhirId": "$practitionerid",
+            |         "noteText": "$notetext",
+            |         "noteSender": "PRACTITIONER",
+            |         "isAlert" : "False"
+            |      },
+            |      "tenantId": "$tenantId"
+            |   }
+            |}
+        """.trimMargin()
+        val responseEntity = multiVendorQuery(query, "epic")
+        val dateformat = SimpleDateFormat("yyyyMMdd")
+        val docId = "RoninNote" + dateformat.format(java.util.Date())
+        val resultJSONObject = JacksonManager.objectMapper.readTree(responseEntity.body)
+        assertEquals(HttpStatus.OK, responseEntity.statusCode)
+        assertFalse(resultJSONObject.has("errors"))
+        assertTrue(resultJSONObject["data"]["sendNote"].asText().startsWith(docId))
+    }
+
+    @Test
+    fun `practitioner non-UDP ID not found in Aidbox, practitioner found in MockEHR, patient MRN not found in Aidbox, patient MRN not found in MockEHR`() {
+        val notetext = "Test Note"
+        val patientid = "123"
+        val practitionerid = "PractitionerFHIRID1"
+        val tenantId = "ronin"
+        val mutation =
+            """mutation sendNote(${'$'}noteInput: NoteInput!, ${'$'}tenantId: String!) {sendNote(noteInput: ${'$'}noteInput, tenantId: ${'$'}tenantId)}"""
+        val query = """
+            |{
+            |   "query": "$mutation",
+            |   "variables": {
+            |      "noteInput": {
+            |         "datetime": "202206011250",
+            |         "patientId":  "$patientid",
+            |         "patientIdType":  "MRN",
+            |         "practitionerFhirId": "$practitionerid",
+            |         "noteText": "$notetext",
+            |         "noteSender": "PRACTITIONER",
+            |         "isAlert" : "False"
+            |      },
+            |      "tenantId": "$tenantId"
+            |   }
+            |}
+        """.trimMargin()
+        val responseEntity = multiVendorQuery(query, "epic")
+        val resultJSONObject = JacksonManager.objectMapper.readTree(responseEntity.body)
+        assertEquals(HttpStatus.OK, responseEntity.statusCode)
+        assertTrue(resultJSONObject.has("errors"))
+        val errorJSONObject = resultJSONObject["errors"][0]
+        println(resultJSONObject)
+        assertTrue(
+            errorJSONObject["message"].asText()
+                .contains("No FHIR ID found for patient") // MockEHR
         )
     }
 

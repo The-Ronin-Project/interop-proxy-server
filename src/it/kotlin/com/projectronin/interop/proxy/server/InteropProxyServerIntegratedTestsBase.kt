@@ -43,6 +43,9 @@ abstract class InteropProxyServerIntegratedTestsBase {
 
     final val httpHeaders = HttpHeaders()
 
+    /**
+     * Lists the JSON resource files that can be served from the Mock EHR during these integration tests.
+     */
     abstract val resourcesToAdd: List<ResourceToAdd>
 
     data class ResourceToAdd(val resourceType: String, val jsonLocation: String, val resourceFHIRID: String)

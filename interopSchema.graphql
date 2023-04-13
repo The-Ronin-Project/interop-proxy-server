@@ -215,11 +215,11 @@ type Identifier {
 }
 
 type Mutation {
-  "Sends a message and returns the current status."
+  "Sends a message and returns the current status. Requires M2M Authorization or User Auth matching to the requested tenant or will result in an error with no results."
   sendMessage(message: MessageInput!, tenantId: String!): String!
-  "Takes in note from product and processes it for downstream services"
+  "Takes in note from product and processes it for downstream services. Requires M2M Authorization or User Auth matching to the requested tenant or will result in an error with no results."
   sendNote(noteInput: NoteInput!, tenantId: String!): String!
-  "Takes in addendum note from product and processes it for downstream services"
+  "Takes in addendum note from product and processes it for downstream services. Requires M2M Authorization or User Auth matching to the requested tenant or will result in an error with no results."
   sendNoteAddendum(noteInput: NoteInput!, parentDocumentId: String!, tenantId: String!): String!
 }
 
@@ -286,19 +286,19 @@ type Practitioner {
 }
 
 type Query {
-  "Finds appointments for a given MRN and date range. Requires User Auth."
+  "Finds appointments for a given MRN and date range. Requires User Auth matching to the requested tenant or will result in an error with no results."
   appointmentsByMRNAndDate(endDate: String!, mrn: String!, startDate: String!, tenantId: String!): [Appointment!]! @deprecated(reason : "This query is deprecated., replace with appointmentsByPatientAndDate")
-  "Finds appointments for a given patient UDP ID and date range. Requires User Auth."
+  "Finds appointments for a given patient UDP ID and date range. Requires User Auth matching to the requested tenant or will result in an error with no results."
   appointmentsByPatientAndDate(endDate: String!, patientFhirId: String!, startDate: String!, tenantId: String!): [Appointment!]!
-  "Finds active patient conditions for a given patient and category. Only conditions registered within the category will be returned. Requires User Auth."
+  "Finds active patient conditions for a given patient and category. Only conditions registered within the category will be returned. Requires User Auth matching to the requested tenant or will result in an error with no results."
   conditionsByPatientAndCategory(conditionCategoryCode: ConditionCategoryCode!, patientFhirId: String!, tenantId: String!): [Condition!]!
-  "Retrieves a FHIR Practitioner from the EHR, and adds it to the Aidbox queue."
+  "Retrieves a FHIR Practitioner from the EHR, and adds it to the Aidbox queue. Requires M2M Authorization or User Auth matching to the requested tenant or will result in an error with no results."
   getPractitionerById(practitionerFhirId: String!, tenantId: String!): Practitioner!
-  "Searches the EHR for a FHIR Practitioner by an internal identifier, and adds it to the Aidbox queue."
+  "Searches the EHR for a FHIR Practitioner by an internal identifier, and adds it to the Aidbox queue. Requires M2M Authorization or User Auth matching to the requested tenant or will result in an error with no results."
   getPractitionerByProvider(providerId: String!, tenantId: String!): Practitioner!
-  "Finds patient(s) that exactly match on family name, given name, and birthdate (YYYY-mm-dd format)."
+  "Finds patient(s) that exactly match on family name, given name, and birthdate (YYYY-mm-dd format). Requires M2M Authorization or User Auth matching to the requested tenant or will result in an error with no results."
   patientsByNameAndDOB(birthdate: String!, family: String!, given: String!, tenantId: String!): [Patient!]!
-  "Finds patient(s) across the supplied tenants that exactly match on family name, given name, and birthdate (YYYY-mm-dd format)."
+  "Finds patient(s) across the supplied tenants that exactly match on family name, given name, and birthdate (YYYY-mm-dd format). Requires M2M Authorization or User Auth matching to the requested tenant or will result in an error with no results."
   patientsByTenants(birthdate: String!, family: String!, given: String!, tenantIds: [String!]!): [PatientsByTenant!]!
 }
 
