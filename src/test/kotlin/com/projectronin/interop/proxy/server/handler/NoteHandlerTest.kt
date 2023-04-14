@@ -185,6 +185,42 @@ class NoteHandlerTest {
     }
 
     @Test
+    fun `addendum note with null parent document ID is sent as a new note`() {
+        every { dfe.graphQlContext.get<InteropGraphQLContext>(INTEROP_CONTEXT_KEY).authzTenantId } returns "apposnd"
+        every {
+            practitionerService.getPractitionerByUDPId(
+                "apposnd",
+                "apposnd-PractitionerTestId"
+            )
+        } returns oncologyPractitioner
+        every { patientService.getPatientByUDPId("apposnd", "apposnd-PatientTestId") } returns oncologyPatient
+        every { tenantService.getTenantForMnemonic("apposnd") } returns tenant
+        every {
+            mdmService.generateMDM(
+                "apposnd",
+                match { it.name == listOf(testname) },
+                match { it.name == listOf(testname) },
+                "Example Note Text",
+                "202206011250",
+                "parentDocId",
+                "IP"
+            )
+        } returns Pair("mock", "uniqueId")
+
+        val noteInput = NoteInput(
+            "apposnd-PatientTestId",
+            PatientIdType.FHIR,
+            "apposnd-PractitionerTestId",
+            "Example Note Text",
+            "202206011250",
+            NoteSender.PATIENT,
+            true
+        )
+        val response = noteHandler.sendNoteAddendum(noteInput, "apposnd", "parentDocId", dfe)
+        assertEquals("uniqueId", response)
+    }
+
+    @Test
     fun `accepts note with provider UDP ID and patient MRN`() {
         every { dfe.graphQlContext.get<InteropGraphQLContext>(INTEROP_CONTEXT_KEY).authzTenantId } returns "apposnd"
         every { tenantService.getTenantForMnemonic("apposnd") } returns tenant

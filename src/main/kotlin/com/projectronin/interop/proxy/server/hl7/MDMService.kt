@@ -39,7 +39,7 @@ class MDMService {
         documentStatus: String = "DO"
     ): Pair<String, String> {
         val mdm = MDM_T02()
-        val eventType = parentDocumentId?.let { "T06" } ?: "T02"
+        val eventType = parentDocumentId?.let { "T08" } ?: "T02"
         // TODO MSH-11, MSH-5 should be set based on Tenant interface information, will need to be added to our tenant configurations and pulled based on tenantId
         mdm.initQuickstart("MDM", eventType, "T")
         mdm.msh.msh3_SendingApplication.namespaceID.value = "RONIN"
@@ -58,7 +58,7 @@ class MDMService {
         pv1.patientClass.value = "U"
 
         // Populate the TXA Segment
-        setTXA(mdm, practitioner, parentDocumentId, documentStatus)
+        setTXA(mdm, practitioner, parentDocumentId, documentStatus, eventType)
 
         // Populate the OBX Segment
         setOBX(mdm, note)
@@ -165,7 +165,8 @@ class MDMService {
         mdm: MDM_T02,
         practitioner: MDMPractitionerFields,
         parentDocumentId: String?,
-        documentStatus: String
+        documentStatus: String,
+        eventType: String
     ) {
         val txa: TXA = mdm.txa
         txa.setIDTXA.value = "1"
@@ -182,12 +183,14 @@ class MDMService {
         txa.getOriginatorCodeName(0).familyName.surname.value = "Project"
         txa.getOriginatorCodeName(0).givenName.value = "Ronin"
 
-        // TXA-12 Unique Document Number (needs to be generated and unique, needs to be cited for addendum messages)
-        txa.uniqueDocumentNumber.entityIdentifier.value =
+        // TXA-12 Unique Document Number (parentDocumentId for T08, or generated and unique for T02 or T06)
+        txa.uniqueDocumentNumber.entityIdentifier.value = if (eventType == "T08") {
+            parentDocumentId
+        } else {
             "RoninNote" + mdm.msh.dateTimeOfMessage.time.value + "." + mdm.msh.messageControlID.value
+        }
 
         // TXA-13 Parent Document Number, used for addendum (T06) messages
-        parentDocumentId?.let { txa.parentDocumentNumber.entityIdentifier.value = parentDocumentId }
 
         // TXA-17 Document Completion Status, default to documented.
         // This default comes from when a message is first requested at generation

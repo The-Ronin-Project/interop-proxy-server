@@ -109,7 +109,7 @@ class NoteHandler(
                         tenant = tenant.mnemonic,
                         text = hl7.first,
                         hl7Type = MessageType.MDM,
-                        hl7Event = parentDocumentId?.let { EventType.MDMT06 } ?: EventType.MDMT02
+                        hl7Event = parentDocumentId?.let { EventType.MDMT08 } ?: EventType.MDMT02
                     )
                 )
             )
