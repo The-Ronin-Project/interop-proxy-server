@@ -1,5 +1,6 @@
 package com.projectronin.interop.proxy.server.tenant.controller
 
+import com.projectronin.interop.ehr.factory.EHRFactory
 import com.projectronin.interop.proxy.server.tenant.model.Tenant
 import com.projectronin.interop.proxy.server.tenant.model.converters.toProxyTenant
 import com.projectronin.interop.proxy.server.tenant.model.converters.toTenantServerTenant
@@ -21,7 +22,10 @@ import org.springframework.web.bind.annotation.RestController
 
 @RestController
 @RequestMapping("tenants")
-class TenantController(private val tenantService: TenantService) {
+class TenantController(
+    private val tenantService: TenantService,
+    private val ehrFactory: EHRFactory
+) {
     private val logger = KotlinLogging.logger { }
 
     @GetMapping
@@ -39,6 +43,34 @@ class TenantController(private val tenantService: TenantService) {
         val tenant = tenantService.getTenantForMnemonic(tenantMnemonic)
             ?: return ResponseEntity(HttpStatus.NOT_FOUND)
         return ResponseEntity(tenant.toProxyTenant(), HttpStatus.OK)
+    }
+
+    @GetMapping("health")
+    @Trace
+    fun health(): ResponseEntity<Map<String, Boolean>> {
+        logger.info { "Retrieving health for all tenants" }
+        val tenants = tenantService.getMonitoredTenants()
+        val tenantsHealth = tenants.associate {
+            it.mnemonic to ehrFactory.getVendorFactory(it).healthCheckService.healthCheck(
+                it
+            )
+        }
+        return ResponseEntity(tenantsHealth, HttpStatus.OK)
+    }
+
+    @GetMapping("/{mnemonic}/health")
+    @Trace
+    fun health(@PathVariable("mnemonic") tenantMnemonic: String): ResponseEntity<Void> {
+        logger.info { "Retrieving health for tenant with mnemonic $tenantMnemonic" }
+        val tenant = tenantService.getTenantForMnemonic(tenantMnemonic)
+            ?: return ResponseEntity(HttpStatus.NOT_FOUND)
+        val isHealthy = ehrFactory.getVendorFactory(tenant).healthCheckService.healthCheck(tenant)
+        return if (isHealthy) {
+            ResponseEntity(HttpStatus.OK)
+        } else {
+            logger.warn { "Health check failed for tenant with mnemonic $tenantMnemonic" }
+            ResponseEntity(HttpStatus.SERVICE_UNAVAILABLE)
+        }
     }
 
     @PostMapping

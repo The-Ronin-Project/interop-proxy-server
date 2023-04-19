@@ -1,5 +1,6 @@
 package com.projectronin.interop.proxy.server.tenant.controller
 
+import com.projectronin.interop.ehr.factory.EHRFactory
 import com.projectronin.interop.proxy.server.tenant.model.converters.toProxyTenant
 import com.projectronin.interop.proxy.server.tenant.model.converters.toTenantServerTenant
 import com.projectronin.interop.tenant.config.TenantService
@@ -11,7 +12,9 @@ import io.mockk.mockkStatic
 import io.mockk.unmockkAll
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -24,7 +27,8 @@ import com.projectronin.interop.tenant.config.model.Tenant as TenantServiceTenan
 
 class TenantControllerTest {
     private var tenantService = mockk<TenantService>()
-    private var tenantController = TenantController(tenantService)
+    private var ehrFactory = mockk<EHRFactory>()
+    private var tenantController = TenantController(tenantService, ehrFactory)
 
     private val proxyVendor = ProxyEpic(
         release = "release",
@@ -55,6 +59,7 @@ class TenantControllerTest {
     )
     private val tenantServiceTenant = mockk<TenantServiceTenant> {
         every { internalId } returns 1
+        every { mnemonic } returns "mnemonic1"
     }
     private val proxyTenantNoTimes = ProxyTenant(
         id = 2,
@@ -66,7 +71,9 @@ class TenantControllerTest {
         timezone = "America/Denver",
         monitoredIndicator = null
     )
-    private val tenantServiceTenantNoBatch = mockk<TenantServiceTenant> {}
+    private val tenantServiceTenantNoBatch = mockk<TenantServiceTenant> {
+        every { mnemonic } returns "mnemonic2"
+    }
 
     @BeforeEach
     fun setup() {
@@ -184,6 +191,55 @@ class TenantControllerTest {
         assertThrows<NoTenantFoundException> {
             tenantController.update("mnemonic1", proxyTenant)
         }
+    }
+
+    @Test
+    fun `can health check a single healthy tenant`() {
+        every { tenantService.getTenantForMnemonic("mnemonic1") } returns tenantServiceTenant
+        every { ehrFactory.getVendorFactory(tenantServiceTenant).healthCheckService.healthCheck(tenantServiceTenant) } returns true
+
+        val response = tenantController.health("mnemonic1")
+        assertEquals(HttpStatus.OK, response.statusCode)
+        assertFalse(response.hasBody())
+    }
+
+    @Test
+    fun `can health check a single unhealthy tenant`() {
+        every { tenantService.getTenantForMnemonic("mnemonic1") } returns tenantServiceTenant
+        every { ehrFactory.getVendorFactory(tenantServiceTenant).healthCheckService.healthCheck(tenantServiceTenant) } returns false
+
+        val response = tenantController.health("mnemonic1")
+        assertEquals(HttpStatus.SERVICE_UNAVAILABLE, response.statusCode)
+        assertFalse(response.hasBody())
+    }
+
+    @Test
+    fun `can health check return 404`() {
+        every { tenantService.getTenantForMnemonic("mnemonic1") } returns null
+
+        val response = tenantController.health("mnemonic1")
+        assertEquals(HttpStatus.NOT_FOUND, response.statusCode)
+        assertFalse(response.hasBody())
+    }
+
+    @Test
+    fun `can check health of all tenants`() {
+        every { tenantService.getMonitoredTenants() } returns listOf(tenantServiceTenant, tenantServiceTenantNoBatch)
+        every { ehrFactory.getVendorFactory(tenantServiceTenant).healthCheckService.healthCheck(tenantServiceTenant) } returns false
+        every {
+            ehrFactory.getVendorFactory(tenantServiceTenantNoBatch).healthCheckService.healthCheck(
+                tenantServiceTenantNoBatch
+            )
+        } returns true
+
+        val response = tenantController.health()
+        val tenantsHealth = response.body
+        assertEquals(HttpStatus.OK, response.statusCode)
+        assertEquals(2, tenantsHealth?.size)
+        assertTrue(tenantsHealth?.keys?.contains(proxyTenant.mnemonic)!!)
+        assertTrue(tenantsHealth.keys?.contains(proxyTenantNoTimes.mnemonic) as Boolean)
+        assertEquals(tenantsHealth[proxyTenant.mnemonic], false)
+        assertEquals(tenantsHealth[proxyTenantNoTimes.mnemonic], true)
     }
 
     @Test

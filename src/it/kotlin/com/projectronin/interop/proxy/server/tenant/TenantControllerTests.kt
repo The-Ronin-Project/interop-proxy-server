@@ -17,10 +17,13 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.MethodSource
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.web.client.TestRestTemplate
 import org.springframework.boot.test.web.server.LocalServerPort
+import org.springframework.core.ParameterizedTypeReference
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
@@ -29,6 +32,7 @@ import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
 import java.net.URI
 import java.time.LocalTime
+import java.util.stream.Stream
 import javax.sql.DataSource
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -36,6 +40,13 @@ import javax.sql.DataSource
 @ContextConfiguration(initializers = [(InteropProxyServerAuthInitializer::class)])
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class TenantControllerTests {
+    companion object {
+        @JvmStatic
+        fun tenantMnemonics(): Stream<String> {
+            return Stream.of("epic", "cerner")
+        }
+    }
+
     @LocalServerPort
     private var port = 0
 
@@ -451,5 +462,39 @@ class TenantControllerTests {
 
         assertEquals(HttpStatus.OK, responseEntity.statusCode)
         assertTrue(tenant.monitoredIndicator!!)
+    }
+
+    @ParameterizedTest
+    @MethodSource("tenantMnemonics")
+    fun `can health check each tenant`(mnemonic: String) {
+        val httpEntity = HttpEntity<HttpHeaders>(httpHeaders)
+        val responseEntity = restTemplate.exchange(
+            "http://localhost:$port/tenants/$mnemonic/health",
+            HttpMethod.GET,
+            httpEntity,
+            Any::class.java
+        )
+        assertFalse(responseEntity.hasBody())
+        assertEquals(HttpStatus.OK, responseEntity.statusCode)
+    }
+
+    @Test
+    fun `can check health of all monitored tenants`() {
+        val validIds = mapOf("apposnd" to false)
+        val httpEntity = HttpEntity<HttpHeaders>(httpHeaders)
+        val responseType = object : ParameterizedTypeReference<Map<String, Boolean>>() {}
+        val responseEntity = restTemplate.exchange(
+            "http://localhost:$port/tenants/health",
+            HttpMethod.GET,
+            httpEntity,
+            responseType
+        )
+        assertEquals(HttpStatus.OK, responseEntity.statusCode)
+        assertTrue(responseEntity.hasBody())
+        assertEquals(1, responseEntity.body?.size)
+        responseEntity.body?.forEach {
+            assertTrue(it.key in validIds.keys)
+            assertEquals(validIds[it.key], it.value)
+        }
     }
 }
