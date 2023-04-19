@@ -8,14 +8,14 @@ graphql-spring-boot-starter-test = "com.graphql-java-kickstart:graphql-spring-bo
 hapi-hl7v2-251 = "ca.uhn.hapi:hapi-structures-v251:2.3"
 hapi-hl7v2-base = "ca.uhn.hapi:hapi-base:2.3"
 
-interop-aidbox = "com.projectronin.interop.publish:interop-aidbox:7.4.7"
+interop-aidbox = "com.projectronin.interop.publish:interop-aidbox:7.6.0"
 
 interop-common = "com.projectronin.interop:interop-common:3.6.0"
 interop-commonHttp = "com.projectronin.interop:interop-common-http:3.6.0"
 interop-commonJackson = "com.projectronin.interop:interop-common-jackson:3.6.0"
 interop-commonTestDb = "com.projectronin.interop:interop-common-test-db:3.6.0"
 
-interop-datalake = "com.projectronin.interop.publish:interop-datalake:7.4.7"
+interop-datalake = "com.projectronin.interop.publish:interop-datalake:7.6.0"
 
 interop-ehr-api = "com.projectronin.interop.ehr:interop-ehr:9.6.0"
 interop-ehr-cerner = "com.projectronin.interop.ehr:interop-ehr-cerner:9.6.0"
@@ -30,7 +30,7 @@ interop-queue-api = "com.projectronin.interop.queue:interop-queue:1.6.1"
 interop-queue-db = "com.projectronin.interop.queue:interop-queue-db:1.6.1"
 interop-queue-liquibase = "com.projectronin.interop.queue:interop-queue-liquibase:1.6.1"
 interop-queue-kafka = "com.projectronin.interop.queue:interop-queue-kafka:1.6.1"
-interop-testcontainer-aidbox = "com.projectronin.interop.publish:interop-aidbox-testcontainer:7.4.7"
+interop-testcontainer-aidbox = "com.projectronin.interop.publish:interop-aidbox-testcontainer:7.6.0"
 interop-testcontainer-mockehr = "com.projectronin.interop.mock:interop-mock-ehr-testcontainer:1.2.1"
 
 junit-pioneer = "org.junit-pioneer:junit-pioneer:2.0.1"
