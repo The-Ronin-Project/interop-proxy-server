@@ -203,4 +203,60 @@ class AuthFilterTest {
         authFilter.filter(exchange, chain)
         assertEquals(HttpStatus.FORBIDDEN, exchange.response.statusCode)
     }
+
+    @Test
+    fun `general tenant health requests skip auth`() {
+        val exchange = MockServerWebExchange
+            .from(
+                MockServerHttpRequest.get("/tenants/health")
+                    .header("Authorization", "")
+            )
+
+        val mono = mockk<Mono<Void>>()
+        val chain = mockk<WebFilterChain> {
+            every { filter(exchange) } returns mono
+        }
+
+        val authFilter = AuthFilter(mockk(), mockk())
+        val response = authFilter.filter(exchange, chain)
+        assertEquals(response, mono)
+    }
+
+    @Test
+    fun `specific tenant health requests skip auth`() {
+        val exchange = MockServerWebExchange
+            .from(
+                MockServerHttpRequest.get("/tenants/test/health")
+                    .header("Authorization", "")
+            )
+
+        val mono = mockk<Mono<Void>>()
+        val chain = mockk<WebFilterChain> {
+            every { filter(exchange) } returns mono
+        }
+
+        val authFilter = AuthFilter(mockk(), mockk())
+        val response = authFilter.filter(exchange, chain)
+        assertEquals(response, mono)
+    }
+
+    @Test
+    fun `other tenant endpoints require auth`() {
+        val chain = mockk<WebFilterChain>()
+        val mono = mockk<Mono<Void>>()
+        val userAuthService = mockk<UserAuthService>()
+        val m2MAuthService = mockk<M2MAuthService>()
+        val slot = slot<ServerWebExchange>() // capture slot for validating argument
+        val exchange = MockServerWebExchange
+            .from(
+                MockServerHttpRequest.get("/tenants/test/not-health")
+                    .header("Authorization", "Bearer 12345")
+            )
+        val authFilter = AuthFilter(userAuthService, m2MAuthService)
+        every { m2MAuthService.isM2MToken("12345") } returns true
+        every { m2MAuthService.validateToken("12345") } returns true
+        every { chain.filter(capture(slot)) } answers { mono }
+        authFilter.filter(exchange, chain)
+        assertNull(slot.captured.request.headers.getFirst(AUTHZ_TENANT_HEADER))
+    }
 }

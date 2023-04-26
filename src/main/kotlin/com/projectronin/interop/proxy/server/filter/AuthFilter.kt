@@ -22,10 +22,16 @@ const val AUTHZ_TENANT_HEADER = "AuthorizedTenant"
 @Component
 class AuthFilter(private val userAuthService: UserAuthService, private val m2MAuthService: M2MAuthService) : WebFilter {
     private val logger = KotlinLogging.logger { }
+    private val tenantHealthRegex = Regex("/tenants(/\\w{1,8})?/health")
+
     override fun filter(exchange: ServerWebExchange, chain: WebFilterChain): Mono<Void> {
+        val path = exchange.request.uri.path
         // Bypass auth for our Actuator endpoints.
-        if (exchange.request.uri.path.startsWith(ACTUATOR_PATH)) {
+        if (path.startsWith(ACTUATOR_PATH)) {
             logger.debug { "Bypassing security for Actuator request" }
+            return chain.filter(exchange)
+        } else if (tenantHealthRegex.matches(path)) {
+            logger.debug { "Bypassing security for Tenant Health check request" }
             return chain.filter(exchange)
         }
 

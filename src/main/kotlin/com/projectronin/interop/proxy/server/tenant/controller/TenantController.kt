@@ -1,5 +1,6 @@
 package com.projectronin.interop.proxy.server.tenant.controller
 
+import com.projectronin.interop.common.logmarkers.LogMarkers
 import com.projectronin.interop.ehr.factory.EHRFactory
 import com.projectronin.interop.proxy.server.tenant.model.Tenant
 import com.projectronin.interop.proxy.server.tenant.model.converters.toProxyTenant
@@ -51,9 +52,12 @@ class TenantController(
         logger.info { "Retrieving health for all tenants" }
         val tenants = tenantService.getMonitoredTenants()
         val tenantsHealth = tenants.associate {
-            it.mnemonic to ehrFactory.getVendorFactory(it).healthCheckService.healthCheck(
-                it
-            )
+            val healthy = ehrFactory.getVendorFactory(it).healthCheckService.healthCheck(it)
+            if (!healthy) {
+                logger.error(LogMarkers.EXCLUDE_FROM_GENERAL_ALERTS) { "Client ${it.mnemonic} reporting unhealthy" }
+            }
+
+            it.mnemonic to healthy
         }
         return ResponseEntity(tenantsHealth, HttpStatus.OK)
     }
