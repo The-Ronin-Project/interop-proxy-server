@@ -1,5 +1,6 @@
 package com.projectronin.interop.proxy.server.tenant.controller
 
+import com.projectronin.interop.kafka.KafkaLoadService
 import com.projectronin.interop.proxy.server.tenant.model.MirthTenantConfig
 import com.projectronin.interop.proxy.server.tenant.model.converters.toProxyTenant
 import com.projectronin.interop.tenant.config.TenantService
@@ -61,12 +62,15 @@ class MirthTenantConfigControllerTest {
         every { name } returns "Epic Tenant"
         every { timezone } returns ZoneId.of("America/New_York")
     }
+    private val mockLoadService = mockk<KafkaLoadService> {
+        every { pushLoadEvent(any(), any(), any(), any()) } returns mockk()
+    }
 
     @BeforeEach
     fun setup() {
         dao = mockk()
         tenantService = mockk()
-        controller = MirthTenantConfigController(dao, tenantService)
+        controller = MirthTenantConfigController(dao, tenantService, mockLoadService)
         mockkStatic("com.projectronin.interop.proxy.server.tenant.model.converters.TenantConvertersKt")
         every { mockTenantServiceTenant.toProxyTenant() } returns mockProxyTenant
     }

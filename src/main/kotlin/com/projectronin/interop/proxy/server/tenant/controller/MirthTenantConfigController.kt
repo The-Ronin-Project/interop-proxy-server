@@ -1,5 +1,8 @@
 package com.projectronin.interop.proxy.server.tenant.controller
 
+import com.projectronin.interop.common.resource.ResourceType
+import com.projectronin.interop.kafka.KafkaLoadService
+import com.projectronin.interop.kafka.model.DataTrigger
 import com.projectronin.interop.proxy.server.tenant.model.MirthTenantConfig
 import com.projectronin.interop.proxy.server.tenant.model.converters.toMirthTenantConfigDO
 import com.projectronin.interop.proxy.server.tenant.model.converters.toProxyMirthTenantConfig
@@ -24,7 +27,8 @@ import org.springframework.web.bind.annotation.RestController
 @RequestMapping("/tenants/{tenantMnemonic}/mirth-config")
 class MirthTenantConfigController(
     private val mirthTenantConfigDAO: MirthTenantConfigDAO,
-    private val tenantService: TenantService
+    private val tenantService: TenantService,
+    private val loadService: KafkaLoadService
 ) {
     private val logger = KotlinLogging.logger { }
 
@@ -51,6 +55,12 @@ class MirthTenantConfigController(
         val insertMirthTenantConfig = mirthTenantConfig.toMirthTenantConfigDO(tenant.toProxyTenant())
 
         val inserted = mirthTenantConfigDAO.insertConfig(insertMirthTenantConfig)
+        loadService.pushLoadEvent(
+            tenantMnemonic,
+            DataTrigger.AD_HOC,
+            mirthTenantConfig.locationIds,
+            ResourceType.LOCATION
+        )
         return ResponseEntity(inserted.toProxyMirthTenantConfig(), HttpStatus.CREATED)
     }
 
@@ -65,7 +75,15 @@ class MirthTenantConfigController(
 
         val updatedMirthTenantConfig = mirthTenantConfig.toMirthTenantConfigDO(tenant.toProxyTenant())
         val result = mirthTenantConfigDAO.updateConfig(updatedMirthTenantConfig)
-        val status = result?.let { HttpStatus.OK } ?: HttpStatus.NOT_FOUND
+        val status = result?.let {
+            loadService.pushLoadEvent(
+                tenantMnemonic,
+                DataTrigger.AD_HOC,
+                mirthTenantConfig.locationIds,
+                ResourceType.LOCATION
+            )
+            HttpStatus.OK
+        } ?: HttpStatus.NOT_FOUND
 
         return ResponseEntity(result?.toProxyMirthTenantConfig(), status)
     }

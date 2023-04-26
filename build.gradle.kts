@@ -16,14 +16,15 @@ dependencies {
         }
     }
 
-    implementation(libs.interop.aidbox)
+    implementation(libs.interop.publishers.aidbox)
     implementation(libs.interop.common)
     implementation(libs.interop.commonHttp)
-    implementation(libs.interop.datalake) {
+    implementation(libs.interop.publishers.datalake) {
         // Exclude validation
         exclude(group = "com.projectronin.interop.validation", module = "interop-validation-client")
     }
     implementation(libs.interop.ehr.api)
+    implementation(libs.interop.publishers.kafka)
     implementation(libs.interop.fhir)
     implementation(libs.interop.queue.api)
     implementation(libs.interop.ehr.tenant)
@@ -103,7 +104,7 @@ dependencies {
     itImplementation(libs.interop.testcontainer.mockehr)
     itImplementation(libs.spring.mockk)
     itImplementation(libs.kafka.clients)
-    itImplementation(libs.interop.aidbox)
+    itImplementation(libs.interop.publishers.aidbox)
     itImplementation(libs.interop.common)
     itImplementation(libs.interop.commonHttp)
     itImplementation(libs.interop.queue.liquibase)
