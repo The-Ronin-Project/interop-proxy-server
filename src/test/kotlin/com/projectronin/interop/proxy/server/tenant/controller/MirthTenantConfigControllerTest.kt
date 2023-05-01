@@ -70,7 +70,7 @@ class MirthTenantConfigControllerTest {
     fun setup() {
         dao = mockk()
         tenantService = mockk()
-        controller = MirthTenantConfigController(dao, tenantService, mockLoadService)
+        controller = MirthTenantConfigController(dao, tenantService, mockLoadService, "yes")
         mockkStatic("com.projectronin.interop.proxy.server.tenant.model.converters.TenantConvertersKt")
         every { mockTenantServiceTenant.toProxyTenant() } returns mockProxyTenant
     }

@@ -12,6 +12,7 @@ import com.projectronin.interop.tenant.config.data.MirthTenantConfigDAO
 import com.projectronin.interop.tenant.config.exception.NoTenantFoundException
 import datadog.trace.api.Trace
 import mu.KotlinLogging
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.ExceptionHandler
@@ -28,7 +29,8 @@ import org.springframework.web.bind.annotation.RestController
 class MirthTenantConfigController(
     private val mirthTenantConfigDAO: MirthTenantConfigDAO,
     private val tenantService: TenantService,
-    private val loadService: KafkaLoadService
+    private val loadService: KafkaLoadService,
+    @Value("\${proxy.load.locations.on.tenant.config.update:no}") private val loadLocations: String = "no" // temp
 ) {
     private val logger = KotlinLogging.logger { }
 
@@ -55,12 +57,7 @@ class MirthTenantConfigController(
         val insertMirthTenantConfig = mirthTenantConfig.toMirthTenantConfigDO(tenant.toProxyTenant())
 
         val inserted = mirthTenantConfigDAO.insertConfig(insertMirthTenantConfig)
-        loadService.pushLoadEvent(
-            tenantMnemonic,
-            DataTrigger.AD_HOC,
-            mirthTenantConfig.locationIds,
-            ResourceType.LOCATION
-        )
+        sendLocationLoadEvent(tenantMnemonic, mirthTenantConfig.locationIds)
         return ResponseEntity(inserted.toProxyMirthTenantConfig(), HttpStatus.CREATED)
     }
 
@@ -76,12 +73,7 @@ class MirthTenantConfigController(
         val updatedMirthTenantConfig = mirthTenantConfig.toMirthTenantConfigDO(tenant.toProxyTenant())
         val result = mirthTenantConfigDAO.updateConfig(updatedMirthTenantConfig)
         val status = result?.let {
-            loadService.pushLoadEvent(
-                tenantMnemonic,
-                DataTrigger.AD_HOC,
-                mirthTenantConfig.locationIds,
-                ResourceType.LOCATION
-            )
+            sendLocationLoadEvent(tenantMnemonic, mirthTenantConfig.locationIds)
             HttpStatus.OK
         } ?: HttpStatus.NOT_FOUND
 
@@ -98,5 +90,16 @@ class MirthTenantConfigController(
     fun handleException(e: Exception): ResponseEntity<String> {
         logger.warn(e) { "Unspecified error occurred during MirthTenantConfigController ${e.message}" }
         return ResponseEntity(e.message, HttpStatus.INTERNAL_SERVER_ERROR)
+    }
+
+    private fun sendLocationLoadEvent(tenantMnemonic: String, locationIds: List<String>) {
+        if (loadLocations == "yes") {
+            loadService.pushLoadEvent(
+                tenantMnemonic,
+                DataTrigger.AD_HOC,
+                locationIds,
+                ResourceType.LOCATION
+            )
+        }
     }
 }
