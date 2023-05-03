@@ -120,21 +120,17 @@ class NoteHandler(
     }
 
     private fun getPractitioner(tenant: Tenant, noteInput: NoteInput): Practitioner {
-        return if (noteInput.practitionerFhirId.startsWith("${tenant.mnemonic}-")) {
-            practitionerService.getPractitionerByUDPId(tenant.mnemonic, noteInput.practitionerFhirId)
-        } else {
-            try {
-                practitionerService.getPractitionerByUDPId(
-                    tenant.mnemonic,
-                    noteInput.practitionerFhirId.localize(tenant)
-                )
-            } catch (exception: Exception) {
-                logWarningMessage(noteInput, exception)
-                ehrFactory.getVendorFactory(tenant).practitionerService.getPractitioner(
-                    tenant,
-                    noteInput.practitionerFhirId
-                )
-            }
+        val practitionerFhirId = noteInput.practitionerFhirId
+        val isUDPId = practitionerFhirId.startsWith("${tenant.mnemonic}-")
+
+        return try {
+            val id = if (isUDPId) practitionerFhirId else practitionerFhirId.localize(tenant)
+            practitionerService.getPractitionerByUDPId(tenant.mnemonic, id)
+        } catch (exception: Exception) {
+            logWarningMessage(noteInput, exception)
+
+            val id = if (isUDPId) practitionerFhirId.removePrefix("${tenant.mnemonic}-") else practitionerFhirId
+            ehrFactory.getVendorFactory(tenant).practitionerService.getPractitioner(tenant, id)
         }
     }
 
@@ -144,6 +140,7 @@ class NoteHandler(
                 // get the Patient from Aidbox
                 patientService.getPatientByUDPId(tenant.mnemonic, noteInput.patientId)
             }
+
             PatientIdType.MRN -> {
                 try {
                     // pivot from the MRN to get the Patient from Aidbox

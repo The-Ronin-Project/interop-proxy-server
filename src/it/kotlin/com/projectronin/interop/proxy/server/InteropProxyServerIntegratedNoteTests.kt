@@ -166,42 +166,6 @@ class InteropProxyServerIntegratedNoteTests : InteropProxyServerIntegratedTestsB
     }
 
     @Test
-    fun `practitioner UDP ID not found in Aidbox, no EHR fallback for practitioner UDP ID not found`() {
-        val notetext = "Test Note"
-        val patientid = "ronin-654321"
-        val practitionerid = "ronin-123456"
-        val tenantId = "ronin"
-        val mutation =
-            """mutation sendNote(${'$'}noteInput: NoteInput!, ${'$'}tenantId: String!) {sendNote(noteInput: ${'$'}noteInput, tenantId: ${'$'}tenantId)}"""
-        val query = """
-            |{
-            |   "query": "$mutation",
-            |   "variables": {
-            |      "noteInput": {
-            |         "datetime": "202206011250",
-            |         "patientId":  "$patientid",
-            |         "patientIdType":  "FHIR",
-            |         "practitionerFhirId": "$practitionerid",
-            |         "noteText": "$notetext",
-            |         "noteSender": "PRACTITIONER",
-            |         "isAlert" : "False"
-            |      },
-            |      "tenantId": "$tenantId"
-            |   }
-            |}
-        """.trimMargin()
-        val responseEntity = multiVendorQuery(query, "epic")
-        val resultJSONObject = JacksonManager.objectMapper.readTree(responseEntity.body)
-        assertEquals(HttpStatus.OK, responseEntity.statusCode)
-        assertTrue(resultJSONObject.has("errors"))
-        val errorJSONObject = resultJSONObject["errors"][0]
-        assertTrue(
-            errorJSONObject["message"].asText()
-                .contains("404 Not Found") // Aidbox
-        )
-    }
-
-    @Test
     fun `practitioner UDP ID found in Aidbox, patient UDP ID not found in Aidbox, no EHR fallback for patient UDP ID not found`() {
         val notetext = "Test Note"
         val patientid = "ronin-123456"
@@ -278,6 +242,40 @@ class InteropProxyServerIntegratedNoteTests : InteropProxyServerIntegratedTestsB
         val notetext = "Test Note"
         val patientid = "ronin-654321"
         val practitionerid = "PractitionerFHIRID1"
+        val tenantId = "ronin"
+        val mutation =
+            """mutation sendNote(${'$'}noteInput: NoteInput!, ${'$'}tenantId: String!) {sendNote(noteInput: ${'$'}noteInput, tenantId: ${'$'}tenantId)}"""
+        val query = """
+            |{
+            |   "query": "$mutation",
+            |   "variables": {
+            |      "noteInput": {
+            |         "datetime": "202206011250",
+            |         "patientId":  "$patientid",
+            |         "patientIdType":  "FHIR",
+            |         "practitionerFhirId": "$practitionerid",
+            |         "noteText": "$notetext",
+            |         "noteSender": "PRACTITIONER",
+            |         "isAlert" : "False"
+            |      },
+            |      "tenantId": "$tenantId"
+            |   }
+            |}
+        """.trimMargin()
+        val responseEntity = multiVendorQuery(query, "epic")
+        val dateformat = SimpleDateFormat("yyyyMMdd")
+        val docId = "RoninNote" + dateformat.format(java.util.Date())
+        val resultJSONObject = JacksonManager.objectMapper.readTree(responseEntity.body)
+        assertEquals(HttpStatus.OK, responseEntity.statusCode)
+        assertFalse(resultJSONObject.has("errors"))
+        assertTrue(resultJSONObject["data"]["sendNote"].asText().startsWith(docId))
+    }
+
+    @Test
+    fun `practitioner UDP ID not found in Aidbox, practitioner found in MockEHR, patient UDP ID found in Aidbox`() {
+        val notetext = "Test Note"
+        val patientid = "ronin-654321"
+        val practitionerid = "ronin-PractitionerFHIRID1"
         val tenantId = "ronin"
         val mutation =
             """mutation sendNote(${'$'}noteInput: NoteInput!, ${'$'}tenantId: String!) {sendNote(noteInput: ${'$'}noteInput, tenantId: ${'$'}tenantId)}"""

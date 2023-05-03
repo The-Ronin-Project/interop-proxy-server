@@ -41,7 +41,6 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.springframework.http.HttpStatus
 import org.springframework.web.client.HttpClientErrorException
-import java.lang.NullPointerException
 import com.projectronin.interop.ehr.PatientService as EHRPatientService
 import com.projectronin.interop.ehr.PractitionerService as EHRPractitionerService
 
@@ -243,7 +242,12 @@ class NoteHandlerTest {
         every {
             patientService.getPatientFHIRIds(
                 "apposnd",
-                mapOf("patientFhirId" to SystemValue(system = CodeSystem.RONIN_MRN.uri.value!!, value = noteInput.patientId))
+                mapOf(
+                    "patientFhirId" to SystemValue(
+                        system = CodeSystem.RONIN_MRN.uri.value!!,
+                        value = noteInput.patientId
+                    )
+                )
             ).getValue("patientFhirId")
         } returns "PatientFhirId"
         every { patientService.getPatientByFHIRId("apposnd", "PatientFhirId") } returns oncologyPatient
@@ -286,7 +290,12 @@ class NoteHandlerTest {
         every {
             patientService.getPatientFHIRIds(
                 "apposnd",
-                mapOf("patientFhirId" to SystemValue(system = CodeSystem.RONIN_MRN.uri.value!!, value = noteInput.patientId))
+                mapOf(
+                    "patientFhirId" to SystemValue(
+                        system = CodeSystem.RONIN_MRN.uri.value!!,
+                        value = noteInput.patientId
+                    )
+                )
             ).getValue("patientFhirId")
         } returns "PatientFhirId"
         every { patientService.getPatientByFHIRId("apposnd", "PatientFhirId") } returns oncologyPatient
@@ -363,7 +372,12 @@ class NoteHandlerTest {
         every {
             patientService.getPatientFHIRIds(
                 "apposnd",
-                mapOf("patientFhirId" to SystemValue(system = CodeSystem.RONIN_MRN.uri.value!!, value = noteInput.patientId))
+                mapOf(
+                    "patientFhirId" to SystemValue(
+                        system = CodeSystem.RONIN_MRN.uri.value!!,
+                        value = noteInput.patientId
+                    )
+                )
             ).getValue("patientFhirId")
         } returns "PatientFhirId"
         every { patientService.getPatientByFHIRId("apposnd", "PatientFhirId") } returns oncologyPatient
@@ -387,7 +401,7 @@ class NoteHandlerTest {
     }
 
     @Test
-    fun `RequestFailureException getting Practitioner from Aidbox with UDP FHIR ID, no EHR fallback for this case`() {
+    fun `RequestFailureException getting Practitioner from Aidbox with UDP FHIR ID, success getting Practitioner from EHR`() {
         every { dfe.graphQlContext.get<InteropGraphQLContext>(INTEROP_CONTEXT_KEY).authzTenantId } returns "apposnd"
         every { tenantService.getTenantForMnemonic("apposnd") } returns tenant
 
@@ -399,7 +413,16 @@ class NoteHandlerTest {
             )
         } throws RequestFailureException(Throwable(), "y", "z")
 
-        // success: NoteInput()
+        // success: ehrPractitionerService.getPractitioner()
+        every { vendorFactory.practitionerService } returns ehrPractitionerService
+        every { ehrFactory.getVendorFactory(tenant) } returns vendorFactory
+        every {
+            ehrPractitionerService.getPractitioner(
+                tenant,
+                "PractitionerTestId"
+            )
+        } returns oncologyPractitioner
+
         val noteInput = NoteInput(
             "PatientMRNId",
             PatientIdType.MRN,
@@ -410,11 +433,36 @@ class NoteHandlerTest {
             false
         )
 
-        // failure: sendNote()
-        val exception = assertThrows<RequestFailureException> {
-            noteHandler.sendNote(noteInput, "apposnd", dfe)
-        }
-        assertEquals("Received exception when calling y (z): null", exception.message)
+        // success: patientService.getPatientFHIRIds() for MRN
+        every {
+            patientService.getPatientFHIRIds(
+                "apposnd",
+                mapOf(
+                    "patientFhirId" to SystemValue(
+                        system = CodeSystem.RONIN_MRN.uri.value!!,
+                        value = noteInput.patientId
+                    )
+                )
+            ).getValue("patientFhirId")
+        } returns "PatientFhirId"
+        every { patientService.getPatientByFHIRId("apposnd", "PatientFhirId") } returns oncologyPatient
+
+        // success: generateMDM()
+        every {
+            mdmService.generateMDM(
+                "apposnd",
+                match { it.name == listOf(testname) },
+                match { it.name == listOf(testname) },
+                "Example Note Text",
+                "202206011250",
+                null,
+                "DO"
+            )
+        } returns Pair("mock", "uniqueId")
+
+        // success: sendNote()
+        val response = noteHandler.sendNote(noteInput, "apposnd", dfe)
+        assertEquals("uniqueId", response)
     }
 
     @Test
@@ -428,7 +476,7 @@ class NoteHandlerTest {
                 "apposnd",
                 "apposnd-PractitionerTestId"
             )
-        } throws(ClientFailureException(HttpStatusCode(401, "x"), "y", "z"))
+        } throws (ClientFailureException(HttpStatusCode(401, "x"), "y", "z"))
 
         // failure: ehrPractitionerService.getPractitioner()
         every { vendorFactory.practitionerService } returns ehrPractitionerService
@@ -438,7 +486,7 @@ class NoteHandlerTest {
                 tenant,
                 "PractitionerTestId"
             )
-        } throws(RequestFailureException(Throwable(), "a", "b"))
+        } throws (RequestFailureException(Throwable(), "a", "b"))
 
         // success: NoteInput()
         val noteInput = NoteInput(
@@ -532,7 +580,12 @@ class NoteHandlerTest {
         every {
             patientService.getPatientFHIRIds(
                 "apposnd",
-                mapOf("patientFhirId" to SystemValue(system = CodeSystem.RONIN_MRN.uri.value!!, value = noteInput.patientId))
+                mapOf(
+                    "patientFhirId" to SystemValue(
+                        system = CodeSystem.RONIN_MRN.uri.value!!,
+                        value = noteInput.patientId
+                    )
+                )
             ).getValue("patientFhirId")
         } returns "PatientFhirId"
 
@@ -596,7 +649,12 @@ class NoteHandlerTest {
         every {
             patientService.getPatientFHIRIds(
                 "apposnd",
-                mapOf("patientFhirId" to SystemValue(system = CodeSystem.RONIN_MRN.uri.value!!, value = noteInput.patientId))
+                mapOf(
+                    "patientFhirId" to SystemValue(
+                        system = CodeSystem.RONIN_MRN.uri.value!!,
+                        value = noteInput.patientId
+                    )
+                )
             ).getValue("patientFhirId")
         } returns "PatientFhirId"
 
