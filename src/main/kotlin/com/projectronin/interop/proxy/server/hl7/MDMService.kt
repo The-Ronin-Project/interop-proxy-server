@@ -14,7 +14,6 @@ import com.projectronin.interop.fhir.r4.valueset.ContactPointUse
 import com.projectronin.interop.proxy.server.hl7.model.MDMPatientFields
 import com.projectronin.interop.proxy.server.hl7.model.MDMPractitionerFields
 import com.projectronin.interop.proxy.server.util.asEnum
-import io.ktor.util.toUpperCasePreservingASCIIRules
 import org.springframework.stereotype.Component
 
 @Component
@@ -25,18 +24,20 @@ class MDMService {
      * @param patient: MDMPatientFields, relevant patient information for the patient from aidbox
      * @param practitioner: MDMPractitionerFields, relevant practitioner information for the practitioner from aidbox
      * @param note: Text of the note to be attached in the OBX segment(s)
-     * @param datetime: Date and Time the note was recorded, in yyyymmddhhmmss
+     * @param dateTime: Date and Time the note was recorded, in yyyymmddhhmmss
      * @param parentDocumentId: document identifier for parent note, in case of addendum
      * @param documentStatus: Whether the document is documented "DO" or in progress "IP", goes into TXA-17
      */
+
+    // TODO Need to break out tenant specific interface details, noted with "MDA" in comments below
     fun generateMDM(
         tenantId: String,
         patient: MDMPatientFields,
         practitioner: MDMPractitionerFields,
         note: String,
-        datetime: String,
+        dateTime: String,
         parentDocumentId: String? = null,
-        documentStatus: String = "DO"
+        documentStatus: String? = "IP"
     ): Pair<String, String> {
         val mdm = MDM_T02()
         val eventType = parentDocumentId?.let { "T08" } ?: "T02"
@@ -48,7 +49,7 @@ class MDMService {
         // Populate the EVN Segment
         val evn: EVN = mdm.evn
         evn.eventTypeCode.value = eventType
-        evn.recordedDateTime.time.value = datetime
+        evn.recordedDateTime.time.value = dateTime
 
         // Populate PID Segment
         setPID(mdm, patient)
@@ -58,13 +59,13 @@ class MDMService {
         pv1.patientClass.value = "U"
 
         // Populate the TXA Segment
-        setTXA(mdm, practitioner, parentDocumentId, documentStatus, eventType)
+        setTXA(mdm, practitioner, parentDocumentId, documentStatus!!, eventType, dateTime)
 
-        // Populate the OBX Segment
+        // Populate the OBX Segment MDA: Replace all tabs with 4 spaces
         setOBX(mdm, note)
 
         val encodedMessage = DefaultHapiContext().pipeParser.encode(mdm)
-        return Pair(encodedMessage, mdm.txa.uniqueDocumentNumber.entityIdentifier.value)
+        return Pair(encodedMessage, mdm.txa.uniqueDocumentNumber.universalID.value)
     }
 
     // formatDate converts the dates from aidbox with dashes into yyyymmdd format for HL7 compatibility
@@ -79,9 +80,10 @@ class MDMService {
             val builder = StringBuilder()
 
             // split string by whitespace
-            for (word in string.split(Regex("( |\n|\r)+"))) {
+            for (word in string.split(Regex("( |\\n|\\r)+"))) {
                 // if the current string exceeds the max size
-                if (builder.length + word.length > max) {
+                val newword = word.replace("\t", "    ")
+                if (builder.length + newword.length > max) {
                     // then we add the string to the list and clear the builder
                     it.add(builder.toString())
                     builder.setLength(0)
@@ -89,7 +91,7 @@ class MDMService {
                 }
                 // append a space at the beginning of each word, except the first one
                 if (firstWord) firstWord = false else builder.append(' ')
-                builder.append(word)
+                builder.append(newword)
             }
 
             // add the last collected part if there was any
@@ -102,24 +104,20 @@ class MDMService {
     private fun setPID(mdm: MDM_T02, patient: MDMPatientFields) {
         val pid: PID = mdm.pid
 
-        // PID-3 Identifiers
-        var pid3count = 0
-        for (i in patient.identifier.indices) {
-            val type = patient.identifier[i].system?.value.toString().substringAfterLast("/")
-
-            if (type in listOf("mrn", "fhir")) {
-                pid.getPatientIdentifierList(pid3count).idNumber.value = patient.identifier[i].value?.value
-                pid.getPatientIdentifierList(pid3count).assigningAuthority.namespaceID.value =
-                    type.toUpperCasePreservingASCIIRules()
-                pid3count += 1
-            }
+        // PID-3 Identifiers MDA: Only want MRN
+        val pid3 = patient.identifier.firstOrNull { it.system?.value?.substringAfterLast("/") == "mrn" }
+        pid3?.let {
+            pid.getPatientIdentifierList(0).idNumber.value = pid3.value?.value
+            pid.getPatientIdentifierList(0).assigningAuthority.namespaceID.value = "MRN"
         }
 
-        // PID-5 Name
-        for (i in patient.name.indices) {
-            pid.getPatientName(i).familyName.surname.value = patient.name[i].family?.value
-            pid.getPatientName(i).givenName.value = patient.name[i].given.getOrNull(0)?.value
+        // PID-5 Name, MDA: only return official name
+        val pid5 = patient.name.firstOrNull { it.use?.value == "official" }
+        pid5?.let {
+            pid.getPatientName(0).familyName.surname.value = pid5.family?.value
+            pid.getPatientName(0).givenName.value = pid5.given.getOrNull(0)?.value
         }
+
         // PID-7 DOB
         pid.dateTimeOfBirth.time.value = patient.dob?.let { formatDate(it) }
 
@@ -166,12 +164,18 @@ class MDMService {
         practitioner: MDMPractitionerFields,
         parentDocumentId: String?,
         documentStatus: String,
-        eventType: String
+        eventType: String,
+        dateTime: String
     ) {
         val txa: TXA = mdm.txa
         txa.setIDTXA.value = "1"
-        txa.documentType.value = "PR"
+
+        // TXA-2 Document Type MDA: Hardcode TXA-2 to 3000326 for their numeric identifier
+        txa.documentType.value = "3000326"
         txa.documentContentPresentation.value = "TX"
+
+        // TXA-4 Activity Date/Time
+        txa.activityDateTime.time.value = dateTime
 
         // TXA-5 Primary Activity Provider from Practitioner Info
         txa.getPrimaryActivityProviderCodeName(0).familyName.surname.value =
@@ -179,22 +183,37 @@ class MDMService {
         txa.getPrimaryActivityProviderCodeName(0).givenName.value =
             practitioner.name.getOrNull(0)?.given?.getOrNull(0)?.value
 
+        // TXA-5 Identifier, MDA: pull ID with type "MDACC" and use "usual"
+        val pracId = practitioner.identifier.firstOrNull { (it.use?.value == "usual" && it.type?.text?.value == "MDACC") }
+        pracId?.let {
+            txa.getPrimaryActivityProviderCodeName(0)?.idNumber!!.value = pracId.value?.value
+        }
+
         // TXA-9 Originator Code/Name (need to provide information from Project Ronin as originators of the transcription)
         txa.getOriginatorCodeName(0).familyName.surname.value = "Project"
         txa.getOriginatorCodeName(0).givenName.value = "Ronin"
 
         // TXA-12 Unique Document Number (parentDocumentId for T08, or generated and unique for T02 or T06)
-        txa.uniqueDocumentNumber.entityIdentifier.value = if (eventType == "T08") {
+        // MDA: Set TXA-12.3 (Universal ID) instead of TXA-12.1 (Entity Identifier)
+        txa.uniqueDocumentNumber.universalID.value = if (eventType == "T08") {
             parentDocumentId
         } else {
-            "RoninNote" + mdm.msh.dateTimeOfMessage.time.value + "." + mdm.msh.messageControlID.value
+            val re = Regex(pattern = "[^A-Za-z0-9 ]")
+            "RoninNote" + re.replace(mdm.msh.dateTimeOfMessage.time.value, "") + "-" + mdm.msh.messageControlID.value
         }
 
         // TXA-13 Parent Document Number, used for addendum (T06) messages
 
         // TXA-17 Document Completion Status, default to documented.
         // This default comes from when a message is first requested at generation
+        // MDA: IP "in progress" for incomplete record, AU "authenticated" for final record
         txa.documentCompletionStatus.value = documentStatus
+
+        // TXA-18 Document Confidentiality Status, MDA: defaults to "U", unrestricted
+        txa.documentConfidentialityStatus.value = "U"
+
+        // TXA-19 Document Availability Status, MDA: defaults to "AV", available
+        txa.documentAvailabilityStatus.value = "AV"
     }
 
     // creates and populates the OBX segment

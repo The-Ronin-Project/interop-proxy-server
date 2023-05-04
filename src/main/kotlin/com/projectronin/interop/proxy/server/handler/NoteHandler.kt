@@ -84,11 +84,11 @@ class NoteHandler(
             patient.address,
             patient.telecom
         )
-
+        // MDA: IP "in progress" for incomplete record, AU "authenticated" for final record
         val documentStatus = if (noteInput.noteSender == NoteSender.PATIENT && noteInput.isAlert) {
             "IP"
         } else {
-            "DO"
+            "AU"
         }
         val hl7 = mdmService.generateMDM(
             tenant.mnemonic,

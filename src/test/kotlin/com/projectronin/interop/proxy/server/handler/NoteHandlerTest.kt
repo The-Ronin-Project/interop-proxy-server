@@ -13,6 +13,7 @@ import com.projectronin.interop.fhir.r4.datatype.Address
 import com.projectronin.interop.fhir.r4.datatype.ContactPoint
 import com.projectronin.interop.fhir.r4.datatype.HumanName
 import com.projectronin.interop.fhir.r4.datatype.Identifier
+import com.projectronin.interop.fhir.r4.datatype.primitive.Code
 import com.projectronin.interop.fhir.r4.datatype.primitive.Date
 import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
 import com.projectronin.interop.fhir.r4.datatype.primitive.asFHIR
@@ -63,10 +64,12 @@ class NoteHandlerTest {
     private val testidentifier = relaxedMockk<Identifier> {
         every { system } returns Uri("test")
         every { value } returns "123".asFHIR()
+        every { use } returns Code("usual")
     }
     private val testname = relaxedMockk<HumanName> {
         every { family } returns "family".asFHIR()
         every { given } returns listOf("given", "given2").asFHIR()
+        every { use } returns Code("official")
     }
     private val testaddress = relaxedMockk<Address> {
         every { line } returns listOf("123 ABC Street", "Unit 1").asFHIR()
@@ -259,7 +262,7 @@ class NoteHandlerTest {
                 "Example Note Text",
                 "202206011250",
                 null,
-                "DO"
+                "AU"
             )
         } returns Pair("mock", "uniqueId")
 
@@ -307,7 +310,7 @@ class NoteHandlerTest {
                 "Example Note Text",
                 "202206011250",
                 null,
-                "DO"
+                "AU"
             )
         } returns Pair("mock", "uniqueId")
 
@@ -391,7 +394,7 @@ class NoteHandlerTest {
                 "Example Note Text",
                 "202206011250",
                 null,
-                "DO"
+                "AU"
             )
         } returns Pair("mock", "uniqueId")
 
@@ -456,7 +459,7 @@ class NoteHandlerTest {
                 "Example Note Text",
                 "202206011250",
                 null,
-                "DO"
+                "AU"
             )
         } returns Pair("mock", "uniqueId")
 
@@ -612,7 +615,7 @@ class NoteHandlerTest {
                 "Example Note Text",
                 "202206011250",
                 null,
-                "DO"
+                "AU"
             )
         } returns Pair("mock", "uniqueId")
 
