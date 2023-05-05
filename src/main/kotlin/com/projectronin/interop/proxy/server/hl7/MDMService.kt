@@ -143,16 +143,19 @@ class MDMService {
                     pid.getPhoneNumberHome(phonecount).telecommunicationUseCode.value = "PRN"
                     phonecount += 1
                 }
+
                 ContactPointUse.WORK -> {
                     pid.getPhoneNumberHome(phonecount).telephoneNumber.value = patient.phone[i].value?.value
                     pid.getPhoneNumberHome(phonecount).telecommunicationUseCode.value = "WPN"
                     phonecount += 1
                 }
+
                 ContactPointUse.MOBILE -> {
                     pid.getPhoneNumberHome(phonecount).telephoneNumber.value = patient.phone[i].value?.value
                     pid.getPhoneNumberHome(phonecount).telecommunicationUseCode.value = "ORN"
                     phonecount += 1
                 }
+
                 else -> {}
             }
         }
@@ -184,7 +187,8 @@ class MDMService {
             practitioner.name.getOrNull(0)?.given?.getOrNull(0)?.value
 
         // TXA-5 Identifier, MDA: pull ID with type "MDACC" and use "usual"
-        val pracId = practitioner.identifier.firstOrNull { (it.use?.value == "usual" && it.type?.text?.value == "MDACC") }
+        val pracId =
+            practitioner.identifier.firstOrNull { (it.use?.value == "usual" && it.type?.text?.value == "MDACC") }
         pracId?.let {
             txa.getPrimaryActivityProviderCodeName(0)?.idNumber!!.value = pracId.value?.value
         }
@@ -213,7 +217,7 @@ class MDMService {
         txa.documentConfidentialityStatus.value = "U"
 
         // TXA-19 Document Availability Status, MDA: defaults to "AV", available
-        txa.documentAvailabilityStatus.value = "AV"
+        txa.documentAvailabilityStatus.value = if (documentStatus == "IP") "UN" else "AV"
     }
 
     // creates and populates the OBX segment
