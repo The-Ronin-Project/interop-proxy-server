@@ -58,6 +58,7 @@ dependencies {
     }
     implementation(libs.bundles.hl7v2)
     implementation(libs.dd.trace.api)
+    implementation(libs.ronin.kafka)
 
     runtimeOnly(libs.bundles.ehr.impls) {
         // Exclude validation

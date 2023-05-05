@@ -1,5 +1,6 @@
 !README.md
 id_file
+.DS_Store
 
 # Gradle
 .gradle
