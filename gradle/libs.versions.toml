@@ -1,8 +1,8 @@
 [libraries]
 dd-trace-api = "com.datadoghq:dd-trace-api:1.13.0"
 
-graphql-kotlin-schema-generator = "com.expediagroup:graphql-kotlin-schema-generator:6.4.0"
-graphql-kotlin-spring-server = "com.expediagroup:graphql-kotlin-spring-server:6.4.0"
+graphql-kotlin-schema-generator = "com.expediagroup:graphql-kotlin-schema-generator:6.4.1"
+graphql-kotlin-spring-server = "com.expediagroup:graphql-kotlin-spring-server:6.4.1"
 
 graphql-spring-boot-starter-test = "com.graphql-java-kickstart:graphql-spring-boot-starter-test:14.1.0"
 hapi-hl7v2-251 = "ca.uhn.hapi:hapi-structures-v251:2.3"
