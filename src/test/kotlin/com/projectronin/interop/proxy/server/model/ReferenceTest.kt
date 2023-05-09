@@ -37,15 +37,13 @@ class ReferenceTest {
             every { mnemonic } returns "tenant"
         }
         val ehrIdentifier = relaxedMockk<R4Identifier>()
-        val ehrReference = mockk<R4Reference> {
-            every { reference } returns "Patient/1234".asFHIR()
-            every { type } returns Uri("Patient")
-            every { display } returns "Patient 1234".asFHIR()
-            every { identifier } returns ehrIdentifier
-            every { id } returns "1234".asFHIR()
-            every { decomposedType() } returns "Patient"
-            every { decomposedId() } returns "1234"
-        }
+        val ehrReference = R4Reference(
+            reference = "Patient/1234".asFHIR(),
+            type = Uri("Patient"),
+            display = "Patient 1234".asFHIR(),
+            identifier = ehrIdentifier,
+            id = "1234".asFHIR()
+        )
         val reference = Reference.from(ehrReference, tenant)
         assertEquals("tenant-1234", reference.id)
         assertEquals("Patient/tenant-1234", reference.reference)
@@ -116,15 +114,9 @@ class ReferenceTest {
         val tenant = mockk<Tenant> {
             every { mnemonic } returns "tenant"
         }
-        val ehrReference = mockk<R4Reference> {
-            every { reference } returns "Patient/1234".asFHIR()
-            every { type } returns null
-            every { display } returns null
-            every { identifier } returns null
-            every { id } returns null
-            every { decomposedType() } returns "Patient"
-            every { decomposedId() } returns "1234"
-        }
+        val ehrReference = R4Reference(
+            reference = "Patient/1234".asFHIR()
+        )
         val reference = Reference.from(ehrReference, tenant)
         assertEquals("tenant-1234", reference.id)
         assertEquals("Patient/tenant-1234", reference.reference)
@@ -138,15 +130,11 @@ class ReferenceTest {
         val tenant = mockk<Tenant> {
             every { mnemonic } returns "tenant"
         }
-        val ehrReference = mockk<R4Reference> {
-            every { reference } returns "Patient/1234".asFHIR()
-            every { type } returns Uri("Practitioner")
-            every { display } returns null
-            every { identifier } returns null
-            every { id } returns "5678".asFHIR()
-            every { decomposedType() } returns "Practitioner"
-            every { decomposedId() } returns "5678"
-        }
+        val ehrReference = R4Reference(
+            reference = "Patient/1234".asFHIR(),
+            type = Uri("Practitioner"),
+            id = "5678".asFHIR()
+        )
         val reference = Reference.from(ehrReference, tenant)
         assertEquals("tenant-5678", reference.id)
         assertEquals("Patient/tenant-1234", reference.reference)

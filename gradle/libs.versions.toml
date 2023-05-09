@@ -13,12 +13,12 @@ interop-commonHttp = "com.projectronin.interop:interop-common-http:3.6.0"
 interop-commonJackson = "com.projectronin.interop:interop-common-jackson:3.6.0"
 interop-commonTestDb = "com.projectronin.interop:interop-common-test-db:3.6.0"
 
-interop-ehr-api = "com.projectronin.interop.ehr:interop-ehr:9.9.0"
-interop-ehr-cerner = "com.projectronin.interop.ehr:interop-ehr-cerner:9.9.0"
-interop-ehr-fhir-ronin = "com.projectronin.interop.ehr:interop-fhir-ronin:9.9.0"
-interop-ehr-epic = "com.projectronin.interop.ehr:interop-ehr-epic:9.9.0"
-interop-ehr-liquibase = "com.projectronin.interop.ehr:interop-ehr-liquibase:9.9.0"
-interop-ehr-tenant = "com.projectronin.interop.ehr:interop-tenant:9.9.0"
+interop-ehr-api = "com.projectronin.interop.ehr:interop-ehr:9.10.0"
+interop-ehr-cerner = "com.projectronin.interop.ehr:interop-ehr-cerner:9.10.0"
+interop-ehr-fhir-ronin = "com.projectronin.interop.ehr:interop-fhir-ronin:9.10.0"
+interop-ehr-epic = "com.projectronin.interop.ehr:interop-ehr-epic:9.10.0"
+interop-ehr-liquibase = "com.projectronin.interop.ehr:interop-ehr-liquibase:9.10.0"
+interop-ehr-tenant = "com.projectronin.interop.ehr:interop-tenant:9.10.0"
 
 interop-fhir = "com.projectronin.interop.fhir:interop-fhir:7.8.2"
 
