@@ -9,6 +9,7 @@ import com.projectronin.interop.ehr.factory.EHRFactory
 import com.projectronin.interop.fhir.r4.resource.Condition
 import com.projectronin.interop.proxy.server.model.ConditionCategoryCode
 import com.projectronin.interop.proxy.server.util.JacksonUtil
+import com.projectronin.interop.proxy.server.util.generateMetadata
 import com.projectronin.interop.queue.QueueService
 import com.projectronin.interop.queue.model.ApiMessage
 import com.projectronin.interop.tenant.config.TenantService
@@ -75,6 +76,8 @@ class ConditionHandler(
             logger.warn { "$countWithoutCode condition(s) returned without codes" }
         }
 
+        val metadata = generateMetadata()
+
         // Send conditions to queue service
         try {
             queueService.enqueueMessages(
@@ -83,7 +86,8 @@ class ConditionHandler(
                         id = null,
                         resourceType = ResourceType.CONDITION,
                         tenant = tenantId,
-                        text = JacksonUtil.writeJsonValue(it)
+                        text = JacksonUtil.writeJsonValue(it),
+                        metadata = metadata
                     )
                 }
             )

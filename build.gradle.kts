@@ -28,11 +28,14 @@ dependencies {
     implementation(libs.interop.fhir)
     implementation(libs.interop.queue.api)
     implementation(libs.interop.ehr.tenant)
+    implementation(libs.event.interop.resource.internal)
     implementation(libs.interop.ehr.fhir.ronin) {
         // Exclude validation
         exclude(group = "com.projectronin.interop.validation", module = "interop-validation-client")
     }
     implementation(libs.interop.commonJackson)
+
+    implementation(libs.bundles.opentracing)
 
     implementation(platform(libs.kotlinx.coroutines.bom))
 

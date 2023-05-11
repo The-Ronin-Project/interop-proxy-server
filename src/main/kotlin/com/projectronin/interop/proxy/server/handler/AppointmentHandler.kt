@@ -9,6 +9,7 @@ import com.projectronin.interop.ehr.factory.EHRFactory
 import com.projectronin.interop.fhir.r4.resource.Appointment
 import com.projectronin.interop.proxy.server.util.DateUtil
 import com.projectronin.interop.proxy.server.util.JacksonUtil
+import com.projectronin.interop.proxy.server.util.generateMetadata
 import com.projectronin.interop.queue.QueueService
 import com.projectronin.interop.queue.model.ApiMessage
 import com.projectronin.interop.tenant.config.TenantService
@@ -91,6 +92,8 @@ class AppointmentHandler(
 
         logger.debug { "Appointment query for tenant ${tenant.name} returned" }
 
+        val metadata = generateMetadata()
+
         // send appointments to queue service
         if (appointments.isNotEmpty()) {
             try {
@@ -100,7 +103,8 @@ class AppointmentHandler(
                             id = null,
                             resourceType = ResourceType.APPOINTMENT,
                             tenant = tenant.mnemonic,
-                            text = JacksonUtil.writeJsonValue(it)
+                            text = JacksonUtil.writeJsonValue(it),
+                            metadata = metadata
                         )
                     }
                 )

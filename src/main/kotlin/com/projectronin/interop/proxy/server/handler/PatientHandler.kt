@@ -12,6 +12,7 @@ import com.projectronin.interop.fhir.ronin.resource.RoninPatient
 import com.projectronin.interop.proxy.server.model.PatientsByTenant
 import com.projectronin.interop.proxy.server.util.DateUtil
 import com.projectronin.interop.proxy.server.util.JacksonUtil
+import com.projectronin.interop.proxy.server.util.generateMetadata
 import com.projectronin.interop.queue.QueueService
 import com.projectronin.interop.queue.model.ApiMessage
 import com.projectronin.interop.tenant.config.TenantService
@@ -144,6 +145,8 @@ class PatientHandler(
     }
 
     private fun queuePatients(patients: List<R4Patient>, tenant: Tenant) {
+        val metadata = generateMetadata()
+
         try {
             queueService.enqueueMessages(
                 patients.map {
@@ -151,7 +154,8 @@ class PatientHandler(
                         id = null,
                         resourceType = ResourceType.PATIENT,
                         tenant = tenant.mnemonic,
-                        text = JacksonUtil.writeJsonValue(it)
+                        text = JacksonUtil.writeJsonValue(it),
+                        metadata = metadata
                     )
                 }
             )

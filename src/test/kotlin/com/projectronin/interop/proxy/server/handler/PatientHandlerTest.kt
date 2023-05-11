@@ -2,6 +2,7 @@ package com.projectronin.interop.proxy.server.handler
 
 import ch.qos.logback.classic.spi.ILoggingEvent
 import ch.qos.logback.core.read.ListAppender
+import com.projectronin.event.interop.internal.v1.Metadata
 import com.projectronin.interop.common.http.exceptions.ServiceUnavailableException
 import com.projectronin.interop.common.logmarkers.LogMarkers
 import com.projectronin.interop.common.resource.ResourceType
@@ -20,6 +21,7 @@ import com.projectronin.interop.proxy.server.context.InteropGraphQLContext
 import com.projectronin.interop.proxy.server.model.Patient
 import com.projectronin.interop.proxy.server.util.JacksonUtil
 import com.projectronin.interop.proxy.server.util.asCode
+import com.projectronin.interop.proxy.server.util.generateMetadata
 import com.projectronin.interop.queue.QueueService
 import com.projectronin.interop.queue.model.ApiMessage
 import com.projectronin.interop.tenant.config.TenantService
@@ -31,7 +33,8 @@ import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
 import io.mockk.mockkObject
-import io.mockk.unmockkObject
+import io.mockk.mockkStatic
+import io.mockk.unmockkAll
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -60,6 +63,8 @@ class PatientHandlerTest {
     private val logger = LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME) as ch.qos.logback.classic.Logger
     private val logAppender = ListAppender<ILoggingEvent>()
 
+    private val metadata = mockk<Metadata>()
+
     @BeforeAll
     fun initAllTests() {
         logger.addAppender(logAppender)
@@ -68,11 +73,14 @@ class PatientHandlerTest {
 
     @AfterEach
     fun unMock() {
-        unmockkObject(JacksonUtil)
+        unmockkAll()
     }
 
     @BeforeEach
     fun initTest() {
+        mockkStatic("com.projectronin.interop.proxy.server.util.MetadataUtilKt")
+        every { generateMetadata() } returns metadata
+
         ehrFactory = mockk()
         tenantService = mockk()
         queueService = mockk()
@@ -292,7 +300,8 @@ class PatientHandlerTest {
                         id = null,
                         resourceType = ResourceType.PATIENT,
                         tenant = "tenantId",
-                        text = "raw JSON for patient"
+                        text = "raw JSON for patient",
+                        metadata = metadata
                     )
                 )
             )
@@ -386,7 +395,8 @@ class PatientHandlerTest {
                         id = null,
                         resourceType = ResourceType.PATIENT,
                         tenant = "tenantId",
-                        text = "raw JSON for patient"
+                        text = "raw JSON for patient",
+                        metadata = metadata
                     )
                 )
             )
@@ -477,7 +487,8 @@ class PatientHandlerTest {
                         id = null,
                         resourceType = ResourceType.PATIENT,
                         tenant = "tenantId",
-                        text = "raw JSON for patient"
+                        text = "raw JSON for patient",
+                        metadata = metadata
                     )
                 )
             )

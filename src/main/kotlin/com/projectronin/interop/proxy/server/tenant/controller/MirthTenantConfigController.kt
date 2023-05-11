@@ -1,12 +1,13 @@
 package com.projectronin.interop.proxy.server.tenant.controller
 
-import com.projectronin.interop.common.resource.ResourceType
+import com.projectronin.event.interop.internal.v1.ResourceType
 import com.projectronin.interop.kafka.KafkaLoadService
 import com.projectronin.interop.kafka.model.DataTrigger
 import com.projectronin.interop.proxy.server.tenant.model.MirthTenantConfig
 import com.projectronin.interop.proxy.server.tenant.model.converters.toMirthTenantConfigDO
 import com.projectronin.interop.proxy.server.tenant.model.converters.toProxyMirthTenantConfig
 import com.projectronin.interop.proxy.server.tenant.model.converters.toProxyTenant
+import com.projectronin.interop.proxy.server.util.generateMetadata
 import com.projectronin.interop.tenant.config.TenantService
 import com.projectronin.interop.tenant.config.data.MirthTenantConfigDAO
 import com.projectronin.interop.tenant.config.exception.NoTenantFoundException
@@ -94,11 +95,14 @@ class MirthTenantConfigController(
 
     private fun sendLocationLoadEvent(tenantMnemonic: String, locationIds: List<String>) {
         if (loadLocations == "yes") {
+            val metadata = generateMetadata()
+
             loadService.pushLoadEvent(
                 tenantMnemonic,
                 DataTrigger.AD_HOC,
                 locationIds,
-                ResourceType.LOCATION
+                ResourceType.Location,
+                metadata
             )
         }
     }

@@ -2,6 +2,7 @@ package com.projectronin.interop.proxy.server.handler
 
 import ch.qos.logback.classic.spi.ILoggingEvent
 import ch.qos.logback.core.read.ListAppender
+import com.projectronin.event.interop.internal.v1.Metadata
 import com.projectronin.interop.common.http.exceptions.ServiceUnavailableException
 import com.projectronin.interop.common.logmarkers.LogMarkers
 import com.projectronin.interop.common.resource.ResourceType
@@ -15,6 +16,7 @@ import com.projectronin.interop.proxy.server.context.InteropGraphQLContext
 import com.projectronin.interop.proxy.server.model.Condition
 import com.projectronin.interop.proxy.server.model.ConditionCategoryCode
 import com.projectronin.interop.proxy.server.util.JacksonUtil
+import com.projectronin.interop.proxy.server.util.generateMetadata
 import com.projectronin.interop.queue.QueueService
 import com.projectronin.interop.queue.model.ApiMessage
 import com.projectronin.interop.tenant.config.TenantService
@@ -26,7 +28,8 @@ import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
 import io.mockk.mockkObject
-import io.mockk.unmockkObject
+import io.mockk.mockkStatic
+import io.mockk.unmockkAll
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -54,6 +57,8 @@ class ConditionHandlerTest {
     private val logger = LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME) as ch.qos.logback.classic.Logger
     private val logAppender = ListAppender<ILoggingEvent>()
 
+    private val metadata = mockk<Metadata>()
+
     @BeforeAll
     fun initAllTests() {
         logger.addAppender(logAppender)
@@ -62,11 +67,14 @@ class ConditionHandlerTest {
 
     @AfterEach
     fun unMock() {
-        unmockkObject(JacksonUtil)
+        unmockkAll()
     }
 
     @BeforeEach
     fun initTest() {
+        mockkStatic("com.projectronin.interop.proxy.server.util.MetadataUtilKt")
+        every { generateMetadata() } returns metadata
+
         tenant = mockk()
         ehrFactory = mockk()
         tenantService = mockk()
@@ -256,7 +264,8 @@ class ConditionHandlerTest {
                         id = null,
                         resourceType = ResourceType.CONDITION,
                         tenant = "tenantId",
-                        text = "raw JSON for condition"
+                        text = "raw JSON for condition",
+                        metadata = metadata
                     )
                 )
             )
@@ -345,7 +354,8 @@ class ConditionHandlerTest {
                         id = null,
                         resourceType = ResourceType.CONDITION,
                         tenant = "tenantId",
-                        text = "raw JSON for condition"
+                        text = "raw JSON for condition",
+                        metadata = metadata
                     )
                 )
             )
@@ -396,7 +406,8 @@ class ConditionHandlerTest {
                         id = null,
                         resourceType = ResourceType.CONDITION,
                         tenant = "tenantId",
-                        text = "raw JSON for condition"
+                        text = "raw JSON for condition",
+                        metadata = metadata
                     )
                 )
             )

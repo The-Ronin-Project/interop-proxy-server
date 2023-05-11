@@ -1,6 +1,8 @@
 [libraries]
 dd-trace-api = "com.datadoghq:dd-trace-api:1.13.0"
 
+event-interop-resource-internal = "com.projectronin.contract.event:event-interop-resource-internal:1.0.0"
+
 graphql-kotlin-schema-generator = "com.expediagroup:graphql-kotlin-schema-generator:6.4.1"
 graphql-kotlin-spring-server = "com.expediagroup:graphql-kotlin-spring-server:6.4.1"
 
@@ -22,15 +24,15 @@ interop-ehr-tenant = "com.projectronin.interop.ehr:interop-tenant:9.10.0"
 
 interop-fhir = "com.projectronin.interop.fhir:interop-fhir:7.8.2"
 
-interop-publishers-aidbox = "com.projectronin.interop.publish:interop-aidbox:7.8.0"
-interop-publishers-datalake = "com.projectronin.interop.publish:interop-datalake:7.8.0"
-interop-publishers-kafka = "com.projectronin.interop.publish:interop-kafka:7.8.0"
+interop-publishers-aidbox = "com.projectronin.interop.publish:interop-aidbox:8.0.0"
+interop-publishers-datalake = "com.projectronin.interop.publish:interop-datalake:8.0.0"
+interop-publishers-kafka = "com.projectronin.interop.publish:interop-kafka:8.0.0"
 
-interop-queue-api = "com.projectronin.interop.queue:interop-queue:1.6.1"
-interop-queue-db = "com.projectronin.interop.queue:interop-queue-db:1.6.1"
-interop-queue-liquibase = "com.projectronin.interop.queue:interop-queue-liquibase:1.6.1"
-interop-queue-kafka = "com.projectronin.interop.queue:interop-queue-kafka:1.6.1"
-interop-testcontainer-aidbox = "com.projectronin.interop.publish:interop-aidbox-testcontainer:7.8.0"
+interop-queue-api = "com.projectronin.interop.queue:interop-queue:2.0.0"
+interop-queue-db = "com.projectronin.interop.queue:interop-queue-db:2.0.0"
+interop-queue-liquibase = "com.projectronin.interop.queue:interop-queue-liquibase:2.0.0"
+interop-queue-kafka = "com.projectronin.interop.queue:interop-queue-kafka:2.0.0"
+interop-testcontainer-aidbox = "com.projectronin.interop.publish:interop-aidbox-testcontainer:8.0.0"
 interop-testcontainer-mockehr = "com.projectronin.interop.mock:interop-mock-ehr-testcontainer:1.2.1"
 
 junit-pioneer = "org.junit-pioneer:junit-pioneer:2.0.1"
@@ -39,6 +41,9 @@ kotlinx-coroutines-bom = "org.jetbrains.kotlinx:kotlinx-coroutines-bom:1.7.0"
 logstash-logback-encoder = "net.logstash.logback:logstash-logback-encoder:7.3"
 mockk = "io.mockk:mockk:1.13.5"
 mysql-connector-java = "com.mysql:mysql-connector-j:8.0.33"
+
+opentracing-api = "io.opentracing:opentracing-api:0.33.0"
+opentracing-util = "io.opentracing:opentracing-util:0.33.0"
 
 ronin-kafka = "com.projectronin:ronin-kafka:0.4.1"
 
@@ -53,3 +58,4 @@ ehr-impls = ["interop-ehr-epic", "interop-ehr-cerner"]
 graphql = ["graphql-kotlin-spring-server", "graphql-kotlin-schema-generator"]
 spring-security = ["spring-security-oauth2-core", "spring-security-oauth2-jose"]
 hl7v2 = ["hapi-hl7v2-251", "hapi-hl7v2-base"]
+opentracing = ["opentracing-api", "opentracing-util"]

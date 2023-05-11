@@ -8,6 +8,7 @@ import com.projectronin.interop.common.resource.ResourceType
 import com.projectronin.interop.ehr.factory.EHRFactory
 import com.projectronin.interop.fhir.r4.resource.Practitioner
 import com.projectronin.interop.proxy.server.util.JacksonUtil
+import com.projectronin.interop.proxy.server.util.generateMetadata
 import com.projectronin.interop.queue.QueueService
 import com.projectronin.interop.queue.model.ApiMessage
 import com.projectronin.interop.tenant.config.TenantService
@@ -75,6 +76,9 @@ class PractitionerHandler(
             logger.error(e.getLogMarker(), e) { "Practitioner query failed for tenant ${tenant.name}." }
             null
         }
+
+        val metadata = generateMetadata()
+
         practitioner?.let {
             try {
                 queueService.enqueueMessages(
@@ -83,7 +87,8 @@ class PractitionerHandler(
                             id = null,
                             resourceType = ResourceType.PRACTITIONER,
                             tenant = tenant.mnemonic,
-                            text = JacksonUtil.writeJsonValue(practitioner)
+                            text = JacksonUtil.writeJsonValue(practitioner),
+                            metadata = metadata
                         )
                     )
                 )
