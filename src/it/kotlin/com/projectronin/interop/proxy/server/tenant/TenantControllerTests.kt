@@ -21,6 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.web.client.TestRestTemplate
 import org.springframework.boot.test.web.server.LocalServerPort
+import org.springframework.core.ParameterizedTypeReference
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
@@ -46,7 +47,8 @@ class TenantControllerTests {
     private lateinit var ehrDatasource: DataSource
 
     // provider pools is just there or else the delete from io_tenant will fail
-    private val modifiedTables = listOf("io_tenant_provider_pool", "io_tenant_epic", "io_tenant_cerner", "io_tenant")
+    private val modifiedTables =
+        listOf("io_tenant_provider_pool", "io_tenant_epic", "io_tenant_cerner", "io_tenant_codes", "io_tenant")
 
     private val httpHeaders = HttpHeaders()
 
@@ -451,5 +453,27 @@ class TenantControllerTests {
 
         assertEquals(HttpStatus.OK, responseEntity.statusCode)
         assertTrue(tenant.monitoredIndicator!!)
+    }
+
+    @Test
+    fun `can retrieve tenant codes`() {
+        val mnemonic = "apposnd"
+        val httpEntity = HttpEntity<HttpHeaders>(httpHeaders)
+        val responseType = object : ParameterizedTypeReference<Map<String, String>>() {}
+        val responseEntity = restTemplate.exchange(
+            "http://localhost:$port/tenants/$mnemonic/codes",
+            HttpMethod.GET,
+            httpEntity,
+            responseType
+        )
+        val validCodes = mapOf("bmiCode" to "bmi_code_value", "bsaCode" to "bsa_code_value")
+        assertTrue(responseEntity.hasBody())
+        assertEquals(2, responseEntity.body?.size)
+        responseEntity.body?.forEach {
+            assertTrue(it.key in validCodes.keys)
+            assertEquals(validCodes[it.key], it.value)
+        }
+
+        assertEquals(HttpStatus.OK, responseEntity.statusCode)
     }
 }

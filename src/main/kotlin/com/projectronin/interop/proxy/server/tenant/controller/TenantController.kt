@@ -46,6 +46,21 @@ class TenantController(
         return ResponseEntity(tenant.toProxyTenant(), HttpStatus.OK)
     }
 
+    @GetMapping("/{mnemonic}/codes")
+    @Trace
+    fun codes(@PathVariable("mnemonic") tenantMnemonic: String): ResponseEntity<Map<String, String>> {
+        logger.info { "Retrieving codes for tenant with mnemonic $tenantMnemonic" }
+        val tenantCodes = tenantService.getCodesForTenantMnemonic(tenantMnemonic)
+        return if (tenantCodes.isEmpty()) {
+            ResponseEntity(HttpStatus.NOT_FOUND)
+        } else {
+            ResponseEntity(
+                tenantCodes,
+                HttpStatus.OK
+            )
+        }
+    }
+
     @GetMapping("health")
     @Trace
     fun health(): ResponseEntity<Map<String, Boolean>> {

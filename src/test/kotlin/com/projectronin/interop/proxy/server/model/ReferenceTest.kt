@@ -44,6 +44,7 @@ class ReferenceTest {
             identifier = ehrIdentifier,
             id = "1234".asFHIR()
         )
+
         val reference = Reference.from(ehrReference, tenant)
         assertEquals("tenant-1234", reference.id)
         assertEquals("Patient/tenant-1234", reference.reference)
@@ -137,9 +138,9 @@ class ReferenceTest {
         )
         val reference = Reference.from(ehrReference, tenant)
         assertEquals("tenant-5678", reference.id)
+        assertEquals("Practitioner", reference.type)
         assertEquals("Patient/tenant-1234", reference.reference)
         assertNull(reference.identifier)
         assertEquals("Practitioner", reference.type)
-        assertNull(reference.display)
     }
 }

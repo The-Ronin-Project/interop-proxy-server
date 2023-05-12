@@ -21,16 +21,16 @@ data class Reference(
 ) {
     companion object {
         fun from(reference: R4Reference?, tenant: Tenant): Reference {
-            val type = reference?.decomposedType()
-            val id = reference?.decomposedId()
             val localizedReference = reference?.localizeReference(tenant)
-            return Reference(
-                reference = localizedReference?.reference?.value,
-                type = type,
-                display = reference?.display?.value,
-                identifier = reference?.identifier?.let { Identifier(it) },
-                id = id?.localize(tenant)
-            )
+            localizedReference.apply {
+                return Reference(
+                    reference = this?.reference?.value,
+                    type = reference?.decomposedType(),
+                    display = this?.display?.value,
+                    identifier = this?.identifier?.let { Identifier(it) },
+                    id = reference?.decomposedId()?.localize(tenant)
+                )
+            }
         }
     }
 }

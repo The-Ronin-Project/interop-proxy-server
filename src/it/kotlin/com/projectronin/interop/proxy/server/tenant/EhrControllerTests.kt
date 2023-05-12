@@ -47,7 +47,17 @@ class EhrControllerTests {
 
     @BeforeEach
     fun setup() {
-        backupTables(ehrDatasource, listOf("io_tenant_epic", "io_tenant_cerner", "io_tenant_provider_pool", "io_tenant", "io_ehr"))
+        backupTables(
+            ehrDatasource,
+            listOf(
+                "io_tenant_epic",
+                "io_tenant_cerner",
+                "io_tenant_provider_pool",
+                "io_tenant_codes",
+                "io_tenant",
+                "io_ehr"
+            )
+        )
     }
 
     @AfterEach
@@ -244,15 +254,45 @@ class EhrControllerTests {
     }
 
     private fun emptyDb() {
-        truncateTables(ehrDatasource, listOf("io_tenant_epic", "io_tenant_cerner", "io_tenant_provider_pool", "io_tenant", "io_ehr"))
+        truncateTables(
+            ehrDatasource,
+            listOf(
+                "io_tenant_epic",
+                "io_tenant_cerner",
+                "io_tenant_provider_pool",
+                "io_tenant_codes",
+                "io_tenant",
+                "io_ehr"
+            )
+        )
     }
 
     private fun populateDb() {
-        restoreTables(ehrDatasource, listOf("io_tenant_epic", "io_tenant_cerner", "io_tenant_provider_pool", "io_tenant", "io_ehr"))
+        restoreTables(
+            ehrDatasource,
+            listOf(
+                "io_tenant_epic",
+                "io_tenant_cerner",
+                "io_tenant_provider_pool",
+                "io_tenant_codes",
+                "io_tenant",
+                "io_ehr"
+            )
+        )
         removeBackups()
     }
 
     private fun removeBackups() {
-        removeBackupTables(ehrDatasource, listOf("io_tenant_epic", "io_tenant_cerner", "io_tenant_provider_pool", "io_tenant", "io_ehr"))
+        removeBackupTables(
+            ehrDatasource,
+            listOf(
+                "io_tenant_epic",
+                "io_tenant_cerner",
+                "io_tenant_provider_pool",
+                "io_tenant_codes",
+                "io_tenant",
+                "io_ehr"
+            )
+        )
     }
 }

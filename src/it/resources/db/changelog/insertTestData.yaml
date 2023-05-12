@@ -265,3 +265,16 @@ databaseChangeLog:
               - column:
                   name: mrn_system
                   value: "mockEHRMRNSystem"
+        - insert:
+            dbms: 'mysql'
+            tableName: io_tenant_codes
+            columns:
+              - column:
+                  name: io_tenant_id
+                  value: "1001"
+              - column:
+                  name: bsa_code
+                  value: "bsa_code_value"
+              - column:
+                  name: bmi_code
+                  value: "bmi_code_value"
