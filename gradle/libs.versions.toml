@@ -51,7 +51,7 @@ spring-boot-parent = "org.springframework.boot:spring-boot-parent:2.7.8"
 spring-mockk = "com.ninja-squad:springmockk:3.1.2"
 spring-security-oauth2-core = { module = "org.springframework.security:spring-security-oauth2-core" }
 spring-security-oauth2-jose = { module = "org.springframework.security:spring-security-oauth2-jose" }
-testcontainers-bom = "org.testcontainers:testcontainers-bom:1.18.0"
+testcontainers-bom = "org.testcontainers:testcontainers-bom:1.18.1"
 
 [bundles]
 ehr-impls = ["interop-ehr-epic", "interop-ehr-cerner"]
