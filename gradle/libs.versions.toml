@@ -45,7 +45,7 @@ mysql-connector-java = "com.mysql:mysql-connector-j:8.0.33"
 opentracing-api = "io.opentracing:opentracing-api:0.33.0"
 opentracing-util = "io.opentracing:opentracing-util:0.33.0"
 
-ronin-kafka = "com.projectronin:ronin-kafka:0.4.1"
+ronin-kafka = "com.projectronin:ronin-kafka:1.0.0"
 
 spring-boot-parent = "org.springframework.boot:spring-boot-parent:2.7.8"
 spring-mockk = "com.ninja-squad:springmockk:3.1.2"
