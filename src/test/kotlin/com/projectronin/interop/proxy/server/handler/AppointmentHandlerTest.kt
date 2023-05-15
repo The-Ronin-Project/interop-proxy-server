@@ -178,7 +178,8 @@ class AppointmentHandlerTest {
                         tenant = tenant,
                         patientFHIRId = "123456789",
                         startDate = LocalDate.of(2025, 1, 20),
-                        endDate = LocalDate.of(2025, 1, 22)
+                        endDate = LocalDate.of(2025, 1, 22),
+                        useEHRFallback = false
                     )
                 } throws (IllegalStateException("Error"))
             }
@@ -214,7 +215,8 @@ class AppointmentHandlerTest {
                         tenant = tenant,
                         patientFHIRId = "123456789",
                         startDate = LocalDate.of(2025, 1, 20),
-                        endDate = LocalDate.of(2025, 1, 22)
+                        endDate = LocalDate.of(2025, 1, 22),
+                        useEHRFallback = false
                     )
                 } throws (ServiceUnavailableException(HttpStatusCode.ServiceUnavailable, "Proxy"))
             }
@@ -304,7 +306,8 @@ class AppointmentHandlerTest {
                         tenant = tenant,
                         patientFHIRId = "123456789",
                         startDate = LocalDate.of(2025, 1, 20),
-                        endDate = LocalDate.of(2025, 1, 22)
+                        endDate = LocalDate.of(2025, 1, 22),
+                        useEHRFallback = false
                     )
                 } returns response
             }
@@ -398,7 +401,8 @@ class AppointmentHandlerTest {
                         tenant = tenant,
                         patientFHIRId = "123456789",
                         startDate = LocalDate.of(2025, 1, 20),
-                        endDate = LocalDate.of(2025, 1, 22)
+                        endDate = LocalDate.of(2025, 1, 22),
+                        useEHRFallback = false
                     )
                 } returns response
             }
@@ -453,7 +457,8 @@ class AppointmentHandlerTest {
                         tenant = tenant,
                         patientFHIRId = "123456789",
                         startDate = LocalDate.of(2025, 1, 20),
-                        endDate = LocalDate.of(2025, 1, 22)
+                        endDate = LocalDate.of(2025, 1, 22),
+                        useEHRFallback = false
                     )
                 } returns response
             }
@@ -494,7 +499,8 @@ class AppointmentHandlerTest {
                         patientFHIRId = "FHIRID",
                         startDate = LocalDate.of(2025, 1, 20),
                         endDate = LocalDate.of(2025, 1, 22),
-                        patientMRN = "MRN"
+                        patientMRN = "MRN",
+                        useEHRFallback = false
                     )
                 } returns response
             }

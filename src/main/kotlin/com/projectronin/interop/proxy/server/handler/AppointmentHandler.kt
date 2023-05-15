@@ -82,7 +82,8 @@ class AppointmentHandler(
                 patientFHIRId = patientFhirId,
                 startDate = dateFormatter.parseDateString(startDate),
                 endDate = dateFormatter.parseDateString(endDate),
-                patientMRN = patientMrn
+                patientMRN = patientMrn,
+                useEHRFallback = false // prevent overloading Epic with too many API calls
             )
         } catch (e: Exception) {
             findAppointmentErrors.add(GraphQLException(e.message).toGraphQLError())
