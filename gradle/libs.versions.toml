@@ -22,7 +22,7 @@ interop-ehr-epic = "com.projectronin.interop.ehr:interop-ehr-epic:9.10.2"
 interop-ehr-liquibase = "com.projectronin.interop.ehr:interop-ehr-liquibase:9.10.2"
 interop-ehr-tenant = "com.projectronin.interop.ehr:interop-tenant:9.10.2"
 
-interop-fhir = "com.projectronin.interop.fhir:interop-fhir:8.0.0"
+interop-fhir = "com.projectronin.interop.fhir:interop-fhir:8.1.0"
 
 interop-publishers-aidbox = "com.projectronin.interop.publish:interop-aidbox:8.0.0"
 interop-publishers-datalake = "com.projectronin.interop.publish:interop-datalake:8.0.0"
