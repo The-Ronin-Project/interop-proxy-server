@@ -422,7 +422,7 @@ input MessageRecipientInput {
 
 "A message that contains note information from product for HL7v2 downstream writebacks"
 input NoteInput {
-  "Timestamp of when note was recorded, in yyyymmddhhmmss format"
+  "Timestamp of when note was recorded, in yyyyMMddHHmm[ss] format"
   datetime: String!
   "If the note is an alert"
   isAlert: Boolean!

@@ -1,5 +1,6 @@
 package com.projectronin.interop.proxy.server.handler.exception
 
+import com.projectronin.interop.common.logmarkers.getLogMarker
 import graphql.ExceptionWhileDataFetching
 import graphql.execution.SimpleDataFetcherExceptionHandler
 import mu.KotlinLogging
@@ -10,6 +11,6 @@ class InteropDataFetcherExceptionHandler : SimpleDataFetcherExceptionHandler() {
     private val logger = KotlinLogging.logger { }
 
     override fun logException(error: ExceptionWhileDataFetching, exception: Throwable?) {
-        logger.error(exception) { error.message }
+        logger.error(exception?.getLogMarker(), exception) { error.message }
     }
 }

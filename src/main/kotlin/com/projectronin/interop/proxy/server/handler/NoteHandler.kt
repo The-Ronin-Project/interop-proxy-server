@@ -1,6 +1,7 @@
 package com.projectronin.interop.proxy.server.handler
 
 import com.expediagroup.graphql.generator.annotations.GraphQLDescription
+import com.expediagroup.graphql.server.extensions.toGraphQLError
 import com.expediagroup.graphql.server.operations.Mutation
 import com.projectronin.interop.aidbox.PatientService
 import com.projectronin.interop.aidbox.PractitionerService
@@ -26,6 +27,8 @@ import com.projectronin.interop.queue.model.HL7Message
 import com.projectronin.interop.tenant.config.TenantService
 import com.projectronin.interop.tenant.config.model.Tenant
 import datadog.trace.api.Trace
+import graphql.GraphQLException
+import graphql.execution.DataFetcherResult
 import graphql.schema.DataFetchingEnvironment
 import mu.KotlinLogging
 import org.springframework.stereotype.Component
@@ -48,9 +51,16 @@ class NoteHandler(
      */
     @GraphQLDescription("Takes in note from product and processes it for downstream services. Requires M2M Authorization or User Auth matching to the requested tenant or will result in an error with no results.")
     @Trace
-    fun sendNote(noteInput: NoteInput, tenantId: String, dfe: DataFetchingEnvironment): String {
+    fun sendNote(noteInput: NoteInput, tenantId: String, dfe: DataFetchingEnvironment): DataFetcherResult<String> {
         val tenant = findAndValidateTenant(dfe, tenantService, tenantId, false)
-        return enqueueHL7(noteInput, tenant)
+        return try {
+            val response = enqueueHL7(noteInput, tenant)
+            DataFetcherResult.newResult<String>().data(response).build()
+        } catch (e: Exception) {
+            logger.error(e.getLogMarker(), e) { "Exception occurred while sending note: ${e.message}" }
+            val error = GraphQLException(e.message).toGraphQLError()
+            DataFetcherResult.newResult<String>().errors(listOf(error)).build()
+        }
     }
 
     @GraphQLDescription("Takes in addendum note from product and processes it for downstream services. Requires M2M Authorization or User Auth matching to the requested tenant or will result in an error with no results.")
@@ -60,12 +70,25 @@ class NoteHandler(
         tenantId: String,
         parentDocumentId: String,
         dfe: DataFetchingEnvironment
-    ): String {
+    ): DataFetcherResult<String> {
         val tenant = findAndValidateTenant(dfe, tenantService, tenantId, false)
-        return enqueueHL7(noteInput, tenant, parentDocumentId)
+        return try {
+            val response = enqueueHL7(noteInput, tenant, parentDocumentId)
+            DataFetcherResult.newResult<String>().data(response).build()
+        } catch (e: Exception) {
+            logger.error(e.getLogMarker(), e) { "Exception occurred while sending note addendum: ${e.message}" }
+            val error = GraphQLException(e.message).toGraphQLError()
+            DataFetcherResult.newResult<String>().errors(listOf(error)).build()
+        }
     }
 
-    private fun enqueueHL7(noteInput: NoteInput, tenant: Tenant, parentDocumentId: String? = null): String {
+    private fun enqueueHL7(
+        noteInput: NoteInput,
+        tenant: Tenant,
+        parentDocumentId: String? = null
+    ): String {
+        noteInput.validate()
+
         logger.info { "Sending Note for patient ${noteInput.patientIdType}:${noteInput.patientId} from Practitioner ${noteInput.practitionerFhirId}" }
         parentDocumentId?.let { logger.info { "Attempting to addend parent document $it" } }
 
@@ -114,7 +137,8 @@ class NoteHandler(
                 )
             )
         } catch (e: Exception) {
-            logger.warn(e.getLogMarker(), e) { "Exception sending note to queue: ${e.message}" }
+            logger.error(e.getLogMarker(), e) { "Exception sending note to queue: ${e.message}" }
+            throw e
         }
         return hl7.second
     }

@@ -34,9 +34,12 @@ import com.projectronin.interop.tenant.config.TenantService
 import com.projectronin.interop.tenant.config.model.Tenant
 import graphql.schema.DataFetchingEnvironment
 import io.ktor.http.HttpStatusCode
+import io.mockk.Runs
 import io.mockk.every
+import io.mockk.just
 import io.mockk.mockk
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -99,7 +102,9 @@ class NoteHandlerTest {
     fun initTest() {
         practitionerService = mockk()
         patientService = mockk()
-        queueService = mockk()
+        queueService = mockk {
+            every { enqueueMessages(any()) } just Runs
+        }
         tenantService = mockk()
         mdmService = mockk()
         ehrFactory = mockk()
@@ -147,7 +152,8 @@ class NoteHandlerTest {
             true
         )
         val response = noteHandler.sendNote(noteInput, "apposnd", dfe)
-        assertEquals("uniqueId", response)
+        assertEquals("uniqueId", response.data)
+        assertEquals(0, response.errors.size)
     }
 
     @Test
@@ -183,7 +189,8 @@ class NoteHandlerTest {
             true
         )
         val response = noteHandler.sendNoteAddendum(noteInput, "apposnd", "parentDocId", dfe)
-        assertEquals("uniqueId", response)
+        assertEquals("uniqueId", response.data)
+        assertEquals(0, response.errors.size)
     }
 
     @Test
@@ -219,7 +226,8 @@ class NoteHandlerTest {
             true
         )
         val response = noteHandler.sendNoteAddendum(noteInput, "apposnd", "parentDocId", dfe)
-        assertEquals("uniqueId", response)
+        assertEquals("uniqueId", response.data)
+        assertEquals(0, response.errors.size)
     }
 
     @Test
@@ -267,7 +275,8 @@ class NoteHandlerTest {
         } returns Pair("mock", "uniqueId")
 
         val response = noteHandler.sendNote(noteInput, "apposnd", dfe)
-        assertEquals("uniqueId", response)
+        assertEquals("uniqueId", response.data)
+        assertEquals(0, response.errors.size)
     }
 
     @Test
@@ -315,7 +324,8 @@ class NoteHandlerTest {
         } returns Pair("mock", "uniqueId")
 
         val response = noteHandler.sendNote(noteInput, "apposnd", dfe)
-        assertEquals("uniqueId", response)
+        assertEquals("uniqueId", response.data)
+        assertEquals(0, response.errors.size)
     }
 
     @Test
@@ -400,7 +410,8 @@ class NoteHandlerTest {
 
         // success: sendNote()
         val response = noteHandler.sendNote(noteInput, "apposnd", dfe)
-        assertEquals("uniqueId", response)
+        assertEquals("uniqueId", response.data)
+        assertEquals(0, response.errors.size)
     }
 
     @Test
@@ -465,7 +476,8 @@ class NoteHandlerTest {
 
         // success: sendNote()
         val response = noteHandler.sendNote(noteInput, "apposnd", dfe)
-        assertEquals("uniqueId", response)
+        assertEquals("uniqueId", response.data)
+        assertEquals(0, response.errors.size)
     }
 
     @Test
@@ -503,10 +515,10 @@ class NoteHandlerTest {
         )
 
         // failure: sendNote()
-        val exception = assertThrows<RequestFailureException> {
-            noteHandler.sendNote(noteInput, "apposnd", dfe)
-        }
-        assertEquals("Received exception when calling a (b): null", exception.message)
+        val response = noteHandler.sendNote(noteInput, "apposnd", dfe)
+        assertNull(response.data)
+        assertEquals(1, response.errors.size)
+        assertEquals("Received exception when calling a (b): null", response.errors[0].message)
     }
 
     @Test
@@ -549,10 +561,10 @@ class NoteHandlerTest {
         )
 
         // failure: sendNote()
-        val exception = assertThrows<HttpClientErrorException> {
-            noteHandler.sendNote(noteInput, "apposnd", dfe)
-        }
-        assertEquals("404 y", exception.message)
+        val response = noteHandler.sendNote(noteInput, "apposnd", dfe)
+        assertNull(response.data)
+        assertEquals(1, response.errors.size)
+        assertEquals("404 y", response.errors[0].message)
     }
 
     @Test
@@ -621,7 +633,8 @@ class NoteHandlerTest {
 
         // success: sendNote()
         val response = noteHandler.sendNote(noteInput, "apposnd", dfe)
-        assertEquals("uniqueId", response)
+        assertEquals("uniqueId", response.data)
+        assertEquals(0, response.errors.size)
     }
 
     @Test
@@ -676,9 +689,32 @@ class NoteHandlerTest {
         every { ehrPatientService.getPatient(tenant, "PatientFHIRId") } throws NullPointerException("z")
 
         // failure: sendNote()
-        val exception = assertThrows<NullPointerException> {
-            noteHandler.sendNote(noteInput, "apposnd", dfe)
-        }
-        assertEquals("z", exception.message)
+        val response = noteHandler.sendNote(noteInput, "apposnd", dfe)
+        assertNull(response.data)
+        assertEquals(1, response.errors.size)
+        assertEquals("z", response.errors[0].message)
+    }
+
+    @Test
+    fun `handles invalid NoteInput`() {
+        every { dfe.graphQlContext.get<InteropGraphQLContext>(INTEROP_CONTEXT_KEY).authzTenantId } returns "apposnd"
+        every { tenantService.getTenantForMnemonic("apposnd") } returns tenant
+
+        val noteInput = NoteInput(
+            "PatientMRNId",
+            PatientIdType.MRN,
+            "apposnd-PractitionerTestId",
+            "Example Note Text",
+            "20220601 125000",
+            NoteSender.PRACTITIONER,
+            false
+        )
+        val response = noteHandler.sendNote(noteInput, "apposnd", dfe)
+        assertNull(response.data)
+        assertEquals(1, response.errors.size)
+        assertEquals(
+            "datetime must be of form \"yyyyMMddHHmm[ss]\" but was \"20220601 125000\"",
+            response.errors[0].message
+        )
     }
 }
