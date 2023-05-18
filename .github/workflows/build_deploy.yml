@@ -5,7 +5,7 @@ on:
   workflow_run:
     workflows: [ Tests ]
     types: [ completed ]
-    branches: [ main ]
+    branches: [ main, hotfix ]
 
 jobs:
   image-push-latest:

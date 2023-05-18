@@ -1,7 +1,7 @@
 - resourceType: "Practitioner"
   id: "ronin-PractitionerFHIRID1"
   identifier:
-    - value: "   E1000"
+    - value: "E1000"
       system: "mockEHRProviderSystem"
       type:
         text: "Internal"
