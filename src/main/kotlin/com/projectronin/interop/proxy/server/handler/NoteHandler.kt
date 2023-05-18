@@ -73,14 +73,15 @@ class NoteHandler(
             practitioner.identifier
         )
 
-        val patient = getPatient(tenant, noteInput)
+        val (patient, mrn) = getPatient(tenant, noteInput)
         val mdmPatientFields = MDMPatientFields(
             patient.identifier,
             patient.name,
             patient.birthDate,
             patient.gender.asEnum<AdministrativeGender>(),
             patient.address,
-            patient.telecom
+            patient.telecom,
+            mrn
         )
         // MDA: IP "in progress" for incomplete record, AU "authenticated" for final record
         val documentStatus = if (noteInput.noteSender == NoteSender.PATIENT && noteInput.isAlert) {
@@ -132,20 +133,23 @@ class NoteHandler(
         }
     }
 
-    private fun getPatient(tenant: Tenant, noteInput: NoteInput): Patient {
+    private fun getPatient(tenant: Tenant, noteInput: NoteInput): Pair<Patient, String?> {
         return when (noteInput.patientIdType) {
             PatientIdType.FHIR -> {
                 // get the Patient from Aidbox
-                patientService.getPatientByUDPId(tenant.mnemonic, noteInput.patientId)
+                val patient = patientService.getPatientByUDPId(tenant.mnemonic, noteInput.patientId)
+                Pair(patient, null)
             }
 
             PatientIdType.MRN -> {
+                val paddedMrn = noteInput.patientId.padStart(7, '0')
                 // pivot from the MRN to get the Patient from the EHR
                 val ehrPatientService = ehrFactory.getVendorFactory(tenant).patientService
-                ehrPatientService.getPatient(
+                val patient = ehrPatientService.getPatient(
                     tenant,
-                    ehrPatientService.getPatientFHIRId(tenant, noteInput.patientId)
+                    ehrPatientService.getPatientFHIRId(tenant, paddedMrn)
                 )
+                Pair(patient, paddedMrn)
             }
         }
     }

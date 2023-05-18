@@ -52,7 +52,7 @@ class MDMService {
         evn.recordedDateTime.time.value = dateTime
 
         // Populate PID Segment
-        setPID(mdm, patient)
+        setPID(mdm, patient, patient.mrn)
 
         // Populate the PV1 Segment
         val pv1: PV1 = mdm.pV1
@@ -101,13 +101,14 @@ class MDMService {
         }
 
     // creates and populates the PID segment
-    private fun setPID(mdm: MDM_T02, patient: MDMPatientFields) {
+    private fun setPID(mdm: MDM_T02, patient: MDMPatientFields, mrn: String? = null) {
         val pid: PID = mdm.pid
 
         // PID-3 Identifiers MDA: Only want MRN
-        val pid3 = patient.identifier.firstOrNull { it.system?.value?.substringAfterLast("/") == "mrn" }
-        pid3?.let {
-            pid.getPatientIdentifierList(0).idNumber.value = pid3.value?.value
+        val mrnValue =
+            mrn ?: patient.identifier.firstOrNull { it.system?.value?.substringAfterLast("/") == "mrn" }?.value?.value
+        mrnValue?.let {
+            pid.getPatientIdentifierList(0).idNumber.value = mrnValue
             pid.getPatientIdentifierList(0).assigningAuthority.namespaceID.value = "MRN"
         }
 

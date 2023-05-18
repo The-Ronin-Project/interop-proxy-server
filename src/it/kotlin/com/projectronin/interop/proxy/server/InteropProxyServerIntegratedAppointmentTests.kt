@@ -243,7 +243,7 @@ class InteropProxyServerIntegratedAppointmentTests : InteropProxyServerIntegrate
         val tenantId = "ronin"
         val startDate = "01-01-2001"
         val endDate = "12-01-2001"
-        val mrn = "202497"
+        val mrn = "0202497"
 
         val query = """
             |query {
