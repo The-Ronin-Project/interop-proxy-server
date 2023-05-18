@@ -9,7 +9,7 @@ on:
 
 jobs:
   image-push-latest:
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    if: ${{ github.event.workflow_run.conclusion == 'success' || github.event_name == 'workflow_dispatch' }}
     name: Push Docker:latest to Nexus
     uses: projectronin/github/.github/workflows/image_push_nexus.yml@master
     with:
@@ -22,7 +22,7 @@ jobs:
       password: ${{ secrets.NEXUS_DOCKER_PASSWORD }}
 
   image-push-sha:
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    if: ${{ github.event.workflow_run.conclusion == 'success' || github.event_name == 'workflow_dispatch' }}
     name: Push Docker:SHA to Nexus
     uses: projectronin/github/.github/workflows/image_push_nexus.yml@master
     with:
