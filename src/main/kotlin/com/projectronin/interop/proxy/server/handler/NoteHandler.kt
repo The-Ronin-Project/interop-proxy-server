@@ -4,12 +4,10 @@ import com.expediagroup.graphql.generator.annotations.GraphQLDescription
 import com.expediagroup.graphql.server.operations.Mutation
 import com.projectronin.interop.aidbox.PatientService
 import com.projectronin.interop.aidbox.PractitionerService
-import com.projectronin.interop.aidbox.model.SystemValue
 import com.projectronin.interop.common.hl7.EventType
 import com.projectronin.interop.common.hl7.MessageType
 import com.projectronin.interop.common.logmarkers.getLogMarker
 import com.projectronin.interop.ehr.factory.EHRFactory
-import com.projectronin.interop.fhir.r4.CodeSystem
 import com.projectronin.interop.fhir.r4.resource.Patient
 import com.projectronin.interop.fhir.r4.resource.Practitioner
 import com.projectronin.interop.fhir.r4.valueset.AdministrativeGender
@@ -142,27 +140,12 @@ class NoteHandler(
             }
 
             PatientIdType.MRN -> {
-                try {
-                    // pivot from the MRN to get the Patient from Aidbox
-                    val patientFhirId = patientService.getPatientFHIRIds(
-                        tenant.mnemonic,
-                        mapOf(
-                            "patientFhirId" to SystemValue(
-                                system = CodeSystem.RONIN_MRN.uri.value!!,
-                                value = noteInput.patientId
-                            )
-                        )
-                    ).getValue("patientFhirId")
-                    patientService.getPatientByFHIRId(tenant.mnemonic, patientFhirId)
-                } catch (exception: Exception) {
-                    logWarningMessage(noteInput, exception)
-                    // pivot from the MRN to get the Patient from the EHR
-                    val ehrPatientService = ehrFactory.getVendorFactory(tenant).patientService
-                    ehrPatientService.getPatient(
-                        tenant,
-                        ehrPatientService.getPatientFHIRId(tenant, noteInput.patientId)
-                    )
-                }
+                // pivot from the MRN to get the Patient from the EHR
+                val ehrPatientService = ehrFactory.getVendorFactory(tenant).patientService
+                ehrPatientService.getPatient(
+                    tenant,
+                    ehrPatientService.getPatientFHIRId(tenant, noteInput.patientId)
+                )
             }
         }
     }
