@@ -134,7 +134,7 @@ class InteropProxyServerIntegratedNoteTests : InteropProxyServerIntegratedTestsB
     @Test
     fun `server handles note mutation with patient MRN`() {
         val notetext = "Test Note"
-        val patientid = "123456"
+        val patientid = "202497"
         val practitionerid = "ronin-654321"
         val tenantId = "ronin"
         val mutation =
@@ -342,7 +342,7 @@ class InteropProxyServerIntegratedNoteTests : InteropProxyServerIntegratedTestsB
     }
 
     @Test
-    fun `practitioner non-UDP ID not found in Aidbox, practitioner found in MockEHR, patient MRN not found in Aidbox, patient MRN found in MockEHR`() {
+    fun `practitioner non-UDP ID not found in Aidbox, practitioner found in MockEHR, patient MRN found in MockEHR`() {
         val notetext = "Test Note"
         val patientid = "202497"
         val practitionerid = "PractitionerFHIRID1"
@@ -376,7 +376,7 @@ class InteropProxyServerIntegratedNoteTests : InteropProxyServerIntegratedTestsB
     }
 
     @Test
-    fun `practitioner non-UDP ID not found in Aidbox, practitioner found in MockEHR, patient MRN not found in Aidbox, patient MRN not found in MockEHR`() {
+    fun `practitioner non-UDP ID not found in Aidbox, practitioner found in MockEHR, patient MRN not found in MockEHR`() {
         val notetext = "Test Note"
         val patientid = "123"
         val practitionerid = "PractitionerFHIRID1"

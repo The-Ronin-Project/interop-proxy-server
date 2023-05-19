@@ -5,12 +5,10 @@ import com.expediagroup.graphql.server.extensions.toGraphQLError
 import com.expediagroup.graphql.server.operations.Mutation
 import com.projectronin.interop.aidbox.PatientService
 import com.projectronin.interop.aidbox.PractitionerService
-import com.projectronin.interop.aidbox.model.SystemValue
 import com.projectronin.interop.common.hl7.EventType
 import com.projectronin.interop.common.hl7.MessageType
 import com.projectronin.interop.common.logmarkers.getLogMarker
 import com.projectronin.interop.ehr.factory.EHRFactory
-import com.projectronin.interop.fhir.r4.CodeSystem
 import com.projectronin.interop.fhir.r4.resource.Patient
 import com.projectronin.interop.fhir.r4.resource.Practitioner
 import com.projectronin.interop.fhir.r4.valueset.AdministrativeGender
@@ -98,14 +96,15 @@ class NoteHandler(
             practitioner.identifier
         )
 
-        val patient = getPatient(tenant, noteInput)
+        val (patient, mrn) = getPatient(tenant, noteInput)
         val mdmPatientFields = MDMPatientFields(
             patient.identifier,
             patient.name,
             patient.birthDate,
             patient.gender.asEnum<AdministrativeGender>(),
             patient.address,
-            patient.telecom
+            patient.telecom,
+            mrn
         )
         // MDA: IP "in progress" for incomplete record, AU "authenticated" for final record
         val documentStatus = if (noteInput.noteSender == NoteSender.PATIENT && noteInput.isAlert) {
@@ -158,35 +157,23 @@ class NoteHandler(
         }
     }
 
-    private fun getPatient(tenant: Tenant, noteInput: NoteInput): Patient {
+    private fun getPatient(tenant: Tenant, noteInput: NoteInput): Pair<Patient, String?> {
         return when (noteInput.patientIdType) {
             PatientIdType.FHIR -> {
                 // get the Patient from Aidbox
-                patientService.getPatientByUDPId(tenant.mnemonic, noteInput.patientId)
+                val patient = patientService.getPatientByUDPId(tenant.mnemonic, noteInput.patientId)
+                Pair(patient, null)
             }
 
             PatientIdType.MRN -> {
-                try {
-                    // pivot from the MRN to get the Patient from Aidbox
-                    val patientFhirId = patientService.getPatientFHIRIds(
-                        tenant.mnemonic,
-                        mapOf(
-                            "patientFhirId" to SystemValue(
-                                system = CodeSystem.RONIN_MRN.uri.value!!,
-                                value = noteInput.patientId
-                            )
-                        )
-                    ).getValue("patientFhirId")
-                    patientService.getPatientByFHIRId(tenant.mnemonic, patientFhirId)
-                } catch (exception: Exception) {
-                    logWarningMessage(noteInput, exception)
-                    // pivot from the MRN to get the Patient from the EHR
-                    val ehrPatientService = ehrFactory.getVendorFactory(tenant).patientService
-                    ehrPatientService.getPatient(
-                        tenant,
-                        ehrPatientService.getPatientFHIRId(tenant, noteInput.patientId)
-                    )
-                }
+                val paddedMrn = noteInput.patientId.padStart(7, '0')
+                // pivot from the MRN to get the Patient from the EHR
+                val ehrPatientService = ehrFactory.getVendorFactory(tenant).patientService
+                val patient = ehrPatientService.getPatient(
+                    tenant,
+                    ehrPatientService.getPatientFHIRId(tenant, paddedMrn)
+                )
+                Pair(patient, paddedMrn)
             }
         }
     }

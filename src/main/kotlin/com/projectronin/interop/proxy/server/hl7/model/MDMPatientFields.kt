@@ -13,5 +13,6 @@ data class MDMPatientFields(
     val dob: Date?,
     val gender: AdministrativeGender?,
     val address: List<R4Address> = listOf(),
-    val phone: List<Phone> = listOf()
+    val phone: List<Phone> = listOf(),
+    val mrn: String? = null
 )

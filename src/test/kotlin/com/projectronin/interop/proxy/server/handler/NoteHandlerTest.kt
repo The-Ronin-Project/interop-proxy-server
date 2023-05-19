@@ -2,13 +2,10 @@ package com.projectronin.interop.proxy.server.handler
 
 import com.projectronin.interop.aidbox.PatientService
 import com.projectronin.interop.aidbox.PractitionerService
-import com.projectronin.interop.aidbox.model.SystemValue
-import com.projectronin.interop.common.exceptions.VendorIdentifierNotFoundException
 import com.projectronin.interop.common.http.exceptions.ClientFailureException
 import com.projectronin.interop.common.http.exceptions.RequestFailureException
 import com.projectronin.interop.ehr.factory.EHRFactory
 import com.projectronin.interop.ehr.factory.VendorFactory
-import com.projectronin.interop.fhir.r4.CodeSystem
 import com.projectronin.interop.fhir.r4.datatype.Address
 import com.projectronin.interop.fhir.r4.datatype.ContactPoint
 import com.projectronin.interop.fhir.r4.datatype.HumanName
@@ -43,7 +40,6 @@ import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import org.springframework.http.HttpStatus
 import org.springframework.web.client.HttpClientErrorException
 import com.projectronin.interop.ehr.PatientService as EHRPatientService
 import com.projectronin.interop.ehr.PractitionerService as EHRPractitionerService
@@ -250,18 +246,12 @@ class NoteHandlerTest {
                 NoteSender.PRACTITIONER,
                 false
             )
-        every {
-            patientService.getPatientFHIRIds(
-                "apposnd",
-                mapOf(
-                    "patientFhirId" to SystemValue(
-                        system = CodeSystem.RONIN_MRN.uri.value!!,
-                        value = noteInput.patientId
-                    )
-                )
-            ).getValue("patientFhirId")
-        } returns "PatientFhirId"
-        every { patientService.getPatientByFHIRId("apposnd", "PatientFhirId") } returns oncologyPatient
+
+        every { vendorFactory.patientService } returns ehrPatientService
+        every { ehrFactory.getVendorFactory(tenant) } returns vendorFactory
+        every { ehrPatientService.getPatientFHIRId(tenant, "PatientMRNId") } returns "PatientFHIRId"
+        every { ehrPatientService.getPatient(tenant, "PatientFHIRId") } returns oncologyPatient
+
         every {
             mdmService.generateMDM(
                 "apposnd",
@@ -299,18 +289,12 @@ class NoteHandlerTest {
                 NoteSender.PATIENT,
                 false
             )
-        every {
-            patientService.getPatientFHIRIds(
-                "apposnd",
-                mapOf(
-                    "patientFhirId" to SystemValue(
-                        system = CodeSystem.RONIN_MRN.uri.value!!,
-                        value = noteInput.patientId
-                    )
-                )
-            ).getValue("patientFhirId")
-        } returns "PatientFhirId"
-        every { patientService.getPatientByFHIRId("apposnd", "PatientFhirId") } returns oncologyPatient
+
+        every { vendorFactory.patientService } returns ehrPatientService
+        every { ehrFactory.getVendorFactory(tenant) } returns vendorFactory
+        every { ehrPatientService.getPatientFHIRId(tenant, "PatientMRNId") } returns "PatientFHIRId"
+        every { ehrPatientService.getPatient(tenant, "PatientFHIRId") } returns oncologyPatient
+
         every {
             mdmService.generateMDM(
                 "apposnd",
@@ -381,19 +365,10 @@ class NoteHandlerTest {
             false
         )
 
-        // success: patientService.getPatientFHIRIds() for MRN
-        every {
-            patientService.getPatientFHIRIds(
-                "apposnd",
-                mapOf(
-                    "patientFhirId" to SystemValue(
-                        system = CodeSystem.RONIN_MRN.uri.value!!,
-                        value = noteInput.patientId
-                    )
-                )
-            ).getValue("patientFhirId")
-        } returns "PatientFhirId"
-        every { patientService.getPatientByFHIRId("apposnd", "PatientFhirId") } returns oncologyPatient
+        every { vendorFactory.patientService } returns ehrPatientService
+        every { ehrFactory.getVendorFactory(tenant) } returns vendorFactory
+        every { ehrPatientService.getPatientFHIRId(tenant, "PatientMRNId") } returns "PatientFHIRId"
+        every { ehrPatientService.getPatient(tenant, "PatientFHIRId") } returns oncologyPatient
 
         // success: generateMDM()
         every {
@@ -447,19 +422,10 @@ class NoteHandlerTest {
             false
         )
 
-        // success: patientService.getPatientFHIRIds() for MRN
-        every {
-            patientService.getPatientFHIRIds(
-                "apposnd",
-                mapOf(
-                    "patientFhirId" to SystemValue(
-                        system = CodeSystem.RONIN_MRN.uri.value!!,
-                        value = noteInput.patientId
-                    )
-                )
-            ).getValue("patientFhirId")
-        } returns "PatientFhirId"
-        every { patientService.getPatientByFHIRId("apposnd", "PatientFhirId") } returns oncologyPatient
+        every { vendorFactory.patientService } returns ehrPatientService
+        every { ehrFactory.getVendorFactory(tenant) } returns vendorFactory
+        every { ehrPatientService.getPatientFHIRId(tenant, "PatientMRNId") } returns "PatientFHIRId"
+        every { ehrPatientService.getPatient(tenant, "PatientFHIRId") } returns oncologyPatient
 
         // success: generateMDM()
         every {
@@ -522,53 +488,7 @@ class NoteHandlerTest {
     }
 
     @Test
-    fun `HttpClientErrorException (RestClientException) getting Patient from Aidbox by UDP ID, no EHR fallback for this case`() {
-        every { dfe.graphQlContext.get<InteropGraphQLContext>(INTEROP_CONTEXT_KEY).authzTenantId } returns "apposnd"
-        every { tenantService.getTenantForMnemonic("apposnd") } returns tenant
-
-        // success: getPractitionerByUDPId()
-        every {
-            practitionerService.getPractitionerByUDPId(
-                "apposnd",
-                "apposnd-PractitionerTestId"
-            )
-        } returns oncologyPractitioner
-
-        // failure: getPatientByUDPId
-        every {
-            patientService.getPatientByUDPId("apposnd", "PatientTestId")
-        } throws HttpClientErrorException(HttpStatus.NOT_FOUND, "y")
-
-        // success: ehrPatientService.getPatient()
-        every { vendorFactory.patientService } returns ehrPatientService
-        every { ehrFactory.getVendorFactory(tenant) } returns vendorFactory
-        every {
-            ehrPatientService.getPatient(
-                tenant,
-                "PatientTestId"
-            )
-        } returns oncologyPatient
-
-        // success: NoteInput()
-        val noteInput = NoteInput(
-            "PatientTestId",
-            PatientIdType.FHIR,
-            "PractitionerTestId",
-            "Example Note Text",
-            "202206011250",
-            NoteSender.PATIENT,
-            true
-        )
-
-        // failure: sendNote()
-        val response = noteHandler.sendNote(noteInput, "apposnd", dfe)
-        assertNull(response.data)
-        assertEquals(1, response.errors.size)
-        assertEquals("404 y", response.errors[0].message)
-    }
-
-    @Test
-    fun `HttpClientErrorException (RestClientException) getting Patient from Aidbox by MRN, success getting Patient from EHR by MRN`() {
+    fun `unexpected exception getting Patient from EHR by MRN`() {
         every { dfe.graphQlContext.get<InteropGraphQLContext>(INTEROP_CONTEXT_KEY).authzTenantId } returns "apposnd"
         every { tenantService.getTenantForMnemonic("apposnd") } returns tenant
 
@@ -590,97 +510,6 @@ class NoteHandlerTest {
             NoteSender.PRACTITIONER,
             false
         )
-
-        // success: patientService.getPatientFHIRIds() for MRN
-        every {
-            patientService.getPatientFHIRIds(
-                "apposnd",
-                mapOf(
-                    "patientFhirId" to SystemValue(
-                        system = CodeSystem.RONIN_MRN.uri.value!!,
-                        value = noteInput.patientId
-                    )
-                )
-            ).getValue("patientFhirId")
-        } returns "PatientFhirId"
-
-        // failure: patientService.getPatientByFHIRId()
-        every {
-            patientService.getPatientByFHIRId(
-                "apposnd",
-                "PatientFhirId"
-            )
-        } throws HttpClientErrorException(HttpStatus.NOT_FOUND, "y")
-
-        // success: ehrPatientService.getPatient()
-        every { vendorFactory.patientService } returns ehrPatientService
-        every { ehrFactory.getVendorFactory(tenant) } returns vendorFactory
-        every { ehrPatientService.getPatientFHIRId(tenant, "PatientMRNId") } returns "PatientFHIRId"
-        every { ehrPatientService.getPatient(tenant, "PatientFHIRId") } returns oncologyPatient
-
-        // success: generateMDM()
-        every {
-            mdmService.generateMDM(
-                "apposnd",
-                match { it.name == listOf(testname) },
-                match { it.name == listOf(testname) },
-                "Example Note Text",
-                "202206011250",
-                null,
-                "AU"
-            )
-        } returns Pair("mock", "uniqueId")
-
-        // success: sendNote()
-        val response = noteHandler.sendNote(noteInput, "apposnd", dfe)
-        assertEquals("uniqueId", response.data)
-        assertEquals(0, response.errors.size)
-    }
-
-    @Test
-    fun `VendorIdentifierNotFoundException getting Patient from Aidbox by MRN, unexpected exception getting Patient from EHR by MRN`() {
-        every { dfe.graphQlContext.get<InteropGraphQLContext>(INTEROP_CONTEXT_KEY).authzTenantId } returns "apposnd"
-        every { tenantService.getTenantForMnemonic("apposnd") } returns tenant
-
-        // success: practitionerService.getPractitionerByUDPId()
-        every {
-            practitionerService.getPractitionerByUDPId(
-                "apposnd",
-                "apposnd-PractitionerTestId"
-            )
-        } returns oncologyPractitioner
-
-        // success: NoteInput()
-        val noteInput = NoteInput(
-            "PatientMRNId",
-            PatientIdType.MRN,
-            "apposnd-PractitionerTestId",
-            "Example Note Text",
-            "202206011250",
-            NoteSender.PRACTITIONER,
-            false
-        )
-
-        // success: patientService.getPatientFHIRIds() for MRN
-        every {
-            patientService.getPatientFHIRIds(
-                "apposnd",
-                mapOf(
-                    "patientFhirId" to SystemValue(
-                        system = CodeSystem.RONIN_MRN.uri.value!!,
-                        value = noteInput.patientId
-                    )
-                )
-            ).getValue("patientFhirId")
-        } returns "PatientFhirId"
-
-        // failure: patientService.getPatientByFHIRId()
-        every {
-            patientService.getPatientByFHIRId(
-                "apposnd",
-                "PatientFhirId"
-            )
-        } throws (VendorIdentifierNotFoundException())
 
         // failure: ehrPatientService.getPatient()
         every { vendorFactory.patientService } returns ehrPatientService
@@ -716,5 +545,48 @@ class NoteHandlerTest {
             "datetime must be of form \"yyyyMMddHHmm[ss]\" but was \"20220601 125000\"",
             response.errors[0].message
         )
+    }
+
+    @Test
+    fun `mrn is padded in less than 7 characters`() {
+        every { dfe.graphQlContext.get<InteropGraphQLContext>(INTEROP_CONTEXT_KEY).authzTenantId } returns "apposnd"
+        every { tenantService.getTenantForMnemonic("apposnd") } returns tenant
+        every {
+            practitionerService.getPractitionerByUDPId(
+                "apposnd",
+                "apposnd-PractitionerTestId"
+            )
+        } returns oncologyPractitioner
+        val noteInput =
+            NoteInput(
+                "12345",
+                PatientIdType.MRN,
+                "apposnd-PractitionerTestId",
+                "Example Note Text",
+                "202206011250",
+                NoteSender.PRACTITIONER,
+                false
+            )
+
+        every { vendorFactory.patientService } returns ehrPatientService
+        every { ehrFactory.getVendorFactory(tenant) } returns vendorFactory
+        every { ehrPatientService.getPatientFHIRId(tenant, "0012345") } returns "PatientFHIRId"
+        every { ehrPatientService.getPatient(tenant, "PatientFHIRId") } returns oncologyPatient
+
+        every {
+            mdmService.generateMDM(
+                "apposnd",
+                match { it.name == listOf(testname) && it.mrn == "0012345" },
+                match { it.name == listOf(testname) },
+                "Example Note Text",
+                "202206011250",
+                null,
+                "AU"
+            )
+        } returns Pair("mock", "uniqueId")
+
+        val response = noteHandler.sendNote(noteInput, "apposnd", dfe)
+        assertEquals("uniqueId", response.data)
+        assertEquals(0, response.errors.size)
     }
 }
