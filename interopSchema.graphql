@@ -293,9 +293,9 @@ type Query {
   "Finds active patient conditions for a given patient and category. Only conditions registered within the category will be returned. Requires User Auth matching to the requested tenant or will result in an error with no results."
   conditionsByPatientAndCategory(conditionCategoryCode: ConditionCategoryCode!, patientFhirId: String!, tenantId: String!): [Condition!]!
   "Retrieves a FHIR Practitioner from the EHR, and adds it to the Aidbox queue. Requires M2M Authorization or User Auth matching to the requested tenant or will result in an error with no results."
-  getPractitionerById(practitionerFhirId: String!, tenantId: String!): Practitioner!
+  getPractitionerById(practitionerFhirId: String!, tenantId: String!): Practitioner
   "Searches the EHR for a FHIR Practitioner by an internal identifier, and adds it to the Aidbox queue. Requires M2M Authorization or User Auth matching to the requested tenant or will result in an error with no results."
-  getPractitionerByProvider(providerId: String!, tenantId: String!): Practitioner!
+  getPractitionerByProvider(providerId: String!, tenantId: String!): Practitioner
   "Finds patient(s) that exactly match on family name, given name, and birthdate (YYYY-mm-dd format). Requires M2M Authorization or User Auth matching to the requested tenant or will result in an error with no results."
   patientsByNameAndDOB(birthdate: String!, family: String!, given: String!, tenantId: String!): [Patient!]!
   "Finds patient(s) across the supplied tenants that exactly match on family name, given name, and birthdate (YYYY-mm-dd format). Requires M2M Authorization or User Auth matching to the requested tenant or will result in an error with no results."

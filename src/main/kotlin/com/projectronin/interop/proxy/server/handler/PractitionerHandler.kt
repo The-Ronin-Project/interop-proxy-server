@@ -39,7 +39,7 @@ class PractitionerHandler(
         tenantId: String,
         providerId: String,
         dfe: DataFetchingEnvironment
-    ): DataFetcherResult<ProxyServerPractitioner> {
+    ): DataFetcherResult<ProxyServerPractitioner?> {
         val tenant = findAndValidateTenant(dfe, tenantService, tenantId, false)
         return retrievePractitioner(
             tenant,
@@ -54,7 +54,7 @@ class PractitionerHandler(
         tenantId: String,
         practitionerFhirId: String,
         dfe: DataFetchingEnvironment
-    ): DataFetcherResult<ProxyServerPractitioner> {
+    ): DataFetcherResult<ProxyServerPractitioner?> {
         val tenant = findAndValidateTenant(dfe, tenantService, tenantId, false)
         return retrievePractitioner(
             tenant,
@@ -67,7 +67,7 @@ class PractitionerHandler(
         tenant: Tenant,
         idToUse: String,
         practitionerLookup: (Tenant, String) -> Practitioner
-    ): DataFetcherResult<ProxyServerPractitioner> {
+    ): DataFetcherResult<ProxyServerPractitioner?> {
         val errors = mutableListOf<GraphQLError>()
         val practitioner = try {
             practitionerLookup(tenant, idToUse)

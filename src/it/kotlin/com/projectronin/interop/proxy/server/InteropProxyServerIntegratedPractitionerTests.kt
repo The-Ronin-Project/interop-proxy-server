@@ -6,6 +6,7 @@ import com.projectronin.interop.aidbox.testcontainer.container.AidboxContainer
 import com.projectronin.interop.aidbox.testcontainer.container.AidboxDatabaseContainer
 import com.projectronin.interop.common.jackson.JacksonManager
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.MethodSource
@@ -57,5 +58,15 @@ class InteropProxyServerIntegratedPractitionerTests : InteropProxyServerIntegrat
 
         val resultJSONNode = JacksonManager.objectMapper.readTree(responseEntity.body)
         assertEquals("ronin-PractitionerFHIRID1", resultJSONNode["data"]["getPractitionerByProvider"]["id"].asText())
+    }
+
+    @ParameterizedTest
+    @MethodSource("tenantsToTest")
+    fun `server handles not finding practitioner by FHIR ID query`(testTenant: String) {
+        val query = this::class.java.getResource("/graphql/practitionerById.graphql")!!.readText()
+        val editedQuery = query.replace("PractitionerFHIRID1", "nonExistent")
+        val responseEntity = multiVendorQuery(editedQuery, testTenant)
+        val resultJSONNode = JacksonManager.objectMapper.readTree(responseEntity.body)
+        assertTrue(resultJSONNode["data"]["getPractitionerById"].isNull)
     }
 }

@@ -61,9 +61,9 @@ internal class PractitionerHandlerTest {
         every { queueService.enqueueMessages(any()) } just runs
         val ret = handler.getPractitionerById("tenant", "FHIRID1", dfe)
         assertEquals(0, ret.errors.size)
-        assertEquals("tenant-practID1", ret.data.id)
-        assertNotNull(ret.data.identifier)
-        assertNotNull(ret.data.name)
+        assertEquals("tenant-practID1", ret.data?.id)
+        assertNotNull(ret.data?.identifier)
+        assertNotNull(ret.data?.name)
         unmockkObject(JacksonUtil)
     }
 
@@ -79,9 +79,9 @@ internal class PractitionerHandlerTest {
         every { queueService.enqueueMessages(any()) } just runs
         val ret = handler.getPractitionerById("tenant", "FHIRID1", dfe)
         assertEquals(0, ret.errors.size)
-        assertEquals("tenant-practID1", ret.data.id)
-        assertNotNull(ret.data.identifier)
-        assertNotNull(ret.data.name)
+        assertEquals("tenant-practID1", ret.data?.id)
+        assertNotNull(ret.data?.identifier)
+        assertNotNull(ret.data?.name)
         unmockkObject(JacksonUtil)
     }
 
