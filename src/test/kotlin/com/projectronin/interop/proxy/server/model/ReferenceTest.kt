@@ -127,7 +127,7 @@ class ReferenceTest {
     }
 
     @Test
-    fun `created from R4 reference does not override type and id if already present`() {
+    fun `created from R4 reference decomposed type and id even if already present`() {
         val tenant = mockk<Tenant> {
             every { mnemonic } returns "tenant"
         }
@@ -137,10 +137,10 @@ class ReferenceTest {
             id = "5678".asFHIR()
         )
         val reference = Reference.from(ehrReference, tenant)
-        assertEquals("tenant-5678", reference.id)
-        assertEquals("Practitioner", reference.type)
+        assertEquals("tenant-1234", reference.id)
+        assertEquals("Patient", reference.type)
         assertEquals("Patient/tenant-1234", reference.reference)
         assertNull(reference.identifier)
-        assertEquals("Practitioner", reference.type)
+        assertNull(reference.display)
     }
 }
