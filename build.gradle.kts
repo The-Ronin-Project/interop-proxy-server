@@ -13,6 +13,7 @@ dependencies {
     configurations.all {
         resolutionStrategy {
             force(libs.kafka.clients)
+            force(libs.graphql.java)
         }
     }
 
