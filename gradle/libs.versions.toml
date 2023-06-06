@@ -1,5 +1,5 @@
 [libraries]
-dd-trace-api = "com.datadoghq:dd-trace-api:1.14.0"
+dd-trace-api = "com.datadoghq:dd-trace-api:1.15.1"
 
 event-interop-resource-internal = "com.projectronin.contract.event:event-interop-resource-internal:1.0.0"
 
