@@ -1,0 +1,11 @@
+on:
+  push:
+    branches: 
+        - PLAT-234-fix-release-tag-checkout
+
+jobs:
+  tag_test_deploy:
+    uses: projectronin/github/.github/workflows/tag_commit_w_stamp.yml@PLAT-234-fix-tag-release-checkout-ref
+    with:
+      deploy-env: test
+      commit-sha: "34c6df5e61eda1a84e9dc3d42edcac82e0c0b2d2"
