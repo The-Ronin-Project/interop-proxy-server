@@ -3,7 +3,7 @@ import com.expediagroup.graphql.plugin.gradle.tasks.GraphQLGenerateSDLTask
 plugins {
     java
     id("com.projectronin.interop.gradle.spring-boot")
-    id("com.projectronin.interop.gradle.integration")
+    id("com.projectronin.interop.gradle.docker-integration")
     id("com.expediagroup.graphql")
     id("org.owasp.dependencycheck")
 }
@@ -98,6 +98,8 @@ dependencies {
     // Allows us to change environment variables
     testImplementation(libs.junit.pioneer)
 
+    itImplementation(project)
+    itImplementation(libs.bundles.ktor)
     itImplementation(platform(libs.spring.boot.parent))
     itImplementation("com.squareup.okhttp3:mockwebserver")
     itImplementation("org.springframework:spring-web")
@@ -109,13 +111,20 @@ dependencies {
     itImplementation(libs.interop.testcontainer.mockehr)
     itImplementation(libs.spring.mockk)
     itImplementation(libs.kafka.clients)
+    itImplementation(libs.ktorm.core)
     itImplementation(libs.interop.publishers.aidbox)
     itImplementation(libs.interop.common)
     itImplementation(libs.interop.commonHttp)
-    itImplementation(libs.interop.queue.liquibase)
     itImplementation(libs.interop.ehr.liquibase)
+    itImplementation(libs.interop.fhir)
+    itImplementation(libs.interop.fhir.generators)
+    itImplementation(libs.interop.ehr.tenant)
+    // itImplementation(libs.interop.ehr.fhir.ronin.generators)
+    itImplementation(libs.ronin.test.data.generator)
     itImplementation("org.springframework.security:spring-security-oauth2-jose")
     itImplementation("org.liquibase:liquibase-core")
+    itImplementation("io.github.microutils:kotlin-logging:3.0.5")
+    itImplementation(libs.jackson.databind)
 }
 
 tasks.withType(Test::class) {

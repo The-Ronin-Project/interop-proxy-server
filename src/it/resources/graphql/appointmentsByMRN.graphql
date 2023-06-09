@@ -1,5 +1,5 @@
 {
-    appointmentsByMRNAndDate (endDate: "__END_DATE__", mrn: "0202497", startDate: "__START_DATE__", tenantId: "ronin") {
+    appointmentsByMRNAndDate (endDate: "__END_DATE__", mrn: "0202497", startDate: "__START_DATE__", tenantId: "__tenant_mnemonic__") {
         appointmentType {
             coding {
                 code

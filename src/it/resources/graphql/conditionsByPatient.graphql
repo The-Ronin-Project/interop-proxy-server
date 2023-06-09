@@ -1,5 +1,5 @@
 {
-    conditionsByPatientAndCategory(tenantId:"ronin", patientFhirId:"PatientFHIRID1", conditionCategoryCode:PROBLEM_LIST_ITEM){
+    conditionsByPatientAndCategory(tenantId:"__tenant_mnemonic__", patientFhirId:"__patFhir__", conditionCategoryCode:PROBLEM_LIST_ITEM){
         category{
             coding {
                 code,

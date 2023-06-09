@@ -1,29 +1,69 @@
-{
-  "httpRequest" : {
-    "method" : "GET",
-    "path" : "/n/.*/b/.*/o/DataNormalizationRegistry%2Fv1%2Fregistry.json"
-  },
-  "httpResponse" : {
-    "statusCode" : 200,
-    "headers" : {
-      "Content-Type" : [ "application/json;" ]
+[
+  {
+    "httpRequest": {
+      "method": "GET",
+      "path": "/n/.*/b/.*/o/DataNormalizationRegistry%2Fv1%2Fregistry.json"
     },
-    "body" :  [{
-      "registry_uuid": "uuidString",
-      "data_element": "dataString",
-      "filename": "filenameString",
-      "source_extension_url": "test",
-      "resource_type": "Patient",
-      "tenant_id": null,
-      "version" : "v1"
-    }]
+    "httpResponse": {
+      "statusCode": 200,
+      "headers": {
+        "Content-Type": [
+          "application/json;"
+        ]
+      },
+      "body": [
+        {
+          "registry_uuid": "uuidString",
+          "data_element": "dataString",
+          "filename": "filenameString",
+          "source_extension_url": "test",
+          "resource_type": "Patient",
+          "tenant_id": null,
+          "version": "v1"
+        }
+      ]
+    },
+    "id": "GetObjectExpectation",
+    "priority": 0,
+    "timeToLive": {
+      "unlimited": true
+    },
+    "times": {
+      "unlimited": true
+    }
   },
-  "id" : "GetObjectExpectation",
-  "priority" : 0,
-  "timeToLive" : {
-    "unlimited" : true
+  {
+    "httpRequest": {
+      "method": "GET",
+      "path": "/seki/session/validate"
+    },
+    "httpResponseTemplate": {
+      "templateType": "MUSTACHE",
+      "template": "{'statusCode': 200, 'headers': {'content-type': ['application/json']}, 'body': \'{\"user\":{\"tenant_id\":\"{{request.queryStringParameters.token.0}}\"},\"user_session\":{\"expires_at\":\"2030-03-14T21:16:05\"}  }\'}"
+    },
+    "id": "seki-mock"
   },
-  "times" : {
-    "unlimited" : true
+  {
+    "httpRequest": {
+      "method": "POST",
+      "path": "/oauth/token"
+    },
+    "httpResponse": {
+      "statusCode": 200,
+      "headers": {
+        "content-type": [
+          "application/json"
+        ]
+      },
+      "body": "{\"access_token\": \"123\", \"expires_in\":999999, \"token_type\": \"garbagge and trash\"}"
+    },
+    "id": "oauthMock",
+    "priority": 0,
+    "timeToLive": {
+      "unlimited": true
+    },
+    "times": {
+      "unlimited": true
+    }
   }
-}
+]

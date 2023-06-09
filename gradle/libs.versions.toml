@@ -24,6 +24,7 @@ interop-ehr-liquibase = "com.projectronin.interop.ehr:interop-ehr-liquibase:9.11
 interop-ehr-tenant = "com.projectronin.interop.ehr:interop-tenant:9.11.0"
 
 interop-fhir = "com.projectronin.interop.fhir:interop-fhir:8.2.1"
+interop-fhir-generators = "com.projectronin.interop.fhir:interop-fhir-generators:8.2.1"
 
 interop-publishers-aidbox = "com.projectronin.interop.publish:interop-aidbox:8.1.0"
 interop-publishers-datalake = "com.projectronin.interop.publish:interop-datalake:8.1.2"
@@ -36,9 +37,22 @@ interop-queue-kafka = "com.projectronin.interop.queue:interop-queue-kafka:2.0.0"
 interop-testcontainer-aidbox = "com.projectronin.interop.publish:interop-aidbox-testcontainer:8.1.0"
 interop-testcontainer-mockehr = "com.projectronin.interop.mock:interop-mock-ehr-testcontainer:1.2.1"
 
+jackson-databind = "com.fasterxml.jackson.core:jackson-databind:2.15.2"
 junit-pioneer = "org.junit-pioneer:junit-pioneer:2.0.1"
 kafka-clients = "org.apache.kafka:kafka-clients:3.4.0"
 kotlinx-coroutines-bom = "org.jetbrains.kotlinx:kotlinx-coroutines-bom:1.7.1"
+
+ktor-client-auth = "io.ktor:ktor-client-auth:2.3.0"
+ktor-client-cio = "io.ktor:ktor-client-cio:2.3.0"
+ktor-client-content-negotiation = "io.ktor:ktor-client-content-negotiation:2.3.0"
+ktor-client-core = "io.ktor:ktor-client-core:2.3.0"
+ktor-client-logging = "io.ktor:ktor-client-logging:2.3.0"
+ktor-client-mock = "io.ktor:ktor-client-mock:2.3.0"
+ktor-serialization-jackson = "io.ktor:ktor-serialization-jackson:2.3.0"
+
+ktorm-core = "org.ktorm:ktorm-core:3.6.0"
+ktorm-support-mysql = "org.ktorm:ktorm-support-mysql:3.6.0"
+
 logstash-logback-encoder = "net.logstash.logback:logstash-logback-encoder:7.3"
 mockk = "io.mockk:mockk:1.13.5"
 mysql-connector-java = "com.mysql:mysql-connector-j:8.0.33"
@@ -47,6 +61,7 @@ opentracing-api = "io.opentracing:opentracing-api:0.33.0"
 opentracing-util = "io.opentracing:opentracing-util:0.33.0"
 
 ronin-kafka = "com.projectronin:ronin-kafka:1.0.0"
+ronin-test-data-generator = "com.projectronin.test:ronin-test-data-generator:0.0.2"
 
 spring-boot-parent = "org.springframework.boot:spring-boot-parent:2.7.8"
 spring-mockk = "com.ninja-squad:springmockk:3.1.2"
@@ -60,3 +75,4 @@ graphql = ["graphql-kotlin-spring-server", "graphql-kotlin-schema-generator"]
 spring-security = ["spring-security-oauth2-core", "spring-security-oauth2-jose"]
 hl7v2 = ["hapi-hl7v2-251", "hapi-hl7v2-base"]
 opentracing = ["opentracing-api", "opentracing-util"]
+ktor = ["ktor-client-auth", "ktor-client-cio", "ktor-client-content-negotiation", "ktor-client-core", "ktor-client-logging", "ktor-serialization-jackson"]

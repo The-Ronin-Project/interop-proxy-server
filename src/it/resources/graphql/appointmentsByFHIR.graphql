@@ -1,5 +1,5 @@
 {
-    appointmentsByPatientAndDate (endDate: "__END_DATE__", patientFhirId: "PatientFHIRID1", startDate: "__START_DATE__", tenantId: "ronin") {
+    appointmentsByPatientAndDate (endDate: "__END_DATE__", patientFhirId: "PatientFHIRID1", startDate: "__START_DATE__", tenantId: "__tenant_mnemonic__") {
         appointmentType {
             coding {
                 code

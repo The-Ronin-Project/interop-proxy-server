@@ -1,7 +1,0 @@
-databaseChangeLog:
-  - include:
-      file: ehr/db/changelog/ehr.db.changelog-master.yaml
-  - include:
-      file: queue/db/changelog/queue.db.changelog-master.yaml
-  - include:
-      file: db/changelog/insertTestData.yaml

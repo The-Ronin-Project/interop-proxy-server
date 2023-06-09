@@ -1,0 +1,22 @@
+{
+  "interactiveLogin": false,
+  "httpServer": "NettyWrapper",
+  "tokenCallbacks": [
+    {
+      "issuerId": "proxy",
+      "tokenExpiry": 1200,
+      "requestMappings": [
+        {
+          "requestParam": "client_id",
+          "match": "*",
+          "claims": {
+            "sub": "clientId@clients",
+            "aud": "https://proxy.dev.projectronin.io",
+            "iss": "http://mock-oauth2:8080/proxy",
+            "scope": "write:resources search:resources"
+          }
+        }
+      ]
+    }
+  ]
+}

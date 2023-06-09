@@ -1,0 +1,72 @@
+{
+  "data": {
+    "patientsByNameAndDOB": [
+      {
+        "address": [
+          {
+            "city": "Madison",
+            "line": [
+              "123 Main St."
+            ],
+            "postalCode": "53703",
+            "state": "WI",
+            "use": "home"
+          }
+        ],
+        "birthDate": "1987-01-15",
+        "gender": "female",
+        "id": "__return__id__",
+        "identifier": [
+          {
+            "system": "mockEHRMRNSystem",
+            "value": "0202497"
+          },
+          {
+            "system": "mockPatientInternalSystem",
+            "value": "     Z4572"
+          },
+          {
+            "system": "https://open.epic.com/FHIR/StructureDefinition/PayerMemberId",
+            "value": "987654321A"
+          },
+          {
+            "system": "http://projectronin.com/id/fhir",
+            "value": "PatientFHIRID1"
+          },
+          {
+            "system": "http://projectronin.com/id/mrn",
+            "value": "0202497"
+          }
+        ],
+        "name": [
+          {
+            "family": "Mychart",
+            "given": [
+              "Allison"
+            ],
+            "use": "official"
+          },
+          {
+            "family": "Mychart",
+            "given": [
+              "Ali"
+            ],
+            "use": "usual"
+          }
+        ],
+        "telecom": [
+          {
+            "system": "phone",
+            "use": "home",
+            "value": "608-123-4567"
+          },
+          {
+            "system": "email",
+            "use": null,
+            "value": "beau@beau.com"
+          }
+        ]
+      }
+    ]
+  }
+}

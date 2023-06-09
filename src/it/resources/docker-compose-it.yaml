@@ -1,0 +1,209 @@
+services:
+  proxy:
+    restart: on-failure
+    build: ../../..
+    image: interop-proxy-server:local
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_EHR_DATASOURCE_JDBCURL: "jdbc:mysql://ehr:ThePassword@mockehrmysql:3306/tenant-db"
+      SPRING_QUEUE_DATASOURCE_JDBCURL: "jdbc:mysql://queueuser:ThePassword@mockehrmysql:3306/queue-db"
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: "http://mock-oauth2:8080/proxy"
+      RONIN_SERVER_AUTH_M2M_ISSUER: "http://mock-oauth2:8080/proxy"
+      RONIN_SERVER_AUTH_M2M_AUDIENCE: "https://proxy.dev.projectronin.io"
+      SEKI_ENDPOINT: "http://mock-server:443/seki"
+      LOGGING_LEVEL_IO_KTOR: "DEBUG"
+      SERVICE_CALL_JWT_SECRET:
+      AO_SANDBOX_KEY:
+      LOGGING_LEVEL_COM_PROJECTRONIN: "DEBUG"
+      AIDBOX_URL: "http://devbox:8888"
+      AIDBOX_CLIENT_ID: "client"
+      AIDBOX_CLIENT_SECRET: "secret"
+      KAFKA_CLOUD_VENDOR: "oci"
+      KAFKA_CLOUD_REGION: "us-phoenix-1"
+      KAFKA_BOOTSTRAP_SERVERS: "kafka:19092"
+      KAFKA_PUBLISH_SOURCE: "interop-kafka-test"
+      KAFKA_RETRIEVE_GROUPID: "interop-kafka-test"
+      KAFKA_PROPERTIES_SECURITY.protocol: "PLAINTEXT"
+      KAFKA_PROPERTIES_SASL_MECHANISM: "GSSAPI"
+      KAFKA_PROPERTIES_JAAS_CONFIG: "nothing"
+
+    healthcheck:
+      test: [ "CMD", "curl", "-k", "-X", "GET", "localhost:8080/actuator/health" ]
+      timeout: 5s
+      retries: 30
+    depends_on:
+      mockehrmysql:
+        condition: service_healthy
+      liquibase-ehr:
+        condition: service_completed_successfully
+      liquibase-queue:
+        condition: service_completed_successfully
+      devbox:
+        condition: service_healthy
+
+  # MySQL Database.
+  # It is name "mockehrmysql" due to the mock-ehr-init script requiring this name
+  # Creates multiple DB schemas and users, which can be seen in db/init/01-databases.sql
+  mockehrmysql:
+    image: mysql/mysql-server
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_ROOT_HOST: '%'
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./db/init:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: [ "CMD", "mysqladmin" ,"ping", "-h", "localhost", "-u", "ehr", "-psecret" ]
+      timeout: 5s
+      retries: 30
+
+  ## Schema updates + starter data
+  liquibase-ehr:
+    image: docker-proxy.devops.projectronin.io/interop-ehr-liquibase:dev
+    environment:
+      - JDBC_URL=jdbc:mysql://ehr:ThePassword@mockehrmysql:3306/tenant-db
+#      - DATA_LOAD=db/changelog/insertTestData.yaml
+      - AO_SANDBOX_KEY
+    volumes:
+      - ./db/changelog/:/liquibase/changelog/db/changelog
+    depends_on:
+      mockehrmysql:
+        condition: service_healthy
+
+  liquibase-queue:
+    image: docker-repo.devops.projectronin.io/interop-queue-liquibase:dev
+    environment:
+      - JDBC_URL=jdbc:mysql://queueuser:ThePassword@mockehrmysql:3306/queue-db
+    depends_on:
+      mockehrmysql:
+        condition: service_healthy
+
+  mockehr:
+    restart: on-failure
+    image: docker-proxy.devops.projectronin.io/interop-mock-ehr:latest
+    environment:
+      - MOCK_EHR_DB_HOST=mockehrmysql
+      - MOCK_EHR_DB_PORT=33060
+      - MOCK_EHR_DB_NAME=mock-ehr-db
+      - MOCK_EHR_DB_USER=springuser
+      - MOCK_EHR_DB_PASS=ThePassword
+    ports:
+      - "8081:8080" # HTTP Port
+      - "1011:1011" # TCP Port
+    depends_on:
+      mockehrmysql:
+        condition: service_healthy
+    healthcheck:
+      test: [ "CMD", "curl", "-k", "-X", "GET", "localhost:8080/fhir/r4/metadata", "-H", "\accept: application/fhir+json", ]
+      timeout: 5s
+      retries: 30
+
+  mock-server:  # mock-oci and mock-seki
+    platform: linux/amd64
+    image: "docker-proxy.devops.projectronin.io/mockserver/mockserver:latest"
+    volumes:
+      - "./mock-oci/config/mockserver.properties:/config/mockserver.properties"
+      - "./mock-oci/expectations:/expectations"
+    ports:
+      - 1081:443
+    networks:
+      default:
+        aliases:
+          - oraclecloud.com
+          - objectstorage.us-phoenix-1.oraclecloud.com
+          - dev.projectronin.io
+
+  devbox:
+    image: healthsamurai/devbox:2206-lts
+    depends_on:
+      - "devbox-db"
+    links:
+      - "devbox-db:database"
+    ports:
+      - "8888:8888"
+    environment:
+      - AIDBOX_LICENSE_ID
+      - AIDBOX_LICENSE_KEY
+      - AIDBOX_PORT
+      - AIDBOX_CLIENT_ID
+      - AIDBOX_ADMIN_ID
+      - AIDBOX_ADMIN_PASSWORD
+      - AIDBOX_CLIENT_SECRET
+      - PGPORT
+      - PGHOSTPORT
+      - AIDBOX_FHIR_VERSION
+      - PGHOST
+      - PGUSER
+      - PGPASSWORD
+      - PGDATABASE
+      - box_features_validation_skip_reference
+    volumes:
+      - ./config:/var/config
+    healthcheck:
+      test: [ "CMD", "curl", "-H", "\"Content-Type: application/json\"", "-H", "\"Accept: application/json\"", "-X", "POST", "-d", "\"{\\\"query\\\":\\\"query { PractitionerList { id } }\\\"}\"", "http://localhost:8888/$$graphql", "-u", "client:secret" ]
+      timeout: 5s
+      retries: 30
+
+  devbox-db:
+    image: healthsamurai/aidboxdb:13.2
+    platform: linux/amd64
+    ports:
+      - "5437:5432"
+    environment:
+      - PGPORT
+      - PGHOSTPORT
+      - PGHOST
+      - PGUSER
+      - PGPASSWORD
+      - POSTGRES_USER
+      - POSTGRES_PASSWORD
+      - POSTGRES_DB
+      - PGDATABASE
+      - box_features_validation_skip_reference
+  kafka:
+    image: docker-proxy.devops.projectronin.io/wurstmeister/kafka
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: >-
+        LISTENER_DOCKER_INTERNAL://kafka:19092,
+        LISTENER_DOCKER_EXTERNAL://127.0.0.1:9092
+      KAFKA_LISTENERS: >-
+        LISTENER_DOCKER_INTERNAL://:19092,
+        LISTENER_DOCKER_EXTERNAL://:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: >-
+        LISTENER_DOCKER_INTERNAL:PLAINTEXT,
+        LISTENER_DOCKER_EXTERNAL:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: LISTENER_DOCKER_INTERNAL
+    depends_on:
+      - zookeeper
+
+  zookeeper:
+    image: docker-proxy.devops.projectronin.io/zookeeper
+    ports:
+      - "2181:2181"
+    environment:
+      - KAFKA_ADVERTISED_HOST_NAME=zookeeper
+  kafka-ui:
+    image: provectuslabs/kafka-ui
+    ports:
+      - "8090:8080"
+    restart: always
+    environment:
+      - KAFKA_CLUSTERS_0_NAME=local
+      - KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS=kafka:19092
+    depends_on:
+      kafka:
+        condition: service_started
+
+  mock-oauth2:
+    image: ghcr.io/navikt/mock-oauth2-server:0.5.4
+    ports:
+      - "8083:8080"
+    volumes:
+      - ./:/host
+    environment:
+      - JSON_CONFIG_PATH=/host/mock-oauth2-config.json

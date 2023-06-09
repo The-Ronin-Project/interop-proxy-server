@@ -1,5 +1,5 @@
 query {
-    getPractitionerByProvider(tenantId: "ronin", providerId: "E1000") {
+    getPractitionerByProvider(tenantId: "__tenant_mnemonic__", providerId: "E1000") {
         id
         identifier {
             system
