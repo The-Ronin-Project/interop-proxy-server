@@ -26,7 +26,7 @@ interop-ehr-tenant = "com.projectronin.interop.ehr:interop-tenant:9.11.0"
 interop-fhir = "com.projectronin.interop.fhir:interop-fhir:8.2.1"
 
 interop-publishers-aidbox = "com.projectronin.interop.publish:interop-aidbox:8.1.0"
-interop-publishers-datalake = "com.projectronin.interop.publish:interop-datalake:8.1.1"
+interop-publishers-datalake = "com.projectronin.interop.publish:interop-datalake:8.1.2"
 interop-publishers-kafka = "com.projectronin.interop.publish:interop-kafka:8.1.1"
 
 interop-queue-api = "com.projectronin.interop.queue:interop-queue:2.0.0"
