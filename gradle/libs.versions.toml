@@ -39,7 +39,7 @@ interop-testcontainer-mockehr = "com.projectronin.interop.mock:interop-mock-ehr-
 
 jackson-databind = "com.fasterxml.jackson.core:jackson-databind:2.15.2"
 junit-pioneer = "org.junit-pioneer:junit-pioneer:2.0.1"
-kafka-clients = "org.apache.kafka:kafka-clients:3.4.0"
+kafka-clients = "org.apache.kafka:kafka-clients:3.5.0"
 kotlinx-coroutines-bom = "org.jetbrains.kotlinx:kotlinx-coroutines-bom:1.7.1"
 
 ktor-client-auth = "io.ktor:ktor-client-auth:2.3.1"
