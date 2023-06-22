@@ -615,4 +615,50 @@ class NoteHandlerTest {
         assertEquals("uniqueId", response.data)
         assertEquals(0, response.errors.size)
     }
+
+    @Test
+    fun `mrn is not padded if disabled and less than 7 characters`() {
+        every { dfe.graphQlContext.get<InteropGraphQLContext>(INTEROP_CONTEXT_KEY).authzTenantId } returns "apposnd"
+        every { tenantService.getTenantForMnemonic("apposnd") } returns tenant
+        coEvery {
+            ehrDataAuthorityClient.getResource(
+                "apposnd",
+                "Practitioner",
+                "apposnd-PractitionerTestId"
+            )
+        } returns oncologyPractitioner
+        val noteInput =
+            NoteInput(
+                "12345",
+                PatientIdType.MRN,
+                "apposnd-PractitionerTestId",
+                "Example Note Text",
+                "202206011250",
+                NoteSender.PRACTITIONER,
+                false
+            )
+
+        every { vendorFactory.patientService } returns ehrPatientService
+        every { ehrFactory.getVendorFactory(tenant) } returns vendorFactory
+        every { ehrPatientService.getPatientFHIRId(tenant, "12345") } returns "PatientFHIRId"
+        every { ehrPatientService.getPatient(tenant, "PatientFHIRId") } returns oncologyPatient
+
+        every {
+            mdmService.generateMDM(
+                "apposnd",
+                match { it.name == listOf(testname) && it.mrn == "12345" },
+                match { it.name == listOf(testname) },
+                "Example Note Text",
+                "202206011250",
+                null,
+                "AU"
+            )
+        } returns Pair("mock", "uniqueId")
+
+        val noteHandler =
+            NoteHandler(queueService, tenantService, mdmService, ehrFactory, ehrDataAuthorityClient, padMRNs = "no")
+        val response = noteHandler.sendNote(noteInput, "apposnd", dfe)
+        assertEquals("uniqueId", response.data)
+        assertEquals(0, response.errors.size)
+    }
 }

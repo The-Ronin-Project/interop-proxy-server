@@ -29,6 +29,7 @@ import graphql.execution.DataFetcherResult
 import graphql.schema.DataFetchingEnvironment
 import kotlinx.coroutines.runBlocking
 import mu.KotlinLogging
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
 
 @Component
@@ -37,7 +38,8 @@ class NoteHandler(
     private val tenantService: TenantService,
     private val mdmService: MDMService,
     private val ehrFactory: EHRFactory,
-    private val ehrDataAuthorityClient: EHRDataAuthorityClient
+    private val ehrDataAuthorityClient: EHRDataAuthorityClient,
+    @Value("\${proxy.mrn.padding.enabled:yes}") private val padMRNs: String = "yes"
 ) : Mutation {
     private val logger = KotlinLogging.logger { }
 
@@ -171,7 +173,7 @@ class NoteHandler(
             }
 
             PatientIdType.MRN -> {
-                val paddedMrn = noteInput.patientId.padStart(7, '0')
+                val paddedMrn = if (padMRNs == "yes") noteInput.patientId.padStart(7, '0') else noteInput.patientId
                 // pivot from the MRN to get the Patient from the EHR
                 val ehrPatientService = ehrFactory.getVendorFactory(tenant).patientService
                 val patient = ehrPatientService.getPatient(
