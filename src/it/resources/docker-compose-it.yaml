@@ -13,12 +13,7 @@ services:
       RONIN_SERVER_AUTH_M2M_AUDIENCE: "https://proxy.dev.projectronin.io"
       SEKI_ENDPOINT: "http://mock-server:443/seki"
       LOGGING_LEVEL_IO_KTOR: "DEBUG"
-      SERVICE_CALL_JWT_SECRET:
-      AO_SANDBOX_KEY:
       LOGGING_LEVEL_COM_PROJECTRONIN: "DEBUG"
-      AIDBOX_URL: "http://devbox:8888"
-      AIDBOX_CLIENT_ID: "client"
-      AIDBOX_CLIENT_SECRET: "secret"
       KAFKA_CLOUD_VENDOR: "oci"
       KAFKA_CLOUD_REGION: "us-phoenix-1"
       KAFKA_BOOTSTRAP_SERVERS: "kafka:19092"
@@ -27,6 +22,12 @@ services:
       KAFKA_PROPERTIES_SECURITY.protocol: "PLAINTEXT"
       KAFKA_PROPERTIES_SASL_MECHANISM: "GSSAPI"
       KAFKA_PROPERTIES_JAAS_CONFIG: "nothing"
+      EHRDA_URL: "http://ehrda:8080"
+      EHRDA_AUTH_TOKEN_URL: "http://mock-oauth2:8080/ehrda/token"
+      EHRDA_AUTH_AUDIENCE: "https://ehr.dev.projectronin.io"
+      EHRDA_AUTH_CLIENT_ID: "ehrda-client"
+      EHRDA_AUTH_CLIENT_SECRET: "ehrda-secret"
+      EHRDA_AUTH_AUTH0: "false"
 
     healthcheck:
       test: [ "CMD", "curl", "-k", "-X", "GET", "localhost:8080/actuator/health" ]
@@ -41,6 +42,55 @@ services:
         condition: service_completed_successfully
       devbox:
         condition: service_healthy
+      ehrda:
+        condition: service_healthy
+
+  ehrda:
+    image: docker-proxy.devops.projectronin.io/ehr-data-authority:latest
+    environment:
+      AIDBOX_URL: "http://devbox:8888"
+      AIDBOX_CLIENT_ID: "client"
+      AIDBOX_CLIENT_SECRET: "secret"
+      SPRING_DATASOURCE_URL: "jdbc:mysql://ehrdauser:ThePassword@mockehrmysql:3306/ehrda-db"
+      AUTH0_AUDIENCE: "https://ehr.dev.projectronin.io"
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: "http://mock-oauth2:8080/ehrda"
+      KAFKA_CLOUD_VENDOR: "oci"
+      KAFKA_CLOUD_REGION: "us-phoenix-1"
+      KAFKA_BOOTSTRAP_SERVERS: "kafka:19092"
+      KAFKA_PUBLISH_SOURCE: "interop-kafka-test"
+      KAFKA_RETRIEVE_GROUPID: "interop-kafka-test"
+      KAFKA_PROPERTIES_SECURITY.protocol: "PLAINTEXT"
+      KAFKA_PROPERTIES_SASL_MECHANISM: "GSSAPI"
+      KAFKA_PROPERTIES_JAAS_CONFIG: "nothing"
+      VALIDATION_SERVER_URL: "http://unused-server:8080"
+      VALIDATION_AUTH_TOKEN_URL: "http://mock-oauth2:8080/validation/token"
+      VALIDATION_AUTH_AUDIENCE: "https://interop-validation.dev.projectronin.io"
+      VALIDATION_AUTH_CLIENT_ID: "validation-client"
+      VALIDATION_AUTH_CLIENT_SECRET: "client-secret"
+      VALIDATION_AUTH_AUTH0: "false"
+      OCI_CONCEPTMAP_BUCKET_NAME: "infx-shared"
+      OCI_FINGERPRINT: "fingerprint"
+      OCI_NAMESPACE: "namespace"
+      OCI_PRIVATE_KEY_BASE64: "LS0tLS1CRUdJTiBSU0EgUFJJVkFURSBLRVktLS0tLQpNSUlFb3dJQkFBS0NBUUVBdnBuYVBLTElLZHZ4OThLVzY4bHo4cEdhUlJjWWVyc05HcVBqcGlmTVZqakU4THVDCm9YZ1BVMEhlUG5OVFVqcFNoQm55bktDdnJ0V2hOK2hhS2JTcCtRV1hTeGlUclc5OUhCZkFsMU1EUXlXY3Vrb0UKYjlDdzZJTmN0VlVONGlSdmtuOVQ4RTZxMTc0UmJjbndBLzd5VGM3cDFOQ3Z3KzZCL2FBTjlsMUcycFFYZ1JkWQpDLytHNm8xSVpFSHRXaHF6RTk3blk1UUtOdVVWRDBWMDlkYzVDRFlCYUtqcWV0d3d2NkRGay9HUmRPU0VkLzZiClcrMjB6MHFTSHBhM1lOVzZxU3AreDVweVltRHJ6UklSMDNvczZEYXVaa0NoU1J5Yy9XaHZ1cng2bzg1RDZxcHoKeXdvOHh3TmFMWkh4VFFQZ2NJQTVzdTlaSXl0djlMSDJFK2xTd3dJREFRQUJBb0lCQUZtbDhjRDlhNXBNcWxXMwpmOWJ0VFF6MXNSTDRGdnA3Q21IU1hodmpzamVId2hIY2tFZTBPYmtXVFJzZ2tUc20xWEx1NVc4SUlUbmhuMCsxCmlOcis3OGVCK3JSR25nZEFYaDhkaU9ka0V5KzgvQ2VlOHRGSTNqeXV0S2RSbHhNYndpS3NvdVZ2aXVtb3EzZngKT0dRWXdRMFoybC9QdkN3eS9ZODJmZnEzeXNDNWdBSnNiQllzQ3JnMTRiUW80NHVsckVMZTRTRFdzNUhDaktZYgpFSTJiOGNPTXVjcVpTT3R4ZzluaUxOL2plMmJvL0kySEdTYXdpYmdjT2RCbXM4azZUdnNTclpNcjNrSjVPNkorCjc3TEd3S0gzN2JyVmdiVll2YnE2bldQTDB4TEc3ZFV2KzdMV0VvNXFRYVB5NmFYYi96YmNrcUxxdTYvRWpPVmUKeWRHNUpRRUNnWUVBOWtLZlRaRC9XRVZBcmVBMGR6ZmVKUnU4dmxud29hZ0w3Y0phb0R4cVhvczRtY3I1bVBEVAprYldnRmtMRkZIL0F5VW5QQmxLNkJjSnAxWEs2N0IxM0VUVWEzaTlRNXQxV3VaRW9iaUtLQkxGbTlERFFKdDQzCnVLWldKeEJLRkdTdkZyWVB0R1pzdDcxOW1aVmNQY3QyQ3pQakVnTjNIbHB0NmZ5dzNlT3Jub0VDZ1lFQXhpT3UKandYQ09tdUdhQjcrT1cydFIwUEdFemJ2VmxFR2RrQUo2VEMvSG9LTTFBOHIydTRoTFRFSkpDckxMVGZ3Kys0SQpkZEhFMmRMZVI0UTdPNThTZkxwaHdnUG1MRGV6TjdXUkxHcjdWeWZ1djdWbWFIakd1QzNHdjlhZ25oV0RsQTJRCmdCRzkvUjlvVmZMMERjN0NnSmdMZVV0SXRDWUMzMWJHVDN5aFYwTUNnWUVBNGszREc0TCtSTjRQWERwSHZLOUkKcEExalhBSkhFaWZlSG5hVzFkM3ZXa2JTa3ZKbWdWZis5VTVWZVYrT3dSSE4xcXpQWlY0c3VSSTZNLzhsSzhyQQpHcjRVbk00YXFLNEsvcWtZNEcwNUxLcmlrOUV2MkNncVNMUURSQTdDSlErSm4zTmI1MHFnNmhGbkZQYWZOK0o3CjdqdVdsbjA4d0ZZVjRBdHBkZCs5WFFFQ2dZQnhpemtaRkwrOUlxa2ZPY09OdldBekdvK0RxMU4wTDNKNGlUSWsKdzU2Q0tXWHlqODhkNHFCNGVVVTN5SjR1QjRTOW1pYVcvZUxFd0taSWJXcFVQRkFuMGRiN2k2aDNabVA1Wkw4UQpxUzNuUUNiOURVTG1VMi90VTY0MWVSVUtBbUlva2ExZzlzbmRLQVp1V28rbzZmZGtJYjFSZ09iazlYTm44UjRyCnBzdithUUtCZ0IrQ0ljRXhSMzB2eWN2NWJuWk45RUZsSVhOS2FlTUpVcllDWGNSUU52cm5VSVVCdkFPOCtqQWUKQ2RMeWdTNVJ0Z09MWmliMElWRXJxV3NQM0VJMUFDR3VMdHMwdlE5R0ZMUUdhTjFTYU1TNDBDOWt2bnMxbWxEdQpMaEloWXBKOFVzQ1Z0NXNuV28yTitNKzZBTmg1dHBXZFFuRUs2eklMaDR0UmJ1emFpSGdiCi0tLS0tRU5EIFJTQSBQUklWQVRFIEtFWS0tLS0t"
+      OCI_PUBLISH_BUCKET_NAME: "publish-bucket"
+      OCI_REGION: "us-phoenix-1"
+      OCI_TENANCY_OCID: "ocid.tenancy"
+      OCI_USER_OCID: "userid"
+      LOGGING_LEVEL_IO_KTOR: "DEBUG"
+    ports:
+      - "8082:8080"
+    depends_on:
+      devbox:
+        condition: service_healthy
+      mockehrmysql:
+        condition: service_healthy
+      kafka:
+        condition: service_started
+    healthcheck:
+      test: [ "CMD", "curl", "-k", "-X", "GET", "localhost:8080/actuator/health" ]
+      timeout: 5s
+      retries: 30
+
 
   # MySQL Database.
   # It is name "mockehrmysql" due to the mock-ehr-init script requiring this name
@@ -64,7 +114,7 @@ services:
     image: docker-proxy.devops.projectronin.io/interop-ehr-liquibase:dev
     environment:
       - JDBC_URL=jdbc:mysql://ehr:ThePassword@mockehrmysql:3306/tenant-db
-#      - DATA_LOAD=db/changelog/insertTestData.yaml
+      #      - DATA_LOAD=db/changelog/insertTestData.yaml
       - AO_SANDBOX_KEY
     volumes:
       - ./db/changelog/:/liquibase/changelog/db/changelog
@@ -100,7 +150,7 @@ services:
       timeout: 5s
       retries: 30
 
-  mock-server:  # mock-oci and mock-seki
+  mock-server: # mock-oci and mock-seki
     platform: linux/amd64
     image: "docker-proxy.devops.projectronin.io/mockserver/mockserver:latest"
     volumes:

@@ -12,3 +12,8 @@ GRANT ALL PRIVILEGES ON `queue-db`.* TO 'queueuser'@'%';
 CREATE DATABASE IF NOT EXISTS `mock-ehr-db`;
 CREATE USER 'springuser'@'%' IDENTIFIED BY 'ThePassword';
 GRANT ALL PRIVILEGES ON `mock-ehr-db`.* TO 'springuser'@'%';
+
+# ehrda
+CREATE DATABASE IF NOT EXISTS `ehrda-db`;
+CREATE USER 'ehrdauser'@'%' IDENTIFIED BY 'ThePassword';
+GRANT ALL PRIVILEGES ON `ehrda-db`.* TO 'ehrdauser'@'%';

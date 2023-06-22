@@ -1,6 +1,9 @@
 [libraries]
 dd-trace-api = "com.datadoghq:dd-trace-api:1.15.3"
 
+ehrda-client = "com.projectronin.ehr:ehr-data-authority-client:1.0.1"
+ehrda-models = "com.projectronin.ehr:ehr-data-authority-models:1.0.1"
+
 event-interop-resource-internal = "com.projectronin.contract.event:event-interop-resource-internal:1.0.0"
 
 graphql-java = "com.graphql-java:graphql-java:20.4"
@@ -11,24 +14,27 @@ graphql-spring-boot-starter-test = "com.graphql-java-kickstart:graphql-spring-bo
 hapi-hl7v2-251 = "ca.uhn.hapi:hapi-structures-v251:2.3"
 hapi-hl7v2-base = "ca.uhn.hapi:hapi-base:2.3"
 
+# For ITs
+interop-aidbox = "com.projectronin.interop.publish:interop-aidbox:8.1.0"
+
 interop-common = "com.projectronin.interop:interop-common:3.9.1"
 interop-commonHttp = "com.projectronin.interop:interop-common-http:3.9.1"
 interop-commonJackson = "com.projectronin.interop:interop-common-jackson:3.9.1"
 interop-commonTestDb = "com.projectronin.interop:interop-common-test-db:3.9.1"
 
-interop-ehr-api = "com.projectronin.interop.ehr:interop-ehr:9.11.0"
-interop-ehr-cerner = "com.projectronin.interop.ehr:interop-ehr-cerner:9.11.0"
-interop-ehr-fhir-ronin = "com.projectronin.interop.ehr:interop-fhir-ronin:9.11.0"
-interop-ehr-epic = "com.projectronin.interop.ehr:interop-ehr-epic:9.11.0"
-interop-ehr-liquibase = "com.projectronin.interop.ehr:interop-ehr-liquibase:9.11.0"
-interop-ehr-tenant = "com.projectronin.interop.ehr:interop-tenant:9.11.0"
+interop-datalake = "com.projectronin.interop.publish:interop-datalake:8.1.2"
+
+interop-ehr-api = "com.projectronin.interop.ehr:interop-ehr:10.1.0"
+interop-ehr-cerner = "com.projectronin.interop.ehr:interop-ehr-cerner:10.1.0"
+interop-ehr-fhir-ronin = "com.projectronin.interop.ehr:interop-fhir-ronin:10.1.0"
+interop-ehr-epic = "com.projectronin.interop.ehr:interop-ehr-epic:10.1.0"
+interop-ehr-liquibase = "com.projectronin.interop.ehr:interop-ehr-liquibase:10.1.0"
+interop-ehr-tenant = "com.projectronin.interop.ehr:interop-tenant:10.1.0"
 
 interop-fhir = "com.projectronin.interop.fhir:interop-fhir:8.2.1"
 interop-fhir-generators = "com.projectronin.interop.fhir:interop-fhir-generators:8.2.1"
 
-interop-publishers-aidbox = "com.projectronin.interop.publish:interop-aidbox:8.1.0"
-interop-publishers-datalake = "com.projectronin.interop.publish:interop-datalake:8.1.2"
-interop-publishers-kafka = "com.projectronin.interop.publish:interop-kafka:8.1.1"
+interop-kafka = "com.projectronin.interop.publish:interop-kafka:8.1.1"
 
 interop-queue-api = "com.projectronin.interop.queue:interop-queue:2.0.0"
 interop-queue-db = "com.projectronin.interop.queue:interop-queue-db:2.0.0"

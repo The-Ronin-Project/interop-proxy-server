@@ -38,6 +38,7 @@ class AppointmentIT : BaseGraphQLIT() {
             AidboxClient.deleteAllResources("Patient", it)
         }
     }
+
     private fun addTenantData(testTenant: String) {
         val tenantIdentifier = identifier {
             value of testTenant
@@ -232,6 +233,7 @@ class AppointmentIT : BaseGraphQLIT() {
         // reset the Timezone
         changeTimeZone("Etc/UTC")
     }
+
     private fun changeTimeZone(timezone: String) {
         val tenantDO = tenantDAO.getTenantForMnemonic("epic")!!
         tenantDO.timezone = ZoneId.of(timezone)

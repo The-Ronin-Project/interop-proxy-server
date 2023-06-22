@@ -47,6 +47,7 @@ class MessageIT : BaseGraphQLIT() {
             AidboxClient.deleteAllResources("Patient", it)
         }
     }
+
     private fun addTenantData(testTenant: String) {
         val tenantDO = tenantDAO.getTenantForMnemonic("epic")!!
         val providerPoolDAO = ProviderPoolDAO(tenantDB)
@@ -372,7 +373,7 @@ class MessageIT : BaseGraphQLIT() {
     }
 
     @Test
-    fun `server handles provider tenant mismatch`() {
+    fun `server handles missing provider`() {
         val testTenant = "epic"
         addTenantData(testTenant)
         val mrn = "111"
@@ -407,7 +408,7 @@ class MessageIT : BaseGraphQLIT() {
         assertEquals(HttpStatusCode.OK, response.status)
         assertTrue(
             errorJSONObject["message"].asText()
-                .contains("Received 404 Not Found when calling Aidbox")
+                .contains("Received 404  when calling EHR Data Authority")
         )
     }
 

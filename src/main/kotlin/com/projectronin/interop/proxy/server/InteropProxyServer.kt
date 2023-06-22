@@ -11,7 +11,7 @@ import org.springframework.context.annotation.FilterType
  * Main Spring Boot application for the Interop proxy server.
  */
 @ComponentScan(
-    basePackages = ["com.projectronin.interop"],
+    basePackages = ["com.projectronin.interop", "com.projectronin.ehr.dataauthority"],
     // Exclude Transform and Validation logic
     excludeFilters = [
         ComponentScan.Filter(

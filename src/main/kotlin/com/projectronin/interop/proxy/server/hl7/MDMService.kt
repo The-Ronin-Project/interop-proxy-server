@@ -16,7 +16,7 @@ import com.projectronin.interop.proxy.server.hl7.model.MDMPractitionerFields
 import com.projectronin.interop.proxy.server.util.asEnum
 import org.springframework.stereotype.Component
 
-@Component
+@Component("proxyMdmService")
 class MDMService {
     /**
      * generateMDM create and return an HL7v2 MDM_T02 message based on the inputs:

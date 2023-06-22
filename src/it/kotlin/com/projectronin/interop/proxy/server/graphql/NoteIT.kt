@@ -221,7 +221,7 @@ class NoteIT : BaseGraphQLIT() {
     }
 
     @Test
-    fun `practitioner UDP ID found in Aidbox, patient UDP ID not found in Aidbox, no EHR fallback for patient UDP ID not found`() {
+    fun `practitioner UDP ID found in EHR Data Authority, patient UDP ID not found in EHR Data Authority, no EHR fallback for patient UDP ID not found`() {
         val testTenant = "epic"
         addTenantData(testTenant)
         val notetext = "Test Note"
@@ -256,12 +256,12 @@ class NoteIT : BaseGraphQLIT() {
         val errorJSONObject = resultJSONObject["errors"][0]
         assertTrue(
             errorJSONObject["message"].asText()
-                .contains("404 Not Found") // Aidbox
+                .contains("Received 404  when calling EHR Data Authority")
         )
     }
 
     @Test
-    fun `practitioner non-UDP ID not found in Aidbox, practitioner not found in MockEHR`() {
+    fun `practitioner non-UDP ID not found in EHR Data Authority, practitioner not found in MockEHR`() {
         val testTenant = "epic"
         addTenantData(testTenant)
         val notetext = "Test Note"
@@ -300,7 +300,7 @@ class NoteIT : BaseGraphQLIT() {
     }
 
     @Test
-    fun `practitioner non-UDP ID not found in Aidbox, practitioner found in MockEHR, patient UDP ID found in Aidbox`() {
+    fun `practitioner non-UDP ID not found in EHR Data Authority, practitioner found in MockEHR, patient UDP ID found in EHR Data Authority`() {
         val testTenant = "epic"
         addTenantData(testTenant)
         val notetext = "Test Note"
@@ -337,7 +337,7 @@ class NoteIT : BaseGraphQLIT() {
     }
 
     @Test
-    fun `practitioner UDP ID not found in Aidbox, practitioner found in MockEHR, patient UDP ID found in Aidbox`() {
+    fun `practitioner UDP ID not found in EHR Data Authority, practitioner found in MockEHR, patient UDP ID found in EHR Data Authority`() {
         val testTenant = "epic"
         addTenantData(testTenant)
         val notetext = "Test Note"
@@ -375,7 +375,7 @@ class NoteIT : BaseGraphQLIT() {
     }
 
     @Test
-    fun `practitioner non-UDP ID not found in Aidbox, practitioner found in MockEHR, patient UDP ID not found in Aidbox, no EHR fallback for this case`() {
+    fun `practitioner non-UDP ID not found in EHR Data Authority, practitioner found in MockEHR, patient UDP ID not found in EHR Data Authority, no EHR fallback for this case`() {
         val testTenant = "epic"
         addTenantData(testTenant)
         val notetext = "Test Note"
@@ -409,12 +409,12 @@ class NoteIT : BaseGraphQLIT() {
         val errorJSONObject = resultJSONObject["errors"][0]
         assertTrue(
             errorJSONObject["message"].asText()
-                .contains("404 Not Found") // Aidbox
+                .contains("Received 404  when calling EHR Data Authority")
         )
     }
 
     @Test
-    fun `practitioner non-UDP ID not found in Aidbox, practitioner found in MockEHR, patient MRN found in MockEHR`() {
+    fun `practitioner non-UDP ID not found in EHR Data Authority, practitioner found in MockEHR, patient MRN found in MockEHR`() {
         val testTenant = "epic"
         addTenantData(testTenant)
         val notetext = "Test Note"
@@ -451,7 +451,7 @@ class NoteIT : BaseGraphQLIT() {
     }
 
     @Test
-    fun `practitioner non-UDP ID not found in Aidbox, practitioner found in MockEHR, patient MRN not found in MockEHR`() {
+    fun `practitioner non-UDP ID not found in EHR Data Authority, practitioner found in MockEHR, patient MRN not found in MockEHR`() {
         val testTenant = "epic"
         addTenantData(testTenant)
         val notetext = "Test Note"

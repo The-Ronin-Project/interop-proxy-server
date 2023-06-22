@@ -1,8 +1,9 @@
 package com.projectronin.interop.proxy.server.handler
 
-import com.projectronin.interop.aidbox.PatientService
-import com.projectronin.interop.aidbox.PractitionerService
-import com.projectronin.interop.aidbox.model.SystemValue
+import com.projectronin.ehr.dataauthority.client.EHRDataAuthorityClient
+import com.projectronin.ehr.dataauthority.models.FoundResourceIdentifiers
+import com.projectronin.ehr.dataauthority.models.IdentifierSearchResponse
+import com.projectronin.ehr.dataauthority.models.IdentifierSearchableResourceTypes
 import com.projectronin.interop.ehr.factory.EHRFactory
 import com.projectronin.interop.ehr.inputs.EHRMessageInput
 import com.projectronin.interop.ehr.inputs.EHRRecipient
@@ -13,6 +14,8 @@ import com.projectronin.interop.fhir.r4.datatype.Identifier
 import com.projectronin.interop.fhir.r4.datatype.primitive.Id
 import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
 import com.projectronin.interop.fhir.r4.datatype.primitive.asFHIR
+import com.projectronin.interop.fhir.r4.resource.Patient
+import com.projectronin.interop.fhir.r4.resource.Practitioner
 import com.projectronin.interop.proxy.server.context.INTEROP_CONTEXT_KEY
 import com.projectronin.interop.proxy.server.context.InteropGraphQLContext
 import com.projectronin.interop.proxy.server.input.MessageInput
@@ -21,6 +24,7 @@ import com.projectronin.interop.proxy.server.input.MessageRecipientInput
 import com.projectronin.interop.tenant.config.TenantService
 import com.projectronin.interop.tenant.config.model.Tenant
 import graphql.schema.DataFetchingEnvironment
+import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -33,8 +37,7 @@ class MessageHandlerTest {
     private lateinit var ehrFactory: EHRFactory
     private lateinit var tenantService: TenantService
     private lateinit var messageHandler: MessageHandler
-    private lateinit var practitionerService: PractitionerService
-    private lateinit var patientService: PatientService
+    private lateinit var ehrDataAuthorityClient: EHRDataAuthorityClient
     private lateinit var dfe: DataFetchingEnvironment
 
     private var provIdentifier = Identifier(system = Uri("system"), value = "1234".asFHIR())
@@ -46,16 +49,32 @@ class MessageHandlerTest {
     fun initTest() {
         ehrFactory = mockk()
         tenantService = mockk()
-        practitionerService = mockk()
-        patientService = mockk {
-            every {
-                getPatientFHIRIds(
+
+        val searchIdentifier =
+            com.projectronin.ehr.dataauthority.models.Identifier(CodeSystem.RONIN_MRN.uri.value!!, "MRN#1")
+        val fhirIdentifier =
+            com.projectronin.ehr.dataauthority.models.Identifier(CodeSystem.RONIN_FHIR_ID.uri.value!!, "FHIRID")
+        ehrDataAuthorityClient = mockk() {
+            coEvery {
+                getResourceIdentifiers(
                     "TEST_TENANT",
-                    mapOf("MRN" to SystemValue(system = CodeSystem.RONIN_MRN.uri.value!!, value = "MRN#1"))
+                    IdentifierSearchableResourceTypes.Patient,
+                    listOf(searchIdentifier)
                 )
-            } returns mapOf("MRN" to "FHIRID")
+            } returns
+                listOf(
+                    IdentifierSearchResponse(
+                        searchedIdentifier = searchIdentifier,
+                        foundResources = listOf(
+                            FoundResourceIdentifiers(
+                                "FHIRID",
+                                listOf(searchIdentifier, fhirIdentifier)
+                            )
+                        )
+                    )
+                )
         }
-        messageHandler = MessageHandler(ehrFactory, tenantService, practitionerService, patientService)
+        messageHandler = MessageHandler(ehrFactory, tenantService, ehrDataAuthorityClient)
         dfe = mockk()
     }
 
@@ -66,16 +85,84 @@ class MessageHandlerTest {
             every { mnemonic } returns "TEST_TENANT"
         }
         every { tenantService.getTenantForMnemonic("TEST_TENANT") } returns tenant
-        every {
-            patientService.getPatientFHIRIds(
+
+        val searchIdentifier =
+            com.projectronin.ehr.dataauthority.models.Identifier(CodeSystem.RONIN_MRN.uri.value!!, "MRN#1")
+        coEvery {
+            ehrDataAuthorityClient.getResourceIdentifiers(
                 "TEST_TENANT",
-                mapOf("MRN" to SystemValue(system = CodeSystem.RONIN_MRN.uri.value!!, value = "MRN#1"))
+                IdentifierSearchableResourceTypes.Patient,
+                listOf(searchIdentifier)
             )
-        } returns emptyMap()
+        } returns listOf(IdentifierSearchResponse(searchIdentifier, emptyList()))
+
         val messageInput = MessageInput("Test Message", MessagePatientInput("MRN#1", null), listOf())
         assertEquals(
-            messageHandler.sendMessage("TEST_TENANT", messageInput, dfe).errors.first().message,
-            "Attempted to send message for patient with MRN MRN#1 who does not exist in Aidbox."
+            "Attempted to send message for patient with MRN MRN#1 who does not exist in EHR Data Authority.",
+            messageHandler.sendMessage("TEST_TENANT", messageInput, dfe).errors.first().message
+        )
+    }
+
+    @Test
+    fun `multiple patients found`() {
+        every { dfe.graphQlContext.get<InteropGraphQLContext>(INTEROP_CONTEXT_KEY).authzTenantId } returns "TEST_TENANT"
+        val tenant = mockk<Tenant> {
+            every { mnemonic } returns "TEST_TENANT"
+        }
+        every { tenantService.getTenantForMnemonic("TEST_TENANT") } returns tenant
+
+        val searchIdentifier =
+            com.projectronin.ehr.dataauthority.models.Identifier(CodeSystem.RONIN_MRN.uri.value!!, "MRN#1")
+        coEvery {
+            ehrDataAuthorityClient.getResourceIdentifiers(
+                "TEST_TENANT",
+                IdentifierSearchableResourceTypes.Patient,
+                listOf(searchIdentifier)
+            )
+        } returns listOf(
+            IdentifierSearchResponse(
+                searchIdentifier,
+                listOf(FoundResourceIdentifiers("udp1", emptyList()), FoundResourceIdentifiers("udp2", emptyList()))
+            )
+        )
+
+        val messageInput = MessageInput("Test Message", MessagePatientInput("MRN#1", null), listOf())
+        assertEquals(
+            "More than 1 patient found for MRN MRN#1 with tenant TEST_TENANT",
+            messageHandler.sendMessage("TEST_TENANT", messageInput, dfe).errors.first().message
+        )
+    }
+
+    @Test
+    fun `patient not found and no matching search identifier returned`() {
+        every { dfe.graphQlContext.get<InteropGraphQLContext>(INTEROP_CONTEXT_KEY).authzTenantId } returns "TEST_TENANT"
+        val tenant = mockk<Tenant> {
+            every { mnemonic } returns "TEST_TENANT"
+        }
+        every { tenantService.getTenantForMnemonic("TEST_TENANT") } returns tenant
+
+        val searchIdentifier =
+            com.projectronin.ehr.dataauthority.models.Identifier(CodeSystem.RONIN_MRN.uri.value!!, "MRN#1")
+        coEvery {
+            ehrDataAuthorityClient.getResourceIdentifiers(
+                "TEST_TENANT",
+                IdentifierSearchableResourceTypes.Patient,
+                listOf(searchIdentifier)
+            )
+        } returns listOf(
+            IdentifierSearchResponse(
+                com.projectronin.ehr.dataauthority.models.Identifier(
+                    CodeSystem.RONIN_MRN.uri.value!!,
+                    "MRN#2"
+                ),
+                emptyList()
+            )
+        )
+
+        val messageInput = MessageInput("Test Message", MessagePatientInput("MRN#1", null), listOf())
+        assertEquals(
+            "Attempted to send message for patient with MRN MRN#1 who does not exist in EHR Data Authority.",
+            messageHandler.sendMessage("TEST_TENANT", messageInput, dfe).errors.first().message
         )
     }
 
@@ -158,7 +245,13 @@ class MessageHandlerTest {
                 every { getPractitionerUserIdentifier(tenant, fhirIdentifiers) } returns (provIdentifier)
             }
         }
-        every { practitionerService.getPractitionerByUDPId("TEST_TENANT", "TEST_TENANT-doc1") } returns mockk {
+        coEvery {
+            ehrDataAuthorityClient.getResource(
+                "TEST_TENANT",
+                "Practitioner",
+                "TEST_TENANT-doc1"
+            )
+        } returns mockk<Practitioner> {
             every { identifier } returns listOf(provIdentifier, fhirIdentifier1)
         }
 
@@ -225,10 +318,22 @@ class MessageHandlerTest {
                 listOf(MessageRecipientInput("TEST_TENANT-doc1"), MessageRecipientInput("TEST_TENANT-pool1"))
             )
 
-        every { practitionerService.getPractitionerByUDPId("TEST_TENANT", "TEST_TENANT-doc1") } returns mockk {
+        coEvery {
+            ehrDataAuthorityClient.getResource(
+                "TEST_TENANT",
+                "Practitioner",
+                "TEST_TENANT-doc1"
+            )
+        } returns mockk<Practitioner> {
             every { identifier } returns listOf(provIdentifier, fhirIdentifier1)
         }
-        every { practitionerService.getPractitionerByUDPId("TEST_TENANT", "TEST_TENANT-pool1") } returns mockk {
+        coEvery {
+            ehrDataAuthorityClient.getResource(
+                "TEST_TENANT",
+                "Practitioner",
+                "TEST_TENANT-pool1"
+            )
+        } returns mockk<Practitioner> {
             every { identifier } returns listOf(provIdentifier, fhirIdentifier2)
         }
         val actualResponse = messageHandler.sendMessage("TEST_TENANT", messageInput, dfe).data
@@ -249,16 +354,17 @@ class MessageHandlerTest {
                 every { sendMessage(tenant, expectedEHRMessageInput) } returns ("messageId#1")
             }
         }
-        every {
-            patientService.getPatientFHIRIds(
+        coEvery {
+            ehrDataAuthorityClient.getResourceIdentifiers(
                 "TEST_TENANT",
-                mapOf("MRN" to SystemValue(system = CodeSystem.RONIN_MRN.uri.value!!, value = "MRN#1"))
+                IdentifierSearchableResourceTypes.Patient,
+                listOf(com.projectronin.ehr.dataauthority.models.Identifier(CodeSystem.RONIN_MRN.uri.value!!, "MRN#1"))
             )
         } throws Exception("shouldn't be hit")
 
-        every {
-            patientService.getPatientByUDPId("TEST_TENANT", "TEST_TENANT-fhirId")
-        } returns mockk {
+        coEvery {
+            ehrDataAuthorityClient.getResource("TEST_TENANT", "Patient", "TEST_TENANT-fhirId")
+        } returns mockk<Patient> {
             every { identifier } returns listOf(
                 mockk {
                     every { system } returns CodeSystem.RONIN_FHIR_ID.uri
@@ -282,8 +388,8 @@ class MessageHandlerTest {
         every { tenantService.getTenantForMnemonic("TEST_TENANT") } returns tenant
         val messageInput = MessageInput("Test Message", MessagePatientInput(null, null), listOf())
         assertEquals(
-            messageHandler.sendMessage("TEST_TENANT", messageInput, dfe).errors.first().message,
-            "Either MRN or Ronin ID must be specified"
+            "Either MRN or Ronin ID must be specified",
+            messageHandler.sendMessage("TEST_TENANT", messageInput, dfe).errors.first().message
         )
     }
 }

@@ -17,6 +17,22 @@
           }
         }
       ]
+    },
+    {
+      "issuerId": "ehrda",
+      "tokenExpiry": 120,
+      "requestMappings": [
+        {
+          "requestParam": "client_id",
+          "match": "*",
+          "claims": {
+            "sub": "clientId@clients",
+            "aud": "https://ehr.dev.projectronin.io",
+            "iss": "http://mock-oauth2:8080/ehrda",
+            "scope": "search:resources"
+          }
+        }
+      ]
     }
   ]
 }

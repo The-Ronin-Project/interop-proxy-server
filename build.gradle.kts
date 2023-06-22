@@ -17,15 +17,16 @@ dependencies {
         }
     }
 
-    implementation(libs.interop.publishers.aidbox)
+    implementation(libs.ehrda.client)
+    implementation(libs.ehrda.models)
     implementation(libs.interop.common)
     implementation(libs.interop.commonHttp)
-    implementation(libs.interop.publishers.datalake) {
+    implementation(libs.interop.datalake) {
         // Exclude validation
         exclude(group = "com.projectronin.interop.validation", module = "interop-validation-client")
     }
     implementation(libs.interop.ehr.api)
-    implementation(libs.interop.publishers.kafka)
+    implementation(libs.interop.kafka)
     implementation(libs.interop.fhir)
     implementation(libs.interop.queue.api)
     implementation(libs.interop.ehr.tenant)
@@ -112,7 +113,9 @@ dependencies {
     itImplementation(libs.spring.mockk)
     itImplementation(libs.kafka.clients)
     itImplementation(libs.ktorm.core)
-    itImplementation(libs.interop.publishers.aidbox)
+    itImplementation(libs.ehrda.client)
+    itImplementation(libs.ehrda.models)
+    itImplementation(libs.interop.aidbox)
     itImplementation(libs.interop.common)
     itImplementation(libs.interop.commonHttp)
     itImplementation(libs.interop.ehr.liquibase)

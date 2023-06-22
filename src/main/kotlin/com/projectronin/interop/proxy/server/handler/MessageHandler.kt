@@ -3,10 +3,9 @@ package com.projectronin.interop.proxy.server.handler
 import com.expediagroup.graphql.generator.annotations.GraphQLDescription
 import com.expediagroup.graphql.server.extensions.toGraphQLError
 import com.expediagroup.graphql.server.operations.Mutation
-import com.projectronin.interop.aidbox.PatientService
-import com.projectronin.interop.aidbox.PractitionerService
-import com.projectronin.interop.aidbox.model.SystemValue
-import com.projectronin.interop.aidbox.utils.findFhirID
+import com.projectronin.ehr.dataauthority.client.EHRDataAuthorityClient
+import com.projectronin.ehr.dataauthority.models.Identifier
+import com.projectronin.ehr.dataauthority.models.IdentifierSearchableResourceTypes
 import com.projectronin.interop.ehr.factory.EHRFactory
 import com.projectronin.interop.ehr.inputs.EHRMessageInput
 import com.projectronin.interop.ehr.inputs.EHRRecipient
@@ -14,14 +13,19 @@ import com.projectronin.interop.ehr.inputs.FHIRIdentifiers
 import com.projectronin.interop.ehr.inputs.IdentifierVendorIdentifier
 import com.projectronin.interop.fhir.r4.CodeSystem
 import com.projectronin.interop.fhir.r4.datatype.primitive.Id
+import com.projectronin.interop.fhir.r4.resource.Patient
+import com.projectronin.interop.fhir.r4.resource.Practitioner
 import com.projectronin.interop.proxy.server.input.MessageInput
 import com.projectronin.interop.proxy.server.input.MessageRecipientInput
+import com.projectronin.interop.proxy.server.util.findFhirID
+import com.projectronin.interop.proxy.server.util.findFhirIDFromEHRDA
 import com.projectronin.interop.tenant.config.TenantService
 import com.projectronin.interop.tenant.config.model.Tenant
 import datadog.trace.api.Trace
 import graphql.GraphQLException
 import graphql.execution.DataFetcherResult
 import graphql.schema.DataFetchingEnvironment
+import kotlinx.coroutines.runBlocking
 import mu.KotlinLogging
 import org.springframework.stereotype.Component
 
@@ -32,8 +36,7 @@ import org.springframework.stereotype.Component
 class MessageHandler(
     private val ehrFactory: EHRFactory,
     private val tenantService: TenantService,
-    private val practitionerService: PractitionerService,
-    private val patientService: PatientService
+    private val ehrDataAuthorityClient: EHRDataAuthorityClient
 ) : Mutation {
     private val logger = KotlinLogging.logger { }
 
@@ -44,26 +47,31 @@ class MessageHandler(
         val tenant = findAndValidateTenant(dfe, tenantService, tenantId, false)
         val patientFHIRID = if (message.patient.patientFhirId != null) {
             // check that the inputted UDP ID is correct
-            val patient = patientService.getPatientByUDPId(
-                tenantMnemonic = tenant.mnemonic,
-                udpId = message.patient.patientFhirId
-            )
+            val patient = runBlocking {
+                ehrDataAuthorityClient.getResource(tenant.mnemonic, "Patient", message.patient.patientFhirId) as Patient
+            }
             patient.identifier.findFhirID()
         } else if (message.patient.mrn != null) {
             logger.info { "sendMessage called with MRN" }
-            // ensure patient exists in Aidbox
-            patientService.getPatientFHIRIds(
-                tenant.mnemonic,
-                mapOf("MRN" to SystemValue(system = CodeSystem.RONIN_MRN.uri.value!!, value = message.patient.mrn))
-            ).getOrElse("MRN") {
-                val error =
-                    "Attempted to send message for patient with MRN ${message.patient.mrn} who does not exist in Aidbox."
-                logger.error { error }
-                return DataFetcherResult.newResult<String>().errors(listOf(GraphQLException(error).toGraphQLError()))
-                    .build()
+
+            val searchIdentifier = Identifier(CodeSystem.RONIN_MRN.uri.value!!, message.patient.mrn)
+            // ensure patient exists in EHR Data Authority
+            val resources = runBlocking {
+                ehrDataAuthorityClient.getResourceIdentifiers(
+                    tenant.mnemonic,
+                    IdentifierSearchableResourceTypes.Patient,
+                    listOf(searchIdentifier)
+                )
+            }.find { it.searchedIdentifier == searchIdentifier }?.foundResources ?: emptyList()
+
+            when (resources.size) {
+                1 -> resources.first().identifiers.findFhirIDFromEHRDA()
+                0 -> return createError("Attempted to send message for patient with MRN ${message.patient.mrn} who does not exist in EHR Data Authority.")
+                else -> return createError("More than 1 patient found for MRN ${message.patient.mrn} with tenant ${tenant.mnemonic}")
             }
         } else {
-            return DataFetcherResult.newResult<String>().errors(listOf(GraphQLException("Either MRN or Ronin ID must be specified").toGraphQLError()))
+            return DataFetcherResult.newResult<String>()
+                .errors(listOf(GraphQLException("Either MRN or Ronin ID must be specified").toGraphQLError()))
                 .build()
         }
         val messageService = ehrFactory.getVendorFactory(tenant).messageService
@@ -83,7 +91,9 @@ class MessageHandler(
 
     private fun mapEHRRecipient(tenant: Tenant, recipientInput: MessageRecipientInput): EHRRecipient {
         val recipientUDPId = recipientInput.fhirId
-        val practitioner = practitionerService.getPractitionerByUDPId(tenant.mnemonic, recipientUDPId)
+        val practitioner = runBlocking {
+            ehrDataAuthorityClient.getResource(tenant.mnemonic, "Practitioner", recipientUDPId) as Practitioner
+        }
         val practitionerIdentifiers = practitioner.identifier
         val practitionerFhirID = practitionerIdentifiers.findFhirID()
 
@@ -96,5 +106,11 @@ class MessageHandler(
         )
 
         return EHRRecipient(id = practitionerFhirID, identifier = IdentifierVendorIdentifier(vendorIdentifier))
+    }
+
+    private fun createError(errorMessage: String): DataFetcherResult<String> {
+        logger.error { errorMessage }
+        return DataFetcherResult.newResult<String>().errors(listOf(GraphQLException(errorMessage).toGraphQLError()))
+            .build()
     }
 }

@@ -1,7 +1,6 @@
 package com.projectronin.interop.proxy.server.handler
 
-import com.projectronin.interop.aidbox.PatientService
-import com.projectronin.interop.aidbox.PractitionerService
+import com.projectronin.ehr.dataauthority.client.EHRDataAuthorityClient
 import com.projectronin.interop.common.http.exceptions.ClientFailureException
 import com.projectronin.interop.common.http.exceptions.RequestFailureException
 import com.projectronin.interop.ehr.factory.EHRFactory
@@ -32,6 +31,7 @@ import com.projectronin.interop.tenant.config.model.Tenant
 import graphql.schema.DataFetchingEnvironment
 import io.ktor.http.HttpStatusCode
 import io.mockk.Runs
+import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
@@ -46,8 +46,7 @@ import com.projectronin.interop.ehr.PractitionerService as EHRPractitionerServic
 
 class NoteHandlerTest {
     private lateinit var noteHandler: NoteHandler
-    private lateinit var practitionerService: PractitionerService
-    private lateinit var patientService: PatientService
+    private lateinit var ehrDataAuthorityClient: EHRDataAuthorityClient
     private lateinit var queueService: QueueService
     private lateinit var tenantService: TenantService
     private lateinit var mdmService: MDMService
@@ -96,8 +95,7 @@ class NoteHandlerTest {
 
     @BeforeEach
     fun initTest() {
-        practitionerService = mockk()
-        patientService = mockk()
+        ehrDataAuthorityClient = mockk()
         queueService = mockk {
             every { enqueueMessages(any()) } just Runs
         }
@@ -105,7 +103,7 @@ class NoteHandlerTest {
         mdmService = mockk()
         ehrFactory = mockk()
         noteHandler =
-            NoteHandler(patientService, practitionerService, queueService, tenantService, mdmService, ehrFactory)
+            NoteHandler(queueService, tenantService, mdmService, ehrFactory, ehrDataAuthorityClient)
         dfe = mockk()
         vendorFactory = mockk()
         ehrPractitionerService = mockk()
@@ -118,13 +116,20 @@ class NoteHandlerTest {
     @Test
     fun `accepts note with provider UDP ID and patient UDP ID`() {
         every { dfe.graphQlContext.get<InteropGraphQLContext>(INTEROP_CONTEXT_KEY).authzTenantId } returns "apposnd"
-        every {
-            practitionerService.getPractitionerByUDPId(
+        coEvery {
+            ehrDataAuthorityClient.getResource(
                 "apposnd",
+                "Practitioner",
                 "apposnd-PractitionerTestId"
             )
         } returns oncologyPractitioner
-        every { patientService.getPatientByUDPId("apposnd", "apposnd-PatientTestId") } returns oncologyPatient
+        coEvery {
+            ehrDataAuthorityClient.getResource(
+                "apposnd",
+                "Patient",
+                "apposnd-PatientTestId"
+            )
+        } returns oncologyPatient
         every { tenantService.getTenantForMnemonic("apposnd") } returns tenant
         every {
             mdmService.generateMDM(
@@ -155,13 +160,20 @@ class NoteHandlerTest {
     @Test
     fun `accepts addendum note with provider UDP ID and patient UDP ID`() {
         every { dfe.graphQlContext.get<InteropGraphQLContext>(INTEROP_CONTEXT_KEY).authzTenantId } returns "apposnd"
-        every {
-            practitionerService.getPractitionerByUDPId(
+        coEvery {
+            ehrDataAuthorityClient.getResource(
                 "apposnd",
+                "Practitioner",
                 "apposnd-PractitionerTestId"
             )
         } returns oncologyPractitioner
-        every { patientService.getPatientByUDPId("apposnd", "apposnd-PatientTestId") } returns oncologyPatient
+        coEvery {
+            ehrDataAuthorityClient.getResource(
+                "apposnd",
+                "Patient",
+                "apposnd-PatientTestId"
+            )
+        } returns oncologyPatient
         every { tenantService.getTenantForMnemonic("apposnd") } returns tenant
         every {
             mdmService.generateMDM(
@@ -192,13 +204,20 @@ class NoteHandlerTest {
     @Test
     fun `addendum note with null parent document ID is sent as a new note`() {
         every { dfe.graphQlContext.get<InteropGraphQLContext>(INTEROP_CONTEXT_KEY).authzTenantId } returns "apposnd"
-        every {
-            practitionerService.getPractitionerByUDPId(
+        coEvery {
+            ehrDataAuthorityClient.getResource(
                 "apposnd",
+                "Practitioner",
                 "apposnd-PractitionerTestId"
             )
         } returns oncologyPractitioner
-        every { patientService.getPatientByUDPId("apposnd", "apposnd-PatientTestId") } returns oncologyPatient
+        coEvery {
+            ehrDataAuthorityClient.getResource(
+                "apposnd",
+                "Patient",
+                "apposnd-PatientTestId"
+            )
+        } returns oncologyPatient
         every { tenantService.getTenantForMnemonic("apposnd") } returns tenant
         every {
             mdmService.generateMDM(
@@ -230,9 +249,10 @@ class NoteHandlerTest {
     fun `accepts note with provider UDP ID and patient MRN`() {
         every { dfe.graphQlContext.get<InteropGraphQLContext>(INTEROP_CONTEXT_KEY).authzTenantId } returns "apposnd"
         every { tenantService.getTenantForMnemonic("apposnd") } returns tenant
-        every {
-            practitionerService.getPractitionerByUDPId(
+        coEvery {
+            ehrDataAuthorityClient.getResource(
                 "apposnd",
+                "Practitioner",
                 "apposnd-PractitionerTestId"
             )
         } returns oncologyPractitioner
@@ -273,9 +293,10 @@ class NoteHandlerTest {
     fun `accepts note with provider UDP ID and patient MRN but not an alert`() {
         every { dfe.graphQlContext.get<InteropGraphQLContext>(INTEROP_CONTEXT_KEY).authzTenantId } returns "apposnd"
         every { tenantService.getTenantForMnemonic("apposnd") } returns tenant
-        every {
-            practitionerService.getPractitionerByUDPId(
+        coEvery {
+            ehrDataAuthorityClient.getResource(
                 "apposnd",
+                "Practitioner",
                 "apposnd-PractitionerTestId"
             )
         } returns oncologyPractitioner
@@ -337,9 +358,10 @@ class NoteHandlerTest {
         every { tenantService.getTenantForMnemonic("apposnd") } returns tenant
 
         // failure: practitionerService.getPractitionerByUDPId()
-        every {
-            practitionerService.getPractitionerByUDPId(
+        coEvery {
+            ehrDataAuthorityClient.getResource(
                 "apposnd",
+                "Practitioner",
                 "apposnd-PractitionerTestId"
             )
         } throws RequestFailureException(Throwable(), "y", "z")
@@ -395,9 +417,10 @@ class NoteHandlerTest {
         every { tenantService.getTenantForMnemonic("apposnd") } returns tenant
 
         // failure: practitionerService.getPractitionerByUDPId()
-        every {
-            practitionerService.getPractitionerByUDPId(
+        coEvery {
+            ehrDataAuthorityClient.getResource(
                 "apposnd",
+                "Practitioner",
                 "apposnd-PractitionerTestId"
             )
         } throws RequestFailureException(Throwable(), "y", "z")
@@ -452,9 +475,10 @@ class NoteHandlerTest {
         every { tenantService.getTenantForMnemonic("apposnd") } returns tenant
 
         // failure: practitionerService.getPractitionerByUDPId()
-        every {
-            practitionerService.getPractitionerByUDPId(
+        coEvery {
+            ehrDataAuthorityClient.getResource(
                 "apposnd",
+                "Practitioner",
                 "apposnd-PractitionerTestId"
             )
         } throws (ClientFailureException(HttpStatusCode(401, "x"), "y", "z"))
@@ -493,9 +517,10 @@ class NoteHandlerTest {
         every { tenantService.getTenantForMnemonic("apposnd") } returns tenant
 
         // success: practitionerService.getPractitionerByUDPId()
-        every {
-            practitionerService.getPractitionerByUDPId(
+        coEvery {
+            ehrDataAuthorityClient.getResource(
                 "apposnd",
+                "Practitioner",
                 "apposnd-PractitionerTestId"
             )
         } returns oncologyPractitioner
@@ -551,9 +576,10 @@ class NoteHandlerTest {
     fun `mrn is padded in less than 7 characters`() {
         every { dfe.graphQlContext.get<InteropGraphQLContext>(INTEROP_CONTEXT_KEY).authzTenantId } returns "apposnd"
         every { tenantService.getTenantForMnemonic("apposnd") } returns tenant
-        every {
-            practitionerService.getPractitionerByUDPId(
+        coEvery {
+            ehrDataAuthorityClient.getResource(
                 "apposnd",
+                "Practitioner",
                 "apposnd-PractitionerTestId"
             )
         } returns oncologyPractitioner

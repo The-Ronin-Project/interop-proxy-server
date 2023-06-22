@@ -3,8 +3,7 @@ package com.projectronin.interop.proxy.server.handler
 import com.expediagroup.graphql.generator.annotations.GraphQLDescription
 import com.expediagroup.graphql.server.extensions.toGraphQLError
 import com.expediagroup.graphql.server.operations.Mutation
-import com.projectronin.interop.aidbox.PatientService
-import com.projectronin.interop.aidbox.PractitionerService
+import com.projectronin.ehr.dataauthority.client.EHRDataAuthorityClient
 import com.projectronin.interop.common.hl7.EventType
 import com.projectronin.interop.common.hl7.MessageType
 import com.projectronin.interop.common.logmarkers.getLogMarker
@@ -28,17 +27,17 @@ import datadog.trace.api.Trace
 import graphql.GraphQLException
 import graphql.execution.DataFetcherResult
 import graphql.schema.DataFetchingEnvironment
+import kotlinx.coroutines.runBlocking
 import mu.KotlinLogging
 import org.springframework.stereotype.Component
 
 @Component
 class NoteHandler(
-    private val patientService: PatientService,
-    private val practitionerService: PractitionerService,
     private val queueService: QueueService,
     private val tenantService: TenantService,
     private val mdmService: MDMService,
-    private val ehrFactory: EHRFactory
+    private val ehrFactory: EHRFactory,
+    private val ehrDataAuthorityClient: EHRDataAuthorityClient
 ) : Mutation {
     private val logger = KotlinLogging.logger { }
 
@@ -148,7 +147,7 @@ class NoteHandler(
 
         return try {
             val id = if (isUDPId) practitionerFhirId else practitionerFhirId.localize(tenant)
-            practitionerService.getPractitionerByUDPId(tenant.mnemonic, id)
+            runBlocking { ehrDataAuthorityClient.getResource(tenant.mnemonic, "Practitioner", id) as Practitioner }
         } catch (exception: Exception) {
             logWarningMessage(noteInput, exception)
 
@@ -161,7 +160,13 @@ class NoteHandler(
         return when (noteInput.patientIdType) {
             PatientIdType.FHIR -> {
                 // get the Patient from Aidbox
-                val patient = patientService.getPatientByUDPId(tenant.mnemonic, noteInput.patientId)
+                val patient = runBlocking {
+                    ehrDataAuthorityClient.getResource(
+                        tenant.mnemonic,
+                        "Patient",
+                        noteInput.patientId
+                    ) as Patient
+                }
                 Pair(patient, null)
             }
 
