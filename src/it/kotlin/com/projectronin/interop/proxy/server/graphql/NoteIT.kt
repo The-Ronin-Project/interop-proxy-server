@@ -256,7 +256,7 @@ class NoteIT : BaseGraphQLIT() {
         val errorJSONObject = resultJSONObject["errors"][0]
         assertTrue(
             errorJSONObject["message"].asText()
-                .contains("Received 404  when calling EHR Data Authority")
+                .contains("No Patient found for $patientid")
         )
     }
 
@@ -409,7 +409,7 @@ class NoteIT : BaseGraphQLIT() {
         val errorJSONObject = resultJSONObject["errors"][0]
         assertTrue(
             errorJSONObject["message"].asText()
-                .contains("Received 404  when calling EHR Data Authority")
+                .contains("No Patient found for $patientid")
         )
     }
 

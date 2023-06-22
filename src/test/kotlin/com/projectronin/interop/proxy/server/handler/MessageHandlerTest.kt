@@ -246,12 +246,12 @@ class MessageHandlerTest {
             }
         }
         coEvery {
-            ehrDataAuthorityClient.getResource(
+            ehrDataAuthorityClient.getResourceAs<Practitioner>(
                 "TEST_TENANT",
                 "Practitioner",
                 "TEST_TENANT-doc1"
             )
-        } returns mockk<Practitioner> {
+        } returns mockk {
             every { identifier } returns listOf(provIdentifier, fhirIdentifier1)
         }
 
@@ -319,21 +319,21 @@ class MessageHandlerTest {
             )
 
         coEvery {
-            ehrDataAuthorityClient.getResource(
+            ehrDataAuthorityClient.getResourceAs<Practitioner>(
                 "TEST_TENANT",
                 "Practitioner",
                 "TEST_TENANT-doc1"
             )
-        } returns mockk<Practitioner> {
+        } returns mockk {
             every { identifier } returns listOf(provIdentifier, fhirIdentifier1)
         }
         coEvery {
-            ehrDataAuthorityClient.getResource(
+            ehrDataAuthorityClient.getResourceAs<Practitioner>(
                 "TEST_TENANT",
                 "Practitioner",
                 "TEST_TENANT-pool1"
             )
-        } returns mockk<Practitioner> {
+        } returns mockk {
             every { identifier } returns listOf(provIdentifier, fhirIdentifier2)
         }
         val actualResponse = messageHandler.sendMessage("TEST_TENANT", messageInput, dfe).data
@@ -363,8 +363,8 @@ class MessageHandlerTest {
         } throws Exception("shouldn't be hit")
 
         coEvery {
-            ehrDataAuthorityClient.getResource("TEST_TENANT", "Patient", "TEST_TENANT-fhirId")
-        } returns mockk<Patient> {
+            ehrDataAuthorityClient.getResourceAs<Patient>("TEST_TENANT", "Patient", "TEST_TENANT-fhirId")
+        } returns mockk {
             every { identifier } returns listOf(
                 mockk {
                     every { system } returns CodeSystem.RONIN_FHIR_ID.uri
@@ -377,6 +377,85 @@ class MessageHandlerTest {
         val actualResponse = messageHandler.sendMessage("TEST_TENANT", messageInput, dfe).data
 
         assertEquals("sent", actualResponse)
+    }
+
+    @Test
+    fun `error returned when patient not found with supplied FHIR ID`() {
+        every { dfe.graphQlContext.get<InteropGraphQLContext>(INTEROP_CONTEXT_KEY).authzTenantId } returns "TEST_TENANT"
+        val tenant = mockk<Tenant> {
+            every { mnemonic } returns "TEST_TENANT"
+        }
+        every { tenantService.getTenantForMnemonic("TEST_TENANT") } returns tenant
+        val expectedEHRMessageInput = EHRMessageInput("Test Message", "fhirId", listOf())
+        every { ehrFactory.getVendorFactory(tenant) } returns mockk {
+            every { messageService } returns mockk {
+                every { sendMessage(tenant, expectedEHRMessageInput) } returns ("messageId#1")
+            }
+        }
+        coEvery {
+            ehrDataAuthorityClient.getResourceIdentifiers(
+                "TEST_TENANT",
+                IdentifierSearchableResourceTypes.Patient,
+                listOf(com.projectronin.ehr.dataauthority.models.Identifier(CodeSystem.RONIN_MRN.uri.value!!, "MRN#1"))
+            )
+        } throws Exception("shouldn't be hit")
+
+        coEvery {
+            ehrDataAuthorityClient.getResourceAs<Patient>("TEST_TENANT", "Patient", "TEST_TENANT-fhirId")
+        } returns null
+
+        val messageInput = MessageInput("Test Message", MessagePatientInput(null, "TEST_TENANT-fhirId"), listOf())
+        assertEquals(
+            "No patient found for TEST_TENANT-fhirId",
+            messageHandler.sendMessage("TEST_TENANT", messageInput, dfe).errors.first().message
+        )
+    }
+
+    @Test
+    fun `error returned when practitioner not found with supplied FHIR ID`() {
+        every { dfe.graphQlContext.get<InteropGraphQLContext>(INTEROP_CONTEXT_KEY).authzTenantId } returns "TEST_TENANT"
+        val tenant = mockk<Tenant>()
+        every { tenant.mnemonic } returns "TEST_TENANT"
+        every { tenantService.getTenantForMnemonic("TEST_TENANT") } returns tenant
+
+        val expectedEHRMessageInput =
+            EHRMessageInput(
+                "Test Message",
+                "FHIRID",
+                listOf(
+                    EHRRecipient("doc1", identifierVendorIdentifier)
+                )
+            )
+        val fhirIdentifiers = FHIRIdentifiers(
+            id = Id("doc1"),
+            identifiers = listOf(provIdentifier, fhirIdentifier1)
+        )
+
+        every { ehrFactory.getVendorFactory(tenant) } returns mockk {
+            every { messageService } returns mockk {
+                every { sendMessage(tenant, expectedEHRMessageInput) } returns ("messageId#1")
+            }
+            every { identifierService } returns mockk {
+                every { getPractitionerUserIdentifier(tenant, fhirIdentifiers) } returns (provIdentifier)
+            }
+        }
+        coEvery {
+            ehrDataAuthorityClient.getResourceAs<Practitioner>(
+                "TEST_TENANT",
+                "Practitioner",
+                "TEST_TENANT-doc1"
+            )
+        } returns null
+
+        val messageInput =
+            MessageInput(
+                "Test Message",
+                MessagePatientInput("MRN#1", null),
+                listOf(MessageRecipientInput("TEST_TENANT-doc1"))
+            )
+        val exception =
+            assertThrows<IllegalArgumentException> { messageHandler.sendMessage("TEST_TENANT", messageInput, dfe) }
+        assertEquals("No Practitioner found for TEST_TENANT-doc1", exception.message)
     }
 
     @Test

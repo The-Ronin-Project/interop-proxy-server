@@ -149,7 +149,8 @@ class NoteHandler(
 
         return try {
             val id = if (isUDPId) practitionerFhirId else practitionerFhirId.localize(tenant)
-            runBlocking { ehrDataAuthorityClient.getResource(tenant.mnemonic, "Practitioner", id) as Practitioner }
+            runBlocking { ehrDataAuthorityClient.getResourceAs<Practitioner>(tenant.mnemonic, "Practitioner", id) }
+                ?: throw IllegalArgumentException("No Practitioner found for $id")
         } catch (exception: Exception) {
             logWarningMessage(noteInput, exception)
 
@@ -163,12 +164,12 @@ class NoteHandler(
             PatientIdType.FHIR -> {
                 // get the Patient from Aidbox
                 val patient = runBlocking {
-                    ehrDataAuthorityClient.getResource(
+                    ehrDataAuthorityClient.getResourceAs<Patient>(
                         tenant.mnemonic,
                         "Patient",
                         noteInput.patientId
-                    ) as Patient
-                }
+                    )
+                } ?: throw IllegalArgumentException("No Patient found for ${noteInput.patientId}")
                 Pair(patient, null)
             }
 

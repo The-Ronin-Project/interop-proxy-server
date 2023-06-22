@@ -1,8 +1,8 @@
 [libraries]
 dd-trace-api = "com.datadoghq:dd-trace-api:1.16.0"
 
-ehrda-client = "com.projectronin.ehr:ehr-data-authority-client:1.0.1"
-ehrda-models = "com.projectronin.ehr:ehr-data-authority-models:1.0.1"
+ehrda-client = "com.projectronin.ehr:ehr-data-authority-client:1.1.0"
+ehrda-models = "com.projectronin.ehr:ehr-data-authority-models:1.1.0"
 
 event-interop-resource-internal = "com.projectronin.contract.event:event-interop-resource-internal:1.0.0"
 
@@ -24,12 +24,12 @@ interop-commonTestDb = "com.projectronin.interop:interop-common-test-db:3.9.1"
 
 interop-datalake = "com.projectronin.interop.publish:interop-datalake:8.1.2"
 
-interop-ehr-api = "com.projectronin.interop.ehr:interop-ehr:10.1.0"
-interop-ehr-cerner = "com.projectronin.interop.ehr:interop-ehr-cerner:10.1.0"
-interop-ehr-fhir-ronin = "com.projectronin.interop.ehr:interop-fhir-ronin:10.1.0"
-interop-ehr-epic = "com.projectronin.interop.ehr:interop-ehr-epic:10.1.0"
-interop-ehr-liquibase = "com.projectronin.interop.ehr:interop-ehr-liquibase:10.1.0"
-interop-ehr-tenant = "com.projectronin.interop.ehr:interop-tenant:10.1.0"
+interop-ehr-api = "com.projectronin.interop.ehr:interop-ehr:10.2.1"
+interop-ehr-cerner = "com.projectronin.interop.ehr:interop-ehr-cerner:10.2.1"
+interop-ehr-fhir-ronin = "com.projectronin.interop.ehr:interop-fhir-ronin:10.2.1"
+interop-ehr-epic = "com.projectronin.interop.ehr:interop-ehr-epic:10.2.1"
+interop-ehr-liquibase = "com.projectronin.interop.ehr:interop-ehr-liquibase:10.2.1"
+interop-ehr-tenant = "com.projectronin.interop.ehr:interop-tenant:10.2.1"
 
 interop-fhir = "com.projectronin.interop.fhir:interop-fhir:8.2.1"
 interop-fhir-generators = "com.projectronin.interop.fhir:interop-fhir-generators:8.2.1"

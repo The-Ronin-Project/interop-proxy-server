@@ -408,7 +408,7 @@ class MessageIT : BaseGraphQLIT() {
         assertEquals(HttpStatusCode.OK, response.status)
         assertTrue(
             errorJSONObject["message"].asText()
-                .contains("Received 404  when calling EHR Data Authority")
+                .contains("No Practitioner found for $id")
         )
     }
 

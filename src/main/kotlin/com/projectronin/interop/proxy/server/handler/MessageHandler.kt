@@ -48,8 +48,8 @@ class MessageHandler(
         val patientFHIRID = if (message.patient.patientFhirId != null) {
             // check that the inputted UDP ID is correct
             val patient = runBlocking {
-                ehrDataAuthorityClient.getResource(tenant.mnemonic, "Patient", message.patient.patientFhirId) as Patient
-            }
+                ehrDataAuthorityClient.getResourceAs<Patient>(tenant.mnemonic, "Patient", message.patient.patientFhirId)
+            } ?: return createError("No patient found for ${message.patient.patientFhirId}")
             patient.identifier.findFhirID()
         } else if (message.patient.mrn != null) {
             logger.info { "sendMessage called with MRN" }
@@ -92,8 +92,8 @@ class MessageHandler(
     private fun mapEHRRecipient(tenant: Tenant, recipientInput: MessageRecipientInput): EHRRecipient {
         val recipientUDPId = recipientInput.fhirId
         val practitioner = runBlocking {
-            ehrDataAuthorityClient.getResource(tenant.mnemonic, "Practitioner", recipientUDPId) as Practitioner
-        }
+            ehrDataAuthorityClient.getResourceAs<Practitioner>(tenant.mnemonic, "Practitioner", recipientUDPId)
+        } ?: throw IllegalArgumentException("No Practitioner found for $recipientUDPId")
         val practitionerIdentifiers = practitioner.identifier
         val practitionerFhirID = practitionerIdentifiers.findFhirID()
 
