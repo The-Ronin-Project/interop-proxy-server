@@ -31,8 +31,9 @@ internal class SimpleQuantityTest {
 
     @Test
     fun `can get value with null value`() {
+        val doubleValue: Double? = null
         val ehrSimpleQuantity = relaxedMockk<R4SimpleQuantity> {
-            every { value } returns Decimal(null)
+            every { value } returns Decimal(doubleValue)
         }
         val simpleQuantity = SimpleQuantity(ehrSimpleQuantity)
         assertNull(simpleQuantity.value)

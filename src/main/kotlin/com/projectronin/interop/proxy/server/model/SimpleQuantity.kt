@@ -6,7 +6,7 @@ import com.projectronin.interop.fhir.r4.datatype.SimpleQuantity as R4SimpleQuant
 @GraphQLDescription("A simple quantity")
 data class SimpleQuantity(private val simpleQuantity: R4SimpleQuantity) {
     @GraphQLDescription("Numerical value (with implicit precision)")
-    val value: Double? = simpleQuantity.value?.value
+    val value: Double? = simpleQuantity.value?.value?.toDouble()
 
     @GraphQLDescription("Unit representation")
     val unit: String? = simpleQuantity.unit?.value

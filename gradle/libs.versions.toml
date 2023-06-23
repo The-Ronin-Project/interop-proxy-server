@@ -31,8 +31,8 @@ interop-ehr-epic = "com.projectronin.interop.ehr:interop-ehr-epic:10.2.1"
 interop-ehr-liquibase = "com.projectronin.interop.ehr:interop-ehr-liquibase:10.2.1"
 interop-ehr-tenant = "com.projectronin.interop.ehr:interop-tenant:10.2.1"
 
-interop-fhir = "com.projectronin.interop.fhir:interop-fhir:8.2.1"
-interop-fhir-generators = "com.projectronin.interop.fhir:interop-fhir-generators:8.2.1"
+interop-fhir = "com.projectronin.interop.fhir:interop-fhir:8.4.0"
+interop-fhir-generators = "com.projectronin.interop.fhir:interop-fhir-generators:8.4.0"
 
 interop-kafka = "com.projectronin.interop.publish:interop-kafka:8.1.1"
 

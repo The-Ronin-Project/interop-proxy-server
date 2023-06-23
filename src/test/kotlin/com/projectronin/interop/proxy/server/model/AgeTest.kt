@@ -33,8 +33,9 @@ internal class AgeTest {
 
     @Test
     fun `can get value with null value`() {
+        val doubleValue: Double? = null
         val ehrAge = relaxedMockk<R4Age> {
-            every { value } returns Decimal(null)
+            every { value } returns Decimal(doubleValue)
         }
         val age = Age(ehrAge)
         assertNull(age.value)
