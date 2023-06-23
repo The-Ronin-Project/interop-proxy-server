@@ -49,6 +49,7 @@ class MirthTenantConfigControllerTest {
             1,
             ZoneOffset.UTC
         )
+        every { blockedResources } returns "beep,boop"
     }
 
     private val mockProxyTenant = mockk<ProxyTenant> {
@@ -88,7 +89,8 @@ class MirthTenantConfigControllerTest {
     fun `get works with mnemonic`() {
         every { dao.getByTenantMnemonic("first") } returns configDO
         val results = controller.get("first")
-        assertEquals(results.body?.locationIds?.size, 3)
+        assertEquals(3, results.body?.locationIds?.size)
+        assertEquals(2, results.body?.blockedResources?.size)
     }
 
     @Test
@@ -112,7 +114,8 @@ class MirthTenantConfigControllerTest {
                 1,
                 1,
                 ZoneOffset.UTC
-            )
+            ),
+            listOf("beep", "boop")
         )
         val result = controller.insert("first", mirthTenantConfig)
         assertEquals(HttpStatus.CREATED, result.statusCode)
@@ -120,11 +123,12 @@ class MirthTenantConfigControllerTest {
     }
 
     @Test
-    fun `insert can return an empty location string`() {
+    fun `insert can return empty properties`() {
         val emptyConfigDO = mockk<MirthTenantConfigDO> {
             every { tenant } returns tenantDO
             every { locationIds } returns ""
             every { lastUpdated } returns null
+            every { blockedResources } returns null
         }
 
         every { tenantService.getTenantForMnemonic("first") } returns mockTenantServiceTenant
@@ -135,6 +139,7 @@ class MirthTenantConfigControllerTest {
 
         assertEquals(HttpStatus.CREATED, result.statusCode)
         assertEquals(emptyList<String>(), result.body?.locationIds)
+        assertEquals(emptyList<String>(), result.body?.blockedResources)
     }
 
     @Test

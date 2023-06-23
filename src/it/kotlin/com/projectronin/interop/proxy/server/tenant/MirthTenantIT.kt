@@ -26,6 +26,7 @@ class MirthTenantIT : BaseTenantControllerIT() {
             MirthTenantConfigDO {
                 tenant = tenantDO
                 locationIds = "1,2,3"
+                blockedResources = "4,5,6,7"
             }
         )
     }
@@ -37,6 +38,7 @@ class MirthTenantIT : BaseTenantControllerIT() {
 
         val body = runBlocking { response.body<MirthTenantConfig>() }
         assertEquals(listOf("1", "2", "3"), body.locationIds)
+        assertEquals(listOf("4", "5", "6", "7"), body.blockedResources)
     }
 
     @Test
@@ -51,7 +53,8 @@ class MirthTenantIT : BaseTenantControllerIT() {
     @Test
     fun `insert works`() {
         val insertMirthConfig = MirthTenantConfig(
-            locationIds = listOf("inserted", "inserted2")
+            locationIds = listOf("inserted", "inserted2"),
+            blockedResources = listOf("blocked", "blocked2")
         )
 
         val response = ProxyClient.post(url.format("epic"), insertMirthConfig)
@@ -59,6 +62,7 @@ class MirthTenantIT : BaseTenantControllerIT() {
         val body = runBlocking { response.body<MirthTenantConfig>() }
         assertEquals(HttpStatusCode.Created, response.status)
         assertEquals(insertMirthConfig.locationIds, body.locationIds)
+        assertEquals(insertMirthConfig.blockedResources, body.blockedResources)
     }
 
     @Test
@@ -76,7 +80,8 @@ class MirthTenantIT : BaseTenantControllerIT() {
     fun `update works`() {
         insert()
         val updated = MirthTenantConfig(
-            locationIds = listOf("updated", "updated2")
+            locationIds = listOf("updated", "updated2"),
+            blockedResources = listOf("blocked", "blocked2")
         )
 
         val response = ProxyClient.put(url.format("epic"), updated)
@@ -84,6 +89,7 @@ class MirthTenantIT : BaseTenantControllerIT() {
         val body = runBlocking { response.body<MirthTenantConfig>() }
         assertEquals(HttpStatusCode.OK, response.status)
         assertEquals(updated.locationIds, body.locationIds)
+        assertEquals(updated.blockedResources, body.blockedResources)
     }
 
     @Test
