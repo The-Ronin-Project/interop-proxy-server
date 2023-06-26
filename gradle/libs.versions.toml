@@ -34,7 +34,7 @@ interop-ehr-tenant = "com.projectronin.interop.ehr:interop-tenant:10.2.1"
 interop-fhir = "com.projectronin.interop.fhir:interop-fhir:8.4.0"
 interop-fhir-generators = "com.projectronin.interop.fhir:interop-fhir-generators:8.4.0"
 
-interop-kafka = "com.projectronin.interop.publish:interop-kafka:8.1.1"
+interop-kafka = "com.projectronin.interop.publish:interop-kafka:8.1.2"
 
 interop-queue-api = "com.projectronin.interop.queue:interop-queue:2.0.0"
 interop-queue-db = "com.projectronin.interop.queue:interop-queue-db:2.0.0"
