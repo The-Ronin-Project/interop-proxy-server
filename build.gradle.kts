@@ -2,10 +2,10 @@ import com.expediagroup.graphql.plugin.gradle.tasks.GraphQLGenerateSDLTask
 
 plugins {
     java
-    id("com.projectronin.interop.gradle.spring-boot")
-    id("com.projectronin.interop.gradle.docker-integration")
-    id("com.expediagroup.graphql")
-    id("org.owasp.dependencycheck")
+    alias(libs.plugins.interop.spring.boot)
+    alias(libs.plugins.interop.docker.integration)
+    alias(libs.plugins.graphql)
+    alias(libs.plugins.dependencycheck)
 }
 
 dependencies {
@@ -91,8 +91,6 @@ dependencies {
     testImplementation(libs.interop.commonTestDb)
     testImplementation(libs.interop.ehr.liquibase)
     testImplementation(libs.interop.queue.liquibase)
-    testImplementation(libs.interop.testcontainer.aidbox)
-    testImplementation(libs.interop.testcontainer.mockehr)
 
     testImplementation("com.squareup.okhttp3:mockwebserver")
 
@@ -108,8 +106,6 @@ dependencies {
     itImplementation("org.springframework.boot:spring-boot-starter-test")
     itImplementation("org.testcontainers:testcontainers")
     itImplementation("org.testcontainers:junit-jupiter")
-    itImplementation(libs.interop.testcontainer.aidbox)
-    itImplementation(libs.interop.testcontainer.mockehr)
     itImplementation(libs.spring.mockk)
     itImplementation(libs.kafka.clients)
     itImplementation(libs.ktorm.core)
@@ -120,13 +116,13 @@ dependencies {
     itImplementation(libs.interop.commonHttp)
     itImplementation(libs.interop.ehr.liquibase)
     itImplementation(libs.interop.fhir)
-    itImplementation(libs.interop.fhir.generators)
+    itImplementation(libs.interop.fhirGenerators)
     itImplementation(libs.interop.ehr.tenant)
     // itImplementation(libs.interop.ehr.fhir.ronin.generators)
     itImplementation(libs.ronin.test.data.generator)
     itImplementation("org.springframework.security:spring-security-oauth2-jose")
     itImplementation("org.liquibase:liquibase-core")
-    itImplementation("io.github.microutils:kotlin-logging:3.0.5")
+    itImplementation(libs.kotlin.logging)
     itImplementation(libs.jackson.databind)
 }
 

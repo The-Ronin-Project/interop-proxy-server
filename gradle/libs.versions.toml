@@ -1,84 +1,130 @@
+[versions]
+apache-kafka = "3.5.0"
+datadog = "1.16.3"
+ehrda = "1.2.1"
+graphql-java = "20.4"
+graphql-java-kickstart = "14.1.0"
+graphql-kotlin = "6.5.3"
+hapi-hl7v2 = "2.3"
+interop-aidbox = "8.1.0"
+interop-common = "3.9.1"
+interop-datalake = "8.1.2"
+interop-ehr = "10.3.1"
+interop-event-resource = "1.0.0"
+interop-fhir = "8.4.0"
+interop-gradle = "3.2.0"
+interop-kafka = "8.1.2"
+interop-queue = "2.0.0"
+jackson = "2.15.2"
+junit-pioneer = "2.0.1"
+kotlin-logging = "3.0.5"
+kotlinx-coroutines = "1.7.1"
+ktor = "2.3.1"
+ktorm = "3.6.0"
+# @pin until Spring 6
+logstash = "7.3"
+mockk = "1.13.5"
+mysql = "8.0.33"
+opentracing = "0.33.0"
+owasp = "8.3.1"
+ronin-kafka = "1.0.0"
+ronin-test = "0.0.2"
+# @pin until can move to JDK 17
+spring-boot = "2.7.13"
+# @pin until Spring 6
+spring-mockk = "3.1.2"
+testcontainers = "1.18.3"
+
 [libraries]
-dd-trace-api = "com.datadoghq:dd-trace-api:1.16.3"
-
-ehrda-client = "com.projectronin.ehr:ehr-data-authority-client:1.2.1"
-ehrda-models = "com.projectronin.ehr:ehr-data-authority-models:1.2.1"
-
-event-interop-resource-internal = "com.projectronin.contract.event:event-interop-resource-internal:1.0.0"
-
-graphql-java = "com.graphql-java:graphql-java:20.4"
-graphql-kotlin-schema-generator = "com.expediagroup:graphql-kotlin-schema-generator:6.5.3"
-graphql-kotlin-spring-server = "com.expediagroup:graphql-kotlin-spring-server:6.5.3"
-
-graphql-spring-boot-starter-test = "com.graphql-java-kickstart:graphql-spring-boot-starter-test:14.1.0"
-hapi-hl7v2-251 = "ca.uhn.hapi:hapi-structures-v251:2.3"
-hapi-hl7v2-base = "ca.uhn.hapi:hapi-base:2.3"
-
+dd-trace-api = { module = "com.datadoghq:dd-trace-api", version.ref = "datadog" }
+ehrda-client = { module = "com.projectronin.ehr:ehr-data-authority-client", version.ref = "ehrda" }
+ehrda-models = { module = "com.projectronin.ehr:ehr-data-authority-models", version.ref = "ehrda" }
+event-interop-resource-internal = { module = "com.projectronin.contract.event:event-interop-resource-internal", version.ref = "interop-event-resource" }
+graphql-java = { module = "com.graphql-java:graphql-java", version.ref = "graphql-java" }
+graphql-kotlin-schema-generator = { module = "com.expediagroup:graphql-kotlin-schema-generator", version.ref = "graphql-kotlin" }
+graphql-kotlin-spring-server = { module = "com.expediagroup:graphql-kotlin-spring-server", version.ref = "graphql-kotlin" }
+graphql-spring-boot-starter-test = { module = "com.graphql-java-kickstart:graphql-spring-boot-starter-test", version.ref = "graphql-java-kickstart" }
+hapi-hl7v2-251 = { module = "ca.uhn.hapi:hapi-structures-v251", version.ref = "hapi-hl7v2" }
+hapi-hl7v2-base = { module = "ca.uhn.hapi:hapi-base", version.ref = "hapi-hl7v2" }
 # For ITs
-interop-aidbox = "com.projectronin.interop.publish:interop-aidbox:8.1.0"
-
-interop-common = "com.projectronin.interop:interop-common:3.9.1"
-interop-commonHttp = "com.projectronin.interop:interop-common-http:3.9.1"
-interop-commonJackson = "com.projectronin.interop:interop-common-jackson:3.9.1"
-interop-commonTestDb = "com.projectronin.interop:interop-common-test-db:3.9.1"
-
-interop-datalake = "com.projectronin.interop.publish:interop-datalake:8.1.2"
-
-interop-ehr-api = "com.projectronin.interop.ehr:interop-ehr:10.3.1"
-interop-ehr-cerner = "com.projectronin.interop.ehr:interop-ehr-cerner:10.3.1"
-interop-ehr-fhir-ronin = "com.projectronin.interop.ehr:interop-fhir-ronin:10.3.1"
-interop-ehr-epic = "com.projectronin.interop.ehr:interop-ehr-epic:10.3.1"
-interop-ehr-liquibase = "com.projectronin.interop.ehr:interop-ehr-liquibase:10.3.1"
-interop-ehr-tenant = "com.projectronin.interop.ehr:interop-tenant:10.3.1"
-
-interop-fhir = "com.projectronin.interop.fhir:interop-fhir:8.4.0"
-interop-fhir-generators = "com.projectronin.interop.fhir:interop-fhir-generators:8.4.0"
-
-interop-kafka = "com.projectronin.interop.publish:interop-kafka:8.1.2"
-
-interop-queue-api = "com.projectronin.interop.queue:interop-queue:2.0.0"
-interop-queue-db = "com.projectronin.interop.queue:interop-queue-db:2.0.0"
-interop-queue-liquibase = "com.projectronin.interop.queue:interop-queue-liquibase:2.0.0"
-interop-queue-kafka = "com.projectronin.interop.queue:interop-queue-kafka:2.0.0"
-interop-testcontainer-aidbox = "com.projectronin.interop.publish:interop-aidbox-testcontainer:8.1.0"
-interop-testcontainer-mockehr = "com.projectronin.interop.mock:interop-mock-ehr-testcontainer:1.2.1"
-
-jackson-databind = "com.fasterxml.jackson.core:jackson-databind:2.15.2"
-junit-pioneer = "org.junit-pioneer:junit-pioneer:2.0.1"
-kafka-clients = "org.apache.kafka:kafka-clients:3.5.0"
-kotlinx-coroutines-bom = "org.jetbrains.kotlinx:kotlinx-coroutines-bom:1.7.1"
-
-ktor-client-auth = "io.ktor:ktor-client-auth:2.3.1"
-ktor-client-cio = "io.ktor:ktor-client-cio:2.3.1"
-ktor-client-content-negotiation = "io.ktor:ktor-client-content-negotiation:2.3.1"
-ktor-client-core = "io.ktor:ktor-client-core:2.3.1"
-ktor-client-logging = "io.ktor:ktor-client-logging:2.3.1"
-ktor-client-mock = "io.ktor:ktor-client-mock:2.3.1"
-ktor-serialization-jackson = "io.ktor:ktor-serialization-jackson:2.3.1"
-
-ktorm-core = "org.ktorm:ktorm-core:3.6.0"
-ktorm-support-mysql = "org.ktorm:ktorm-support-mysql:3.6.0"
-
-logstash-logback-encoder = "net.logstash.logback:logstash-logback-encoder:7.3"
-mockk = "io.mockk:mockk:1.13.5"
-mysql-connector-java = "com.mysql:mysql-connector-j:8.0.33"
-
-opentracing-api = "io.opentracing:opentracing-api:0.33.0"
-opentracing-util = "io.opentracing:opentracing-util:0.33.0"
-
-ronin-kafka = "com.projectronin:ronin-kafka:1.0.0"
-ronin-test-data-generator = "com.projectronin.test:ronin-test-data-generator:0.0.2"
-
-spring-boot-parent = "org.springframework.boot:spring-boot-parent:2.7.8"
-spring-mockk = "com.ninja-squad:springmockk:3.1.2"
+interop-aidbox = { module = "com.projectronin.interop.publish:interop-aidbox", version.ref = "interop-aidbox" }
+interop-common = { module = "com.projectronin.interop:interop-common", version.ref = "interop-common" }
+interop-commonHttp = { module = "com.projectronin.interop:interop-common-http", version.ref = "interop-common" }
+interop-commonJackson = { module = "com.projectronin.interop:interop-common-jackson", version.ref = "interop-common" }
+interop-commonTestDb = { module = "com.projectronin.interop:interop-common-test-db", version.ref = "interop-common" }
+interop-datalake = { module = "com.projectronin.interop.publish:interop-datalake", version.ref = "interop-datalake" }
+interop-ehr-api = { module = "com.projectronin.interop.ehr:interop-ehr", version.ref = "interop-ehr" }
+interop-ehr-cerner = { module = "com.projectronin.interop.ehr:interop-ehr-cerner", version.ref = "interop-ehr" }
+interop-ehr-fhir-ronin = { module = "com.projectronin.interop.ehr:interop-fhir-ronin", version.ref = "interop-ehr" }
+interop-ehr-epic = { module = "com.projectronin.interop.ehr:interop-ehr-epic", version.ref = "interop-ehr" }
+interop-ehr-liquibase = { module = "com.projectronin.interop.ehr:interop-ehr-liquibase", version.ref = "interop-ehr" }
+interop-ehr-tenant = { module = "com.projectronin.interop.ehr:interop-tenant", version.ref = "interop-ehr" }
+interop-fhir = { module = "com.projectronin.interop.fhir:interop-fhir", version.ref = "interop-fhir" }
+interop-fhirGenerators = { module = "com.projectronin.interop.fhir:interop-fhir-generators", version.ref = "interop-fhir" }
+interop-kafka = { module = "com.projectronin.interop.publish:interop-kafka", version.ref = "interop-kafka" }
+interop-queue-api = { module = "com.projectronin.interop.queue:interop-queue", version.ref = "interop-queue" }
+interop-queue-db = { module = "com.projectronin.interop.queue:interop-queue-db", version.ref = "interop-queue" }
+interop-queue-liquibase = { module = "com.projectronin.interop.queue:interop-queue-liquibase", version.ref = "interop-queue" }
+interop-queue-kafka = { module = "com.projectronin.interop.queue:interop-queue-kafka", version.ref = "interop-queue" }
+jackson-databind = { module = "com.fasterxml.jackson.core:jackson-databind", version.ref = "jackson" }
+junit-pioneer = { module = "org.junit-pioneer:junit-pioneer", version.ref = "junit-pioneer" }
+kafka-clients = { module = "org.apache.kafka:kafka-clients", version.ref = "apache-kafka" }
+kotlin-logging = { module = "io.github.microutils:kotlin-logging", version.ref = "kotlin-logging" }
+kotlinx-coroutines-bom = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-bom", version.ref = "kotlinx-coroutines" }
+ktor-client-auth = { module = "io.ktor:ktor-client-auth", version.ref = "ktor" }
+ktor-client-cio = { module = "io.ktor:ktor-client-cio", version.ref = "ktor" }
+ktor-client-content-negotiation = { module = "io.ktor:ktor-client-content-negotiation", version.ref = "ktor" }
+ktor-client-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
+ktor-client-logging = { module = "io.ktor:ktor-client-logging", version.ref = "ktor" }
+ktor-client-mock = { module = "io.ktor:ktor-client-mock", version.ref = "ktor" }
+ktor-serialization-jackson = { module = "io.ktor:ktor-serialization-jackson", version.ref = "ktor" }
+ktorm-core = { module = "org.ktorm:ktorm-core", version.ref = "ktorm" }
+ktorm-support-mysql = { module = "org.ktorm:ktorm-support-mysql", version.ref = "ktorm" }
+logstash-logback-encoder = { module = "net.logstash.logback:logstash-logback-encoder", version.ref = "logstash" }
+mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
+mysql-connector-java = { module = "com.mysql:mysql-connector-j", version.ref = "mysql" }
+opentracing-api = { module = "io.opentracing:opentracing-api", version.ref = "opentracing" }
+opentracing-util = { module = "io.opentracing:opentracing-util", version.ref = "opentracing" }
+ronin-kafka = { module = "com.projectronin:ronin-kafka", version.ref = "ronin-kafka" }
+ronin-test-data-generator = { module = "com.projectronin.test:ronin-test-data-generator", version.ref = "ronin-test" }
+spring-boot-parent = { module = "org.springframework.boot:spring-boot-parent", version.ref = "spring-boot" }
+spring-mockk = { module = "com.ninja-squad:springmockk", version.ref = "spring-mockk" }
 spring-security-oauth2-core = { module = "org.springframework.security:spring-security-oauth2-core" }
 spring-security-oauth2-jose = { module = "org.springframework.security:spring-security-oauth2-jose" }
-testcontainers-bom = "org.testcontainers:testcontainers-bom:1.18.3"
+testcontainers-bom = { module = "org.testcontainers:testcontainers-bom", version.ref = "testcontainers" }
 
 [bundles]
-ehr-impls = ["interop-ehr-epic", "interop-ehr-cerner"]
-graphql = ["graphql-kotlin-spring-server", "graphql-kotlin-schema-generator"]
-spring-security = ["spring-security-oauth2-core", "spring-security-oauth2-jose"]
-hl7v2 = ["hapi-hl7v2-251", "hapi-hl7v2-base"]
-opentracing = ["opentracing-api", "opentracing-util"]
-ktor = ["ktor-client-auth", "ktor-client-cio", "ktor-client-content-negotiation", "ktor-client-core", "ktor-client-logging", "ktor-serialization-jackson"]
+ehr-impls = [
+    "interop-ehr-epic",
+    "interop-ehr-cerner"
+]
+graphql = [
+    "graphql-kotlin-spring-server",
+    "graphql-kotlin-schema-generator"
+]
+hl7v2 = [
+    "hapi-hl7v2-251",
+    "hapi-hl7v2-base"
+]
+ktor = [
+    "ktor-client-auth",
+    "ktor-client-cio",
+    "ktor-client-content-negotiation",
+    "ktor-client-core",
+    "ktor-client-logging",
+    "ktor-serialization-jackson"
+]
+opentracing = [
+    "opentracing-api",
+    "opentracing-util"
+]
+spring-security = [
+    "spring-security-oauth2-core",
+    "spring-security-oauth2-jose"
+]
+
+[plugins]
+dependencycheck = { id = "org.owasp.dependencycheck", version.ref = "owasp" }
+graphql = { id = "com.expediagroup.graphql", version.ref = "graphql-kotlin" }
+interop-docker-integration = { id = "com.projectronin.interop.gradle.docker-integration", version.ref = "interop-gradle" }
+interop-spring-boot = { id = "com.projectronin.interop.gradle.spring-boot", version.ref = "interop-gradle" }
