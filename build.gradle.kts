@@ -4,6 +4,7 @@ plugins {
     java
     alias(libs.plugins.interop.spring.boot)
     alias(libs.plugins.interop.docker.integration)
+    alias(libs.plugins.interop.version.catalog)
     alias(libs.plugins.graphql)
     alias(libs.plugins.dependencycheck)
 }

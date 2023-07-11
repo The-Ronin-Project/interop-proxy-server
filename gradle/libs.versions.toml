@@ -2,6 +2,7 @@
 apache-kafka = "3.5.0"
 datadog = "1.16.3"
 ehrda = "1.2.1"
+# @keep for forcing version
 graphql-java = "20.4"
 graphql-java-kickstart = "14.1.0"
 graphql-kotlin = "6.5.3"
@@ -55,8 +56,8 @@ interop-commonTestDb = { module = "com.projectronin.interop:interop-common-test-
 interop-datalake = { module = "com.projectronin.interop.publish:interop-datalake", version.ref = "interop-datalake" }
 interop-ehr-api = { module = "com.projectronin.interop.ehr:interop-ehr", version.ref = "interop-ehr" }
 interop-ehr-cerner = { module = "com.projectronin.interop.ehr:interop-ehr-cerner", version.ref = "interop-ehr" }
-interop-ehr-fhir-ronin = { module = "com.projectronin.interop.ehr:interop-fhir-ronin", version.ref = "interop-ehr" }
 interop-ehr-epic = { module = "com.projectronin.interop.ehr:interop-ehr-epic", version.ref = "interop-ehr" }
+interop-ehr-fhir-ronin = { module = "com.projectronin.interop.ehr:interop-fhir-ronin", version.ref = "interop-ehr" }
 interop-ehr-liquibase = { module = "com.projectronin.interop.ehr:interop-ehr-liquibase", version.ref = "interop-ehr" }
 interop-ehr-tenant = { module = "com.projectronin.interop.ehr:interop-tenant", version.ref = "interop-ehr" }
 interop-fhir = { module = "com.projectronin.interop.fhir:interop-fhir", version.ref = "interop-fhir" }
@@ -64,8 +65,8 @@ interop-fhirGenerators = { module = "com.projectronin.interop.fhir:interop-fhir-
 interop-kafka = { module = "com.projectronin.interop.publish:interop-kafka", version.ref = "interop-kafka" }
 interop-queue-api = { module = "com.projectronin.interop.queue:interop-queue", version.ref = "interop-queue" }
 interop-queue-db = { module = "com.projectronin.interop.queue:interop-queue-db", version.ref = "interop-queue" }
-interop-queue-liquibase = { module = "com.projectronin.interop.queue:interop-queue-liquibase", version.ref = "interop-queue" }
 interop-queue-kafka = { module = "com.projectronin.interop.queue:interop-queue-kafka", version.ref = "interop-queue" }
+interop-queue-liquibase = { module = "com.projectronin.interop.queue:interop-queue-liquibase", version.ref = "interop-queue" }
 jackson-databind = { module = "com.fasterxml.jackson.core:jackson-databind", version.ref = "jackson" }
 junit-pioneer = { module = "org.junit-pioneer:junit-pioneer", version.ref = "junit-pioneer" }
 kafka-clients = { module = "org.apache.kafka:kafka-clients", version.ref = "apache-kafka" }
@@ -76,10 +77,8 @@ ktor-client-cio = { module = "io.ktor:ktor-client-cio", version.ref = "ktor" }
 ktor-client-content-negotiation = { module = "io.ktor:ktor-client-content-negotiation", version.ref = "ktor" }
 ktor-client-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
 ktor-client-logging = { module = "io.ktor:ktor-client-logging", version.ref = "ktor" }
-ktor-client-mock = { module = "io.ktor:ktor-client-mock", version.ref = "ktor" }
 ktor-serialization-jackson = { module = "io.ktor:ktor-serialization-jackson", version.ref = "ktor" }
 ktorm-core = { module = "org.ktorm:ktorm-core", version.ref = "ktorm" }
-ktorm-support-mysql = { module = "org.ktorm:ktorm-support-mysql", version.ref = "ktorm" }
 logstash-logback-encoder = { module = "net.logstash.logback:logstash-logback-encoder", version.ref = "logstash" }
 mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
 mysql-connector-java = { module = "com.mysql:mysql-connector-j", version.ref = "mysql" }
@@ -95,16 +94,16 @@ testcontainers-bom = { module = "org.testcontainers:testcontainers-bom", version
 
 [bundles]
 ehr-impls = [
+    "interop-ehr-cerner",
     "interop-ehr-epic",
-    "interop-ehr-cerner"
 ]
 graphql = [
+    "graphql-kotlin-schema-generator",
     "graphql-kotlin-spring-server",
-    "graphql-kotlin-schema-generator"
 ]
 hl7v2 = [
     "hapi-hl7v2-251",
-    "hapi-hl7v2-base"
+    "hapi-hl7v2-base",
 ]
 ktor = [
     "ktor-client-auth",
@@ -112,15 +111,15 @@ ktor = [
     "ktor-client-content-negotiation",
     "ktor-client-core",
     "ktor-client-logging",
-    "ktor-serialization-jackson"
+    "ktor-serialization-jackson",
 ]
 opentracing = [
     "opentracing-api",
-    "opentracing-util"
+    "opentracing-util",
 ]
 spring-security = [
     "spring-security-oauth2-core",
-    "spring-security-oauth2-jose"
+    "spring-security-oauth2-jose",
 ]
 
 [plugins]
@@ -128,3 +127,4 @@ dependencycheck = { id = "org.owasp.dependencycheck", version.ref = "owasp" }
 graphql = { id = "com.expediagroup.graphql", version.ref = "graphql-kotlin" }
 interop-docker-integration = { id = "com.projectronin.interop.gradle.docker-integration", version.ref = "interop-gradle" }
 interop-spring-boot = { id = "com.projectronin.interop.gradle.spring-boot", version.ref = "interop-gradle" }
+interop-version-catalog = { id = "com.projectronin.interop.gradle.version-catalog-update", version.ref = "interop-gradle" }
