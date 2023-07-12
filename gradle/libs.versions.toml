@@ -1,26 +1,27 @@
 [versions]
 apache-kafka = "3.5.0"
-datadog = "1.16.3"
-ehrda = "1.2.1"
+datadog = "1.18.0"
+ehrda = "1.2.2"
 # @keep for forcing version
 graphql-java = "20.4"
+# @pin until Spring Boot 3
 graphql-java-kickstart = "14.1.0"
 graphql-kotlin = "6.5.3"
 hapi-hl7v2 = "2.3"
 interop-aidbox = "8.1.0"
 interop-common = "3.9.1"
 interop-datalake = "8.1.2"
-interop-ehr = "10.3.1"
+interop-ehr = "10.5.0"
 interop-event-resource = "1.0.0"
-interop-fhir = "8.4.0"
+interop-fhir = "8.6.0"
 interop-gradle = "3.2.0"
 interop-kafka = "8.1.2"
 interop-queue = "2.0.0"
 jackson = "2.15.2"
 junit-pioneer = "2.0.1"
 kotlin-logging = "3.0.5"
-kotlinx-coroutines = "1.7.1"
-ktor = "2.3.1"
+kotlinx-coroutines = "1.7.2"
+ktor = "2.3.2"
 ktorm = "3.6.0"
 # @pin until Spring 6
 logstash = "7.3"
@@ -41,6 +42,7 @@ dd-trace-api = { module = "com.datadoghq:dd-trace-api", version.ref = "datadog" 
 ehrda-client = { module = "com.projectronin.ehr:ehr-data-authority-client", version.ref = "ehrda" }
 ehrda-models = { module = "com.projectronin.ehr:ehr-data-authority-models", version.ref = "ehrda" }
 event-interop-resource-internal = { module = "com.projectronin.contract.event:event-interop-resource-internal", version.ref = "interop-event-resource" }
+# @keep to force version
 graphql-java = { module = "com.graphql-java:graphql-java", version.ref = "graphql-java" }
 graphql-kotlin-schema-generator = { module = "com.expediagroup:graphql-kotlin-schema-generator", version.ref = "graphql-kotlin" }
 graphql-kotlin-spring-server = { module = "com.expediagroup:graphql-kotlin-spring-server", version.ref = "graphql-kotlin" }

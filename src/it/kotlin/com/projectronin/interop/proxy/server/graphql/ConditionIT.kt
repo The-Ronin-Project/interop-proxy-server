@@ -3,6 +3,7 @@ package com.projectronin.interop.proxy.server.graphql
 import com.projectronin.interop.common.jackson.JacksonManager.Companion.objectMapper
 import com.projectronin.interop.fhir.generators.datatypes.codeableConcept
 import com.projectronin.interop.fhir.generators.datatypes.reference
+import com.projectronin.interop.fhir.generators.primitives.of
 import com.projectronin.interop.fhir.generators.resources.condition
 import com.projectronin.interop.fhir.generators.resources.patient
 import com.projectronin.interop.fhir.r4.CodeSystem
