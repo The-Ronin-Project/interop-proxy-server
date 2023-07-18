@@ -1,6 +1,6 @@
 [versions]
 apache-kafka = "3.5.0"
-datadog = "1.18.0"
+datadog = "1.18.1"
 ehrda = "1.2.2"
 # @keep for forcing version
 graphql-java = "20.4"
@@ -13,7 +13,7 @@ interop-common = "3.9.1"
 interop-datalake = "8.1.2"
 interop-ehr = "10.5.0"
 interop-event-resource = "1.0.0"
-interop-fhir = "8.6.0"
+interop-fhir = "8.7.0"
 interop-gradle = "3.2.0"
 interop-kafka = "8.1.2"
 interop-queue = "2.0.0"
