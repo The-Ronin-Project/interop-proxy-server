@@ -13,6 +13,7 @@ import com.projectronin.interop.tenant.config.data.binding.MirthTenantConfigDOs
 import com.projectronin.interop.tenant.config.data.binding.ProviderPoolDOs
 import com.projectronin.interop.tenant.config.data.binding.TenantCodesDOs
 import com.projectronin.interop.tenant.config.data.binding.TenantDOs
+import com.projectronin.interop.tenant.config.data.binding.TenantMDMConfigDOs
 import com.projectronin.interop.tenant.config.data.binding.TenantServerDOs
 import com.projectronin.interop.tenant.config.data.model.CernerTenantDO
 import com.projectronin.interop.tenant.config.data.model.EhrDO
@@ -78,6 +79,7 @@ abstract class BaseProxyIT {
         tenantDB.deleteAll(TenantCodesDOs)
         tenantDB.deleteAll(ProviderPoolDOs)
         tenantDB.deleteAll(MirthTenantConfigDOs)
+        tenantDB.deleteAll(TenantMDMConfigDOs)
         tenantDB.deleteAll(EpicTenantDOs)
         tenantDB.deleteAll(CernerTenantDOs)
         tenantDB.deleteAll(TenantServerDOs)
