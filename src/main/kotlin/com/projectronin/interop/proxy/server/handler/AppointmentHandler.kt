@@ -7,6 +7,7 @@ import com.projectronin.interop.common.logmarkers.getLogMarker
 import com.projectronin.interop.common.resource.ResourceType
 import com.projectronin.interop.ehr.factory.EHRFactory
 import com.projectronin.interop.fhir.r4.resource.Appointment
+import com.projectronin.interop.fhir.ronin.util.unlocalize
 import com.projectronin.interop.proxy.server.util.DateUtil
 import com.projectronin.interop.proxy.server.util.JacksonUtil
 import com.projectronin.interop.proxy.server.util.generateMetadata
@@ -60,7 +61,9 @@ class AppointmentHandler(
         dfe: DataFetchingEnvironment // automatically added to requests
     ): DataFetcherResult<List<ProxyServerAppointment>> {
         val tenant = findAndValidateTenant(dfe, tenantService, tenantId)
-        return appointmentHandler(tenant, patientFhirId, startDate, endDate)
+        // INT-2073: This should be corrected in Appointment and moved there.
+        val unlocalizedId = patientFhirId.unlocalize(tenant)
+        return appointmentHandler(tenant, unlocalizedId, startDate, endDate)
     }
 
     private fun appointmentHandler(
