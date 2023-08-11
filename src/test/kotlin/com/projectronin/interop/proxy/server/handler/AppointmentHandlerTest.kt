@@ -145,7 +145,9 @@ class AppointmentHandlerTest {
 
     @Test
     fun `unknown vendor returns an error`() {
-        val tenant = mockk<Tenant>()
+        val tenant = mockk<Tenant> {
+            every { mnemonic } returns "tenantId"
+        }
         every { tenantService.getTenantForMnemonic("tenantId") } returns tenant
         every { dfe.graphQlContext.get<InteropGraphQLContext>(INTEROP_CONTEXT_KEY).authzTenantId } returns "tenantId"
 
@@ -332,6 +334,114 @@ class AppointmentHandlerTest {
         val actualResponse = appointmentHandler.appointmentsByPatientAndDate(
             tenantId = "tenantId",
             patientFhirId = "123456789",
+            startDate = "2025-01-20",
+            endDate = "2025-01-22",
+            dfe = dfe
+        )
+
+        // Check results
+        assertNotNull(actualResponse)
+
+        val appointments = actualResponse.data
+        assertEquals(1, appointments.size)
+        assertEquals(Appointment(appointment1, tenant), appointments[0])
+        unmockkObject(JacksonUtil)
+    }
+
+    @Test
+    fun `ensure appointment is correctly returned for UDP ID`() {
+        // Mock response
+        val appointment1 = mockk<R4Appointment> {
+            every { id } returns Id("APPT-ID-1")
+            every { identifier } returns listOf(
+                mockk {
+                    every { system?.value } returns "test-system"
+                    every { value?.value } returns "test-value"
+                }
+            )
+            every { status?.value } returns AppointmentStatus.BOOKED.code
+            every { appointmentType } returns mockk {
+                every { coding } returns listOf(
+                    mockk {
+                        every { system?.value } returns "test-system"
+                        every { version?.value } returns "test-version"
+                        every { code?.value } returns "test-code"
+                        every { display?.value } returns "test-appt-type"
+                        every { userSelected?.value } returns true
+                    }
+                )
+                every { text?.value } returns "appt-type-text"
+            }
+            every { serviceType } returns listOf(
+                mockk {
+                    every { coding } returns listOf(
+                        mockk {
+                            every { system?.value } returns "test-system"
+                            every { version?.value } returns "test-version"
+                            every { code?.value } returns "test-code"
+                            every { display?.value } returns "test-service-type"
+                            every { userSelected?.value } returns true
+                        }
+                    )
+                    every { text?.value } returns "service-type-text"
+                }
+            )
+            every { start?.value } returns "2025-01-21"
+            every { participant } returns listOf(
+                mockk {
+                    every { actor } returns mockk {
+                        every { reference?.value } returns "test-reference"
+                        every { display?.value } returns "test-display"
+                        every { type } returns Uri("Practitioner")
+                        every { id?.value } returns "test-id"
+                        every { identifier } returns mockk {
+                            every { system?.value } returns "test-system"
+                            every { value?.value } returns "test-value"
+                        }
+                    }
+                }
+            )
+        }
+        val response = listOf(appointment1)
+
+        val tenant = mockk<Tenant>()
+        every { tenant.mnemonic } returns "tenantId"
+        every { tenantService.getTenantForMnemonic("tenantId") } returns tenant
+        every { dfe.graphQlContext.get<InteropGraphQLContext>(INTEROP_CONTEXT_KEY).authzTenantId } returns "tenantId"
+
+        every { ehrFactory.getVendorFactory(tenant) } returns mockk {
+            every { appointmentService } returns mockk {
+                every {
+                    findPatientAppointments(
+                        tenant = tenant,
+                        patientFHIRId = "123456789",
+                        startDate = LocalDate.of(2025, 1, 20),
+                        endDate = LocalDate.of(2025, 1, 22),
+                        useEHRFallback = false
+                    )
+                } returns response
+            }
+        }
+        mockkObject(JacksonUtil)
+        every { JacksonUtil.writeJsonValue(appointment1) } returns "serializedAppt"
+        every {
+            queueService.enqueueMessages(
+                listOf(
+                    ApiMessage(
+                        id = null,
+                        resourceType = ResourceType.APPOINTMENT,
+                        tenant = "tenantId",
+                        text = "serializedAppt",
+                        metadata = metadata
+                    )
+                )
+            )
+        } just Runs
+
+        // Run test
+        val actualResponse = appointmentHandler.appointmentsByPatientAndDate(
+            tenantId = "tenantId",
+            patientFhirId = "tenantId-123456789",
             startDate = "2025-01-20",
             endDate = "2025-01-22",
             dfe = dfe

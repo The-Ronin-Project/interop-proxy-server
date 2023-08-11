@@ -170,6 +170,49 @@ class AppointmentIT : BaseGraphQLIT() {
         addTenantData(testTenant)
         val query = this::class.java.getResource("/graphql/appointmentsByFHIR.graphql")!!
             .readText()
+            .replace("__PATIENT_FHIR__", "PatientFHIRID1")
+            .replace("__START_DATE__", "01-01-2022")
+            .replace("__END_DATE__", "02-02-2022")
+            .replace("__tenant_mnemonic__", testTenant)
+        val response = ProxyClient.query(query, testTenant)
+        val body = runBlocking { response.body<String>() }
+        val resultJSONNode = JacksonManager.objectMapper.readTree(body)
+        val node = resultJSONNode["data"]["appointmentsByPatientAndDate"]
+        assertFalse(node.has("errors"))
+        assertEquals(2, node.size())
+        node.forEach { appointment ->
+            if (appointment["id"].asText().contains("AppointmentFHIRID1")) {
+                assertEquals("2022-01-01T09:00:00Z", appointment["start"].asText())
+                assertEquals("booked", appointment["status"].asText())
+                val participants = appointment["participants"]
+                participants.forEach { participant ->
+                    val actor = participant["actor"]
+                    val type = actor["type"].asText()
+                    if (type == "Patient") {
+                        assertEquals("Patient/$testTenant-PatientFHIRID1", actor["reference"].asText())
+                    }
+                    // TODO need to add these resources in setup so this resolves
+                    // if (type == "Practitioner") {
+                    //     assertEquals("Practitioner/ronin-PractitionerFHIRID1", actor["reference"].asText())
+                    // }
+                    // if (type == "Location") {
+                    //     assertEquals("Location/ronin-LocationFHIRID1", actor["reference"].asText())
+                    // }
+                }
+            }
+            if (appointment["id"].asText().contains("AppointmentFHIRID2")) {
+                assertEquals("2022-01-01T10:00:00Z", appointment["start"].asText())
+            }
+        }
+    }
+
+    @ParameterizedTest
+    @MethodSource("tenantMnemonics")
+    fun `server handles appointment by Ronin FHIR ID query`(testTenant: String) {
+        addTenantData(testTenant)
+        val query = this::class.java.getResource("/graphql/appointmentsByFHIR.graphql")!!
+            .readText()
+            .replace("__PATIENT_FHIR__", "$testTenant-PatientFHIRID1")
             .replace("__START_DATE__", "01-01-2022")
             .replace("__END_DATE__", "02-02-2022")
             .replace("__tenant_mnemonic__", testTenant)
@@ -213,6 +256,7 @@ class AppointmentIT : BaseGraphQLIT() {
 
         val query = this::class.java.getResource("/graphql/appointmentsByFHIR.graphql")!!
             .readText()
+            .replace("__PATIENT_FHIR__", "PatientFHIRID1")
             .replace("__START_DATE__", "01-01-2022")
             .replace("__END_DATE__", "02-02-2022")
             .replace("__tenant_mnemonic__", testTenant)
