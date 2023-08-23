@@ -295,7 +295,7 @@ class NoteIT : BaseGraphQLIT() {
         val errorJSONObject = resultJSONObject["errors"][0]
         assertTrue(
             errorJSONObject["message"].asText()
-                .contains("Received 404") // MockEHR
+                .contains("No Patient found for") // MockEHR
         )
     }
 
@@ -486,5 +486,42 @@ class NoteIT : BaseGraphQLIT() {
             errorJSONObject["message"].asText()
                 .contains("No FHIR ID found for patient") // MockEHR
         )
+    }
+
+    @Test
+    fun `patient ID (less than 7 digits) needs padding, practitioner found in MockEHR, padded patient MRN found in MockEHR`() {
+        val testTenant = "epic"
+        addTenantData(testTenant)
+        val notetext = "Test Note"
+        val patientid = "202497"
+        val practitionerid = "PractitionerFHIRID1"
+        val mutation =
+            """mutation sendNote(${'$'}noteInput: NoteInput!, ${'$'}tenantId: String!) {sendNote(noteInput: ${'$'}noteInput, tenantId: ${'$'}tenantId)}"""
+        val query = """
+            |{
+            |   "query": "$mutation",
+            |   "variables": {
+            |      "noteInput": {
+            |         "datetime": "202206011250",
+            |         "patientId":  "$patientid",
+            |         "patientIdType":  "MRN",
+            |         "practitionerFhirId": "$practitionerid",
+            |         "noteText": "$notetext",
+            |         "noteSender": "PRACTITIONER",
+            |         "isAlert" : "False"
+            |      },
+            |      "tenantId": "$testTenant"
+            |   }
+            |}
+        """.trimMargin()
+        val response = ProxyClient.query(query, testTenant, getBaseHeaders(testTenant))
+
+        val body = runBlocking { response.body<String>() }
+        val dateformat = SimpleDateFormat("yyyyMM")
+        val docId = "RoninNote" + dateformat.format(java.util.Date())
+        val resultJSONObject = JacksonManager.objectMapper.readTree(body)
+        assertEquals(HttpStatusCode.OK, response.status)
+        assertFalse(resultJSONObject.has("errors"))
+        assertTrue(resultJSONObject["data"]["sendNote"].asText().startsWith(docId))
     }
 }

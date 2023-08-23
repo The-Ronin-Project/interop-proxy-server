@@ -60,6 +60,7 @@ interop-ehr-api = { module = "com.projectronin.interop.ehr:interop-ehr", version
 interop-ehr-cerner = { module = "com.projectronin.interop.ehr:interop-ehr-cerner", version.ref = "interop-ehr" }
 interop-ehr-epic = { module = "com.projectronin.interop.ehr:interop-ehr-epic", version.ref = "interop-ehr" }
 interop-ehr-fhir-ronin = { module = "com.projectronin.interop.ehr:interop-fhir-ronin", version.ref = "interop-ehr" }
+interop-ehr-hl7 = { module = "com.projectronin.interop.ehr:interop-hl7", version.ref = "interop-ehr" }
 interop-ehr-liquibase = { module = "com.projectronin.interop.ehr:interop-ehr-liquibase", version.ref = "interop-ehr" }
 interop-ehr-tenant = { module = "com.projectronin.interop.ehr:interop-tenant", version.ref = "interop-ehr" }
 interop-fhir = { module = "com.projectronin.interop.fhir:interop-fhir", version.ref = "interop-fhir" }
@@ -98,6 +99,7 @@ testcontainers-bom = { module = "org.testcontainers:testcontainers-bom", version
 ehr-impls = [
     "interop-ehr-cerner",
     "interop-ehr-epic",
+    "interop-ehr-hl7"
 ]
 graphql = [
     "graphql-kotlin-schema-generator",

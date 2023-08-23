@@ -5,21 +5,32 @@ import com.projectronin.interop.common.http.exceptions.ClientFailureException
 import com.projectronin.interop.common.http.exceptions.RequestFailureException
 import com.projectronin.interop.ehr.factory.EHRFactory
 import com.projectronin.interop.ehr.factory.VendorFactory
+import com.projectronin.interop.fhir.r4.CodeSystem
+import com.projectronin.interop.fhir.r4.CodeableConcepts
 import com.projectronin.interop.fhir.r4.datatype.Address
+import com.projectronin.interop.fhir.r4.datatype.Attachment
 import com.projectronin.interop.fhir.r4.datatype.ContactPoint
 import com.projectronin.interop.fhir.r4.datatype.HumanName
 import com.projectronin.interop.fhir.r4.datatype.Identifier
+import com.projectronin.interop.fhir.r4.datatype.Reference
+import com.projectronin.interop.fhir.r4.datatype.primitive.Base64Binary
 import com.projectronin.interop.fhir.r4.datatype.primitive.Code
 import com.projectronin.interop.fhir.r4.datatype.primitive.Date
+import com.projectronin.interop.fhir.r4.datatype.primitive.Instant
 import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
 import com.projectronin.interop.fhir.r4.datatype.primitive.asFHIR
+import com.projectronin.interop.fhir.r4.resource.DocumentReference
+import com.projectronin.interop.fhir.r4.resource.DocumentReferenceContent
+import com.projectronin.interop.fhir.r4.resource.DocumentReferenceRelatesTo
 import com.projectronin.interop.fhir.r4.resource.Patient
 import com.projectronin.interop.fhir.r4.resource.Practitioner
 import com.projectronin.interop.fhir.r4.valueset.AdministrativeGender
+import com.projectronin.interop.fhir.r4.valueset.CompositionStatus
 import com.projectronin.interop.fhir.r4.valueset.ContactPointUse
+import com.projectronin.interop.fhir.r4.valueset.DocumentReferenceStatus
+import com.projectronin.interop.fhir.r4.valueset.DocumentRelationshipType
 import com.projectronin.interop.proxy.server.context.INTEROP_CONTEXT_KEY
 import com.projectronin.interop.proxy.server.context.InteropGraphQLContext
-import com.projectronin.interop.proxy.server.hl7.MDMService
 import com.projectronin.interop.proxy.server.input.NoteInput
 import com.projectronin.interop.proxy.server.input.NoteSender
 import com.projectronin.interop.proxy.server.input.PatientIdType
@@ -41,20 +52,24 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.springframework.web.client.HttpClientErrorException
+import java.time.LocalDateTime
+import com.projectronin.interop.ehr.NoteService as EHRNoteService
 import com.projectronin.interop.ehr.PatientService as EHRPatientService
 import com.projectronin.interop.ehr.PractitionerService as EHRPractitionerService
+import com.projectronin.interop.ehr.inputs.NoteInput as EhrNoteInput
+import com.projectronin.interop.ehr.inputs.NoteSender as EhrNoteSender
 
 class NoteHandlerTest {
     private lateinit var noteHandler: NoteHandler
     private lateinit var ehrDataAuthorityClient: EHRDataAuthorityClient
     private lateinit var queueService: QueueService
     private lateinit var tenantService: TenantService
-    private lateinit var mdmService: MDMService
     private lateinit var ehrFactory: EHRFactory
     private lateinit var dfe: DataFetchingEnvironment
     private lateinit var vendorFactory: VendorFactory
     private lateinit var ehrPatientService: EHRPatientService
     private lateinit var ehrPractitionerService: EHRPractitionerService
+    private lateinit var ehrNoteService: EHRNoteService
 
     private val tenant = mockk<Tenant> {
         every { mnemonic } returns "apposnd"
@@ -92,6 +107,29 @@ class NoteHandlerTest {
         every { identifier } returns listOf(testidentifier)
         every { name } returns listOf(testname)
     }
+    private val testAttachment = mockk<Attachment> {
+        every { data } returns Base64Binary("RXhhbXBsZSBOb3RlIFRleHQ=")
+    }
+    private val documentReferenceContent = mockk<DocumentReferenceContent> {
+        every { attachment } returns testAttachment
+    }
+    private val documentReference = mockk<DocumentReference> {
+        every { status } returns DocumentReferenceStatus.CURRENT.asCode()
+        every { date } returns Instant("2023-08-07T13:28:17.000Z")
+        every { content } returns listOf(documentReferenceContent)
+        every { docStatus } returns CompositionStatus.PRELIMINARY.asCode()
+    }
+    private val documentReferenceRelatesTo = mockk<DocumentReferenceRelatesTo> {
+        every { code } returns DocumentRelationshipType.APPENDS.asCode()
+        every { target } returns Reference(reference = "DocumentReference/parentID".asFHIR())
+    }
+    private val documentReferenceAddendum = mockk<DocumentReference> {
+        every { status } returns DocumentReferenceStatus.CURRENT.asCode()
+        every { date } returns Instant("2023-08-07T13:28:17.000Z")
+        every { content } returns listOf(documentReferenceContent)
+        every { docStatus } returns CompositionStatus.PRELIMINARY.asCode()
+        every { relatesTo } returns listOf(documentReferenceRelatesTo)
+    }
 
     @BeforeEach
     fun initTest() {
@@ -100,14 +138,14 @@ class NoteHandlerTest {
             every { enqueueMessages(any()) } just Runs
         }
         tenantService = mockk()
-        mdmService = mockk()
         ehrFactory = mockk()
         noteHandler =
-            NoteHandler(queueService, tenantService, mdmService, ehrFactory, ehrDataAuthorityClient)
+            NoteHandler(tenantService, ehrFactory, ehrDataAuthorityClient)
         dfe = mockk()
         vendorFactory = mockk()
         ehrPractitionerService = mockk()
         ehrPatientService = mockk()
+        ehrNoteService = mockk()
     }
 
     /**
@@ -131,27 +169,28 @@ class NoteHandlerTest {
             )
         } returns oncologyPatient
         every { tenantService.getTenantForMnemonic("apposnd") } returns tenant
-        every {
-            mdmService.generateMDM(
-                "apposnd",
-                match { it.name == listOf(testname) },
-                match { it.name == listOf(testname) },
-                "Example Note Text",
-                "202206011250",
-                null,
-                "IP"
-            )
-        } returns Pair("mock", "uniqueId")
-
         val noteInput = NoteInput(
             "apposnd-PatientTestId",
             PatientIdType.FHIR,
             "apposnd-PractitionerTestId",
             "Example Note Text",
-            "202206011250",
+            "20230807132817",
             NoteSender.PATIENT,
             true
         )
+        val ehrNoteInput = EhrNoteInput(
+            noteText = "Example Note Text",
+            dateTime = LocalDateTime.of(2023, 8, 7, 13, 28, 17),
+            noteSender = EhrNoteSender.PATIENT,
+            isAlert = true,
+            patient = oncologyPatient,
+            practitioner = oncologyPractitioner
+        )
+        every { ehrFactory.getVendorFactory(tenant) } returns vendorFactory
+        every { vendorFactory.noteService } returns ehrNoteService
+        every {
+            ehrNoteService.sendPatientNote(tenant, ehrNoteInput)
+        } returns "uniqueId"
         val response = noteHandler.sendNote(noteInput, "apposnd", dfe)
         assertEquals("uniqueId", response.data)
         assertEquals(0, response.errors.size)
@@ -175,27 +214,29 @@ class NoteHandlerTest {
             )
         } returns oncologyPatient
         every { tenantService.getTenantForMnemonic("apposnd") } returns tenant
-        every {
-            mdmService.generateMDM(
-                "apposnd",
-                match { it.name == listOf(testname) },
-                match { it.name == listOf(testname) },
-                "Example Note Text",
-                "202206011250",
-                "parentDocId",
-                "IP"
-            )
-        } returns Pair("mock", "uniqueId")
 
         val noteInput = NoteInput(
             "apposnd-PatientTestId",
             PatientIdType.FHIR,
             "apposnd-PractitionerTestId",
             "Example Note Text",
-            "202206011250",
+            "20230807132817",
             NoteSender.PATIENT,
             true
         )
+        val ehrNoteInput = EhrNoteInput(
+            noteText = "Example Note Text",
+            dateTime = LocalDateTime.of(2023, 8, 7, 13, 28, 17),
+            noteSender = EhrNoteSender.PATIENT,
+            isAlert = true,
+            patient = oncologyPatient,
+            practitioner = oncologyPractitioner
+        )
+        every { ehrFactory.getVendorFactory(tenant) } returns vendorFactory
+        every { vendorFactory.noteService } returns ehrNoteService
+        every {
+            ehrNoteService.sendPatientNoteAddendum(tenant, ehrNoteInput, "parentDocId")
+        } returns "uniqueId"
         val response = noteHandler.sendNoteAddendum(noteInput, "apposnd", "parentDocId", dfe)
         assertEquals("uniqueId", response.data)
         assertEquals(0, response.errors.size)
@@ -219,27 +260,28 @@ class NoteHandlerTest {
             )
         } returns oncologyPatient
         every { tenantService.getTenantForMnemonic("apposnd") } returns tenant
-        every {
-            mdmService.generateMDM(
-                "apposnd",
-                match { it.name == listOf(testname) },
-                match { it.name == listOf(testname) },
-                "Example Note Text",
-                "202206011250",
-                "parentDocId",
-                "IP"
-            )
-        } returns Pair("mock", "uniqueId")
-
         val noteInput = NoteInput(
             "apposnd-PatientTestId",
             PatientIdType.FHIR,
             "apposnd-PractitionerTestId",
             "Example Note Text",
-            "202206011250",
+            "20230807132817",
             NoteSender.PATIENT,
             true
         )
+        val ehrNoteInput = EhrNoteInput(
+            noteText = "Example Note Text",
+            dateTime = LocalDateTime.of(2023, 8, 7, 13, 28, 17),
+            noteSender = EhrNoteSender.PATIENT,
+            isAlert = true,
+            patient = oncologyPatient,
+            practitioner = oncologyPractitioner
+        )
+        every { ehrFactory.getVendorFactory(tenant) } returns vendorFactory
+        every { vendorFactory.noteService } returns ehrNoteService
+        every {
+            ehrNoteService.sendPatientNoteAddendum(tenant, ehrNoteInput, "parentDocId")
+        } returns "uniqueId"
         val response = noteHandler.sendNoteAddendum(noteInput, "apposnd", "parentDocId", dfe)
         assertEquals("uniqueId", response.data)
         assertEquals(0, response.errors.size)
@@ -262,27 +304,27 @@ class NoteHandlerTest {
                 PatientIdType.MRN,
                 "apposnd-PractitionerTestId",
                 "Example Note Text",
-                "202206011250",
+                "20230807132817",
                 NoteSender.PRACTITIONER,
                 false
             )
 
         every { vendorFactory.patientService } returns ehrPatientService
         every { ehrFactory.getVendorFactory(tenant) } returns vendorFactory
+        every { vendorFactory.noteService } returns ehrNoteService
         every { ehrPatientService.getPatientFHIRId(tenant, "PatientMRNId") } returns "PatientFHIRId"
         every { ehrPatientService.getPatient(tenant, "PatientFHIRId") } returns oncologyPatient
-
+        val ehrNoteInput = EhrNoteInput(
+            noteText = "Example Note Text",
+            dateTime = LocalDateTime.of(2023, 8, 7, 13, 28, 17),
+            noteSender = EhrNoteSender.PRACTITIONER,
+            isAlert = false,
+            patient = oncologyPatient,
+            practitioner = oncologyPractitioner
+        )
         every {
-            mdmService.generateMDM(
-                "apposnd",
-                match { it.name == listOf(testname) },
-                match { it.name == listOf(testname) },
-                "Example Note Text",
-                "202206011250",
-                null,
-                "AU"
-            )
-        } returns Pair("mock", "uniqueId")
+            ehrNoteService.sendPatientNote(tenant, ehrNoteInput)
+        } returns "uniqueId"
 
         val response = noteHandler.sendNote(noteInput, "apposnd", dfe)
         assertEquals("uniqueId", response.data)
@@ -306,7 +348,7 @@ class NoteHandlerTest {
                 PatientIdType.MRN,
                 "apposnd-PractitionerTestId",
                 "Example Note Text",
-                "202206011250",
+                "20230807132817",
                 NoteSender.PATIENT,
                 false
             )
@@ -315,18 +357,18 @@ class NoteHandlerTest {
         every { ehrFactory.getVendorFactory(tenant) } returns vendorFactory
         every { ehrPatientService.getPatientFHIRId(tenant, "PatientMRNId") } returns "PatientFHIRId"
         every { ehrPatientService.getPatient(tenant, "PatientFHIRId") } returns oncologyPatient
-
+        every { vendorFactory.noteService } returns ehrNoteService
+        val ehrNoteInput = EhrNoteInput(
+            noteText = "Example Note Text",
+            dateTime = LocalDateTime.of(2023, 8, 7, 13, 28, 17),
+            noteSender = EhrNoteSender.PATIENT,
+            isAlert = false,
+            patient = oncologyPatient,
+            practitioner = oncologyPractitioner
+        )
         every {
-            mdmService.generateMDM(
-                "apposnd",
-                match { it.name == listOf(testname) },
-                match { it.name == listOf(testname) },
-                "Example Note Text",
-                "202206011250",
-                null,
-                "AU"
-            )
-        } returns Pair("mock", "uniqueId")
+            ehrNoteService.sendPatientNote(tenant, ehrNoteInput)
+        } returns "uniqueId"
 
         val response = noteHandler.sendNote(noteInput, "apposnd", dfe)
         assertEquals("uniqueId", response.data)
@@ -343,7 +385,7 @@ class NoteHandlerTest {
             PatientIdType.MRN,
             "apposnd-PractitionerTestId",
             "Example Note Text",
-            "202206011250",
+            "20230807132817",
             NoteSender.PRACTITIONER,
             false
         )
@@ -356,6 +398,7 @@ class NoteHandlerTest {
     fun `RequestFailureException getting Practitioner from EHR Data Authority with non-UDP FHIR ID, success getting Practitioner from EHR`() {
         every { dfe.graphQlContext.get<InteropGraphQLContext>(INTEROP_CONTEXT_KEY).authzTenantId } returns "apposnd"
         every { tenantService.getTenantForMnemonic("apposnd") } returns tenant
+        every { ehrFactory.getVendorFactory(tenant) } returns vendorFactory
 
         // failure: practitionerService.getPractitionerByUDPId()
         coEvery {
@@ -368,7 +411,6 @@ class NoteHandlerTest {
 
         // success: ehrPractitionerService.getPractitioner()
         every { vendorFactory.practitionerService } returns ehrPractitionerService
-        every { ehrFactory.getVendorFactory(tenant) } returns vendorFactory
         every {
             ehrPractitionerService.getPractitioner(
                 tenant,
@@ -382,28 +424,26 @@ class NoteHandlerTest {
             PatientIdType.MRN,
             "PractitionerTestId",
             "Example Note Text",
-            "202206011250",
+            "20230807132817",
             NoteSender.PRACTITIONER,
             false
         )
 
         every { vendorFactory.patientService } returns ehrPatientService
-        every { ehrFactory.getVendorFactory(tenant) } returns vendorFactory
         every { ehrPatientService.getPatientFHIRId(tenant, "PatientMRNId") } returns "PatientFHIRId"
         every { ehrPatientService.getPatient(tenant, "PatientFHIRId") } returns oncologyPatient
-
-        // success: generateMDM()
+        every { vendorFactory.noteService } returns ehrNoteService
+        val ehrNoteInput = EhrNoteInput(
+            noteText = "Example Note Text",
+            dateTime = LocalDateTime.of(2023, 8, 7, 13, 28, 17),
+            noteSender = EhrNoteSender.PRACTITIONER,
+            isAlert = false,
+            patient = oncologyPatient,
+            practitioner = oncologyPractitioner
+        )
         every {
-            mdmService.generateMDM(
-                "apposnd",
-                match { it.name == listOf(testname) },
-                match { it.name == listOf(testname) },
-                "Example Note Text",
-                "202206011250",
-                null,
-                "AU"
-            )
-        } returns Pair("mock", "uniqueId")
+            ehrNoteService.sendPatientNote(tenant, ehrNoteInput)
+        } returns "uniqueId"
 
         // success: sendNote()
         val response = noteHandler.sendNote(noteInput, "apposnd", dfe)
@@ -415,6 +455,7 @@ class NoteHandlerTest {
     fun `RequestFailureException getting Practitioner from EHR Data Authority with UDP FHIR ID, success getting Practitioner from EHR`() {
         every { dfe.graphQlContext.get<InteropGraphQLContext>(INTEROP_CONTEXT_KEY).authzTenantId } returns "apposnd"
         every { tenantService.getTenantForMnemonic("apposnd") } returns tenant
+        every { ehrFactory.getVendorFactory(tenant) } returns vendorFactory
 
         // failure: practitionerService.getPractitionerByUDPId()
         coEvery {
@@ -427,7 +468,6 @@ class NoteHandlerTest {
 
         // success: ehrPractitionerService.getPractitioner()
         every { vendorFactory.practitionerService } returns ehrPractitionerService
-        every { ehrFactory.getVendorFactory(tenant) } returns vendorFactory
         every {
             ehrPractitionerService.getPractitioner(
                 tenant,
@@ -440,28 +480,26 @@ class NoteHandlerTest {
             PatientIdType.MRN,
             "apposnd-PractitionerTestId",
             "Example Note Text",
-            "202206011250",
+            "20230807132817",
             NoteSender.PRACTITIONER,
             false
         )
 
         every { vendorFactory.patientService } returns ehrPatientService
-        every { ehrFactory.getVendorFactory(tenant) } returns vendorFactory
         every { ehrPatientService.getPatientFHIRId(tenant, "PatientMRNId") } returns "PatientFHIRId"
         every { ehrPatientService.getPatient(tenant, "PatientFHIRId") } returns oncologyPatient
-
-        // success: generateMDM()
+        every { vendorFactory.noteService } returns ehrNoteService
+        val ehrNoteInput = EhrNoteInput(
+            noteText = "Example Note Text",
+            dateTime = LocalDateTime.of(2023, 8, 7, 13, 28, 17),
+            noteSender = EhrNoteSender.PRACTITIONER,
+            isAlert = false,
+            patient = oncologyPatient,
+            practitioner = oncologyPractitioner
+        )
         every {
-            mdmService.generateMDM(
-                "apposnd",
-                match { it.name == listOf(testname) },
-                match { it.name == listOf(testname) },
-                "Example Note Text",
-                "202206011250",
-                null,
-                "AU"
-            )
-        } returns Pair("mock", "uniqueId")
+            ehrNoteService.sendPatientNote(tenant, ehrNoteInput)
+        } returns "uniqueId"
 
         // success: sendNote()
         val response = noteHandler.sendNote(noteInput, "apposnd", dfe)
@@ -473,6 +511,7 @@ class NoteHandlerTest {
     fun `practitioner not found in EHR Data Authority with UDP FHIR ID, success getting Practitioner from EHR`() {
         every { dfe.graphQlContext.get<InteropGraphQLContext>(INTEROP_CONTEXT_KEY).authzTenantId } returns "apposnd"
         every { tenantService.getTenantForMnemonic("apposnd") } returns tenant
+        every { ehrFactory.getVendorFactory(tenant) } returns vendorFactory
 
         // failure: practitionerService.getPractitionerByUDPId()
         coEvery {
@@ -485,7 +524,6 @@ class NoteHandlerTest {
 
         // success: ehrPractitionerService.getPractitioner()
         every { vendorFactory.practitionerService } returns ehrPractitionerService
-        every { ehrFactory.getVendorFactory(tenant) } returns vendorFactory
         every {
             ehrPractitionerService.getPractitioner(
                 tenant,
@@ -498,28 +536,27 @@ class NoteHandlerTest {
             PatientIdType.MRN,
             "apposnd-PractitionerTestId",
             "Example Note Text",
-            "202206011250",
+            "20230807132817",
             NoteSender.PRACTITIONER,
             false
         )
 
         every { vendorFactory.patientService } returns ehrPatientService
-        every { ehrFactory.getVendorFactory(tenant) } returns vendorFactory
         every { ehrPatientService.getPatientFHIRId(tenant, "PatientMRNId") } returns "PatientFHIRId"
         every { ehrPatientService.getPatient(tenant, "PatientFHIRId") } returns oncologyPatient
-
+        every { vendorFactory.noteService } returns ehrNoteService
         // success: generateMDM()
+        val ehrNoteInput = EhrNoteInput(
+            noteText = "Example Note Text",
+            dateTime = LocalDateTime.of(2023, 8, 7, 13, 28, 17),
+            noteSender = EhrNoteSender.PRACTITIONER,
+            isAlert = false,
+            patient = oncologyPatient,
+            practitioner = oncologyPractitioner
+        )
         every {
-            mdmService.generateMDM(
-                "apposnd",
-                match { it.name == listOf(testname) },
-                match { it.name == listOf(testname) },
-                "Example Note Text",
-                "202206011250",
-                null,
-                "AU"
-            )
-        } returns Pair("mock", "uniqueId")
+            ehrNoteService.sendPatientNote(tenant, ehrNoteInput)
+        } returns "uniqueId"
 
         // success: sendNote()
         val response = noteHandler.sendNote(noteInput, "apposnd", dfe)
@@ -551,13 +588,17 @@ class NoteHandlerTest {
             )
         } throws (RequestFailureException(Throwable(), "a", "b"))
 
+        every { vendorFactory.patientService } returns ehrPatientService
+        every { ehrPatientService.getPatientFHIRId(tenant, "PatientMRNId") } returns "PatientFHIRId"
+        every { ehrPatientService.getPatient(tenant, "PatientFHIRId") } returns oncologyPatient
+        every { vendorFactory.noteService } returns ehrNoteService
         // success: NoteInput()
         val noteInput = NoteInput(
             "PatientMRNId",
             PatientIdType.MRN,
             "PractitionerTestId",
             "Example Note Text",
-            "202206011250",
+            "20230807132817",
             NoteSender.PRACTITIONER,
             false
         )
@@ -589,7 +630,7 @@ class NoteHandlerTest {
             PatientIdType.MRN,
             "apposnd-PractitionerTestId",
             "Example Note Text",
-            "202206011250",
+            "20230807132817",
             NoteSender.PRACTITIONER,
             false
         )
@@ -599,6 +640,7 @@ class NoteHandlerTest {
         every { ehrFactory.getVendorFactory(tenant) } returns vendorFactory
         every { ehrPatientService.getPatientFHIRId(tenant, "PatientMRNId") } returns "PatientFHIRId"
         every { ehrPatientService.getPatient(tenant, "PatientFHIRId") } throws NullPointerException("z")
+        every { vendorFactory.noteService } returns ehrNoteService
 
         // failure: sendNote()
         val response = noteHandler.sendNote(noteInput, "apposnd", dfe)
@@ -621,11 +663,13 @@ class NoteHandlerTest {
             NoteSender.PRACTITIONER,
             false
         )
+        every { ehrFactory.getVendorFactory(tenant) } returns vendorFactory
+        every { vendorFactory.noteService } returns ehrNoteService
         val response = noteHandler.sendNote(noteInput, "apposnd", dfe)
         assertNull(response.data)
         assertEquals(1, response.errors.size)
         assertEquals(
-            "datetime must be of form \"yyyyMMddHHmm[ss]\" but was \"20220601 125000\"",
+            """'20220601 125000' is not in a recognized date format, datetime must be of form "yyyyMMddHHmm[ss]"""",
             response.errors[0].message
         )
     }
@@ -647,27 +691,56 @@ class NoteHandlerTest {
                 PatientIdType.MRN,
                 "apposnd-PractitionerTestId",
                 "Example Note Text",
-                "202206011250",
+                "20230807132817",
                 NoteSender.PRACTITIONER,
                 false
             )
-
+        val oncologyPatient1 = relaxedMockk<Patient> {
+            every { identifier } returns listOf(testidentifier)
+            every { name } returns listOf(testname)
+            every { gender } returns AdministrativeGender.FEMALE.asCode()
+            every { birthDate } returns Date("2022-06-01")
+            every { address } returns listOf(testaddress)
+            every { telecom } returns listOf(testphone)
+        }
+        val paddedMrn = relaxedMockk<Identifier> {
+            every { system } returns CodeSystem.RONIN_MRN.uri
+            every { value } returns "0012345".asFHIR()
+            every { type } returns CodeableConcepts.RONIN_MRN
+        }
+        val mrnPatient = mockk<Patient> {
+            every { identifier } returns listOf(testidentifier, paddedMrn)
+            every { name } returns listOf(testname)
+            every { gender } returns AdministrativeGender.FEMALE.asCode()
+            every { birthDate } returns Date("2022-06-01")
+            every { address } returns listOf(testaddress)
+            every { telecom } returns listOf(testphone)
+        }
+        // every { oncologyPatient.copy(identifier = oncologyPatient.identifier + Identifier(system = CodeSystem.RONIN_MRN.uri, value = "0012345".asFHIR(), type = CodeableConcepts.RONIN_MRN)) } returns mrnPatient
         every { vendorFactory.patientService } returns ehrPatientService
         every { ehrFactory.getVendorFactory(tenant) } returns vendorFactory
         every { ehrPatientService.getPatientFHIRId(tenant, "0012345") } returns "PatientFHIRId"
-        every { ehrPatientService.getPatient(tenant, "PatientFHIRId") } returns oncologyPatient
+        every { ehrPatientService.getPatient(tenant, "PatientFHIRId") } returns oncologyPatient1
+        every { vendorFactory.noteService } returns ehrNoteService
 
+        val ehrNoteInput = EhrNoteInput(
+            noteText = "Example Note Text",
+            dateTime = LocalDateTime.of(2023, 8, 7, 13, 28, 17),
+            noteSender = EhrNoteSender.PRACTITIONER,
+            isAlert = false,
+            patient = oncologyPatient1.copy(
+                identifier = oncologyPatient1.identifier +
+                    Identifier(
+                        system = CodeSystem.RONIN_MRN.uri,
+                        value = "0012345".asFHIR(),
+                        type = CodeableConcepts.RONIN_MRN
+                    )
+            ),
+            practitioner = oncologyPractitioner
+        )
         every {
-            mdmService.generateMDM(
-                "apposnd",
-                match { it.name == listOf(testname) && it.mrn == "0012345" },
-                match { it.name == listOf(testname) },
-                "Example Note Text",
-                "202206011250",
-                null,
-                "AU"
-            )
-        } returns Pair("mock", "uniqueId")
+            ehrNoteService.sendPatientNote(tenant, ehrNoteInput)
+        } returns "uniqueId"
 
         val response = noteHandler.sendNote(noteInput, "apposnd", dfe)
         assertEquals("uniqueId", response.data)
@@ -691,7 +764,7 @@ class NoteHandlerTest {
                 PatientIdType.MRN,
                 "apposnd-PractitionerTestId",
                 "Example Note Text",
-                "202206011250",
+                "20230807132817",
                 NoteSender.PRACTITIONER,
                 false
             )
@@ -700,21 +773,22 @@ class NoteHandlerTest {
         every { ehrFactory.getVendorFactory(tenant) } returns vendorFactory
         every { ehrPatientService.getPatientFHIRId(tenant, "12345") } returns "PatientFHIRId"
         every { ehrPatientService.getPatient(tenant, "PatientFHIRId") } returns oncologyPatient
+        every { vendorFactory.noteService } returns ehrNoteService
 
+        val ehrNoteInput = EhrNoteInput(
+            noteText = "Example Note Text",
+            dateTime = LocalDateTime.of(2023, 8, 7, 13, 28, 17),
+            noteSender = EhrNoteSender.PRACTITIONER,
+            isAlert = false,
+            patient = oncologyPatient,
+            practitioner = oncologyPractitioner
+        )
         every {
-            mdmService.generateMDM(
-                "apposnd",
-                match { it.name == listOf(testname) && it.mrn == "12345" },
-                match { it.name == listOf(testname) },
-                "Example Note Text",
-                "202206011250",
-                null,
-                "AU"
-            )
-        } returns Pair("mock", "uniqueId")
+            ehrNoteService.sendPatientNote(tenant, ehrNoteInput)
+        } returns "uniqueId"
 
         val noteHandler =
-            NoteHandler(queueService, tenantService, mdmService, ehrFactory, ehrDataAuthorityClient, padMRNs = "no")
+            NoteHandler(tenantService, ehrFactory, ehrDataAuthorityClient, padMRNs = "no")
         val response = noteHandler.sendNote(noteInput, "apposnd", dfe)
         assertEquals("uniqueId", response.data)
         assertEquals(0, response.errors.size)
@@ -744,7 +818,7 @@ class NoteHandlerTest {
             PatientIdType.FHIR,
             "apposnd-PractitionerTestId",
             "Example Note Text",
-            "202206011250",
+            "20230807132817",
             NoteSender.PATIENT,
             true
         )
