@@ -10,7 +10,6 @@ plugins {
 }
 
 dependencies {
-    implementation(libs.kafka.clients)
     configurations.all {
         resolutionStrategy {
             force(libs.kafka.clients)
@@ -18,6 +17,9 @@ dependencies {
         }
     }
 
+    api(enforcedPlatform(libs.kotlin.bom))
+
+    implementation(libs.kafka.clients)
     implementation(libs.ehrda.client)
     implementation(libs.ehrda.models)
     implementation(libs.interop.common)

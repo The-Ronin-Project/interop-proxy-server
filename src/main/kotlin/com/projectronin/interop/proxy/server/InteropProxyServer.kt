@@ -1,6 +1,7 @@
 package com.projectronin.interop.proxy.server
 
-import com.projectronin.interop.fhir.ronin.TransformManager
+import com.projectronin.interop.fhir.ronin.spring.RoninProfileConfig
+import com.projectronin.interop.fhir.ronin.transform.TransformManager
 import com.projectronin.interop.fhir.ronin.validation.ValidationClient
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
@@ -16,7 +17,7 @@ import org.springframework.context.annotation.FilterType
     excludeFilters = [
         ComponentScan.Filter(
             type = FilterType.ASSIGNABLE_TYPE,
-            value = [TransformManager::class, ValidationClient::class]
+            value = [TransformManager::class, ValidationClient::class, RoninProfileConfig::class]
         )
     ]
 )

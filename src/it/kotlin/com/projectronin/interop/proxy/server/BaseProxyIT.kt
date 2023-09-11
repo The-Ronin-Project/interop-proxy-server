@@ -25,6 +25,7 @@ import org.ktorm.dsl.deleteAll
 import org.testcontainers.containers.DockerComposeContainer
 import org.testcontainers.containers.wait.strategy.Wait
 import java.io.File
+import java.time.Duration
 import java.time.LocalTime
 import java.time.ZoneId
 import java.util.stream.Stream
@@ -35,6 +36,7 @@ abstract class BaseProxyIT {
         fun tenantMnemonics(): Stream<String> {
             return Stream.of("epic", "cerner")
         }
+
         val docker =
             DockerComposeContainer(File(BaseProxyIT::class.java.getResource("/docker-compose-it.yaml")!!.file)).withEnv(
                 mapOf<String, String>(
@@ -59,7 +61,7 @@ abstract class BaseProxyIT {
                     "box_features_validation_skip_reference" to "true"
                 )
             )
-                .waitingFor("proxy", Wait.forHealthcheck())
+                .waitingFor("proxy", Wait.forHealthcheck().withStartupTimeout(Duration.ofSeconds(120)))
                 .start()
     }
 
@@ -74,6 +76,7 @@ abstract class BaseProxyIT {
     fun cleanup() {
         purgeTenantData()
     }
+
     protected fun purgeTenantData() {
         tenantDB.deleteAll(TenantServerDOs)
         tenantDB.deleteAll(TenantCodesDOs)
