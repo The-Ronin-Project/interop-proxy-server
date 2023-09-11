@@ -125,6 +125,21 @@ class AppointmentIT : BaseGraphQLIT() {
 
     @ParameterizedTest
     @MethodSource("tenantMnemonics")
+    fun `server errors when appointment by MRN query is missing patient data`(testTenant: String) {
+        val query = this::class.java.getResource("/graphql/appointmentsByMRN.graphql")!!
+            .readText()
+            .replace("__START_DATE__", "01-01-2022")
+            .replace("__END_DATE__", "02-02-2022")
+            .replace("__tenant_mnemonic__", testTenant)
+        val response = ProxyClient.query(query, testTenant)
+        val body = runBlocking { response.body<String>() }
+        val resultJSONNode = JacksonManager.objectMapper.readTree(body)
+        assertTrue(resultJSONNode.has("errors"))
+        assertTrue(resultJSONNode["errors"][0]["message"].toString().contains("No FHIR ID found for patient"))
+    }
+
+    @ParameterizedTest
+    @MethodSource("tenantMnemonics")
     fun `server handles appointment by MRN query`(testTenant: String) {
         addTenantData(testTenant)
         val query = this::class.java.getResource("/graphql/appointmentsByMRN.graphql")!!
