@@ -243,37 +243,6 @@ class TenantControllerTest {
     }
 
     @Test
-    fun `can retrieve tenant codes`() {
-        val mnemonic = "tenantMnemonic"
-        val expectedCodes = mapOf(
-            "bsaCode" to "bsaCode",
-            "bmiCode" to "bmiCode"
-        )
-        every { tenantService.getCodesForTenantMnemonic(mnemonic) } returns expectedCodes
-
-        val response = tenantController.codes(mnemonic)
-        assertTrue(response.hasBody())
-        assertEquals(expectedCodes.size, response.body?.size)
-        response.body?.forEach {
-            assertTrue(it.key in expectedCodes.keys)
-            assertEquals(expectedCodes[it.key], it.value)
-        }
-
-        assertEquals(HttpStatus.OK, response.statusCode)
-    }
-
-    @Test
-    fun `tenant code check fails when tenant has no codes`() {
-        val mnemonic = "tenantMnemonic"
-        val expectedCodes = mapOf<String, String>()
-        every { tenantService.getCodesForTenantMnemonic(mnemonic) } returns expectedCodes
-
-        val response = tenantController.codes(mnemonic)
-        assertFalse(response.hasBody())
-        assertEquals(HttpStatus.NOT_FOUND, response.statusCode)
-    }
-
-    @Test
     fun `no tenant exception is handled`() {
         val exception = NoTenantFoundException("Probably didn't get the id right")
         val response = tenantController.handleTenantException(exception)
