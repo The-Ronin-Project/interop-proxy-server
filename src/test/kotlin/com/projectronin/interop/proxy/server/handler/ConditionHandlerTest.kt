@@ -11,8 +11,7 @@ import com.projectronin.interop.fhir.r4.datatype.CodeableConcept
 import com.projectronin.interop.fhir.r4.datatype.primitive.DateTime
 import com.projectronin.interop.fhir.r4.datatype.primitive.Id
 import com.projectronin.interop.fhir.r4.datatype.primitive.asFHIR
-import com.projectronin.interop.proxy.server.context.INTEROP_CONTEXT_KEY
-import com.projectronin.interop.proxy.server.context.InteropGraphQLContext
+import com.projectronin.interop.proxy.server.context.getAuthorizedTenantId
 import com.projectronin.interop.proxy.server.model.Condition
 import com.projectronin.interop.proxy.server.model.ConditionCategoryCode
 import com.projectronin.interop.proxy.server.util.JacksonUtil
@@ -86,7 +85,7 @@ class ConditionHandlerTest {
     @Test
     fun `unknown tenant returns an error`() {
         every { tenantService.getTenantForMnemonic("tenantId") } returns null
-        every { dfe.graphQlContext.get<InteropGraphQLContext>(INTEROP_CONTEXT_KEY).authzTenantId } returns "tenantId"
+        every { dfe.getAuthorizedTenantId() } returns "tenantId"
 
         // Run Test
         val exception = assertThrows<HttpClientErrorException> {
@@ -103,7 +102,7 @@ class ConditionHandlerTest {
     @Test
     fun `unauthorized user returns an error`() {
         every { tenantService.getTenantForMnemonic("tenantId") } returns tenant
-        every { dfe.graphQlContext.get<InteropGraphQLContext>(INTEROP_CONTEXT_KEY).authzTenantId } returns null
+        every { dfe.getAuthorizedTenantId() } returns null
 
         // Run Test
         val exception = assertThrows<HttpClientErrorException> {
@@ -122,7 +121,7 @@ class ConditionHandlerTest {
     fun `ensure findConditions exception is returned as error`() {
         every { tenant.mnemonic } returns "tenantId"
         every { tenantService.getTenantForMnemonic("tenantId") } returns tenant
-        every { dfe.graphQlContext.get<InteropGraphQLContext>(INTEROP_CONTEXT_KEY).authzTenantId } returns "tenantId"
+        every { dfe.getAuthorizedTenantId() } returns "tenantId"
 
         every { ehrFactory.getVendorFactory(tenant) } returns mockk {
             every { conditionService } returns mockk {
@@ -156,7 +155,7 @@ class ConditionHandlerTest {
     fun `ensure findConditions service unavailable exception sets log marker`() {
         every { tenant.mnemonic } returns "tenantId"
         every { tenantService.getTenantForMnemonic("tenantId") } returns tenant
-        every { dfe.graphQlContext.get<InteropGraphQLContext>(INTEROP_CONTEXT_KEY).authzTenantId } returns "tenantId"
+        every { dfe.getAuthorizedTenantId() } returns "tenantId"
 
         every { ehrFactory.getVendorFactory(tenant) } returns mockk {
             every { conditionService } returns mockk {
@@ -241,7 +240,7 @@ class ConditionHandlerTest {
 
         every { tenant.mnemonic } returns "tenantId"
         every { tenantService.getTenantForMnemonic("tenantId") } returns tenant
-        every { dfe.graphQlContext.get<InteropGraphQLContext>(INTEROP_CONTEXT_KEY).authzTenantId } returns "tenantId"
+        every { dfe.getAuthorizedTenantId() } returns "tenantId"
 
         every { ehrFactory.getVendorFactory(tenant) } returns mockk {
             every { conditionService } returns mockk {
@@ -331,7 +330,7 @@ class ConditionHandlerTest {
 
         every { tenant.mnemonic } returns "tenantId"
         every { tenantService.getTenantForMnemonic("tenantId") } returns tenant
-        every { dfe.graphQlContext.get<InteropGraphQLContext>(INTEROP_CONTEXT_KEY).authzTenantId } returns "tenantId"
+        every { dfe.getAuthorizedTenantId() } returns "tenantId"
 
         every { ehrFactory.getVendorFactory(tenant) } returns mockk {
             every { conditionService } returns mockk {
@@ -384,7 +383,7 @@ class ConditionHandlerTest {
 
         every { tenant.mnemonic } returns "tenantId"
         every { tenantService.getTenantForMnemonic("tenantId") } returns tenant
-        every { dfe.graphQlContext.get<InteropGraphQLContext>(INTEROP_CONTEXT_KEY).authzTenantId } returns "tenantId"
+        every { dfe.getAuthorizedTenantId() } returns "tenantId"
 
         every { ehrFactory.getVendorFactory(tenant) } returns mockk {
             every { conditionService } returns mockk {

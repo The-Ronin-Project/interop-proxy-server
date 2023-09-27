@@ -29,8 +29,7 @@ import com.projectronin.interop.fhir.r4.valueset.CompositionStatus
 import com.projectronin.interop.fhir.r4.valueset.ContactPointUse
 import com.projectronin.interop.fhir.r4.valueset.DocumentReferenceStatus
 import com.projectronin.interop.fhir.r4.valueset.DocumentRelationshipType
-import com.projectronin.interop.proxy.server.context.INTEROP_CONTEXT_KEY
-import com.projectronin.interop.proxy.server.context.InteropGraphQLContext
+import com.projectronin.interop.proxy.server.context.getAuthorizedTenantId
 import com.projectronin.interop.proxy.server.input.NoteInput
 import com.projectronin.interop.proxy.server.input.NoteSender
 import com.projectronin.interop.proxy.server.input.PatientIdType
@@ -153,7 +152,7 @@ class NoteHandlerTest {
      */
     @Test
     fun `accepts note with provider UDP ID and patient UDP ID`() {
-        every { dfe.graphQlContext.get<InteropGraphQLContext>(INTEROP_CONTEXT_KEY).authzTenantId } returns "apposnd"
+        every { dfe.getAuthorizedTenantId() } returns "apposnd"
         coEvery {
             ehrDataAuthorityClient.getResourceAs<Practitioner>(
                 "apposnd",
@@ -198,7 +197,7 @@ class NoteHandlerTest {
 
     @Test
     fun `accepts addendum note with provider UDP ID and patient UDP ID`() {
-        every { dfe.graphQlContext.get<InteropGraphQLContext>(INTEROP_CONTEXT_KEY).authzTenantId } returns "apposnd"
+        every { dfe.getAuthorizedTenantId() } returns "apposnd"
         coEvery {
             ehrDataAuthorityClient.getResourceAs<Practitioner>(
                 "apposnd",
@@ -244,7 +243,7 @@ class NoteHandlerTest {
 
     @Test
     fun `addendum note with null parent document ID is sent as a new note`() {
-        every { dfe.graphQlContext.get<InteropGraphQLContext>(INTEROP_CONTEXT_KEY).authzTenantId } returns "apposnd"
+        every { dfe.getAuthorizedTenantId() } returns "apposnd"
         coEvery {
             ehrDataAuthorityClient.getResourceAs<Practitioner>(
                 "apposnd",
@@ -289,7 +288,7 @@ class NoteHandlerTest {
 
     @Test
     fun `accepts note with provider UDP ID and patient MRN`() {
-        every { dfe.graphQlContext.get<InteropGraphQLContext>(INTEROP_CONTEXT_KEY).authzTenantId } returns "apposnd"
+        every { dfe.getAuthorizedTenantId() } returns "apposnd"
         every { tenantService.getTenantForMnemonic("apposnd") } returns tenant
         coEvery {
             ehrDataAuthorityClient.getResourceAs<Practitioner>(
@@ -333,7 +332,7 @@ class NoteHandlerTest {
 
     @Test
     fun `accepts note with provider UDP ID and patient MRN but not an alert`() {
-        every { dfe.graphQlContext.get<InteropGraphQLContext>(INTEROP_CONTEXT_KEY).authzTenantId } returns "apposnd"
+        every { dfe.getAuthorizedTenantId() } returns "apposnd"
         every { tenantService.getTenantForMnemonic("apposnd") } returns tenant
         coEvery {
             ehrDataAuthorityClient.getResourceAs<Practitioner>(
@@ -377,7 +376,7 @@ class NoteHandlerTest {
 
     @Test
     fun `handles bad tenant`() {
-        every { dfe.graphQlContext.get<InteropGraphQLContext>(INTEROP_CONTEXT_KEY).authzTenantId } returns "apposnd"
+        every { dfe.getAuthorizedTenantId() } returns "apposnd"
         every { tenantService.getTenantForMnemonic("apposnd") } returns null
 
         val noteInput = NoteInput(
@@ -396,7 +395,7 @@ class NoteHandlerTest {
 
     @Test
     fun `RequestFailureException getting Practitioner from EHR Data Authority with non-UDP FHIR ID, success getting Practitioner from EHR`() {
-        every { dfe.graphQlContext.get<InteropGraphQLContext>(INTEROP_CONTEXT_KEY).authzTenantId } returns "apposnd"
+        every { dfe.getAuthorizedTenantId() } returns "apposnd"
         every { tenantService.getTenantForMnemonic("apposnd") } returns tenant
         every { ehrFactory.getVendorFactory(tenant) } returns vendorFactory
 
@@ -453,7 +452,7 @@ class NoteHandlerTest {
 
     @Test
     fun `RequestFailureException getting Practitioner from EHR Data Authority with UDP FHIR ID, success getting Practitioner from EHR`() {
-        every { dfe.graphQlContext.get<InteropGraphQLContext>(INTEROP_CONTEXT_KEY).authzTenantId } returns "apposnd"
+        every { dfe.getAuthorizedTenantId() } returns "apposnd"
         every { tenantService.getTenantForMnemonic("apposnd") } returns tenant
         every { ehrFactory.getVendorFactory(tenant) } returns vendorFactory
 
@@ -509,7 +508,7 @@ class NoteHandlerTest {
 
     @Test
     fun `practitioner not found in EHR Data Authority with UDP FHIR ID, success getting Practitioner from EHR`() {
-        every { dfe.graphQlContext.get<InteropGraphQLContext>(INTEROP_CONTEXT_KEY).authzTenantId } returns "apposnd"
+        every { dfe.getAuthorizedTenantId() } returns "apposnd"
         every { tenantService.getTenantForMnemonic("apposnd") } returns tenant
         every { ehrFactory.getVendorFactory(tenant) } returns vendorFactory
 
@@ -566,7 +565,7 @@ class NoteHandlerTest {
 
     @Test
     fun `ClientFailureException (HttpException) getting Practitioner from EHR Data Authority with non-UDP FHIR ID, RequestFailureException getting Practitioner from EHR`() {
-        every { dfe.graphQlContext.get<InteropGraphQLContext>(INTEROP_CONTEXT_KEY).authzTenantId } returns "apposnd"
+        every { dfe.getAuthorizedTenantId() } returns "apposnd"
         every { tenantService.getTenantForMnemonic("apposnd") } returns tenant
 
         // failure: practitionerService.getPractitionerByUDPId()
@@ -612,7 +611,7 @@ class NoteHandlerTest {
 
     @Test
     fun `unexpected exception getting Patient from EHR by MRN`() {
-        every { dfe.graphQlContext.get<InteropGraphQLContext>(INTEROP_CONTEXT_KEY).authzTenantId } returns "apposnd"
+        every { dfe.getAuthorizedTenantId() } returns "apposnd"
         every { tenantService.getTenantForMnemonic("apposnd") } returns tenant
 
         // success: practitionerService.getPractitionerByUDPId()
@@ -651,7 +650,7 @@ class NoteHandlerTest {
 
     @Test
     fun `handles invalid NoteInput`() {
-        every { dfe.graphQlContext.get<InteropGraphQLContext>(INTEROP_CONTEXT_KEY).authzTenantId } returns "apposnd"
+        every { dfe.getAuthorizedTenantId() } returns "apposnd"
         every { tenantService.getTenantForMnemonic("apposnd") } returns tenant
 
         val noteInput = NoteInput(
@@ -676,7 +675,7 @@ class NoteHandlerTest {
 
     @Test
     fun `mrn is padded in less than 7 characters`() {
-        every { dfe.graphQlContext.get<InteropGraphQLContext>(INTEROP_CONTEXT_KEY).authzTenantId } returns "apposnd"
+        every { dfe.getAuthorizedTenantId() } returns "apposnd"
         every { tenantService.getTenantForMnemonic("apposnd") } returns tenant
         coEvery {
             ehrDataAuthorityClient.getResourceAs<Practitioner>(
@@ -749,7 +748,7 @@ class NoteHandlerTest {
 
     @Test
     fun `mrn is not padded if disabled and less than 7 characters`() {
-        every { dfe.graphQlContext.get<InteropGraphQLContext>(INTEROP_CONTEXT_KEY).authzTenantId } returns "apposnd"
+        every { dfe.getAuthorizedTenantId() } returns "apposnd"
         every { tenantService.getTenantForMnemonic("apposnd") } returns tenant
         coEvery {
             ehrDataAuthorityClient.getResourceAs<Practitioner>(
@@ -796,7 +795,7 @@ class NoteHandlerTest {
 
     @Test
     fun `throws exception when patient not found for UDP ID`() {
-        every { dfe.graphQlContext.get<InteropGraphQLContext>(INTEROP_CONTEXT_KEY).authzTenantId } returns "apposnd"
+        every { dfe.getAuthorizedTenantId() } returns "apposnd"
         every { tenantService.getTenantForMnemonic("apposnd") } returns tenant
         coEvery {
             ehrDataAuthorityClient.getResourceAs<Practitioner>(

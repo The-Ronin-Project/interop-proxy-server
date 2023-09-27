@@ -16,8 +16,7 @@ import com.projectronin.interop.fhir.r4.datatype.primitive.asFHIR
 import com.projectronin.interop.fhir.r4.valueset.AdministrativeGender
 import com.projectronin.interop.fhir.r4.valueset.NameUse.USUAL
 import com.projectronin.interop.fhir.ronin.resource.RoninPatient
-import com.projectronin.interop.proxy.server.context.INTEROP_CONTEXT_KEY
-import com.projectronin.interop.proxy.server.context.InteropGraphQLContext
+import com.projectronin.interop.proxy.server.context.getAuthorizedTenantId
 import com.projectronin.interop.proxy.server.model.Patient
 import com.projectronin.interop.proxy.server.util.JacksonUtil
 import com.projectronin.interop.proxy.server.util.asCode
@@ -92,7 +91,7 @@ class PatientHandlerTest {
     @Test
     fun `unknown tenant returns an error`() {
         every { tenantService.getTenantForMnemonic("tenantId") } returns null
-        every { dfe.graphQlContext.get<InteropGraphQLContext>(INTEROP_CONTEXT_KEY).authzTenantId } returns "tenantId"
+        every { dfe.getAuthorizedTenantId() } returns "tenantId"
 
         every { queueService.enqueueMessages(listOf()) } just Runs
 
@@ -114,7 +113,7 @@ class PatientHandlerTest {
     fun `unauthorized tenant returns an error`() {
         val tenant = mockk<Tenant>()
         every { tenantService.getTenantForMnemonic("tenantId") } returns tenant
-        every { dfe.graphQlContext.get<InteropGraphQLContext>(INTEROP_CONTEXT_KEY).authzTenantId } returns "differentTenantId"
+        every { dfe.getAuthorizedTenantId() } returns "differentTenantId"
 
         every { queueService.enqueueMessages(listOf()) } just Runs
 
@@ -139,7 +138,7 @@ class PatientHandlerTest {
     fun `unknown vendor returns an error`() {
         val tenant = mockk<Tenant>()
         every { tenantService.getTenantForMnemonic("tenantId") } returns tenant
-        every { dfe.graphQlContext.get<InteropGraphQLContext>(INTEROP_CONTEXT_KEY).authzTenantId } returns "tenantId"
+        every { dfe.getAuthorizedTenantId() } returns "tenantId"
 
         every { ehrFactory.getVendorFactory(tenant) } throws IllegalStateException("Error")
 
@@ -163,7 +162,7 @@ class PatientHandlerTest {
         val tenant = mockk<Tenant>()
         every { tenant.mnemonic } returns "tenantId"
         every { tenantService.getTenantForMnemonic("tenantId") } returns tenant
-        every { dfe.graphQlContext.get<InteropGraphQLContext>(INTEROP_CONTEXT_KEY).authzTenantId } returns "tenantId"
+        every { dfe.getAuthorizedTenantId() } returns "tenantId"
 
         every { ehrFactory.getVendorFactory(tenant) } returns mockk {
             every { patientService } returns mockk {
@@ -199,7 +198,7 @@ class PatientHandlerTest {
         val tenant = mockk<Tenant>()
         every { tenant.mnemonic } returns "tenantId"
         every { tenantService.getTenantForMnemonic("tenantId") } returns tenant
-        every { dfe.graphQlContext.get<InteropGraphQLContext>(INTEROP_CONTEXT_KEY).authzTenantId } returns "tenantId"
+        every { dfe.getAuthorizedTenantId() } returns "tenantId"
 
         every { ehrFactory.getVendorFactory(tenant) } returns mockk {
             every { patientService } returns mockk {
@@ -248,7 +247,7 @@ class PatientHandlerTest {
                 }
             )
             every { birthDate } returns Date("1984-08-31")
-            every { gender } returns com.projectronin.interop.fhir.r4.valueset.AdministrativeGender.MALE.asCode()
+            every { gender } returns AdministrativeGender.MALE.asCode()
             every { telecom } returns listOf(
                 mockk {
                     every { system } returns com.projectronin.interop.fhir.r4.valueset.ContactPointSystem.PHONE.asCode()
@@ -271,7 +270,7 @@ class PatientHandlerTest {
         val tenant = mockk<Tenant>()
         every { tenant.mnemonic } returns "tenantId"
         every { tenantService.getTenantForMnemonic("tenantId") } returns tenant
-        every { dfe.graphQlContext.get<InteropGraphQLContext>(INTEROP_CONTEXT_KEY).authzTenantId } returns "tenantId"
+        every { dfe.getAuthorizedTenantId() } returns "tenantId"
 
         val roninIdentifiers = listOf(
             Identifier(
@@ -342,7 +341,7 @@ class PatientHandlerTest {
                 }
             )
             every { birthDate } returns Date("1984-08-31")
-            every { gender } returns com.projectronin.interop.fhir.r4.valueset.AdministrativeGender.MALE.asCode()
+            every { gender } returns AdministrativeGender.MALE.asCode()
             every { telecom } returns listOf(
                 mockk {
                     every { system } returns com.projectronin.interop.fhir.r4.valueset.ContactPointSystem.PHONE.asCode()
@@ -366,7 +365,7 @@ class PatientHandlerTest {
         every { tenant.mnemonic } returns "tenantId"
         every { tenantService.getTenantForMnemonic("tenantId") } returns tenant
         // M2M Auth will not provide an authzTenantId
-        every { dfe.graphQlContext.get<InteropGraphQLContext>(INTEROP_CONTEXT_KEY).authzTenantId } returns null
+        every { dfe.getAuthorizedTenantId() } returns null
 
         val roninIdentifiers = listOf(
             Identifier(
@@ -437,7 +436,7 @@ class PatientHandlerTest {
                 }
             )
             every { birthDate } returns Date("1984-08-31")
-            every { gender } returns com.projectronin.interop.fhir.r4.valueset.AdministrativeGender.MALE.asCode()
+            every { gender } returns AdministrativeGender.MALE.asCode()
             every { telecom } returns listOf(
                 mockk {
                     every { system } returns com.projectronin.interop.fhir.r4.valueset.ContactPointSystem.PHONE.asCode()
@@ -460,7 +459,7 @@ class PatientHandlerTest {
         val tenant = mockk<Tenant>()
         every { tenant.mnemonic } returns "tenantId"
         every { tenantService.getTenantForMnemonic("tenantId") } returns tenant
-        every { dfe.graphQlContext.get<InteropGraphQLContext>(INTEROP_CONTEXT_KEY).authzTenantId } returns "tenantId"
+        every { dfe.getAuthorizedTenantId() } returns "tenantId"
 
         val roninIdentifiers = listOf(
             Identifier(
@@ -518,7 +517,7 @@ class PatientHandlerTest {
         val tenant = mockk<Tenant>()
         every { tenant.mnemonic } returns "tenantId"
         every { tenantService.getTenantForMnemonic("tenantId") } returns tenant
-        every { dfe.graphQlContext.get<InteropGraphQLContext>(INTEROP_CONTEXT_KEY).authzTenantId } returns "tenantId"
+        every { dfe.getAuthorizedTenantId() } returns "tenantId"
 
         every { ehrFactory.getVendorFactory(tenant) } returns mockk {
             every { patientService } returns mockk {
@@ -569,7 +568,7 @@ class PatientHandlerTest {
                 }
             )
             every { birthDate } returns Date("1984-08-31")
-            every { gender } returns com.projectronin.interop.fhir.r4.valueset.AdministrativeGender.MALE.asCode()
+            every { gender } returns AdministrativeGender.MALE.asCode()
             every { telecom } returns listOf(
                 mockk {
                     every { system } returns com.projectronin.interop.fhir.r4.valueset.ContactPointSystem.PHONE.asCode()
@@ -603,7 +602,7 @@ class PatientHandlerTest {
                 }
             )
             every { birthDate } returns Date("1984-01-31")
-            every { gender } returns com.projectronin.interop.fhir.r4.valueset.AdministrativeGender.MALE.asCode()
+            every { gender } returns AdministrativeGender.MALE.asCode()
             every { telecom } returns listOf(
                 mockk {
                     every { system } returns com.projectronin.interop.fhir.r4.valueset.ContactPointSystem.PHONE.asCode()
@@ -625,7 +624,7 @@ class PatientHandlerTest {
         val tenant = mockk<Tenant>()
         every { tenant.mnemonic } returns "tenantId"
         every { tenantService.getTenantForMnemonic("tenantId") } returns tenant
-        every { dfe.graphQlContext.get<InteropGraphQLContext>(INTEROP_CONTEXT_KEY).authzTenantId } returns "tenantId"
+        every { dfe.getAuthorizedTenantId() } returns "tenantId"
 
         val roninIdentifiers = listOf(
             Identifier(
@@ -679,7 +678,7 @@ class PatientHandlerTest {
                 }
             )
             every { birthDate } returns Date("1984-08-31")
-            every { gender } returns com.projectronin.interop.fhir.r4.valueset.AdministrativeGender.MALE.asCode()
+            every { gender } returns AdministrativeGender.MALE.asCode()
             every { telecom } returns listOf(
                 mockk {
                     every { system } returns com.projectronin.interop.fhir.r4.valueset.ContactPointSystem.PHONE.asCode()
@@ -713,7 +712,7 @@ class PatientHandlerTest {
                 }
             )
             every { birthDate } returns Date("1984-01-31")
-            every { gender } returns com.projectronin.interop.fhir.r4.valueset.AdministrativeGender.MALE.asCode()
+            every { gender } returns AdministrativeGender.MALE.asCode()
             every { telecom } returns listOf(
                 mockk {
                     every { system } returns com.projectronin.interop.fhir.r4.valueset.ContactPointSystem.PHONE.asCode()
@@ -736,7 +735,7 @@ class PatientHandlerTest {
         val tenant = mockk<Tenant>()
         every { tenant.mnemonic } returns "tenantId"
         every { tenantService.getTenantForMnemonic("tenantId") } returns tenant
-        every { dfe.graphQlContext.get<InteropGraphQLContext>(INTEROP_CONTEXT_KEY).authzTenantId } returns "tenantId"
+        every { dfe.getAuthorizedTenantId() } returns "tenantId"
 
         val roninIdentifiers = listOf(
             Identifier(
@@ -796,7 +795,7 @@ class PatientHandlerTest {
                 }
             )
             every { birthDate } returns Date("1984-08-31")
-            every { gender } returns com.projectronin.interop.fhir.r4.valueset.AdministrativeGender.MALE.asCode()
+            every { gender } returns AdministrativeGender.MALE.asCode()
             every { telecom } returns listOf(
                 mockk {
                     every { system } returns com.projectronin.interop.fhir.r4.valueset.ContactPointSystem.PHONE.asCode()
@@ -832,7 +831,7 @@ class PatientHandlerTest {
                 }
             )
             every { birthDate } returns Date("1984-01-31")
-            every { gender } returns com.projectronin.interop.fhir.r4.valueset.AdministrativeGender.MALE.asCode()
+            every { gender } returns AdministrativeGender.MALE.asCode()
             every { telecom } returns listOf(
                 mockk {
                     every { system } returns com.projectronin.interop.fhir.r4.valueset.ContactPointSystem.PHONE.asCode()
@@ -868,7 +867,7 @@ class PatientHandlerTest {
                 }
             )
             every { birthDate } returns null
-            every { gender } returns com.projectronin.interop.fhir.r4.valueset.AdministrativeGender.MALE.asCode()
+            every { gender } returns AdministrativeGender.MALE.asCode()
             every { telecom } returns listOf(
                 mockk {
                     every { system } returns com.projectronin.interop.fhir.r4.valueset.ContactPointSystem.PHONE.asCode()
@@ -890,7 +889,7 @@ class PatientHandlerTest {
         val tenant = mockk<Tenant>()
         every { tenant.mnemonic } returns "tenantId"
         every { tenantService.getTenantForMnemonic("tenantId") } returns tenant
-        every { dfe.graphQlContext.get<InteropGraphQLContext>(INTEROP_CONTEXT_KEY).authzTenantId } returns "tenantId"
+        every { dfe.getAuthorizedTenantId() } returns "tenantId"
 
         val roninIdentifiers = listOf(
             Identifier(
@@ -944,7 +943,7 @@ class PatientHandlerTest {
                 }
             )
             every { birthDate } returns Date("1984-08-31")
-            every { gender } returns com.projectronin.interop.fhir.r4.valueset.AdministrativeGender.MALE.asCode()
+            every { gender } returns AdministrativeGender.MALE.asCode()
             every { telecom } returns listOf(
                 mockk {
                     every { system } returns com.projectronin.interop.fhir.r4.valueset.ContactPointSystem.PHONE.asCode()
@@ -983,7 +982,7 @@ class PatientHandlerTest {
                 }
             )
             every { birthDate } returns Date("1984-08-31")
-            every { gender } returns com.projectronin.interop.fhir.r4.valueset.AdministrativeGender.MALE.asCode()
+            every { gender } returns AdministrativeGender.MALE.asCode()
             every { telecom } returns listOf(
                 mockk {
                     every { system } returns com.projectronin.interop.fhir.r4.valueset.ContactPointSystem.PHONE.asCode()
@@ -1005,7 +1004,7 @@ class PatientHandlerTest {
         val tenant = mockk<Tenant>()
         every { tenant.mnemonic } returns "tenantId"
         every { tenantService.getTenantForMnemonic("tenantId") } returns tenant
-        every { dfe.graphQlContext.get<InteropGraphQLContext>(INTEROP_CONTEXT_KEY).authzTenantId } returns "tenantId"
+        every { dfe.getAuthorizedTenantId() } returns "tenantId"
 
         val roninIdentifiers = listOf(
             Identifier(
@@ -1061,7 +1060,7 @@ class PatientHandlerTest {
                 }
             )
             every { birthDate } returns Date("1961-08-25")
-            every { gender } returns com.projectronin.interop.fhir.r4.valueset.AdministrativeGender.MALE.asCode()
+            every { gender } returns AdministrativeGender.MALE.asCode()
             every { telecom } returns listOf(
                 mockk {
                     every { system } returns com.projectronin.interop.fhir.r4.valueset.ContactPointSystem.PHONE.asCode()
@@ -1083,7 +1082,7 @@ class PatientHandlerTest {
         val tenant = mockk<Tenant>()
         every { tenant.mnemonic } returns "tenantId"
         every { tenantService.getTenantForMnemonic("tenantId") } returns tenant
-        every { dfe.graphQlContext.get<InteropGraphQLContext>(INTEROP_CONTEXT_KEY).authzTenantId } returns "tenantId"
+        every { dfe.getAuthorizedTenantId() } returns "tenantId"
 
         val roninIdentifiers = listOf(
             Identifier(
@@ -1137,7 +1136,7 @@ class PatientHandlerTest {
                 }
             )
             every { birthDate } returns Date("1961-08-25")
-            every { gender } returns com.projectronin.interop.fhir.r4.valueset.AdministrativeGender.MALE.asCode()
+            every { gender } returns AdministrativeGender.MALE.asCode()
             every { telecom } returns listOf(
                 mockk {
                     every { system } returns com.projectronin.interop.fhir.r4.valueset.ContactPointSystem.PHONE.asCode()
@@ -1159,7 +1158,7 @@ class PatientHandlerTest {
         val tenant = mockk<Tenant>()
         every { tenant.mnemonic } returns "tenantId"
         every { tenantService.getTenantForMnemonic("tenantId") } returns tenant
-        every { dfe.graphQlContext.get<InteropGraphQLContext>(INTEROP_CONTEXT_KEY).authzTenantId } returns "tenantId"
+        every { dfe.getAuthorizedTenantId() } returns "tenantId"
 
         val roninIdentifiers = listOf(
             Identifier(

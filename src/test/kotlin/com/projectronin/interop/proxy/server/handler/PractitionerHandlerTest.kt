@@ -5,8 +5,7 @@ import com.projectronin.interop.ehr.factory.EHRFactory
 import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
 import com.projectronin.interop.fhir.r4.datatype.primitive.asFHIR
 import com.projectronin.interop.fhir.r4.resource.Practitioner
-import com.projectronin.interop.proxy.server.context.INTEROP_CONTEXT_KEY
-import com.projectronin.interop.proxy.server.context.InteropGraphQLContext
+import com.projectronin.interop.proxy.server.context.getAuthorizedTenantId
 import com.projectronin.interop.proxy.server.util.JacksonUtil
 import com.projectronin.interop.queue.QueueService
 import com.projectronin.interop.tenant.config.TenantService
@@ -55,7 +54,7 @@ internal class PractitionerHandlerTest {
         every { JacksonUtil.writeJsonValue(any()) } returns "json"
 
         every { tenantService.getTenantForMnemonic("tenant") } returns tenant
-        every { dfe.graphQlContext.get<InteropGraphQLContext>(INTEROP_CONTEXT_KEY).authzTenantId } returns "tenant"
+        every { dfe.getAuthorizedTenantId() } returns "tenant"
         every { factory.getVendorFactory(tenant).practitionerService } returns practService
         every { practService.getPractitioner(tenant, "FHIRID1") } returns practitioner
         every { queueService.enqueueMessages(any()) } just runs
@@ -73,7 +72,7 @@ internal class PractitionerHandlerTest {
         every { JacksonUtil.writeJsonValue(any()) } returns "json"
 
         every { tenantService.getTenantForMnemonic("tenant") } returns tenant
-        every { dfe.graphQlContext.get<InteropGraphQLContext>(INTEROP_CONTEXT_KEY).authzTenantId } returns null
+        every { dfe.getAuthorizedTenantId() } returns null
         every { factory.getVendorFactory(tenant).practitionerService } returns practService
         every { practService.getPractitioner(tenant, "FHIRID1") } returns practitioner
         every { queueService.enqueueMessages(any()) } just runs
@@ -91,7 +90,7 @@ internal class PractitionerHandlerTest {
         every { JacksonUtil.writeJsonValue(any()) } returns "json"
 
         every { tenantService.getTenantForMnemonic("tenant") } returns tenant
-        every { dfe.graphQlContext.get<InteropGraphQLContext>(INTEROP_CONTEXT_KEY).authzTenantId } returns "tenant"
+        every { dfe.getAuthorizedTenantId() } returns "tenant"
         every { factory.getVendorFactory(tenant).practitionerService } returns practService
         every { practService.getPractitionerByProvider(tenant, "ProviderID1") } returns practitioner
         every { queueService.enqueueMessages(any()) } just runs
@@ -106,7 +105,7 @@ internal class PractitionerHandlerTest {
         every { JacksonUtil.writeJsonValue(any()) } returns "json"
 
         every { tenantService.getTenantForMnemonic("tenant") } returns tenant
-        every { dfe.graphQlContext.get<InteropGraphQLContext>(INTEROP_CONTEXT_KEY).authzTenantId } returns null
+        every { dfe.getAuthorizedTenantId() } returns null
         every { factory.getVendorFactory(tenant).practitionerService } returns practService
         every { practService.getPractitionerByProvider(tenant, "ProviderID1") } returns practitioner
         every { queueService.enqueueMessages(any()) } just runs
@@ -121,7 +120,7 @@ internal class PractitionerHandlerTest {
         every { JacksonUtil.writeJsonValue(any()) } returns "json"
 
         every { tenantService.getTenantForMnemonic("tenant") } returns tenant
-        every { dfe.graphQlContext.get<InteropGraphQLContext>(INTEROP_CONTEXT_KEY).authzTenantId } returns "tenant"
+        every { dfe.getAuthorizedTenantId() } returns "tenant"
         every { factory.getVendorFactory(tenant).practitionerService } returns practService
         every { practService.getPractitioner(tenant, "FHIRID1") } throws Exception("something wrong")
         every { queueService.enqueueMessages(any()) } throws Exception("something else wrong")
@@ -136,7 +135,7 @@ internal class PractitionerHandlerTest {
         every { JacksonUtil.writeJsonValue(any()) } returns "json"
 
         every { tenantService.getTenantForMnemonic("tenant") } returns tenant
-        every { dfe.graphQlContext.get<InteropGraphQLContext>(INTEROP_CONTEXT_KEY).authzTenantId } returns "tenant"
+        every { dfe.getAuthorizedTenantId() } returns "tenant"
         every { factory.getVendorFactory(tenant).practitionerService } returns practService
         every { practService.getPractitioner(tenant, "FHIRID1") } returns practitioner
         every { queueService.enqueueMessages(any()) } throws Exception("something else wrong")

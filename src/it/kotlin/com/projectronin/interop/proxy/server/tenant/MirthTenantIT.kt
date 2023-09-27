@@ -12,7 +12,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
 class MirthTenantIT : BaseTenantControllerIT() {
-    private val url = "$serverUrl/tenants/%s/mirth-config/"
+    private val url = "$serverUrl/tenants/%s/mirth-config"
     private val mirthTenantConfigDAO = MirthTenantConfigDAO(tenantDB)
 
     @BeforeEach

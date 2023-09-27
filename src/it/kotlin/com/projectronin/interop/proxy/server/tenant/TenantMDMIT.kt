@@ -12,7 +12,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
 class TenantMDMIT : BaseTenantControllerIT() {
-    private val url = "$serverUrl/tenants/%s/hl7v2/mdm/"
+    private val url = "$serverUrl/tenants/%s/hl7v2/mdm"
     private val tenantMDMConfigDAO = TenantMDMConfigDAO(tenantDB)
 
     @BeforeEach

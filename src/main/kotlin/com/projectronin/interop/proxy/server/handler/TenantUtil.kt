@@ -1,7 +1,6 @@
 package com.projectronin.interop.proxy.server.handler
 
-import com.projectronin.interop.proxy.server.context.INTEROP_CONTEXT_KEY
-import com.projectronin.interop.proxy.server.context.InteropGraphQLContext
+import com.projectronin.interop.proxy.server.context.getAuthorizedTenantId
 import com.projectronin.interop.tenant.config.TenantService
 import com.projectronin.interop.tenant.config.model.Tenant
 import graphql.schema.DataFetchingEnvironment
@@ -20,7 +19,7 @@ fun findAndValidateTenant(
     requestedTenantId: String,
     requireTenantAuth: Boolean = true
 ): Tenant {
-    val authorizedTenantId = dfe.graphQlContext.get<InteropGraphQLContext>(INTEROP_CONTEXT_KEY).authzTenantId
+    val authorizedTenantId = dfe.getAuthorizedTenantId()
 
     if (requireTenantAuth && authorizedTenantId == null) {
         // Authorized tenet is required
