@@ -1,7 +1,7 @@
 [versions]
 apache-kafka = "3.5.0"
 datadog = "1.21.0"
-ehrda = "1.4.0"
+ehrda = "1.4.1"
 # @keep for forcing version
 graphql-java = "20.4"
 graphql-java-kickstart = "15.0.0"
@@ -10,7 +10,7 @@ hapi-hl7v2 = "2.3"
 interop-aidbox = "8.1.0"
 interop-common = "3.12.0"
 interop-datalake = "8.4.2"
-interop-ehr = "11.2.0"
+interop-ehr = "11.2.1"
 interop-event-resource = "1.1.0"
 interop-fhir = "8.10.1"
 interop-gradle = "3.2.0"
