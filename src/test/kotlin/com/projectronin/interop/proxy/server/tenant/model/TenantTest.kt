@@ -32,7 +32,8 @@ class TenantTest {
                 hsi = null,
                 instanceName = "instanceName",
                 departmentInternalSystem = "departmentInternalSystem",
-                patientOnboardedFlagId = null
+                patientOnboardedFlagId = null,
+                orderSystem = "orderSystem"
             ),
             monitoredIndicator = null
         )
@@ -70,7 +71,8 @@ class TenantTest {
                 hsi = null,
                 instanceName = "Epic Sandbox",
                 departmentInternalSystem = "departmentInternalSystem",
-                patientOnboardedFlagId = null
+                patientOnboardedFlagId = null,
+                orderSystem = "orderSystem"
             ),
             monitoredIndicator = true
         )
@@ -98,6 +100,7 @@ class TenantTest {
                 "patientMRNTypeText" : "patientMRNTypeText",
                 "instanceName" : "Epic Sandbox",
                 "departmentInternalSystem" : "departmentInternalSystem",
+                "orderSystem" : "orderSystem",
                 "vendorType" : "EPIC"
               },
               "timezone" : "America/Chicago",
@@ -134,7 +137,8 @@ class TenantTest {
                 hsi = null,
                 instanceName = "Epic Sandbox",
                 departmentInternalSystem = "departmentInternalSystem",
-                patientOnboardedFlagId = null
+                patientOnboardedFlagId = null,
+                orderSystem = null
             )
         )
         val json = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(tenant)

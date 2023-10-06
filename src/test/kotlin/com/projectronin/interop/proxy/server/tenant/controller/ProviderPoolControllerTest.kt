@@ -52,7 +52,8 @@ class ProviderPoolControllerTest {
             hsi = "hsi",
             instanceName = "instanceName",
             departmentInternalSystem = "departmentInternalSystem",
-            patientOnboardedFlagId = "flagId"
+            patientOnboardedFlagId = "flagId",
+            orderSystem = "orderSystem"
         ),
         monitoredIndicator = null
     )

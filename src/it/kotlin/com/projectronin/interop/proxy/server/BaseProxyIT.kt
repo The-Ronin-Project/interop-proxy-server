@@ -141,6 +141,7 @@ abstract class BaseProxyIT {
                 patientMRNTypeText = "MRN"
                 departmentInternalSystem = "mockEHRDepartmentInternalSystem"
                 patientOnboardedFlagId = "135124"
+                orderSystem = "mockEHROrderSystem"
             }
         )
 

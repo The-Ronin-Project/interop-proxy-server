@@ -143,7 +143,8 @@ class TenantConvertersTest {
                 hsi = null,
                 instanceName = "instanceName",
                 departmentInternalSystem = "departmentInternalSystem",
-                patientOnboardedFlagId = null
+                patientOnboardedFlagId = null,
+                orderSystem = "orderSystem"
             ),
             monitoredIndicator = null
         )

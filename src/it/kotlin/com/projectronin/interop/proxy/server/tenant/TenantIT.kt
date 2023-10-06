@@ -75,7 +75,8 @@ class TenantIT : BaseTenantControllerIT() {
             hsi = null,
             instanceName = "Epic Sandbox",
             departmentInternalSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.2.686980",
-            patientOnboardedFlagId = null
+            patientOnboardedFlagId = null,
+            orderSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.2.798268"
         )
         val newTenant = Tenant(
             id = 0,
@@ -142,7 +143,8 @@ class TenantIT : BaseTenantControllerIT() {
             hsi = null,
             instanceName = "Epic Sandbox",
             departmentInternalSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.2.686980",
-            patientOnboardedFlagId = null
+            patientOnboardedFlagId = null,
+            orderSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.2.798268"
         )
 
         val newTenant = Tenant(
@@ -180,7 +182,8 @@ class TenantIT : BaseTenantControllerIT() {
             hsi = null,
             instanceName = "Epic Sandbox",
             departmentInternalSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.2.686980",
-            patientOnboardedFlagId = "135124"
+            patientOnboardedFlagId = "135124",
+            orderSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.2.798268"
         )
 
         val updatedTenant = Tenant(
@@ -248,7 +251,8 @@ class TenantIT : BaseTenantControllerIT() {
             hsi = null,
             instanceName = "Epic Sandbox",
             departmentInternalSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.2.686980",
-            patientOnboardedFlagId = null
+            patientOnboardedFlagId = null,
+            orderSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.2.798268"
         )
 
         val updatedTenant = Tenant(
@@ -286,7 +290,8 @@ class TenantIT : BaseTenantControllerIT() {
             hsi = null,
             instanceName = "Epic Sandbox",
             departmentInternalSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.2.686980",
-            patientOnboardedFlagId = null
+            patientOnboardedFlagId = null,
+            orderSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.2.798268"
         )
 
         val newTenant = Tenant(
