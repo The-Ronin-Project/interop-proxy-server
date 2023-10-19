@@ -24,13 +24,21 @@ jobs:
         run: chmod +x gradlew
       - name: Gradlew Test
         run: ./gradlew test
-      - name: Upload Coverage
-        uses: codecov/codecov-action@v2
+      - name: Build and analyze
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+        run: ./gradlew build sonar --info
+      - name: SonarQube Quality Gate check
+        id: sonarqube-quality-gate-check
+        uses: sonarsource/sonarqube-quality-gate-action@master
+        timeout-minutes: 5
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
         with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          fail_ci_if_error: false
-          file: ./codecov/test/jacocoTestReport.xml
-
+          scanMetadataReportFile: build/sonar/report-task.txt
       - name: Upload report to DataDog
         if: always() && !cancelled()
         env:

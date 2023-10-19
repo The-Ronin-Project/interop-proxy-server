@@ -8,6 +8,7 @@ plugins {
     alias(libs.plugins.interop.version.catalog)
     alias(libs.plugins.graphql)
     alias(libs.plugins.dependencycheck)
+    id("org.sonarqube") version "4.0.0.2929" // move to interop-gradle once we've proven out this works
 }
 
 dependencies {
@@ -157,4 +158,12 @@ dependencyCheck {
     scanConfigurations = listOf("compileClasspath", "runtimeClasspath")
     skipTestGroups = true
     suppressionFile = "conf/owasp-suppress.xml"
+}
+
+sonar {
+    properties {
+        property("sonar.projectKey", "interop-proxy-server")
+        property("sonar.projectName", "interop-proxy-server")
+        property("sonar.newCode.referenceBranch", "main")
+    }
 }
