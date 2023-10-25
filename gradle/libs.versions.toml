@@ -13,7 +13,7 @@ interop-datalake = "8.4.2"
 interop-ehr = "12.0.0"
 interop-event-resource = "1.2.1"
 interop-fhir = "8.10.2"
-interop-gradle = "3.2.0"
+interop-gradle = "3.2.1-INT2308-SNAPSHOT"
 interop-kafka = "8.5.0"
 interop-queue = "2.0.0"
 jackson = "2.15.3"
@@ -130,5 +130,6 @@ spring-security = [
 dependencycheck = { id = "org.owasp.dependencycheck", version.ref = "owasp" }
 graphql = { id = "com.expediagroup.graphql", version.ref = "graphql-kotlin" }
 interop-docker-integration = { id = "com.projectronin.interop.gradle.docker-integration", version.ref = "interop-gradle" }
+interop-sonarqube = { id = "com.projectronin.interop.gradle.sonarqube", version.ref = "interop-gradle" }
 interop-spring-boot = { id = "com.projectronin.interop.gradle.spring-boot", version.ref = "interop-gradle" }
 interop-version-catalog = { id = "com.projectronin.interop.gradle.version-catalog-update", version.ref = "interop-gradle" }
