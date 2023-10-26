@@ -130,5 +130,6 @@ spring-security = [
 dependencycheck = { id = "org.owasp.dependencycheck", version.ref = "owasp" }
 graphql = { id = "com.expediagroup.graphql", version.ref = "graphql-kotlin" }
 interop-docker-integration = { id = "com.projectronin.interop.gradle.docker-integration", version.ref = "interop-gradle" }
+interop-sonarqube = { id = "com.projectronin.interop.gradle.sonarqube", version.ref = "interop-gradle" }
 interop-spring-boot = { id = "com.projectronin.interop.gradle.spring-boot", version.ref = "interop-gradle" }
 interop-version-catalog = { id = "com.projectronin.interop.gradle.version-catalog-update", version.ref = "interop-gradle" }

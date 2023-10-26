@@ -39,12 +39,6 @@ jobs:
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
         with:
           scanMetadataReportFile: build/sonar/report-task.txt
-      - name: Upload Coverage
-        uses: codecov/codecov-action@v2
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          fail_ci_if_error: false
-          file: ./codecov/test/jacocoTestReport.xml
       - name: Upload report to DataDog
         if: always() && !cancelled()
         env:
