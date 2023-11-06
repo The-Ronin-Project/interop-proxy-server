@@ -29,10 +29,26 @@ the tenant authorized for the User.
 
 #### Machine to Machine (Auth0) authentication
 
-For select [calls](interopSchema.graphql), where user authentication is not required, machine to machine authentication
-is accepted. A signed Auth0 Bearer token must be supplied in the request's 'Authorization' header. The token must have
+Machine to machine authentication is accepted. A signed Auth0 Bearer token must be supplied in the request's 'Authorization' header. The token must have
 been issued, issuer on the JWT, by the auth endpoint corresponding to the environment, the audience must be "proxy", and
 the token must not be expired at time of processing.
+
+If the auth0 token contains the correct claims, it can also be used for the same calls as Seki authentication.  The claims structure is defined in
+[ronin-common](https://github.com/projectronin/ronin-common/tree/main/auth/src/main/kotlin/com/projectronin/auth), and is managed by the permissions given to the client by
+the auth0 "api" for proxy.  See [the M2M action definition](https://github.com/projectronin/ronin-auth0-tf/blob/main/terraform/modules/auth0/auth0_m2m_claims.tf) for some more information.
+Essentially, when making a client-credentials request for an auth0 M2M token, a specific tenant can be requested, like this:
+
+```json
+{
+  "audience": "https://interop-proxy-server.dev.projectronin.io",
+  "grant_type": "client_credentials",
+  "client_id": "some client id",
+  "client_secret": "some secret",
+  "requested_profile": {
+      "accessingTenantId": "some tenant id"
+  }
+}
+```
 
 ## Development
 

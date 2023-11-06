@@ -2,6 +2,7 @@ package com.projectronin.interop.proxy.server.auth
 
 import com.nimbusds.jwt.JWTParser
 import mu.KotlinLogging
+import org.springframework.security.oauth2.jwt.Jwt
 import org.springframework.security.oauth2.jwt.JwtDecoder
 import org.springframework.stereotype.Component
 
@@ -21,14 +22,24 @@ class M2MAuthService(private val properties: Auth0MachineToMachineProperties, pr
     /**
      * Validates a M2M token.
      */
-    fun validateToken(token: String): Boolean {
+    fun validateToken(token: String): ParsedM2MToken {
         // Decode the JWT to ensure there are no validation exceptions
         return try {
-            m2mJwtDecoder.decode(token)
-            true
+            ParsedM2MToken(
+                m2mJwtDecoder.decode(token),
+                true
+            )
         } catch (e: Exception) {
             logger.info { "M2M Auth Failed with exception: ${e.message}" }
-            false
+            ParsedM2MToken(
+                null,
+                false
+            )
         }
     }
 }
+
+data class ParsedM2MToken(
+    val token: Jwt?,
+    val success: Boolean
+)

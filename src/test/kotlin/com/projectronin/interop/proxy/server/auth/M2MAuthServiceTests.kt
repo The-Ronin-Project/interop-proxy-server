@@ -19,7 +19,7 @@ class M2MAuthServiceTests {
         val jwtDecoder = mockk<JwtDecoder>()
         every { jwtDecoder.decode(token) } returns mockk<Jwt>()
 
-        assertTrue(M2MAuthService(authProperties, jwtDecoder).validateToken(token))
+        assertTrue(M2MAuthService(authProperties, jwtDecoder).validateToken(token).success)
     }
 
     @Test
@@ -29,7 +29,7 @@ class M2MAuthServiceTests {
         val jwtDecoder = mockk<JwtDecoder>()
         every { jwtDecoder.decode(token) }.throws(BadJwtException("Invalid"))
 
-        assertFalse(M2MAuthService(authProperties, jwtDecoder).validateToken(token))
+        assertFalse(M2MAuthService(authProperties, jwtDecoder).validateToken(token).success)
     }
 
     @Test

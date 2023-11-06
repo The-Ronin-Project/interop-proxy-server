@@ -2,6 +2,7 @@ package com.projectronin.interop.proxy.server.filter
 
 import com.projectronin.interop.proxy.server.auth.AuthResponse
 import com.projectronin.interop.proxy.server.auth.M2MAuthService
+import com.projectronin.interop.proxy.server.auth.ParsedM2MToken
 import com.projectronin.interop.proxy.server.auth.User
 import com.projectronin.interop.proxy.server.auth.UserAuthService
 import com.projectronin.interop.proxy.server.auth.UserSession
@@ -15,6 +16,7 @@ import org.junit.jupiter.api.Test
 import org.springframework.http.HttpStatus
 import org.springframework.mock.http.server.reactive.MockServerHttpRequest
 import org.springframework.mock.web.server.MockServerWebExchange
+import org.springframework.security.oauth2.jwt.Jwt
 import org.springframework.web.server.ServerWebExchange
 import org.springframework.web.server.WebFilterChain
 import reactor.core.publisher.Mono
@@ -138,10 +140,66 @@ class AuthFilterTest {
             )
         val authFilter = AuthFilter(userAuthService, m2MAuthService)
         every { m2MAuthService.isM2MToken("12345") } returns true
-        every { m2MAuthService.validateToken("12345") } returns true
+        every { m2MAuthService.validateToken("12345") } returns ParsedM2MToken(mockk(relaxed = true), true)
         every { chain.filter(capture(slot)) } answers { mono }
         authFilter.filter(exchange, chain)
         assertNull(slot.captured.request.headers.getFirst(AUTHZ_TENANT_HEADER))
+    }
+
+    @Test
+    fun `good m2m auth does not add tenant ID with partial claims`() {
+        val chain = mockk<WebFilterChain>()
+        val mono = mockk<Mono<Void>>()
+        val userAuthService = mockk<UserAuthService>()
+        val m2MAuthService = mockk<M2MAuthService>()
+        val jwt = mockk<Jwt>()
+        val slot = slot<ServerWebExchange>() // capture slot for validating argument
+        val exchange = MockServerWebExchange
+            .from(
+                MockServerHttpRequest.get("/graphql")
+                    .header("Authorization", "Bearer 12345")
+            )
+        val authFilter = AuthFilter(userAuthService, m2MAuthService)
+        every { m2MAuthService.isM2MToken("12345") } returns true
+        every { m2MAuthService.validateToken("12345") } returns ParsedM2MToken(jwt, true)
+        every { chain.filter(capture(slot)) } answers { mono }
+        every { jwt.claims } returns mapOf(
+            "urn:projectronin:authorization:claims:version:1" to mapOf<String, Any>(
+                "user" to emptyMap<String, Any>()
+            )
+        )
+        authFilter.filter(exchange, chain)
+        assertNull(slot.captured.request.headers.getFirst(AUTHZ_TENANT_HEADER))
+    }
+
+    @Test
+    fun `good m2m auth does add tenant ID with full claims`() {
+        val chain = mockk<WebFilterChain>()
+        val mono = mockk<Mono<Void>>()
+        val userAuthService = mockk<UserAuthService>()
+        val m2MAuthService = mockk<M2MAuthService>()
+        val jwt = mockk<Jwt>()
+        val slot = slot<ServerWebExchange>() // capture slot for validating argument
+        val exchange = MockServerWebExchange
+            .from(
+                MockServerHttpRequest.get("/graphql")
+                    .header("Authorization", "Bearer 12345")
+            )
+        val authFilter = AuthFilter(userAuthService, m2MAuthService)
+        every { m2MAuthService.isM2MToken("12345") } returns true
+        every { m2MAuthService.validateToken("12345") } returns ParsedM2MToken(jwt, true)
+        every { chain.filter(capture(slot)) } answers { mono }
+        every { jwt.claims } returns mapOf(
+            "urn:projectronin:authorization:claims:version:1" to mapOf<String, Any>(
+                "user" to mapOf<String, Any>(
+                    "loginProfile" to mapOf<String, Any>(
+                        "accessingTenantId" to "apposnd"
+                    )
+                )
+            )
+        )
+        authFilter.filter(exchange, chain)
+        assertEquals("apposnd", slot.captured.request.headers.getFirst(AUTHZ_TENANT_HEADER))
     }
 
     @Test
@@ -156,7 +214,7 @@ class AuthFilterTest {
             )
         val authFilter = AuthFilter(userAuthService, m2MAuthService)
         every { m2MAuthService.isM2MToken("12345") } returns true
-        every { m2MAuthService.validateToken("12345") } returns false
+        every { m2MAuthService.validateToken("12345") } returns ParsedM2MToken(mockk(relaxed = true), false)
         authFilter.filter(exchange, chain)
         assertEquals(HttpStatus.FORBIDDEN, exchange.response.statusCode)
     }
@@ -176,7 +234,7 @@ class AuthFilterTest {
         val authResponse = AuthResponse(User("tenantId"), UserSession("12345"))
         val authFilter = AuthFilter(userAuthService, m2MAuthService)
         every { m2MAuthService.isM2MToken("12345") } returns true
-        every { m2MAuthService.validateToken("12345") } returns false
+        every { m2MAuthService.validateToken("12345") } returns ParsedM2MToken(mockk(relaxed = true), false)
         every { userAuthService.validateToken("12345") } returns authResponse
         every { chain.filter(capture(slot)) } answers { mono }
         authFilter.filter(exchange, chain)
@@ -197,7 +255,7 @@ class AuthFilterTest {
             )
         val authFilter = AuthFilter(userAuthService, m2MAuthService)
         every { m2MAuthService.isM2MToken("12345") } returns true
-        every { m2MAuthService.validateToken("12345") } returns false
+        every { m2MAuthService.validateToken("12345") } returns ParsedM2MToken(mockk(relaxed = true), false)
         every { userAuthService.validateToken("12345") } returns null
         every { chain.filter(capture(slot)) } answers { mono }
         authFilter.filter(exchange, chain)
@@ -254,7 +312,7 @@ class AuthFilterTest {
             )
         val authFilter = AuthFilter(userAuthService, m2MAuthService)
         every { m2MAuthService.isM2MToken("12345") } returns true
-        every { m2MAuthService.validateToken("12345") } returns true
+        every { m2MAuthService.validateToken("12345") } returns ParsedM2MToken(mockk(relaxed = true), true)
         every { chain.filter(capture(slot)) } answers { mono }
         authFilter.filter(exchange, chain)
         assertNull(slot.captured.request.headers.getFirst(AUTHZ_TENANT_HEADER))
