@@ -1,6 +1,6 @@
 [versions]
 apache-kafka = "3.5.0"
-datadog = "1.22.0"
+datadog = "1.23.0"
 ehrda = "1.5.4"
 # @keep for forcing version
 graphql-java = "20.4"
