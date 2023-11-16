@@ -1,7 +1,7 @@
 [versions]
 apache-kafka = "3.5.0"
-datadog = "1.23.0"
-ehrda = "1.5.4"
+datadog = "1.24.0"
+ehrda = "1.5.5"
 # @keep for forcing version
 graphql-java = "20.4"
 graphql-java-kickstart = "15.0.0"
@@ -16,7 +16,7 @@ interop-fhir = "8.11.0"
 interop-gradle = "3.3.0"
 interop-kafka = "8.5.2"
 interop-queue = "2.0.0"
-jackson = "2.15.3"
+jackson = "2.16.0"
 junit-pioneer = "2.1.0"
 # @keep for forcing version
 kotlin = "1.9.0"
@@ -28,12 +28,12 @@ logstash = "7.4"
 mockk = "1.13.8"
 mysql = "8.2.0"
 opentracing = "0.33.0"
-owasp = "8.4.2"
+owasp = "8.4.3"
 ronin-kafka = "1.1.1"
 ronin-test = "0.2.0"
 spring-boot = "3.1.5"
 spring-mockk = "4.0.2"
-testcontainers = "1.19.1"
+testcontainers = "1.19.2"
 
 [libraries]
 dd-trace-api = { module = "com.datadoghq:dd-trace-api", version.ref = "datadog" }
