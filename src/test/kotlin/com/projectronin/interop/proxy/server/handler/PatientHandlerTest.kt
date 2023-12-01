@@ -136,7 +136,9 @@ class PatientHandlerTest {
 
     @Test
     fun `unknown vendor returns an error`() {
-        val tenant = mockk<Tenant>()
+        val tenant = mockk<Tenant> {
+            every { mnemonic } returns "tenantId"
+        }
         every { tenantService.getTenantForMnemonic("tenantId") } returns tenant
         every { dfe.getAuthorizedTenantId() } returns "tenantId"
 
@@ -154,7 +156,7 @@ class PatientHandlerTest {
         )
 
         assertNotNull(result)
-        assertEquals("Error", result.errors[0].message)
+        assertEquals("Lookup error for tenantId: Error", result.errors[0].message)
     }
 
     @Test
@@ -189,7 +191,7 @@ class PatientHandlerTest {
         )
 
         assertNotNull(result)
-        assertEquals("Error", result.errors[0].message)
+        assertEquals("Lookup error for tenantId: Error", result.errors[0].message)
         assertNull(logAppender.list.last().marker)
     }
 
@@ -225,7 +227,10 @@ class PatientHandlerTest {
         )
 
         assertNotNull(result)
-        assertEquals("Received 503 Service Unavailable when calling Proxy", result.errors[0].message)
+        assertEquals(
+            "Lookup error for tenantId: Received 503 Service Unavailable when calling Proxy",
+            result.errors[0].message
+        )
         assertEquals(logAppender.list.last().marker, LogMarkers.SERVICE_UNAVAILABLE)
     }
 
@@ -1430,6 +1435,146 @@ class PatientHandlerTest {
                 "2001-02-03",
                 dfe
             )
+        assertEquals(1, response.data.size)
+
+        val dataByTenant = response.data.associateBy { it.tenantId }
+        assertEquals(0, dataByTenant["tenant1"]!!.patients.size)
+
+        assertEquals(0, response.errors.size)
+    }
+
+    @Test
+    fun `patientsByTenants - patient lookup throws error for one tenant`() {
+        val tenant1 = mockk<Tenant> {
+            every { mnemonic } returns "tenant1"
+        }
+        val tenant2 = mockk<Tenant> {
+            every { mnemonic } returns "tenant2"
+        }
+        every { tenantService.getTenantForMnemonic("tenant1") } returns tenant1
+        every { tenantService.getTenantForMnemonic("tenant2") } returns tenant2
+
+        val patient1 = mockk<R4Patient>(relaxed = true) {
+            every { id } returns Id("Patient-UUID-1")
+            every { name } returns listOf(
+                mockk {
+                    every { use } returns USUAL.asCode()
+                    every { family?.value } returns "Smith"
+                    every { given } returns listOf("Josh").asFHIR()
+                }
+            )
+            every { birthDate } returns Date("2001-02-03")
+            every { gender } returns AdministrativeGender.MALE.asCode()
+        }
+
+        every { ehrFactory.getVendorFactory(tenant1) } returns mockk {
+            every { patientService } returns mockk {
+                every { findPatient(tenant1, LocalDate.of(2001, 2, 3), "Josh", "Smith") } returns listOf(patient1)
+            }
+        }
+        every { ehrFactory.getVendorFactory(tenant2) } returns mockk {
+            every { patientService } returns mockk {
+                every {
+                    findPatient(
+                        tenant2,
+                        LocalDate.of(2001, 2, 3),
+                        "Josh",
+                        "Smith"
+                    )
+                } throws IllegalStateException("Lookup error")
+            }
+        }
+
+        every { roninPatient.getRoninIdentifiers(patient1, tenant1) } returns emptyList()
+
+        val response =
+            patientHandler.patientsByTenants(
+                listOf("tenant1", "tenant2"),
+                "Smith",
+                "Josh",
+                "2001-02-03",
+                dfe
+            )
+        assertEquals(2, response.data.size)
+
+        val dataByTenant = response.data.associateBy { it.tenantId }
+
+        assertEquals(1, dataByTenant["tenant1"]!!.patients.size)
+        val tenant1Patient1 = dataByTenant["tenant1"]!!.patients[0]
+        assertEquals("tenant1-Patient-UUID-1", tenant1Patient1.id)
+        assertEquals(0, tenant1Patient1.identifier.size)
+        assertEquals(1, tenant1Patient1.name.size)
+        assertEquals("usual", tenant1Patient1.name[0].use)
+        assertEquals("Smith", tenant1Patient1.name[0].family)
+        assertEquals(1, tenant1Patient1.name[0].given.size)
+        assertEquals("Josh", tenant1Patient1.name[0].given[0])
+        assertEquals("2001-02-03", tenant1Patient1.birthDate)
+        assertEquals("male", tenant1Patient1.gender)
+        assertEquals(0, tenant1Patient1.telecom.size)
+        assertEquals(0, tenant1Patient1.address.size)
+
+        assertEquals(0, dataByTenant["tenant2"]!!.patients.size)
+
+        assertEquals(1, response.errors.size)
+        assertEquals("Lookup error for tenant2: Lookup error", response.errors[0].message)
+    }
+
+    @Test
+    fun `patientsByNameAndDOB - strips commas from family name`() {
+        val response = listOf<R4Patient>()
+
+        val tenant = mockk<Tenant>()
+        every { tenant.mnemonic } returns "tenantId"
+        every { tenantService.getTenantForMnemonic("tenantId") } returns tenant
+        every { dfe.getAuthorizedTenantId() } returns "tenantId"
+
+        every { ehrFactory.getVendorFactory(tenant) } returns mockk {
+            every { patientService } returns mockk {
+                every {
+                    findPatient(
+                        tenant = tenant,
+                        birthDate = LocalDate.of(1984, 8, 31),
+                        familyName = "Smith Jr",
+                        givenName = "Josh"
+                    )
+                } returns response
+            }
+        }
+
+        every { queueService.enqueueMessages(listOf()) } just Runs
+
+        // Run Test
+        val actualResponse = patientHandler.patientsByNameAndDOB(
+            tenantId = "tenantId",
+            birthdate = "1984-08-31",
+            given = "Josh",
+            family = "Smith, Jr",
+            dfe = dfe
+        )
+
+        // Assert outcome
+        assertNotNull(actualResponse)
+
+        // Patient
+        assertEquals(0, actualResponse.data.size)
+        assertEquals(0, actualResponse.errors.size)
+    }
+
+    @Test
+    fun `patientsByTenants - strips commas from family name`() {
+        val tenant1 = mockk<Tenant> {
+            every { mnemonic } returns "tenant1"
+        }
+        every { tenantService.getTenantForMnemonic("tenant1") } returns tenant1
+
+        every { ehrFactory.getVendorFactory(tenant1) } returns mockk {
+            every { patientService } returns mockk {
+                every { findPatient(tenant1, LocalDate.of(2001, 2, 3), "Josh", "Smith Jr") } returns emptyList()
+            }
+        }
+
+        val response =
+            patientHandler.patientsByTenants(listOf("tenant1"), "Smith, Jr", "Josh", "2001-02-03", dfe)
         assertEquals(1, response.data.size)
 
         val dataByTenant = response.data.associateBy { it.tenantId }

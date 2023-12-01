@@ -123,17 +123,18 @@ class PatientHandler(
         birthdate: String,
         errors: MutableList<GraphQLError>
     ): List<R4Patient> {
+        val cleanedFamily = family.replace(",", "")
         val patients = try {
             val patientService = ehrFactory.getVendorFactory(tenant).patientService
 
             patientService.findPatient(
                 tenant = tenant,
-                familyName = family,
+                familyName = cleanedFamily,
                 givenName = given,
                 birthDate = dateFormatter.parseDateString(birthdate)
             )
         } catch (e: Exception) {
-            errors.add(GraphQLException(e.message).toGraphQLError())
+            errors.add(GraphQLException("Lookup error for ${tenant.mnemonic}: ${e.message}").toGraphQLError())
             logger.error(e.getLogMarker(), e) { "Patient query for tenant ${tenant.mnemonic} contains errors" }
             listOf()
         }
