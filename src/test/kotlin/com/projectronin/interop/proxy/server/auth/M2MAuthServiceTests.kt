@@ -9,6 +9,7 @@ import org.springframework.security.oauth2.jwt.BadJwtException
 import org.springframework.security.oauth2.jwt.Jwt
 import org.springframework.security.oauth2.jwt.JwtDecoder
 
+@Suppress("ktlint:standard:max-line-length")
 class M2MAuthServiceTests {
     @Test
     fun `valid token can be validated`() {

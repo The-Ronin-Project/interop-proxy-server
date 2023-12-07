@@ -9,14 +9,14 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 class TenantCodesConvertersTest {
-
     @Test
     fun `ensure DO to Proxy works`() {
-        val tenantCodesDO = TenantCodesDO {
-            bmiCode = "123"
-            bsaCode = "456"
-            stageCodes = "910,322"
-        }
+        val tenantCodesDO =
+            TenantCodesDO {
+                bmiCode = "123"
+                bsaCode = "456"
+                stageCodes = "910,322"
+            }
 
         val actualProxyCodes = tenantCodesDO.toProxyTenantCodes()
 

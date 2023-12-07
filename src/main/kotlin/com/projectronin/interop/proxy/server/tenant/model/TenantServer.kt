@@ -8,5 +8,5 @@ data class TenantServer(
     val messageType: String,
     val address: String,
     val port: Int,
-    val serverType: String
+    val serverType: String,
 )

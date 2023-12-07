@@ -14,54 +14,60 @@ import com.projectronin.interop.fhir.r4.datatype.HumanName as R4HumanName
 class HumanNameTest {
     @Test
     fun `can get use`() {
-        val ehrHumanName = relaxedMockk<R4HumanName> {
-            every { use } returns NameUse.USUAL.asCode()
-        }
+        val ehrHumanName =
+            relaxedMockk<R4HumanName> {
+                every { use } returns NameUse.USUAL.asCode()
+            }
         val humanName = HumanName(ehrHumanName)
         assertEquals("usual", humanName.use)
     }
 
     @Test
     fun `can get null use`() {
-        val ehrHumanName = relaxedMockk<R4HumanName> {
-            every { use } returns null
-        }
+        val ehrHumanName =
+            relaxedMockk<R4HumanName> {
+                every { use } returns null
+            }
         val humanName = HumanName(ehrHumanName)
         assertNull(humanName.use)
     }
 
     @Test
     fun `can get family`() {
-        val ehrHumanName = relaxedMockk<R4HumanName> {
-            every { family } returns "Public".asFHIR()
-        }
+        val ehrHumanName =
+            relaxedMockk<R4HumanName> {
+                every { family } returns "Public".asFHIR()
+            }
         val humanName = HumanName(ehrHumanName)
         assertEquals("Public", humanName.family)
     }
 
     @Test
     fun `can get null family`() {
-        val ehrHumanName = relaxedMockk<R4HumanName> {
-            every { family } returns null
-        }
+        val ehrHumanName =
+            relaxedMockk<R4HumanName> {
+                every { family } returns null
+            }
         val humanName = HumanName(ehrHumanName)
         assertNull(humanName.family)
     }
 
     @Test
     fun `can get family with null value`() {
-        val ehrHumanName = relaxedMockk<R4HumanName> {
-            every { family } returns FHIRString(null)
-        }
+        val ehrHumanName =
+            relaxedMockk<R4HumanName> {
+                every { family } returns FHIRString(null)
+            }
         val humanName = HumanName(ehrHumanName)
         assertNull(humanName.family)
     }
 
     @Test
     fun `can get given`() {
-        val ehrHumanName = relaxedMockk<R4HumanName> {
-            every { given } returns listOf("John", "Q").asFHIR()
-        }
+        val ehrHumanName =
+            relaxedMockk<R4HumanName> {
+                every { given } returns listOf("John", "Q").asFHIR()
+            }
         val humanName = HumanName(ehrHumanName)
         assertEquals(listOf("John", "Q"), humanName.given)
     }

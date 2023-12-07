@@ -19,5 +19,5 @@ data class Ehr(
     val publicKey: String? = null,
     val privateKey: String? = null,
     val accountId: String? = null,
-    val secret: String? = null
+    val secret: String? = null,
 )

@@ -23,12 +23,13 @@ class M2MAuthConfig(private val properties: Auth0MachineToMachineProperties) {
     @Bean
     fun m2mJwtDecoder(): JwtDecoder {
         // Set up all claims that need to be validated.
-        val validator = DelegatingOAuth2TokenValidator(
-            listOf(
-                JwtValidators.createDefaultWithIssuer(properties.issuer),
-                JwtClaimValidator<Collection<String>>(JwtClaimNames.AUD) { aud -> properties.audience in aud }
+        val validator =
+            DelegatingOAuth2TokenValidator(
+                listOf(
+                    JwtValidators.createDefaultWithIssuer(properties.issuer),
+                    JwtClaimValidator<Collection<String>>(JwtClaimNames.AUD) { aud -> properties.audience in aud },
+                ),
             )
-        )
 
         // Build the JWT Decoder
         val jwtDecoder = JwtDecoders.fromOidcIssuerLocation<NimbusJwtDecoder>(properties.issuer)

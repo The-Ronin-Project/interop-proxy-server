@@ -9,5 +9,5 @@ data class MessageInput(
     @GraphQLDescription("The patient for whom the message is being sent")
     val patient: MessagePatientInput,
     @GraphQLDescription("The List of recipients of the message")
-    val recipients: List<MessageRecipientInput>
+    val recipients: List<MessageRecipientInput>,
 )

@@ -35,7 +35,7 @@ class NoteHandler(
     private val tenantService: TenantService,
     private val ehrFactory: EHRFactory,
     private val ehrDataAuthorityClient: EHRDataAuthorityClient,
-    @Value("\${proxy.mrn.padding.enabled:yes}") private val padMRNs: String = "yes"
+    @Value("\${proxy.mrn.padding.enabled:yes}") private val padMRNs: String = "yes",
 ) : Mutation {
     private val logger = KotlinLogging.logger { }
 
@@ -44,9 +44,16 @@ class NoteHandler(
      * Sends notes to the queue to be sent to the tenant's EHR system based on tenant Id and noteInput.
      * The return value is the HL7v2 MDM document ID, if the new HL7v2 MDM document could be successfully created.
      */
-    @GraphQLDescription("Takes in note from product and processes it for downstream services. Requires M2M Authorization or User Auth matching to the requested tenant or will result in an error with no results.")
+    @GraphQLDescription(
+        "Takes in note from product and processes it for downstream services. " +
+            "Requires M2M Authorization or User Auth matching to the requested tenant or will result in an error with no results.",
+    )
     @Trace
-    fun sendNote(noteInput: NoteInput, tenantId: String, dfe: DataFetchingEnvironment): DataFetcherResult<String> {
+    fun sendNote(
+        noteInput: NoteInput,
+        tenantId: String,
+        dfe: DataFetchingEnvironment,
+    ): DataFetcherResult<String> {
         val tenant = findAndValidateTenant(dfe, tenantService, tenantId, false)
         return try {
             val ehrNoteInput = setEhrNoteInput(tenant, noteInput)
@@ -59,18 +66,26 @@ class NoteHandler(
         }
     }
 
-    @GraphQLDescription("Takes in addendum note from product and processes it for downstream services. Requires M2M Authorization or User Auth matching to the requested tenant or will result in an error with no results.")
+    @GraphQLDescription(
+        "Takes in addendum note from product and processes it for downstream services. " +
+            "Requires M2M Authorization or User Auth matching to the requested tenant or will result in an error with no results.",
+    )
     @Trace
     fun sendNoteAddendum(
         noteInput: NoteInput,
         tenantId: String,
         parentDocumentId: String,
-        dfe: DataFetchingEnvironment
+        dfe: DataFetchingEnvironment,
     ): DataFetcherResult<String> {
         val tenant = findAndValidateTenant(dfe, tenantService, tenantId, false)
         return try {
             val ehrNoteInput = setEhrNoteInput(tenant, noteInput)
-            val response = ehrFactory.getVendorFactory(tenant).noteService.sendPatientNoteAddendum(tenant, ehrNoteInput, parentDocumentId)
+            val response =
+                ehrFactory.getVendorFactory(tenant).noteService.sendPatientNoteAddendum(
+                    tenant,
+                    ehrNoteInput,
+                    parentDocumentId,
+                )
             DataFetcherResult.newResult<String>().data(response).build()
         } catch (e: Exception) {
             logger.error(e.getLogMarker(), e) { "Exception occurred while sending note addendum: ${e.message}" }
@@ -79,7 +94,10 @@ class NoteHandler(
         }
     }
 
-    private fun getPractitioner(tenant: Tenant, noteInput: NoteInput): Practitioner {
+    private fun getPractitioner(
+        tenant: Tenant,
+        noteInput: NoteInput,
+    ): Practitioner {
         val practitionerFhirId = noteInput.practitionerFhirId
         val isUDPId = practitionerFhirId.startsWith("${tenant.mnemonic}-")
 
@@ -95,17 +113,21 @@ class NoteHandler(
         }
     }
 
-    private fun getPatient(tenant: Tenant, noteInput: NoteInput): Patient {
+    private fun getPatient(
+        tenant: Tenant,
+        noteInput: NoteInput,
+    ): Patient {
         return when (noteInput.patientIdType) {
             PatientIdType.FHIR -> {
                 // get the Patient from Aidbox
-                val patient = runBlocking {
-                    ehrDataAuthorityClient.getResourceAs<Patient>(
-                        tenant.mnemonic,
-                        "Patient",
-                        noteInput.patientId
-                    )
-                } ?: throw IllegalArgumentException("No Patient found for ${noteInput.patientId}")
+                val patient =
+                    runBlocking {
+                        ehrDataAuthorityClient.getResourceAs<Patient>(
+                            tenant.mnemonic,
+                            "Patient",
+                            noteInput.patientId,
+                        )
+                    } ?: throw IllegalArgumentException("No Patient found for ${noteInput.patientId}")
                 patient
             }
 
@@ -114,45 +136,57 @@ class NoteHandler(
                 if ((padMRNs == "yes") && (noteInput.patientId.length < 7)) {
                     // pivot from the MRN to get the Patient from the EHR
                     val paddedMrn = noteInput.patientId.padStart(7, '0')
-                    val patient = ehrPatientService.getPatient(
-                        tenant,
-                        ehrPatientService.getPatientFHIRId(tenant, paddedMrn)
-                    )
-                    val paddedPatient = patient.copy(
-                        identifier = patient.identifier +
-                            Identifier(
-                                system = CodeSystem.RONIN_MRN.uri,
-                                value = paddedMrn.asFHIR(),
-                                type = CodeableConcepts.RONIN_MRN
-                            )
-                    )
+                    val patient =
+                        ehrPatientService.getPatient(
+                            tenant,
+                            ehrPatientService.getPatientFHIRId(tenant, paddedMrn),
+                        )
+                    val paddedPatient =
+                        patient.copy(
+                            identifier =
+                                patient.identifier +
+                                    Identifier(
+                                        system = CodeSystem.RONIN_MRN.uri,
+                                        value = paddedMrn.asFHIR(),
+                                        type = CodeableConcepts.RONIN_MRN,
+                                    ),
+                        )
                     paddedPatient
                 } else {
                     // pivot from the MRN to get the Patient from the EHR
-                    val patient = ehrPatientService.getPatient(
-                        tenant,
-                        ehrPatientService.getPatientFHIRId(tenant, noteInput.patientId)
-                    )
+                    val patient =
+                        ehrPatientService.getPatient(
+                            tenant,
+                            ehrPatientService.getPatientFHIRId(tenant, noteInput.patientId),
+                        )
                     patient
                 }
             }
         }
     }
-    private fun setEhrNoteInput(tenant: Tenant, noteInput: NoteInput): EhrNoteInput {
+
+    private fun setEhrNoteInput(
+        tenant: Tenant,
+        noteInput: NoteInput,
+    ): EhrNoteInput {
         return EhrNoteInput(
             noteText = noteInput.noteText,
             dateTime = DateUtil().parseDateTimeString(noteInput.datetime),
-            noteSender = when (noteInput.noteSender) {
-                NoteSender.PATIENT -> EhrNoteSender.PATIENT
-                NoteSender.PRACTITIONER -> EhrNoteSender.PRACTITIONER
-            },
+            noteSender =
+                when (noteInput.noteSender) {
+                    NoteSender.PATIENT -> EhrNoteSender.PATIENT
+                    NoteSender.PRACTITIONER -> EhrNoteSender.PRACTITIONER
+                },
             isAlert = noteInput.isAlert,
             patient = getPatient(tenant, noteInput),
-            practitioner = getPractitioner(tenant, noteInput)
+            practitioner = getPractitioner(tenant, noteInput),
         )
     }
 
-    private fun logWarningMessage(noteInput: NoteInput, exception: Exception) {
+    private fun logWarningMessage(
+        noteInput: NoteInput,
+        exception: Exception,
+    ) {
         logger.warn(exception.getLogMarker(), exception) {
             "Exception sending Note for patient ${noteInput.patientIdType}:${noteInput.patientId}" +
                 " from Practitioner ${noteInput.practitionerFhirId}: ${exception.message}"

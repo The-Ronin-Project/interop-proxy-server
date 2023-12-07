@@ -36,44 +36,61 @@ import org.springframework.stereotype.Component
 class MessageHandler(
     private val ehrFactory: EHRFactory,
     private val tenantService: TenantService,
-    private val ehrDataAuthorityClient: EHRDataAuthorityClient
+    private val ehrDataAuthorityClient: EHRDataAuthorityClient,
 ) : Mutation {
     private val logger = KotlinLogging.logger { }
 
-    @GraphQLDescription("Sends a message and returns the current status. Requires M2M Authorization or User Auth matching to the requested tenant or will result in an error with no results.")
+    @GraphQLDescription(
+        "Sends a message and returns the current status. " +
+            "Requires M2M Authorization or User Auth matching to the requested tenant or will result in an error with no results.",
+    )
     @Trace
-    fun sendMessage(tenantId: String, message: MessageInput, dfe: DataFetchingEnvironment): DataFetcherResult<String> {
+    fun sendMessage(
+        tenantId: String,
+        message: MessageInput,
+        dfe: DataFetchingEnvironment,
+    ): DataFetcherResult<String> {
         logger.info { "Sending message to $tenantId" }
         val tenant = findAndValidateTenant(dfe, tenantService, tenantId, false)
-        val patientFHIRID = if (message.patient.patientFhirId != null) {
-            // check that the inputted UDP ID is correct
-            val patient = runBlocking {
-                ehrDataAuthorityClient.getResourceAs<Patient>(tenant.mnemonic, "Patient", message.patient.patientFhirId)
-            } ?: return createError("No patient found for ${message.patient.patientFhirId}")
-            patient.identifier.findFhirID()
-        } else if (message.patient.mrn != null) {
-            logger.info { "sendMessage called with MRN" }
+        val patientFHIRID =
+            if (message.patient.patientFhirId != null) {
+                // check that the inputted UDP ID is correct
+                val patient =
+                    runBlocking {
+                        ehrDataAuthorityClient.getResourceAs<Patient>(
+                            tenant.mnemonic,
+                            "Patient",
+                            message.patient.patientFhirId,
+                        )
+                    } ?: return createError("No patient found for ${message.patient.patientFhirId}")
+                patient.identifier.findFhirID()
+            } else if (message.patient.mrn != null) {
+                logger.info { "sendMessage called with MRN" }
 
-            val searchIdentifier = Identifier(CodeSystem.RONIN_MRN.uri.value!!, message.patient.mrn)
-            // ensure patient exists in EHR Data Authority
-            val resources = runBlocking {
-                ehrDataAuthorityClient.getResourceIdentifiers(
-                    tenant.mnemonic,
-                    IdentifierSearchableResourceTypes.Patient,
-                    listOf(searchIdentifier)
-                )
-            }.find { it.searchedIdentifier == searchIdentifier }?.foundResources ?: emptyList()
+                val searchIdentifier = Identifier(CodeSystem.RONIN_MRN.uri.value!!, message.patient.mrn)
+                // ensure patient exists in EHR Data Authority
+                val resources =
+                    runBlocking {
+                        ehrDataAuthorityClient.getResourceIdentifiers(
+                            tenant.mnemonic,
+                            IdentifierSearchableResourceTypes.Patient,
+                            listOf(searchIdentifier),
+                        )
+                    }.find { it.searchedIdentifier == searchIdentifier }?.foundResources ?: emptyList()
 
-            when (resources.size) {
-                1 -> resources.first().identifiers.findFhirIDFromEHRDA()
-                0 -> return createError("Attempted to send message for patient with MRN ${message.patient.mrn} who does not exist in EHR Data Authority.")
-                else -> return createError("More than 1 patient found for MRN ${message.patient.mrn} with tenant ${tenant.mnemonic}")
+                when (resources.size) {
+                    1 -> resources.first().identifiers.findFhirIDFromEHRDA()
+                    0 -> return createError(
+                        "Attempted to send message for patient with MRN ${message.patient.mrn} who does not exist in EHR Data Authority.",
+                    )
+
+                    else -> return createError("More than 1 patient found for MRN ${message.patient.mrn} with tenant ${tenant.mnemonic}")
+                }
+            } else {
+                return DataFetcherResult.newResult<String>()
+                    .errors(listOf(GraphQLException("Either MRN or Ronin ID must be specified").toGraphQLError()))
+                    .build()
             }
-        } else {
-            return DataFetcherResult.newResult<String>()
-                .errors(listOf(GraphQLException("Either MRN or Ronin ID must be specified").toGraphQLError()))
-                .build()
-        }
         val messageService = ehrFactory.getVendorFactory(tenant).messageService
 
         val messageId = messageService.sendMessage(tenant, mapEHRMessage(tenant, message, patientFHIRID))
@@ -81,29 +98,38 @@ class MessageHandler(
         return DataFetcherResult.newResult<String>().data("sent").build()
     }
 
-    private fun mapEHRMessage(tenant: Tenant, message: MessageInput, patientFHIRID: String): EHRMessageInput {
+    private fun mapEHRMessage(
+        tenant: Tenant,
+        message: MessageInput,
+        patientFHIRID: String,
+    ): EHRMessageInput {
         return EHRMessageInput(
             text = message.text,
             patientFHIRID = patientFHIRID,
-            recipients = message.recipients.map { mapEHRRecipient(tenant, it) }.toList()
+            recipients = message.recipients.map { mapEHRRecipient(tenant, it) }.toList(),
         )
     }
 
-    private fun mapEHRRecipient(tenant: Tenant, recipientInput: MessageRecipientInput): EHRRecipient {
+    private fun mapEHRRecipient(
+        tenant: Tenant,
+        recipientInput: MessageRecipientInput,
+    ): EHRRecipient {
         val recipientUDPId = recipientInput.fhirId
-        val practitioner = runBlocking {
-            ehrDataAuthorityClient.getResourceAs<Practitioner>(tenant.mnemonic, "Practitioner", recipientUDPId)
-        } ?: throw IllegalArgumentException("No Practitioner found for $recipientUDPId")
+        val practitioner =
+            runBlocking {
+                ehrDataAuthorityClient.getResourceAs<Practitioner>(tenant.mnemonic, "Practitioner", recipientUDPId)
+            } ?: throw IllegalArgumentException("No Practitioner found for $recipientUDPId")
         val practitionerIdentifiers = practitioner.identifier
         val practitionerFhirID = practitionerIdentifiers.findFhirID()
 
-        val vendorIdentifier = ehrFactory.getVendorFactory(tenant).identifierService.getPractitionerUserIdentifier(
-            tenant,
-            FHIRIdentifiers(
-                id = Id(practitionerFhirID),
-                identifiers = practitionerIdentifiers
+        val vendorIdentifier =
+            ehrFactory.getVendorFactory(tenant).identifierService.getPractitionerUserIdentifier(
+                tenant,
+                FHIRIdentifiers(
+                    id = Id(practitionerFhirID),
+                    identifiers = practitionerIdentifiers,
+                ),
             )
-        )
 
         return EHRRecipient(id = practitionerFhirID, identifier = IdentifierVendorIdentifier(vendorIdentifier))
     }

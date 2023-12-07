@@ -15,18 +15,20 @@ internal class StageTest {
 
     @Test
     fun `can get summary`() {
-        val ehrStage = relaxedMockk<R4Stage> {
-            every { summary } returns relaxedMockk()
-        }
+        val ehrStage =
+            relaxedMockk<R4Stage> {
+                every { summary } returns relaxedMockk()
+            }
         val stage = Stage(ehrStage, mockTenant)
         assertNotNull(stage.summary)
     }
 
     @Test
     fun `can get null summary`() {
-        val ehrStage = relaxedMockk<R4Stage> {
-            every { summary } returns null
-        }
+        val ehrStage =
+            relaxedMockk<R4Stage> {
+                every { summary } returns null
+            }
         val stage = Stage(ehrStage, mockTenant)
         assertNull(stage.summary)
     }
@@ -35,27 +37,30 @@ internal class StageTest {
     fun `can get assessment`() {
         val ehrReference1 = relaxedMockk<R4Reference>()
         val ehrReference2 = relaxedMockk<R4Reference>()
-        val ehrStage = relaxedMockk<R4Stage> {
-            every { assessment } returns listOf(ehrReference1, ehrReference2)
-        }
+        val ehrStage =
+            relaxedMockk<R4Stage> {
+                every { assessment } returns listOf(ehrReference1, ehrReference2)
+            }
         val stage = Stage(ehrStage, mockTenant)
         assertEquals(2, stage.assessment.size)
     }
 
     @Test
     fun `can get type`() {
-        val ehrStage = relaxedMockk<R4Stage> {
-            every { type } returns relaxedMockk()
-        }
+        val ehrStage =
+            relaxedMockk<R4Stage> {
+                every { type } returns relaxedMockk()
+            }
         val stage = Stage(ehrStage, mockTenant)
         assertNotNull(stage.type)
     }
 
     @Test
     fun `can get null type`() {
-        val ehrStage = relaxedMockk<R4Stage> {
-            every { type } returns null
-        }
+        val ehrStage =
+            relaxedMockk<R4Stage> {
+                every { type } returns null
+            }
         val stage = Stage(ehrStage, mockTenant)
         assertNull(stage.type)
     }

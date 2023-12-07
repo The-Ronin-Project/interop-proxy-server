@@ -18,7 +18,10 @@ import org.springframework.stereotype.Component
  * Validates a token with Seki authentication service.
  */
 @Component
-class UserAuthService(private val client: HttpClient, @Value("\${seki.endpoint}") val authServiceEndPoint: String) {
+class UserAuthService(
+    private val client: HttpClient,
+    @Value("\${seki.endpoint}") val authServiceEndPoint: String,
+) {
     private val logger = KotlinLogging.logger { }
 
     // We'll have to change these once Seki is live and the final config is done
@@ -34,12 +37,13 @@ class UserAuthService(private val client: HttpClient, @Value("\${seki.endpoint}"
         logger.debug { "Calling authentication for $authURL" }
         return runBlocking {
             try {
-                val httpResponse: HttpResponse = client.get(authURL) {
-                    headers {
-                        append(HttpHeaders.ContentType, "application/json")
+                val httpResponse: HttpResponse =
+                    client.get(authURL) {
+                        headers {
+                            append(HttpHeaders.ContentType, "application/json")
+                        }
+                        parameter("token", consumerToken)
                     }
-                    parameter("token", consumerToken)
-                }
                 httpResponse.throwExceptionFromHttpStatus("Seki", "authentication")
 
                 val authResponse = httpResponse.body<AuthResponse>()

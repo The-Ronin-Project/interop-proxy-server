@@ -9,5 +9,5 @@ data class MessagePatientInput(
     @GraphQLDescription("The MRN of the patient")
     val mrn: String?,
     @GraphQLDescription("The Ronin ID of the patient")
-    val patientFhirId: String?
+    val patientFhirId: String?,
 )

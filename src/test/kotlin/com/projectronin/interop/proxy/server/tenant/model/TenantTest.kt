@@ -10,33 +10,35 @@ import java.time.LocalTime
 class TenantTest {
     @Test
     fun `can get data`() {
-        val tenant = Tenant(
-            id = 1,
-            mnemonic = "mnemonic1",
-            availableStart = LocalTime.of(22, 0),
-            availableEnd = LocalTime.of(23, 0),
-            name = "test tenant",
-            timezone = "America/Chicago",
-            vendor = Epic(
-                release = "release",
-                serviceEndpoint = "serviceEndpoint",
-                authEndpoint = "authEndpoint",
-                ehrUserId = "ehrUserId",
-                messageType = "messageType",
-                practitionerProviderSystem = "practitionerProviderSystem",
-                practitionerUserSystem = "practitionerUserSystem",
-                patientMRNSystem = "patientMRNSystem",
-                patientInternalSystem = "patientInternalSystem",
-                encounterCSNSystem = "encounterCSNSystem",
-                patientMRNTypeText = "patientMRNTypeText",
-                hsi = null,
-                instanceName = "instanceName",
-                departmentInternalSystem = "departmentInternalSystem",
-                patientOnboardedFlagId = null,
-                orderSystem = "orderSystem"
-            ),
-            monitoredIndicator = null
-        )
+        val tenant =
+            Tenant(
+                id = 1,
+                mnemonic = "mnemonic1",
+                availableStart = LocalTime.of(22, 0),
+                availableEnd = LocalTime.of(23, 0),
+                name = "test tenant",
+                timezone = "America/Chicago",
+                vendor =
+                    Epic(
+                        release = "release",
+                        serviceEndpoint = "serviceEndpoint",
+                        authEndpoint = "authEndpoint",
+                        ehrUserId = "ehrUserId",
+                        messageType = "messageType",
+                        practitionerProviderSystem = "practitionerProviderSystem",
+                        practitionerUserSystem = "practitionerUserSystem",
+                        patientMRNSystem = "patientMRNSystem",
+                        patientInternalSystem = "patientInternalSystem",
+                        encounterCSNSystem = "encounterCSNSystem",
+                        patientMRNTypeText = "patientMRNTypeText",
+                        hsi = null,
+                        instanceName = "instanceName",
+                        departmentInternalSystem = "departmentInternalSystem",
+                        patientOnboardedFlagId = null,
+                        orderSystem = "orderSystem",
+                    ),
+                monitoredIndicator = null,
+            )
 
         assertEquals(1, tenant.id)
         assertEquals("mnemonic1", tenant.mnemonic)
@@ -49,36 +51,39 @@ class TenantTest {
 
     @Test
     fun `can serialize and deserialize`() {
-        val tenant = Tenant(
-            id = 1,
-            mnemonic = "mnemonic1",
-            availableStart = LocalTime.of(22, 0),
-            availableEnd = LocalTime.of(23, 0),
-            name = "test tenant",
-            timezone = "America/Chicago",
-            vendor = Epic(
-                release = "release",
-                serviceEndpoint = "serviceEndpoint",
-                authEndpoint = "authEndpoint",
-                ehrUserId = "ehrUserId",
-                messageType = "messageType",
-                practitionerProviderSystem = "practitionerProviderSystem",
-                practitionerUserSystem = "practitionerUserSystem",
-                patientMRNSystem = "patientMRNSystem",
-                patientInternalSystem = "patientInternalSystem",
-                encounterCSNSystem = "encounterCSNSystem",
-                patientMRNTypeText = "patientMRNTypeText",
-                hsi = null,
-                instanceName = "Epic Sandbox",
-                departmentInternalSystem = "departmentInternalSystem",
-                patientOnboardedFlagId = null,
-                orderSystem = "orderSystem"
-            ),
-            monitoredIndicator = true
-        )
+        val tenant =
+            Tenant(
+                id = 1,
+                mnemonic = "mnemonic1",
+                availableStart = LocalTime.of(22, 0),
+                availableEnd = LocalTime.of(23, 0),
+                name = "test tenant",
+                timezone = "America/Chicago",
+                vendor =
+                    Epic(
+                        release = "release",
+                        serviceEndpoint = "serviceEndpoint",
+                        authEndpoint = "authEndpoint",
+                        ehrUserId = "ehrUserId",
+                        messageType = "messageType",
+                        practitionerProviderSystem = "practitionerProviderSystem",
+                        practitionerUserSystem = "practitionerUserSystem",
+                        patientMRNSystem = "patientMRNSystem",
+                        patientInternalSystem = "patientInternalSystem",
+                        encounterCSNSystem = "encounterCSNSystem",
+                        patientMRNTypeText = "patientMRNTypeText",
+                        hsi = null,
+                        instanceName = "Epic Sandbox",
+                        departmentInternalSystem = "departmentInternalSystem",
+                        patientOnboardedFlagId = null,
+                        orderSystem = "orderSystem",
+                    ),
+                monitoredIndicator = true,
+            )
         val json = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(tenant)
 
-        val expectedJSON = """
+        val expectedJSON =
+            """
             {
               "id" : 1,
               "mnemonic" : "mnemonic1",
@@ -106,7 +111,7 @@ class TenantTest {
               "timezone" : "America/Chicago",
               "monitoredIndicator" : true
             }
-        """.trimIndent()
+            """.trimIndent()
         assertEquals(expectedJSON, json)
 
         val deserializedTenant = objectMapper.readValue<Tenant>(json)
@@ -115,35 +120,38 @@ class TenantTest {
 
     @Test
     fun `can serialize and deserialize with default values`() {
-        val tenant = Tenant(
-            id = 1,
-            mnemonic = "mnemonic1",
-            availableStart = LocalTime.of(22, 0),
-            availableEnd = LocalTime.of(23, 0),
-            name = "test tenant",
-            timezone = "America/Chicago",
-            vendor = Epic(
-                release = "release",
-                serviceEndpoint = "serviceEndpoint",
-                authEndpoint = "authEndpoint",
-                ehrUserId = "ehrUserId",
-                messageType = "messageType",
-                practitionerProviderSystem = "practitionerProviderSystem",
-                practitionerUserSystem = "practitionerUserSystem",
-                patientMRNSystem = "patientMRNSystem",
-                patientInternalSystem = "patientInternalSystem",
-                encounterCSNSystem = "encounterCSNSystem",
-                patientMRNTypeText = "patientMRNTypeText",
-                hsi = null,
-                instanceName = "Epic Sandbox",
-                departmentInternalSystem = "departmentInternalSystem",
-                patientOnboardedFlagId = null,
-                orderSystem = null
+        val tenant =
+            Tenant(
+                id = 1,
+                mnemonic = "mnemonic1",
+                availableStart = LocalTime.of(22, 0),
+                availableEnd = LocalTime.of(23, 0),
+                name = "test tenant",
+                timezone = "America/Chicago",
+                vendor =
+                    Epic(
+                        release = "release",
+                        serviceEndpoint = "serviceEndpoint",
+                        authEndpoint = "authEndpoint",
+                        ehrUserId = "ehrUserId",
+                        messageType = "messageType",
+                        practitionerProviderSystem = "practitionerProviderSystem",
+                        practitionerUserSystem = "practitionerUserSystem",
+                        patientMRNSystem = "patientMRNSystem",
+                        patientInternalSystem = "patientInternalSystem",
+                        encounterCSNSystem = "encounterCSNSystem",
+                        patientMRNTypeText = "patientMRNTypeText",
+                        hsi = null,
+                        instanceName = "Epic Sandbox",
+                        departmentInternalSystem = "departmentInternalSystem",
+                        patientOnboardedFlagId = null,
+                        orderSystem = null,
+                    ),
             )
-        )
         val json = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(tenant)
 
-        val expectedJSON = """
+        val expectedJSON =
+            """
             {
               "id" : 1,
               "mnemonic" : "mnemonic1",
@@ -170,7 +178,7 @@ class TenantTest {
               "timezone" : "America/Chicago",
               "monitoredIndicator" : true
             }
-        """.trimIndent()
+            """.trimIndent()
         assertEquals(expectedJSON, json)
 
         val deserializedTenant = objectMapper.readValue<Tenant>(json)

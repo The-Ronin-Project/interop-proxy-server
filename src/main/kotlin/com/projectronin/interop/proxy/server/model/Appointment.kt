@@ -8,7 +8,7 @@ import com.projectronin.interop.fhir.r4.resource.Appointment as R4Appointment
 @GraphQLDescription("An appointment in a clinical setting")
 data class Appointment(
     private val appointment: R4Appointment,
-    private val tenant: Tenant
+    private val tenant: Tenant,
 ) {
     @GraphQLDescription("The internal identifier for this appointment")
     val id: String by lazy {
@@ -20,7 +20,12 @@ data class Appointment(
         appointment.identifier.map(::Identifier)
     }
 
-    @GraphQLDescription("When appointment is to take place. An instant in time in the format YYYY-MM-DDThh:mm:ss.sss+zz:zz (e.g. 2015-02-07T13:28:17.239+02:00 or 2017-01-01T00:00:00Z). The time SHALL specified at least to the second and SHALL include a time zone.")
+    @GraphQLDescription(
+        "When appointment is to take place. " +
+            "An instant in time in the format YYYY-MM-DDThh:mm:ss.sss+zz:zz " +
+            "(e.g. 2015-02-07T13:28:17.239+02:00 or 2017-01-01T00:00:00Z). " +
+            "The time SHALL specified at least to the second and SHALL include a time zone.",
+    )
     val start: String? = appointment.start?.value
 
     @GraphQLDescription("Current status of the meeting")

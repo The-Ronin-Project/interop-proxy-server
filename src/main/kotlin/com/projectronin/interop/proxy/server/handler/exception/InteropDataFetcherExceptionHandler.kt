@@ -10,7 +10,10 @@ import org.springframework.stereotype.Component
 class InteropDataFetcherExceptionHandler : SimpleDataFetcherExceptionHandler() {
     private val logger = KotlinLogging.logger { }
 
-    override fun logException(error: ExceptionWhileDataFetching, exception: Throwable?) {
+    override fun logException(
+        error: ExceptionWhileDataFetching,
+        exception: Throwable?,
+    ) {
         logger.error(exception?.getLogMarker(), exception) { error.message }
     }
 }

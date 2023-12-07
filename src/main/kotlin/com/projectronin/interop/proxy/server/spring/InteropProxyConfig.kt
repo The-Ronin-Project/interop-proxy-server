@@ -29,7 +29,9 @@ class InteropProxyConfig {
      */
     @Bean
     @Qualifier("queue")
-    fun queueDatabase(@Qualifier("queue") queueDatasource: DataSource): Database = Database.connect(queueDatasource)
+    fun queueDatabase(
+        @Qualifier("queue") queueDatasource: DataSource,
+    ): Database = Database.connect(queueDatasource)
 
     /**
      * The returns [DataSource] for the interop-ehr. Datasource config need to be prefixed by "spring.ehr.datasource".
@@ -46,9 +48,13 @@ class InteropProxyConfig {
      */
     @Bean
     @Qualifier("ehr")
-    fun ehrDatabase(@Qualifier("ehr") ehrDatasource: DataSource): Database = Database.connectWithSpringSupport(ehrDatasource)
+    fun ehrDatabase(
+        @Qualifier("ehr") ehrDatasource: DataSource,
+    ): Database = Database.connectWithSpringSupport(ehrDatasource)
 
     @Bean
     @Qualifier("ehr")
-    fun txManager(@Qualifier("ehr") ehrDatasource: DataSource): PlatformTransactionManager = DataSourceTransactionManager(ehrDatasource)
+    fun txManager(
+        @Qualifier("ehr") ehrDatasource: DataSource,
+    ): PlatformTransactionManager = DataSourceTransactionManager(ehrDatasource)
 }

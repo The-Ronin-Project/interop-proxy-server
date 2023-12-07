@@ -26,79 +26,88 @@ class ProviderPoolControllerTest {
     private lateinit var controller: ProviderPoolController
     private lateinit var tenantService: TenantService
 
-    private val tenant = Tenant(
-        internalId = 1,
-        mnemonic = "tenantMnemonic",
-        name = "full name",
-        timezone = ZoneId.of("America/Los_Angeles"),
-        batchConfig = null,
-        vendor = Epic(
-            clientId = "clientId",
-            release = "release",
-            serviceEndpoint = "serviceEndpoint",
-            authenticationConfig = EpicAuthenticationConfig(
-                authEndpoint = "authEndpoint",
-                publicKey = "publicKey",
-                privateKey = "privateKey"
-            ),
-            ehrUserId = "ehrUserId",
-            messageType = "messageType",
-            practitionerProviderSystem = "practitionerProviderSystem",
-            practitionerUserSystem = "practitionerUserSystem",
-            patientMRNSystem = "patientMRNSystem",
-            patientInternalSystem = "patientInternalSystem",
-            encounterCSNSystem = "encounterCSNSystem",
-            patientMRNTypeText = "patientMRNTypeText",
-            hsi = "hsi",
-            instanceName = "instanceName",
-            departmentInternalSystem = "departmentInternalSystem",
-            patientOnboardedFlagId = "flagId",
-            orderSystem = "orderSystem"
-        ),
-        monitoredIndicator = null
-    )
+    private val tenant =
+        Tenant(
+            internalId = 1,
+            mnemonic = "tenantMnemonic",
+            name = "full name",
+            timezone = ZoneId.of("America/Los_Angeles"),
+            batchConfig = null,
+            vendor =
+                Epic(
+                    clientId = "clientId",
+                    release = "release",
+                    serviceEndpoint = "serviceEndpoint",
+                    authenticationConfig =
+                        EpicAuthenticationConfig(
+                            authEndpoint = "authEndpoint",
+                            publicKey = "publicKey",
+                            privateKey = "privateKey",
+                        ),
+                    ehrUserId = "ehrUserId",
+                    messageType = "messageType",
+                    practitionerProviderSystem = "practitionerProviderSystem",
+                    practitionerUserSystem = "practitionerUserSystem",
+                    patientMRNSystem = "patientMRNSystem",
+                    patientInternalSystem = "patientInternalSystem",
+                    encounterCSNSystem = "encounterCSNSystem",
+                    patientMRNTypeText = "patientMRNTypeText",
+                    hsi = "hsi",
+                    instanceName = "instanceName",
+                    departmentInternalSystem = "departmentInternalSystem",
+                    patientOnboardedFlagId = "flagId",
+                    orderSystem = "orderSystem",
+                ),
+            monitoredIndicator = null,
+        )
 
-    private val providerPool = ProviderPool(
-        providerPoolId = 1,
-        providerId = "providerId",
-        poolId = "poolId"
-    )
+    private val providerPool =
+        ProviderPool(
+            providerPoolId = 1,
+            providerId = "providerId",
+            poolId = "poolId",
+        )
 
-    private val tenantDO = TenantDO {
-        val vendor = tenant.vendorAs<Epic>()
-        id = 1
-        mnemonic = tenant.mnemonic
-        name = tenant.name
-        ehr = EhrDO {
-            instanceName = vendor.instanceName
-            vendorType = VendorType.EPIC
-            clientId = vendor.clientId
-            publicKey = vendor.authenticationConfig.publicKey
-            privateKey = vendor.authenticationConfig.privateKey
+    private val tenantDO =
+        TenantDO {
+            val vendor = tenant.vendorAs<Epic>()
+            id = 1
+            mnemonic = tenant.mnemonic
+            name = tenant.name
+            ehr =
+                EhrDO {
+                    instanceName = vendor.instanceName
+                    vendorType = VendorType.EPIC
+                    clientId = vendor.clientId
+                    publicKey = vendor.authenticationConfig.publicKey
+                    privateKey = vendor.authenticationConfig.privateKey
+                }
+            availableBatchStart = null
+            availableBatchEnd = null
+            monitoredIndicator = null
         }
-        availableBatchStart = null
-        availableBatchEnd = null
-        monitoredIndicator = null
-    }
 
-    private val providerPoolDO = ProviderPoolDO {
-        id = providerPool.providerPoolId
-        tenant = tenantDO
-        providerId = providerPool.providerId
-        poolId = providerPool.poolId
-    }
+    private val providerPoolDO =
+        ProviderPoolDO {
+            id = providerPool.providerPoolId
+            tenant = tenantDO
+            providerId = providerPool.providerId
+            poolId = providerPool.poolId
+        }
 
     // Used for mocking the insert
-    private val slimTenantDO = TenantDO {
-        id = 1
-    }
+    private val slimTenantDO =
+        TenantDO {
+            id = 1
+        }
 
-    private val slimProviderPoolDO = ProviderPoolDO {
-        id = providerPool.providerPoolId
-        tenant = slimTenantDO
-        providerId = providerPool.providerId
-        poolId = providerPool.poolId
-    }
+    private val slimProviderPoolDO =
+        ProviderPoolDO {
+            id = providerPool.providerPoolId
+            tenant = slimTenantDO
+            providerId = providerPool.providerId
+            poolId = providerPool.poolId
+        }
 
     private val fakeMnemonic = "FakeMnemonic"
 
@@ -114,9 +123,10 @@ class ProviderPoolControllerTest {
 
     @Test
     fun `handles get`() {
-        every { dao.getPoolsForProviders(tenant.internalId, listOf(providerPoolDO.providerId)) } returns listOf(
-            providerPoolDO
-        )
+        every { dao.getPoolsForProviders(tenant.internalId, listOf(providerPoolDO.providerId)) } returns
+            listOf(
+                providerPoolDO,
+            )
         val response = controller.get(tenant.mnemonic, listOf(providerPoolDO.providerId))
 
         assertEquals(HttpStatus.OK, response.statusCode)

@@ -17,10 +17,13 @@ data class Reference(
     @GraphQLDescription("Logical Reference")
     val identifier: Identifier?,
     @GraphQLDescription("Unique Reference")
-    val id: String?
+    val id: String?,
 ) {
     companion object {
-        fun from(reference: R4Reference?, tenant: Tenant): Reference {
+        fun from(
+            reference: R4Reference?,
+            tenant: Tenant,
+        ): Reference {
             val localizedReference = reference?.localizeReference(tenant)
             localizedReference.apply {
                 return Reference(
@@ -28,7 +31,7 @@ data class Reference(
                     type = reference?.decomposedType(),
                     display = this?.display?.value,
                     identifier = this?.identifier?.let { Identifier(it) },
-                    id = reference?.decomposedId()?.localize(tenant)
+                    id = reference?.decomposedId()?.localize(tenant),
                 )
             }
         }

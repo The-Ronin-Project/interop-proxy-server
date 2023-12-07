@@ -25,7 +25,7 @@ import org.springframework.web.bind.annotation.RestController
 @RequestMapping("tenants")
 class TenantController(
     private val tenantService: TenantService,
-    private val ehrFactory: EHRFactory
+    private val ehrFactory: EHRFactory,
 ) {
     private val logger = KotlinLogging.logger { }
 
@@ -39,10 +39,13 @@ class TenantController(
 
     @GetMapping("/{mnemonic}")
     @Trace
-    fun read(@PathVariable("mnemonic") tenantMnemonic: String): ResponseEntity<Tenant> {
+    fun read(
+        @PathVariable("mnemonic") tenantMnemonic: String,
+    ): ResponseEntity<Tenant> {
         logger.info { "Retrieving tenant with mnemonic $tenantMnemonic" }
-        val tenant = tenantService.getTenantForMnemonic(tenantMnemonic)
-            ?: return ResponseEntity(HttpStatus.NOT_FOUND)
+        val tenant =
+            tenantService.getTenantForMnemonic(tenantMnemonic)
+                ?: return ResponseEntity(HttpStatus.NOT_FOUND)
         return ResponseEntity(tenant.toProxyTenant(), HttpStatus.OK)
     }
 
@@ -51,23 +54,27 @@ class TenantController(
     fun health(): ResponseEntity<Map<String, Boolean>> {
         logger.info { "Retrieving health for all tenants" }
         val tenants = tenantService.getMonitoredTenants()
-        val tenantsHealth = tenants.associate {
-            val healthy = ehrFactory.getVendorFactory(it).healthCheckService.healthCheck(it)
-            if (!healthy) {
-                logger.error(LogMarkers.EXCLUDE_FROM_GENERAL_ALERTS) { "Client ${it.mnemonic} reporting unhealthy" }
-            }
+        val tenantsHealth =
+            tenants.associate {
+                val healthy = ehrFactory.getVendorFactory(it).healthCheckService.healthCheck(it)
+                if (!healthy) {
+                    logger.error(LogMarkers.EXCLUDE_FROM_GENERAL_ALERTS) { "Client ${it.mnemonic} reporting unhealthy" }
+                }
 
-            it.mnemonic to healthy
-        }
+                it.mnemonic to healthy
+            }
         return ResponseEntity(tenantsHealth, HttpStatus.OK)
     }
 
     @GetMapping("/{mnemonic}/health")
     @Trace
-    fun health(@PathVariable("mnemonic") tenantMnemonic: String): ResponseEntity<Void> {
+    fun health(
+        @PathVariable("mnemonic") tenantMnemonic: String,
+    ): ResponseEntity<Void> {
         logger.info { "Retrieving health for tenant with mnemonic $tenantMnemonic" }
-        val tenant = tenantService.getTenantForMnemonic(tenantMnemonic)
-            ?: return ResponseEntity(HttpStatus.NOT_FOUND)
+        val tenant =
+            tenantService.getTenantForMnemonic(tenantMnemonic)
+                ?: return ResponseEntity(HttpStatus.NOT_FOUND)
         val isHealthy = ehrFactory.getVendorFactory(tenant).healthCheckService.healthCheck(tenant)
         return if (isHealthy) {
             ResponseEntity(HttpStatus.OK)
@@ -79,7 +86,9 @@ class TenantController(
 
     @PostMapping
     @Trace
-    fun insert(@RequestBody tenant: Tenant): ResponseEntity<Tenant> {
+    fun insert(
+        @RequestBody tenant: Tenant,
+    ): ResponseEntity<Tenant> {
         logger.info { "Inserting new tenant with mnemonic ${tenant.mnemonic}" }
         val newTenant = tenantService.insertTenant(tenant.toTenantServerTenant())
         return ResponseEntity(newTenant.toProxyTenant(), HttpStatus.CREATED)
@@ -87,11 +96,15 @@ class TenantController(
 
     @PutMapping("/{mnemonic}")
     @Trace
-    fun update(@PathVariable("mnemonic") tenantMnemonic: String, @RequestBody tenant: Tenant): ResponseEntity<Tenant> {
+    fun update(
+        @PathVariable("mnemonic") tenantMnemonic: String,
+        @RequestBody tenant: Tenant,
+    ): ResponseEntity<Tenant> {
         logger.info { "Updating tenant with mnemonic $tenantMnemonic" }
 
-        val tenantToUpdate = tenantService.getTenantForMnemonic(tenantMnemonic)
-            ?: throw NoTenantFoundException("No tenant found for mnemonic $tenantMnemonic")
+        val tenantToUpdate =
+            tenantService.getTenantForMnemonic(tenantMnemonic)
+                ?: throw NoTenantFoundException("No tenant found for mnemonic $tenantMnemonic")
 
         val newTenant = tenantService.updateTenant(tenant.toTenantServerTenant(tenantToUpdate.internalId))
         return ResponseEntity(newTenant.toProxyTenant(), HttpStatus.OK)

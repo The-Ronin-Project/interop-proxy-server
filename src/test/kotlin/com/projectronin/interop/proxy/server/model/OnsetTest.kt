@@ -15,18 +15,20 @@ import com.projectronin.interop.fhir.r4.datatype.Range as R4Range
 class OnsetTest {
     @Test
     fun `creates date time onset`() {
-        val ehrDateTimeOnset = mockk<DynamicValue<DateTime>> {
-            every { value } returns DateTime("2022-03-09")
-        }
+        val ehrDateTimeOnset =
+            mockk<DynamicValue<DateTime>> {
+                every { value } returns DateTime("2022-03-09")
+            }
         val onset = DateTimeOnset(ehrDateTimeOnset.value)
         assertEquals("2022-03-09", onset.value)
     }
 
     @Test
     fun `creates date time onset with null value`() {
-        val ehrDateTimeOnset = mockk<DynamicValue<DateTime>> {
-            every { value } returns DateTime(null)
-        }
+        val ehrDateTimeOnset =
+            mockk<DynamicValue<DateTime>> {
+                every { value } returns DateTime(null)
+            }
         val onset = DateTimeOnset(ehrDateTimeOnset.value)
         assertEquals("", onset.value)
     }
@@ -34,9 +36,10 @@ class OnsetTest {
     @Test
     fun `creates age onset`() {
         val ehrAge = relaxedMockk<R4Age>()
-        val ehrAgeOnset = mockk<DynamicValue<R4Age>> {
-            every { value } returns ehrAge
-        }
+        val ehrAgeOnset =
+            mockk<DynamicValue<R4Age>> {
+                every { value } returns ehrAge
+            }
         val onset = AgeOnset(ehrAgeOnset.value)
         assertNotNull(onset.value)
     }
@@ -44,9 +47,10 @@ class OnsetTest {
     @Test
     fun `creates period onset`() {
         val ehrPeriod = relaxedMockk<R4Period>()
-        val ehrPeriodOnset = mockk<DynamicValue<R4Period>> {
-            every { value } returns ehrPeriod
-        }
+        val ehrPeriodOnset =
+            mockk<DynamicValue<R4Period>> {
+                every { value } returns ehrPeriod
+            }
         val onset = PeriodOnset(ehrPeriodOnset.value)
         assertNotNull(onset.value)
     }
@@ -54,18 +58,20 @@ class OnsetTest {
     @Test
     fun `creates range onset`() {
         val ehrRange = relaxedMockk<R4Range>()
-        val ehrRangeOnset = mockk<DynamicValue<R4Range>> {
-            every { value } returns ehrRange
-        }
+        val ehrRangeOnset =
+            mockk<DynamicValue<R4Range>> {
+                every { value } returns ehrRange
+            }
         val onset = RangeOnset(ehrRangeOnset.value)
         assertNotNull(onset.value)
     }
 
     @Test
     fun `creates string onset`() {
-        val ehrStringOnset = mockk<DynamicValue<String>> {
-            every { value } returns "recently"
-        }
+        val ehrStringOnset =
+            mockk<DynamicValue<String>> {
+                every { value } returns "recently"
+            }
         val onset = StringOnset(ehrStringOnset.value)
         assertEquals("recently", onset.value)
     }

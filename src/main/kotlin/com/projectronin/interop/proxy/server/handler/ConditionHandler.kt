@@ -30,7 +30,7 @@ import com.projectronin.interop.proxy.server.model.Condition as ProxyServerCondi
 class ConditionHandler(
     private val ehrFactory: EHRFactory,
     private val tenantService: TenantService,
-    private val queueService: QueueService
+    private val queueService: QueueService,
 ) : Query {
     private val logger = KotlinLogging.logger { }
 
@@ -38,13 +38,17 @@ class ConditionHandler(
      * Returns only active [ProxyServerCondition]s for the given [patientFhirId] and [conditionCategoryCode]
      * See [Jira](https://projectronin.atlassian.net/browse/INT-284?focusedCommentId=24692)
      */
-    @GraphQLDescription("Finds active patient conditions for a given patient and category. Only conditions registered within the category will be returned. Requires User Auth matching to the requested tenant or will result in an error with no results.")
+    @GraphQLDescription(
+        "Finds active patient conditions for a given patient and category. " +
+            "Only conditions registered within the category will be returned. " +
+            "Requires User Auth matching to the requested tenant or will result in an error with no results.",
+    )
     @Trace
     fun conditionsByPatientAndCategory(
         tenantId: String,
         patientFhirId: String,
         conditionCategoryCode: ConditionCategoryCode,
-        dfe: DataFetchingEnvironment // automatically added to request
+        dfe: DataFetchingEnvironment,
     ): DataFetcherResult<List<ProxyServerCondition>> {
         logger.info { "Processing condition query for tenant: $tenantId" }
 
@@ -54,20 +58,22 @@ class ConditionHandler(
         val findConditionErrors = mutableListOf<GraphQLError>()
 
         // Call condition service
-        val conditions = try {
-            val conditionService = ehrFactory.getVendorFactory(tenant).conditionService
+        val conditions =
+            try {
+                val conditionService = ehrFactory.getVendorFactory(tenant).conditionService
 
-            conditionService.findConditions(
-                tenant = tenant,
-                patientFhirId = patientFhirId,
-                conditionCategoryCode = conditionCategoryCode.code,
-                clinicalStatus = "active" // We're only interested in active Conditions
-            )
-        } catch (e: Exception) {
-            findConditionErrors.add(GraphQLException(e.message).toGraphQLError())
-            logger.error(e.getLogMarker(), e) { "Condition query for tenant $tenantId contains errors" }
-            listOf()
-        }
+                conditionService.findConditions(
+                    tenant = tenant,
+                    patientFhirId = patientFhirId,
+                    conditionCategoryCode = conditionCategoryCode.code,
+                    // We're only interested in active Conditions
+                    clinicalStatus = "active",
+                )
+            } catch (e: Exception) {
+                findConditionErrors.add(GraphQLException(e.message).toGraphQLError())
+                logger.error(e.getLogMarker(), e) { "Condition query for tenant $tenantId contains errors" }
+                listOf()
+            }
 
         logger.debug { "Condition query for tenant $tenantId returned" }
 
@@ -87,9 +93,9 @@ class ConditionHandler(
                         resourceType = ResourceType.CONDITION,
                         tenant = tenantId,
                         text = JacksonUtil.writeJsonValue(it),
-                        metadata = metadata
+                        metadata = metadata,
                     )
-                }
+                },
             )
         } catch (e: Exception) {
             logger.warn { "Exception sending conditions to queue: ${e.message}" }
@@ -105,7 +111,10 @@ class ConditionHandler(
     /**
      * Translates a list of [Condition]s into the appropriate list of proxy server [ProxyServerCondition]s for return.
      */
-    private fun mapEHRConditions(ehrConditions: List<Condition>, tenant: Tenant): List<ProxyServerCondition> {
+    private fun mapEHRConditions(
+        ehrConditions: List<Condition>,
+        tenant: Tenant,
+    ): List<ProxyServerCondition> {
         return ehrConditions.map { ProxyServerCondition(it, tenant) }
     }
 }

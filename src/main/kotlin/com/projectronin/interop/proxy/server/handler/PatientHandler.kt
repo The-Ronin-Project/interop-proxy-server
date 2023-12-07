@@ -39,19 +39,22 @@ class PatientHandler(
     private val ehrFactory: EHRFactory,
     private val tenantService: TenantService,
     private val queueService: QueueService,
-    private val roninPatient: RoninPatient
+    private val roninPatient: RoninPatient,
 ) : Query {
     private val logger = KotlinLogging.logger { }
     private val dateFormatter = DateUtil()
 
-    @GraphQLDescription("Finds patient(s) that exactly match on family name, given name, and birthdate (YYYY-mm-dd format). Requires M2M Authorization or User Auth matching to the requested tenant or will result in an error with no results.")
+    @GraphQLDescription(
+        "Finds patient(s) that exactly match on family name, given name, and birthdate (YYYY-mm-dd format). " +
+            "Requires M2M Authorization or User Auth matching to the requested tenant or will result in an error with no results.",
+    )
     @Trace
     fun patientsByNameAndDOB(
         tenantId: String,
         family: String,
         given: String,
         birthdate: String,
-        dfe: DataFetchingEnvironment // automatically added to request calls
+        dfe: DataFetchingEnvironment,
     ): DataFetcherResult<List<ProxyServerPatient>> {
         logger.info { "Processing patient query for tenant: $tenantId" }
 
@@ -69,48 +72,56 @@ class PatientHandler(
             .errors(findPatientErrors).build()
     }
 
-    @GraphQLDescription("Finds patient(s) across the supplied tenants that exactly match on family name, given name, and birthdate (YYYY-mm-dd format). Requires M2M Authorization or User Auth matching to the requested tenant or will result in an error with no results.")
+    @GraphQLDescription(
+        "Finds patient(s) across the supplied tenants that exactly match on family name, given name, and birthdate (YYYY-mm-dd format). " +
+            "Requires M2M Authorization or User Auth matching to the requested tenant or will result in an error with no results.",
+    )
     @Trace
     fun patientsByTenants(
         tenantIds: List<String>,
         family: String,
         given: String,
         birthdate: String,
-        dfe: DataFetchingEnvironment // automatically added to request calls
+        dfe: DataFetchingEnvironment,
     ): DataFetcherResult<List<PatientsByTenant>> {
         logger.info { "Processing patient query for tenants: $tenantIds" }
 
         val patientSearchErrors = Collections.synchronizedList(mutableListOf<GraphQLError>())
 
-        val patientsByTenants = runBlocking {
-            val requests = tenantIds.map {
-                async {
-                    val tenant = runCatching { findTenant(tenantService, it) }.fold(
-                        onSuccess = { it },
-                        onFailure = {
-                            patientSearchErrors.add(GraphQLException(it.message).toGraphQLError())
-                            null
-                        }
-                    )
+        val patientsByTenants =
+            runBlocking {
+                val requests =
+                    tenantIds.map {
+                        async {
+                            val tenant =
+                                runCatching { findTenant(tenantService, it) }.fold(
+                                    onSuccess = { it },
+                                    onFailure = {
+                                        patientSearchErrors.add(GraphQLException(it.message).toGraphQLError())
+                                        null
+                                    },
+                                )
 
-                    val patients = tenant?.let { searchPatients(tenant, family, given, birthdate, patientSearchErrors) }
-                        ?: emptyList()
-                    tenant to patients
+                            val patients =
+                                tenant?.let { searchPatients(tenant, family, given, birthdate, patientSearchErrors) }
+                                    ?: emptyList()
+                            tenant to patients
+                        }
+                    }
+                awaitAll(*requests.toTypedArray())
+            }
+
+        val responseData =
+            patientsByTenants.mapNotNull { (tenant, patients) ->
+                tenant?.let {
+                    queuePatients(patients, tenant)
+
+                    PatientsByTenant(
+                        tenant.mnemonic,
+                        mapFHIRPatients(patients, tenant),
+                    )
                 }
             }
-            awaitAll(*requests.toTypedArray())
-        }
-
-        val responseData = patientsByTenants.mapNotNull { (tenant, patients) ->
-            tenant?.let {
-                queuePatients(patients, tenant)
-
-                PatientsByTenant(
-                    tenant.mnemonic,
-                    mapFHIRPatients(patients, tenant)
-                )
-            }
-        }
 
         return DataFetcherResult.newResult<List<PatientsByTenant>>()
             .data(responseData).errors(patientSearchErrors).build()
@@ -121,23 +132,24 @@ class PatientHandler(
         family: String,
         given: String,
         birthdate: String,
-        errors: MutableList<GraphQLError>
+        errors: MutableList<GraphQLError>,
     ): List<R4Patient> {
         val cleanedFamily = family.replace(",", "")
-        val patients = try {
-            val patientService = ehrFactory.getVendorFactory(tenant).patientService
+        val patients =
+            try {
+                val patientService = ehrFactory.getVendorFactory(tenant).patientService
 
-            patientService.findPatient(
-                tenant = tenant,
-                familyName = cleanedFamily,
-                givenName = given,
-                birthDate = dateFormatter.parseDateString(birthdate)
-            )
-        } catch (e: Exception) {
-            errors.add(GraphQLException("Lookup error for ${tenant.mnemonic}: ${e.message}").toGraphQLError())
-            logger.error(e.getLogMarker(), e) { "Patient query for tenant ${tenant.mnemonic} contains errors" }
-            listOf()
-        }
+                patientService.findPatient(
+                    tenant = tenant,
+                    familyName = cleanedFamily,
+                    givenName = given,
+                    birthDate = dateFormatter.parseDateString(birthdate),
+                )
+            } catch (e: Exception) {
+                errors.add(GraphQLException("Lookup error for ${tenant.mnemonic}: ${e.message}").toGraphQLError())
+                logger.error(e.getLogMarker(), e) { "Patient query for tenant ${tenant.mnemonic} contains errors" }
+                listOf()
+            }
         logger.debug { "Patient query for tenant ${tenant.mnemonic} returned ${patients.size} patients." }
         // post search matching
         val postMatchPatients = postSearchPatientMatch(patients, family, given, birthdate)
@@ -145,7 +157,10 @@ class PatientHandler(
         return postMatchPatients
     }
 
-    private fun queuePatients(patients: List<R4Patient>, tenant: Tenant) {
+    private fun queuePatients(
+        patients: List<R4Patient>,
+        tenant: Tenant,
+    ) {
         val metadata = generateMetadata()
 
         try {
@@ -156,9 +171,9 @@ class PatientHandler(
                         resourceType = ResourceType.PATIENT,
                         tenant = tenant.mnemonic,
                         text = JacksonUtil.writeJsonValue(it),
-                        metadata = metadata
+                        metadata = metadata,
                     )
-                }
+                },
             )
         } catch (e: Exception) {
             logger.warn { "Exception sending patients to queue: ${e.message}" }
@@ -172,7 +187,7 @@ class PatientHandler(
      */
     private fun mapFHIRPatients(
         fhirPatients: List<R4Patient>,
-        tenant: Tenant
+        tenant: Tenant,
     ): List<ProxyServerPatient> {
         if (fhirPatients.isEmpty()) return emptyList()
         return fhirPatients.map { ProxyServerPatient(it, tenant, roninPatient.getRoninIdentifiers(it, tenant)) }
@@ -182,7 +197,7 @@ class PatientHandler(
         patientList: List<R4Patient>,
         family: String,
         given: String,
-        dob: String
+        dob: String,
     ): List<R4Patient> {
         return patientList.filter { patient ->
             val requestDate = Date(dob)
@@ -198,7 +213,10 @@ class PatientHandler(
      * * At least one given name matches the supplied name
      * * If the above does not apply, and the [name] contains spaces, each space-delimited word must be present in [givenNames].
      */
-    private fun containsName(name: String, givenNames: List<FHIRString>): Boolean {
+    private fun containsName(
+        name: String,
+        givenNames: List<FHIRString>,
+    ): Boolean {
         return if (givenNames.containsIgnoreCase(name)) {
             true
         } else {

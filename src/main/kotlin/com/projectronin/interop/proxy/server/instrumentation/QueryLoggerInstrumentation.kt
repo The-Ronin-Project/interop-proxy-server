@@ -18,7 +18,7 @@ class QueryLoggerInstrumentation : SimpleInstrumentation() {
 
     override fun instrumentExecutionInput(
         executionInput: ExecutionInput,
-        parameters: InstrumentationExecutionParameters?
+        parameters: InstrumentationExecutionParameters?,
     ): ExecutionInput {
         logger.info { "Processing GraphQL query: ${executionInput.query}" }
 
@@ -32,7 +32,7 @@ class QueryLoggerInstrumentation : SimpleInstrumentation() {
      */
     override fun instrumentExecutionResult(
         executionResult: ExecutionResult?,
-        parameters: InstrumentationExecutionParameters?
+        parameters: InstrumentationExecutionParameters?,
     ): CompletableFuture<ExecutionResult> {
         executionResult?.let {
             it.errors.filterIsInstance<ValidationError>().map { error ->

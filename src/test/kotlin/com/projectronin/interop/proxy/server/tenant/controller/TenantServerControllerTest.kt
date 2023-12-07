@@ -27,20 +27,23 @@ class TenantServerControllerTest {
     private lateinit var controller: TenantServerController
     private lateinit var tenantService: TenantService
 
-    private val mockTenantServerDO = mockk<TenantServerDO> {
-        every { tenant } returns mockk {}
-        every { id } returns 1
-        every { address } returns "127.0.0.1"
-        every { port } returns 80
-        every { messageType } returns MessageType.MDM
-        every { serverType } returns ProcessingID.VALIDATION
-    }
-    private val mockTenantServiceTenant = mockk<Tenant> {
-        every { internalId } returns 1
-    }
-    private val mockTenant = mockk<ProxyTenant> {
-        every { id } returns 1
-    }
+    private val mockTenantServerDO =
+        mockk<TenantServerDO> {
+            every { tenant } returns mockk {}
+            every { id } returns 1
+            every { address } returns "127.0.0.1"
+            every { port } returns 80
+            every { messageType } returns MessageType.MDM
+            every { serverType } returns ProcessingID.VALIDATION
+        }
+    private val mockTenantServiceTenant =
+        mockk<Tenant> {
+            every { internalId } returns 1
+        }
+    private val mockTenant =
+        mockk<ProxyTenant> {
+            every { id } returns 1
+        }
 
     @BeforeEach
     fun setup() {
@@ -89,13 +92,14 @@ class TenantServerControllerTest {
     fun `insert works`() {
         every { tenantService.getTenantForMnemonic("first") } returns mockTenantServiceTenant
         every { dao.insertTenantServer(any()) } returns mockTenantServerDO
-        val tenantServer = TenantServer(
-            id = 1,
-            messageType = "MDM",
-            address = "127.0.0.1",
-            port = 80,
-            serverType = "V"
-        )
+        val tenantServer =
+            TenantServer(
+                id = 1,
+                messageType = "MDM",
+                address = "127.0.0.1",
+                port = 80,
+                serverType = "V",
+            )
         val result = controller.insert("first", tenantServer)
         assertEquals(HttpStatus.CREATED, result.statusCode)
         assertEquals(tenantServer, result.body)
@@ -104,13 +108,14 @@ class TenantServerControllerTest {
     @Test
     fun `insert fails with bad mnemonic`() {
         every { tenantService.getTenantForMnemonic("first") } returns null
-        val tenantServer = TenantServer(
-            id = 1,
-            messageType = "MDM",
-            address = "127.0.0.1",
-            port = 80,
-            serverType = "V"
-        )
+        val tenantServer =
+            TenantServer(
+                id = 1,
+                messageType = "MDM",
+                address = "127.0.0.1",
+                port = 80,
+                serverType = "V",
+            )
         assertThrows<NoTenantFoundException> { controller.insert("first", tenantServer) }
     }
 
@@ -118,13 +123,14 @@ class TenantServerControllerTest {
     fun `update works`() {
         every { tenantService.getTenantForMnemonic("first") } returns mockTenantServiceTenant
         every { dao.updateTenantServer(any()) } returns mockTenantServerDO
-        val tenantServer = TenantServer(
-            id = 1,
-            messageType = "MDM",
-            address = "127.0.0.1",
-            port = 80,
-            serverType = "V"
-        )
+        val tenantServer =
+            TenantServer(
+                id = 1,
+                messageType = "MDM",
+                address = "127.0.0.1",
+                port = 80,
+                serverType = "V",
+            )
         val result = controller.update("first", tenantServer)
         assertEquals(HttpStatus.OK, result.statusCode)
     }
@@ -133,13 +139,14 @@ class TenantServerControllerTest {
     fun `update yells when nothing is in the database`() {
         every { tenantService.getTenantForMnemonic("first") } returns mockTenantServiceTenant
         every { dao.updateTenantServer(any()) } returns null
-        val tenantServer = TenantServer(
-            id = 1,
-            messageType = "MDM",
-            address = "127.0.0.1",
-            port = 80,
-            serverType = "V"
-        )
+        val tenantServer =
+            TenantServer(
+                id = 1,
+                messageType = "MDM",
+                address = "127.0.0.1",
+                port = 80,
+                serverType = "V",
+            )
         val result = controller.update("first", tenantServer)
         assertEquals(HttpStatus.NOT_FOUND, result.statusCode)
     }
@@ -147,13 +154,14 @@ class TenantServerControllerTest {
     @Test
     fun `put fails with bad mnemonic`() {
         every { tenantService.getTenantForMnemonic("first") } returns null
-        val tenantServer = TenantServer(
-            id = 1,
-            messageType = "MDM",
-            address = "127.0.0.1",
-            port = 80,
-            serverType = "V"
-        )
+        val tenantServer =
+            TenantServer(
+                id = 1,
+                messageType = "MDM",
+                address = "127.0.0.1",
+                port = 80,
+                serverType = "V",
+            )
         assertThrows<NoTenantFoundException> { controller.update("first", tenantServer) }
     }
 

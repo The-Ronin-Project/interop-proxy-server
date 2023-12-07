@@ -24,7 +24,10 @@ class AuthFilter(private val userAuthService: UserAuthService, private val m2MAu
     private val logger = KotlinLogging.logger { }
     private val tenantHealthRegex = Regex("/tenants(/\\w{1,8})?/health")
 
-    override fun filter(exchange: ServerWebExchange, chain: WebFilterChain): Mono<Void> {
+    override fun filter(
+        exchange: ServerWebExchange,
+        chain: WebFilterChain,
+    ): Mono<Void> {
         val path = exchange.request.uri.path
         // Bypass auth for our Actuator endpoints.
         if (path.startsWith(ACTUATOR_PATH)) {
@@ -36,7 +39,10 @@ class AuthFilter(private val userAuthService: UserAuthService, private val m2MAu
         }
 
         val bearer =
-            kotlin.runCatching { exchange.request.headers.getFirst(AUTH_HEADER)!!.substring(7) /* strip 'Bearer '*/ }
+            kotlin.runCatching {
+                // strip 'Bearer '
+                exchange.request.headers.getFirst(AUTH_HEADER)!!.substring(7)
+            }
                 .getOrElse {
                     logger.info(it) { "Invalid or missing bearer token when requesting ${exchange.request.uri}" }
                     return handleForbidden(exchange, "Invalid Bearer token")
@@ -48,11 +54,22 @@ class AuthFilter(private val userAuthService: UserAuthService, private val m2MAu
             when {
                 parsedToken.success && parsedToken.token != null -> {
                     logger.debug { "Machine2Machine Authentication success" }
-                    return when (val tenantId = parsedToken.token.claims?.getNested(listOf("urn:projectronin:authorization:claims:version:1", "user", "loginProfile", "accessingTenantId"))) {
+                    return when (
+                        val tenantId =
+                            parsedToken.token.claims?.getNested(
+                                listOf(
+                                    "urn:projectronin:authorization:claims:version:1",
+                                    "user",
+                                    "loginProfile",
+                                    "accessingTenantId",
+                                ),
+                            )
+                    ) {
                         null -> chain.filter(exchange)
                         else -> chain.filter(mutateExchange(exchange, tenantId))
                     }
                 }
+
                 else -> logger.info { "Machine2Machine Authentication failed, falling back to User Auth" }
             }
         } else {
@@ -72,17 +89,23 @@ class AuthFilter(private val userAuthService: UserAuthService, private val m2MAu
         }
     }
 
-    private fun mutateExchange(exchange: ServerWebExchange, tenantId: String?): ServerWebExchange {
+    private fun mutateExchange(
+        exchange: ServerWebExchange,
+        tenantId: String?,
+    ): ServerWebExchange {
         val mutatedRequest = exchange.request.mutate().header(AUTHZ_TENANT_HEADER, tenantId).build()
         return exchange.mutate().request(mutatedRequest).build()
     }
 
-    private fun handleForbidden(exchange: ServerWebExchange, message: String): Mono<Void> {
+    private fun handleForbidden(
+        exchange: ServerWebExchange,
+        message: String,
+    ): Mono<Void> {
         exchange.response.statusCode = HttpStatus.FORBIDDEN
         return exchange.response.writeWith(
             Flux.just(
-                exchange.response.bufferFactory().wrap(message.toByteArray())
-            )
+                exchange.response.bufferFactory().wrap(message.toByteArray()),
+            ),
         )
     }
 
@@ -91,16 +114,20 @@ class AuthFilter(private val userAuthService: UserAuthService, private val m2MAu
             throw IllegalStateException("No keys passed")
         }
         return when (val mapEntry = this[keys.first()]) {
-            is Map<*, *> -> if (keys.size > 1) {
-                mapEntry.getNested(keys.subList(1, keys.size))
-            } else {
-                null
-            }
-            is String -> if (keys.size == 1) {
-                mapEntry
-            } else {
-                null
-            }
+            is Map<*, *> ->
+                if (keys.size > 1) {
+                    mapEntry.getNested(keys.subList(1, keys.size))
+                } else {
+                    null
+                }
+
+            is String ->
+                if (keys.size == 1) {
+                    mapEntry
+                } else {
+                    null
+                }
+
             else -> null
         }
     }

@@ -15,7 +15,7 @@ class EhrTest {
                 "public",
                 "private",
                 "accountId",
-                "secret"
+                "secret",
             )
         assertEquals(VendorType.EPIC, ehr.vendorType)
         assertEquals("clientId", ehr.clientId)

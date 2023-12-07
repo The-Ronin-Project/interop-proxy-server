@@ -15,63 +15,70 @@ import com.projectronin.interop.fhir.r4.datatype.ContactPoint as R4ContactPoint
 class ContactPointTest {
     @Test
     fun `can get system`() {
-        val ehrContactPoint = relaxedMockk<R4ContactPoint> {
-            every { system } returns ContactPointSystem.EMAIL.asCode()
-        }
+        val ehrContactPoint =
+            relaxedMockk<R4ContactPoint> {
+                every { system } returns ContactPointSystem.EMAIL.asCode()
+            }
         val contactPoint = ContactPoint(ehrContactPoint)
         assertEquals("email", contactPoint.system)
     }
 
     @Test
     fun `can get null system`() {
-        val ehrContactPoint = relaxedMockk<R4ContactPoint> {
-            every { system } returns null
-        }
+        val ehrContactPoint =
+            relaxedMockk<R4ContactPoint> {
+                every { system } returns null
+            }
         val contactPoint = ContactPoint(ehrContactPoint)
         assertNull(contactPoint.system)
     }
 
     @Test
     fun `can get use`() {
-        val ehrContactPoint = relaxedMockk<R4ContactPoint> {
-            every { use } returns ContactPointUse.WORK.asCode()
-        }
+        val ehrContactPoint =
+            relaxedMockk<R4ContactPoint> {
+                every { use } returns ContactPointUse.WORK.asCode()
+            }
         val contactPoint = ContactPoint(ehrContactPoint)
         assertEquals("work", contactPoint.use)
     }
 
     @Test
     fun `can get null use`() {
-        val ehrContactPoint = relaxedMockk<R4ContactPoint> {
-            every { use } returns null
-        }
+        val ehrContactPoint =
+            relaxedMockk<R4ContactPoint> {
+                every { use } returns null
+            }
         val contactPoint = ContactPoint(ehrContactPoint)
         assertNull(contactPoint.use)
     }
 
     @Test
     fun `can get value`() {
-        val ehrContactPoint = relaxedMockk<R4ContactPoint> {
-            every { value } returns "value".asFHIR()
-        }
+        val ehrContactPoint =
+            relaxedMockk<R4ContactPoint> {
+                every { value } returns "value".asFHIR()
+            }
         val contactPoint = ContactPoint(ehrContactPoint)
         assertEquals("value", contactPoint.value)
     }
 
     @Test
     fun `can get null value`() {
-        val ehrContactPoint = relaxedMockk<R4ContactPoint> {
-            every { value } returns null
-        }
+        val ehrContactPoint =
+            relaxedMockk<R4ContactPoint> {
+                every { value } returns null
+            }
         val contactPoint = ContactPoint(ehrContactPoint)
         assertNull(contactPoint.value)
     }
 
     @Test
     fun `can get value with null value`() {
-        val ehrContactPoint = relaxedMockk<R4ContactPoint> {
-            every { value } returns FHIRString(null)
-        }
+        val ehrContactPoint =
+            relaxedMockk<R4ContactPoint> {
+                every { value } returns FHIRString(null)
+            }
         val contactPoint = ContactPoint(ehrContactPoint)
         assertNull(contactPoint.value)
     }

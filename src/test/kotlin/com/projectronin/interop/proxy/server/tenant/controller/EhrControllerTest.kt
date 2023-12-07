@@ -29,32 +29,35 @@ class EhrControllerTest {
     fun initTest() {
         dao = mockk()
         controller = EhrController(dao)
-        epicEhrDO = mockk {
-            every { id } returns 1
-            every { vendorType } returns VendorType.EPIC
-            every { instanceName } returns "instanceName1"
-            every { clientId } returns "clientId1"
-            every { publicKey } returns "publicKey1"
-            every { privateKey } returns "privateKey1"
-            every { accountId } returns "wontBePopulatedNormally"
-        }
-        epicEhrDO2 = mockk {
-            every { id } returns 2
-            every { vendorType } returns VendorType.EPIC
-            every { instanceName } returns "instanceName2"
-            every { clientId } returns "clientId2"
-            every { publicKey } returns "publicKey2"
-            every { privateKey } returns "privateKey3"
-        }
-        cernerEHRDO = mockk {
-            every { id } returns 2
-            every { vendorType } returns VendorType.CERNER
-            every { instanceName } returns "instanceName2"
-            every { clientId } returns "clientId2"
-            every { publicKey } returns "wontBePopulatedNormally"
-            every { accountId } returns "accountId"
-            every { secret } returns "secret"
-        }
+        epicEhrDO =
+            mockk {
+                every { id } returns 1
+                every { vendorType } returns VendorType.EPIC
+                every { instanceName } returns "instanceName1"
+                every { clientId } returns "clientId1"
+                every { publicKey } returns "publicKey1"
+                every { privateKey } returns "privateKey1"
+                every { accountId } returns "wontBePopulatedNormally"
+            }
+        epicEhrDO2 =
+            mockk {
+                every { id } returns 2
+                every { vendorType } returns VendorType.EPIC
+                every { instanceName } returns "instanceName2"
+                every { clientId } returns "clientId2"
+                every { publicKey } returns "publicKey2"
+                every { privateKey } returns "privateKey3"
+            }
+        cernerEHRDO =
+            mockk {
+                every { id } returns 2
+                every { vendorType } returns VendorType.CERNER
+                every { instanceName } returns "instanceName2"
+                every { clientId } returns "clientId2"
+                every { publicKey } returns "wontBePopulatedNormally"
+                every { accountId } returns "accountId"
+                every { secret } returns "secret"
+            }
     }
 
     @Test
@@ -91,13 +94,14 @@ class EhrControllerTest {
 
     @Test
     fun `insert test - epic`() {
-        val ehr = Ehr(
-            vendorType = VendorType.EPIC,
-            instanceName = "instanceName",
-            clientId = "clientId1",
-            publicKey = "publicKey1",
-            privateKey = "privateKey1"
-        )
+        val ehr =
+            Ehr(
+                vendorType = VendorType.EPIC,
+                instanceName = "instanceName",
+                clientId = "clientId1",
+                publicKey = "publicKey1",
+                privateKey = "privateKey1",
+            )
         every { dao.insert(any()) } returns epicEhrDO
 
         val post = controller.insert(ehr)
@@ -106,13 +110,14 @@ class EhrControllerTest {
 
     @Test
     fun `insert test - cerner`() {
-        val ehr = Ehr(
-            vendorType = VendorType.CERNER,
-            instanceName = "instanceName",
-            clientId = "clientId1",
-            accountId = "accountId",
-            secret = "secret"
-        )
+        val ehr =
+            Ehr(
+                vendorType = VendorType.CERNER,
+                instanceName = "instanceName",
+                clientId = "clientId1",
+                accountId = "accountId",
+                secret = "secret",
+            )
         every { dao.insert(any()) } returns cernerEHRDO
 
         val post = controller.insert(ehr)
@@ -121,12 +126,13 @@ class EhrControllerTest {
 
     @Test
     fun `insert test - cerner no clientId`() {
-        val ehr = Ehr(
-            vendorType = VendorType.CERNER,
-            instanceName = "instanceName",
-            accountId = "accountId",
-            secret = "secret"
-        )
+        val ehr =
+            Ehr(
+                vendorType = VendorType.CERNER,
+                instanceName = "instanceName",
+                accountId = "accountId",
+                secret = "secret",
+            )
         every { dao.insert(any()) } returns cernerEHRDO
 
         val post = controller.insert(ehr)
@@ -135,32 +141,36 @@ class EhrControllerTest {
 
     @Test
     fun `bad inserts throw errors`() {
-        val cernerEHR = Ehr(
-            vendorType = VendorType.CERNER,
-            instanceName = "instanceName",
-            clientId = "clientId1",
-            publicKey = "publicKey1",
-            privateKey = "privateKey1"
-        )
-        val cernerEHR2 = Ehr(
-            vendorType = VendorType.CERNER,
-            instanceName = "instanceName",
-            clientId = "clientId1",
-            accountId = "accountId"
-        )
-        val epicEhr = Ehr(
-            vendorType = VendorType.EPIC,
-            instanceName = "instanceName",
-            clientId = "clientId1",
-            accountId = "accountId",
-            secret = "secret"
-        )
-        val epicEhr2 = Ehr(
-            vendorType = VendorType.EPIC,
-            instanceName = "instanceName",
-            clientId = "clientId1",
-            publicKey = "publicKey1"
-        )
+        val cernerEHR =
+            Ehr(
+                vendorType = VendorType.CERNER,
+                instanceName = "instanceName",
+                clientId = "clientId1",
+                publicKey = "publicKey1",
+                privateKey = "privateKey1",
+            )
+        val cernerEHR2 =
+            Ehr(
+                vendorType = VendorType.CERNER,
+                instanceName = "instanceName",
+                clientId = "clientId1",
+                accountId = "accountId",
+            )
+        val epicEhr =
+            Ehr(
+                vendorType = VendorType.EPIC,
+                instanceName = "instanceName",
+                clientId = "clientId1",
+                accountId = "accountId",
+                secret = "secret",
+            )
+        val epicEhr2 =
+            Ehr(
+                vendorType = VendorType.EPIC,
+                instanceName = "instanceName",
+                clientId = "clientId1",
+                publicKey = "publicKey1",
+            )
 
         assertThrows<IllegalStateException> { controller.insert(cernerEHR) }
         assertThrows<IllegalStateException> { controller.insert(cernerEHR2) }
@@ -170,13 +180,14 @@ class EhrControllerTest {
 
     @Test
     fun `update test`() {
-        val ehr = Ehr(
-            VendorType.EPIC,
-            "instanceName",
-            "clientId2",
-            "publicKey2",
-            "privateKey2"
-        )
+        val ehr =
+            Ehr(
+                VendorType.EPIC,
+                "instanceName",
+                "clientId2",
+                "publicKey2",
+                "privateKey2",
+            )
         every { dao.getByInstance(ehr.instanceName) } returns epicEhrDO2
         every { dao.update(any()) } returns epicEhrDO2
 
@@ -186,13 +197,14 @@ class EhrControllerTest {
 
     @Test
     fun `update fails due to missing EHR`() {
-        val ehr = Ehr(
-            VendorType.EPIC,
-            "instanceName",
-            "clientId2",
-            "publicKey2",
-            "privateKey2"
-        )
+        val ehr =
+            Ehr(
+                VendorType.EPIC,
+                "instanceName",
+                "clientId2",
+                "publicKey2",
+                "privateKey2",
+            )
         every { dao.getByInstance(ehr.instanceName) } returns null
 
         assertThrows<NoEHRFoundException> {

@@ -24,16 +24,18 @@ import reactor.core.publisher.Mono
 class AuthFilterTest {
     @Test
     fun `actuator requests skip auth`() {
-        val exchange = MockServerWebExchange
-            .from(
-                MockServerHttpRequest.get("/actuator/health")
-                    .header("Authorization", "")
-            )
+        val exchange =
+            MockServerWebExchange
+                .from(
+                    MockServerHttpRequest.get("/actuator/health")
+                        .header("Authorization", ""),
+                )
 
         val mono = mockk<Mono<Void>>()
-        val chain = mockk<WebFilterChain> {
-            every { filter(exchange) } returns mono
-        }
+        val chain =
+            mockk<WebFilterChain> {
+                every { filter(exchange) } returns mono
+            }
 
         val authFilter = AuthFilter(mockk(), mockk())
         val response = authFilter.filter(exchange, chain)
@@ -47,11 +49,12 @@ class AuthFilterTest {
         val userAuthService = UserAuthService(http, "/auth")
         val m2MAuthService = mockk<M2MAuthService>()
         val authFilter = AuthFilter(userAuthService, m2MAuthService)
-        val exchange = MockServerWebExchange
-            .from(
-                MockServerHttpRequest.get("/graphql")
-                    .header("Authorization", "")
-            )
+        val exchange =
+            MockServerWebExchange
+                .from(
+                    MockServerHttpRequest.get("/graphql")
+                        .header("Authorization", ""),
+                )
         authFilter.filter(exchange, chain)
         assertEquals(HttpStatus.FORBIDDEN, exchange.response.statusCode)
     }
@@ -63,10 +66,11 @@ class AuthFilterTest {
         val userAuthService = UserAuthService(http, "/auth")
         val m2MAuthService = mockk<M2MAuthService>()
         val authFilter = AuthFilter(userAuthService, m2MAuthService)
-        val exchange = MockServerWebExchange
-            .from(
-                MockServerHttpRequest.get("/graphql")
-            )
+        val exchange =
+            MockServerWebExchange
+                .from(
+                    MockServerHttpRequest.get("/graphql"),
+                )
         authFilter.filter(exchange, chain)
         assertEquals(HttpStatus.FORBIDDEN, exchange.response.statusCode)
     }
@@ -76,11 +80,12 @@ class AuthFilterTest {
         val chain = mockk<WebFilterChain>()
         val userAuthService = mockk<UserAuthService>()
         val m2MAuthService = mockk<M2MAuthService>()
-        val exchange = MockServerWebExchange
-            .from(
-                MockServerHttpRequest.get("/graphql")
-                    .header("Authorization", "Bearer 12345")
-            )
+        val exchange =
+            MockServerWebExchange
+                .from(
+                    MockServerHttpRequest.get("/graphql")
+                        .header("Authorization", "Bearer 12345"),
+                )
         val authFilter = AuthFilter(userAuthService, m2MAuthService)
         every { m2MAuthService.isM2MToken("12345") } returns false
         every { userAuthService.validateToken("12345") } returns null
@@ -93,11 +98,12 @@ class AuthFilterTest {
         val chain = mockk<WebFilterChain>()
         val userAuthService = mockk<UserAuthService>()
         val m2MAuthService = mockk<M2MAuthService>()
-        val exchange = MockServerWebExchange
-            .from(
-                MockServerHttpRequest.get("/graphql")
-                    .header("Authorization", "Bearer 12345")
-            )
+        val exchange =
+            MockServerWebExchange
+                .from(
+                    MockServerHttpRequest.get("/graphql")
+                        .header("Authorization", "Bearer 12345"),
+                )
         val authFilter = AuthFilter(userAuthService, m2MAuthService)
         every { m2MAuthService.isM2MToken("12345") } returns false
         every { userAuthService.validateToken("12345") } throws Exception()
@@ -112,11 +118,12 @@ class AuthFilterTest {
         val userAuthService = mockk<UserAuthService>()
         val m2MAuthService = mockk<M2MAuthService>()
         val slot = slot<ServerWebExchange>() // capture slot for validating argument
-        val exchange = MockServerWebExchange
-            .from(
-                MockServerHttpRequest.get("/graphql")
-                    .header("Authorization", "Bearer 12345")
-            )
+        val exchange =
+            MockServerWebExchange
+                .from(
+                    MockServerHttpRequest.get("/graphql")
+                        .header("Authorization", "Bearer 12345"),
+                )
         val authResponse = AuthResponse(User("tenantId"), UserSession("12345"))
         val authFilter = AuthFilter(userAuthService, m2MAuthService)
         every { m2MAuthService.isM2MToken("12345") } returns false
@@ -133,11 +140,12 @@ class AuthFilterTest {
         val userAuthService = mockk<UserAuthService>()
         val m2MAuthService = mockk<M2MAuthService>()
         val slot = slot<ServerWebExchange>() // capture slot for validating argument
-        val exchange = MockServerWebExchange
-            .from(
-                MockServerHttpRequest.get("/graphql")
-                    .header("Authorization", "Bearer 12345")
-            )
+        val exchange =
+            MockServerWebExchange
+                .from(
+                    MockServerHttpRequest.get("/graphql")
+                        .header("Authorization", "Bearer 12345"),
+                )
         val authFilter = AuthFilter(userAuthService, m2MAuthService)
         every { m2MAuthService.isM2MToken("12345") } returns true
         every { m2MAuthService.validateToken("12345") } returns ParsedM2MToken(mockk(relaxed = true), true)
@@ -154,20 +162,23 @@ class AuthFilterTest {
         val m2MAuthService = mockk<M2MAuthService>()
         val jwt = mockk<Jwt>()
         val slot = slot<ServerWebExchange>() // capture slot for validating argument
-        val exchange = MockServerWebExchange
-            .from(
-                MockServerHttpRequest.get("/graphql")
-                    .header("Authorization", "Bearer 12345")
-            )
+        val exchange =
+            MockServerWebExchange
+                .from(
+                    MockServerHttpRequest.get("/graphql")
+                        .header("Authorization", "Bearer 12345"),
+                )
         val authFilter = AuthFilter(userAuthService, m2MAuthService)
         every { m2MAuthService.isM2MToken("12345") } returns true
         every { m2MAuthService.validateToken("12345") } returns ParsedM2MToken(jwt, true)
         every { chain.filter(capture(slot)) } answers { mono }
-        every { jwt.claims } returns mapOf(
-            "urn:projectronin:authorization:claims:version:1" to mapOf<String, Any>(
-                "user" to emptyMap<String, Any>()
+        every { jwt.claims } returns
+            mapOf(
+                "urn:projectronin:authorization:claims:version:1" to
+                    mapOf<String, Any>(
+                        "user" to emptyMap<String, Any>(),
+                    ),
             )
-        )
         authFilter.filter(exchange, chain)
         assertNull(slot.captured.request.headers.getFirst(AUTHZ_TENANT_HEADER))
     }
@@ -180,24 +191,29 @@ class AuthFilterTest {
         val m2MAuthService = mockk<M2MAuthService>()
         val jwt = mockk<Jwt>()
         val slot = slot<ServerWebExchange>() // capture slot for validating argument
-        val exchange = MockServerWebExchange
-            .from(
-                MockServerHttpRequest.get("/graphql")
-                    .header("Authorization", "Bearer 12345")
-            )
+        val exchange =
+            MockServerWebExchange
+                .from(
+                    MockServerHttpRequest.get("/graphql")
+                        .header("Authorization", "Bearer 12345"),
+                )
         val authFilter = AuthFilter(userAuthService, m2MAuthService)
         every { m2MAuthService.isM2MToken("12345") } returns true
         every { m2MAuthService.validateToken("12345") } returns ParsedM2MToken(jwt, true)
         every { chain.filter(capture(slot)) } answers { mono }
-        every { jwt.claims } returns mapOf(
-            "urn:projectronin:authorization:claims:version:1" to mapOf<String, Any>(
-                "user" to mapOf<String, Any>(
-                    "loginProfile" to mapOf<String, Any>(
-                        "accessingTenantId" to "apposnd"
-                    )
-                )
+        every { jwt.claims } returns
+            mapOf(
+                "urn:projectronin:authorization:claims:version:1" to
+                    mapOf<String, Any>(
+                        "user" to
+                            mapOf<String, Any>(
+                                "loginProfile" to
+                                    mapOf<String, Any>(
+                                        "accessingTenantId" to "apposnd",
+                                    ),
+                            ),
+                    ),
             )
-        )
         authFilter.filter(exchange, chain)
         assertEquals("apposnd", slot.captured.request.headers.getFirst(AUTHZ_TENANT_HEADER))
     }
@@ -207,11 +223,12 @@ class AuthFilterTest {
         val chain = mockk<WebFilterChain>()
         val userAuthService = mockk<UserAuthService>()
         val m2MAuthService = mockk<M2MAuthService>()
-        val exchange = MockServerWebExchange
-            .from(
-                MockServerHttpRequest.get("/graphql")
-                    .header("Authorization", "Bearer 12345")
-            )
+        val exchange =
+            MockServerWebExchange
+                .from(
+                    MockServerHttpRequest.get("/graphql")
+                        .header("Authorization", "Bearer 12345"),
+                )
         val authFilter = AuthFilter(userAuthService, m2MAuthService)
         every { m2MAuthService.isM2MToken("12345") } returns true
         every { m2MAuthService.validateToken("12345") } returns ParsedM2MToken(mockk(relaxed = true), false)
@@ -226,11 +243,12 @@ class AuthFilterTest {
         val slot = slot<ServerWebExchange>()
         val userAuthService = mockk<UserAuthService>()
         val m2MAuthService = mockk<M2MAuthService>()
-        val exchange = MockServerWebExchange
-            .from(
-                MockServerHttpRequest.get("/graphql")
-                    .header("Authorization", "Bearer 12345")
-            )
+        val exchange =
+            MockServerWebExchange
+                .from(
+                    MockServerHttpRequest.get("/graphql")
+                        .header("Authorization", "Bearer 12345"),
+                )
         val authResponse = AuthResponse(User("tenantId"), UserSession("12345"))
         val authFilter = AuthFilter(userAuthService, m2MAuthService)
         every { m2MAuthService.isM2MToken("12345") } returns true
@@ -248,11 +266,12 @@ class AuthFilterTest {
         val slot = slot<ServerWebExchange>()
         val userAuthService = mockk<UserAuthService>()
         val m2MAuthService = mockk<M2MAuthService>()
-        val exchange = MockServerWebExchange
-            .from(
-                MockServerHttpRequest.get("/graphql")
-                    .header("Authorization", "Bearer 12345")
-            )
+        val exchange =
+            MockServerWebExchange
+                .from(
+                    MockServerHttpRequest.get("/graphql")
+                        .header("Authorization", "Bearer 12345"),
+                )
         val authFilter = AuthFilter(userAuthService, m2MAuthService)
         every { m2MAuthService.isM2MToken("12345") } returns true
         every { m2MAuthService.validateToken("12345") } returns ParsedM2MToken(mockk(relaxed = true), false)
@@ -264,16 +283,18 @@ class AuthFilterTest {
 
     @Test
     fun `general tenant health requests skip auth`() {
-        val exchange = MockServerWebExchange
-            .from(
-                MockServerHttpRequest.get("/tenants/health")
-                    .header("Authorization", "")
-            )
+        val exchange =
+            MockServerWebExchange
+                .from(
+                    MockServerHttpRequest.get("/tenants/health")
+                        .header("Authorization", ""),
+                )
 
         val mono = mockk<Mono<Void>>()
-        val chain = mockk<WebFilterChain> {
-            every { filter(exchange) } returns mono
-        }
+        val chain =
+            mockk<WebFilterChain> {
+                every { filter(exchange) } returns mono
+            }
 
         val authFilter = AuthFilter(mockk(), mockk())
         val response = authFilter.filter(exchange, chain)
@@ -282,16 +303,18 @@ class AuthFilterTest {
 
     @Test
     fun `specific tenant health requests skip auth`() {
-        val exchange = MockServerWebExchange
-            .from(
-                MockServerHttpRequest.get("/tenants/test/health")
-                    .header("Authorization", "")
-            )
+        val exchange =
+            MockServerWebExchange
+                .from(
+                    MockServerHttpRequest.get("/tenants/test/health")
+                        .header("Authorization", ""),
+                )
 
         val mono = mockk<Mono<Void>>()
-        val chain = mockk<WebFilterChain> {
-            every { filter(exchange) } returns mono
-        }
+        val chain =
+            mockk<WebFilterChain> {
+                every { filter(exchange) } returns mono
+            }
 
         val authFilter = AuthFilter(mockk(), mockk())
         val response = authFilter.filter(exchange, chain)
@@ -305,11 +328,12 @@ class AuthFilterTest {
         val userAuthService = mockk<UserAuthService>()
         val m2MAuthService = mockk<M2MAuthService>()
         val slot = slot<ServerWebExchange>() // capture slot for validating argument
-        val exchange = MockServerWebExchange
-            .from(
-                MockServerHttpRequest.get("/tenants/test/not-health")
-                    .header("Authorization", "Bearer 12345")
-            )
+        val exchange =
+            MockServerWebExchange
+                .from(
+                    MockServerHttpRequest.get("/tenants/test/not-health")
+                        .header("Authorization", "Bearer 12345"),
+                )
         val authFilter = AuthFilter(userAuthService, m2MAuthService)
         every { m2MAuthService.isM2MToken("12345") } returns true
         every { m2MAuthService.validateToken("12345") } returns ParsedM2MToken(mockk(relaxed = true), true)

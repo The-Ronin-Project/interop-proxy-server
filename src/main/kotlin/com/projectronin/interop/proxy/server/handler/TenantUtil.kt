@@ -17,7 +17,7 @@ fun findAndValidateTenant(
     dfe: DataFetchingEnvironment,
     tenantService: TenantService,
     requestedTenantId: String,
-    requireTenantAuth: Boolean = true
+    requireTenantAuth: Boolean = true,
 ): Tenant {
     val authorizedTenantId = dfe.getAuthorizedTenantId()
 
@@ -30,7 +30,7 @@ fun findAndValidateTenant(
         // Always check the authorized tenant (always sent from User Auth) against the requested.
         throw HttpClientErrorException(
             FORBIDDEN,
-            "Requested Tenant '$requestedTenantId' does not match authorized Tenant '$authorizedTenantId'"
+            "Requested Tenant '$requestedTenantId' does not match authorized Tenant '$authorizedTenantId'",
         )
     }
 
@@ -40,8 +40,11 @@ fun findAndValidateTenant(
 /**
  * Retrieves the Tenant for the requested [tenantId] using the [tenantService]. [HttpClientErrorException] is returned indicating [NOT_FOUND] if no tenant was found for the [tenantId].
  */
-fun findTenant(tenantService: TenantService, tenantId: String): Tenant =
+fun findTenant(
+    tenantService: TenantService,
+    tenantId: String,
+): Tenant =
     tenantService.getTenantForMnemonic(tenantId) ?: throw HttpClientErrorException(
         NOT_FOUND,
-        "Invalid Tenant: $tenantId"
+        "Invalid Tenant: $tenantId",
     )

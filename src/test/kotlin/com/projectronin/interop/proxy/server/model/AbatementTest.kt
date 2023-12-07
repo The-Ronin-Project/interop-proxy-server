@@ -16,18 +16,20 @@ import com.projectronin.interop.fhir.r4.datatype.primitive.DateTime as R4DateTim
 class AbatementTest {
     @Test
     fun `creates date time abatement`() {
-        val ehrDateTimeAbatement = mockk<R4DateTime> {
-            every { value } returns "2022-03-09"
-        }
+        val ehrDateTimeAbatement =
+            mockk<R4DateTime> {
+                every { value } returns "2022-03-09"
+            }
         val abatement = DateTimeAbatement(ehrDateTimeAbatement)
         assertEquals("2022-03-09", abatement.value)
     }
 
     @Test
     fun `creates date time abatement for date time with null value`() {
-        val ehrDateTimeAbatement = mockk<R4DateTime> {
-            every { value } returns null
-        }
+        val ehrDateTimeAbatement =
+            mockk<R4DateTime> {
+                every { value } returns null
+            }
         val abatement = DateTimeAbatement(ehrDateTimeAbatement)
         assertEquals("", abatement.value)
     }

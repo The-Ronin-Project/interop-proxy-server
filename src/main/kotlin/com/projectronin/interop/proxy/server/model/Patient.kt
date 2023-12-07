@@ -10,7 +10,7 @@ import com.projectronin.interop.fhir.r4.resource.Patient as R4Patient
 data class Patient(
     private val patient: R4Patient,
     private val tenant: Tenant,
-    private val roninIdentifiers: List<R4Identifier>
+    private val roninIdentifiers: List<R4Identifier>,
 ) {
     @GraphQLDescription("The internal identifier for this patient")
     val id: String? by lazy {

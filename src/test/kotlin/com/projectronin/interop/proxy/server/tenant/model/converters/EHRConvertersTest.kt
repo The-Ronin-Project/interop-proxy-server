@@ -10,16 +10,16 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
 class EHRConvertersTest {
-
     @Test
     fun `toProxyEhr - cerner`() {
-        val ehrDo = EhrDO {
-            vendorType = VendorType.CERNER
-            instanceName = "instanceName"
-            clientId = "clientId"
-            accountId = "accountId"
-            secret = "secret"
-        }
+        val ehrDo =
+            EhrDO {
+                vendorType = VendorType.CERNER
+                instanceName = "instanceName"
+                clientId = "clientId"
+                accountId = "accountId"
+                secret = "secret"
+            }
         val proxyEhr = ehrDo.toProxyEHR()
         assertNotNull(proxyEhr)
         assertEquals("instanceName", proxyEhr.instanceName)
@@ -29,13 +29,14 @@ class EHRConvertersTest {
 
     @Test
     fun `toProxyEhr - epic`() {
-        val ehrDo = EhrDO {
-            vendorType = VendorType.EPIC
-            instanceName = "instanceName"
-            clientId = "clientId"
-            publicKey = "publicKey"
-            privateKey = "privateKey"
-        }
+        val ehrDo =
+            EhrDO {
+                vendorType = VendorType.EPIC
+                instanceName = "instanceName"
+                clientId = "clientId"
+                publicKey = "publicKey"
+                privateKey = "privateKey"
+            }
         val proxyEhr = ehrDo.toProxyEHR()
         assertNotNull(proxyEhr)
         assertEquals("instanceName", proxyEhr.instanceName)
@@ -44,13 +45,14 @@ class EHRConvertersTest {
 
     @Test
     fun `toEhrDO - epic`() {
-        val ehr = Ehr(
-            vendorType = VendorType.EPIC,
-            instanceName = "instanceName",
-            clientId = "clientId1",
-            publicKey = "publicKey1",
-            privateKey = "privateKey1"
-        )
+        val ehr =
+            Ehr(
+                vendorType = VendorType.EPIC,
+                instanceName = "instanceName",
+                clientId = "clientId1",
+                publicKey = "publicKey1",
+                privateKey = "privateKey1",
+            )
         val proxyEHR = ehr.toEhrDO()
         assertNotNull(proxyEHR)
         assertEquals("publicKey1", proxyEHR.publicKey)
@@ -58,13 +60,14 @@ class EHRConvertersTest {
 
     @Test
     fun `toEhrDO - cerner`() {
-        val ehr = Ehr(
-            vendorType = VendorType.CERNER,
-            instanceName = "instanceName",
-            clientId = "clientId1",
-            accountId = "accountId",
-            secret = "secret"
-        )
+        val ehr =
+            Ehr(
+                vendorType = VendorType.CERNER,
+                instanceName = "instanceName",
+                clientId = "clientId1",
+                accountId = "accountId",
+                secret = "secret",
+            )
         val proxyEHR = ehr.toEhrDO()
         assertNotNull(proxyEHR)
         assertEquals("accountId", proxyEHR.accountId)
@@ -72,32 +75,36 @@ class EHRConvertersTest {
 
     @Test
     fun `bad toEhrDO throw errors`() {
-        val cernerEHR = Ehr(
-            vendorType = VendorType.CERNER,
-            instanceName = "instanceName",
-            clientId = "clientId1",
-            publicKey = "publicKey1",
-            privateKey = "privateKey1"
-        )
-        val cernerEHR2 = Ehr(
-            vendorType = VendorType.CERNER,
-            instanceName = "instanceName",
-            clientId = "clientId1",
-            accountId = "accountId"
-        )
-        val epicEhr = Ehr(
-            vendorType = VendorType.EPIC,
-            instanceName = "instanceName",
-            clientId = "clientId1",
-            accountId = "accountId",
-            secret = "secret"
-        )
-        val epicEhr2 = Ehr(
-            vendorType = VendorType.EPIC,
-            instanceName = "instanceName",
-            clientId = "clientId1",
-            publicKey = "publicKey1"
-        )
+        val cernerEHR =
+            Ehr(
+                vendorType = VendorType.CERNER,
+                instanceName = "instanceName",
+                clientId = "clientId1",
+                publicKey = "publicKey1",
+                privateKey = "privateKey1",
+            )
+        val cernerEHR2 =
+            Ehr(
+                vendorType = VendorType.CERNER,
+                instanceName = "instanceName",
+                clientId = "clientId1",
+                accountId = "accountId",
+            )
+        val epicEhr =
+            Ehr(
+                vendorType = VendorType.EPIC,
+                instanceName = "instanceName",
+                clientId = "clientId1",
+                accountId = "accountId",
+                secret = "secret",
+            )
+        val epicEhr2 =
+            Ehr(
+                vendorType = VendorType.EPIC,
+                instanceName = "instanceName",
+                clientId = "clientId1",
+                publicKey = "publicKey1",
+            )
 
         assertThrows<IllegalStateException> { cernerEHR.toEhrDO() }
         assertThrows<IllegalStateException> { cernerEHR2.toEhrDO() }

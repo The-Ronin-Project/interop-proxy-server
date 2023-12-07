@@ -88,14 +88,15 @@ class ConditionHandlerTest {
         every { dfe.getAuthorizedTenantId() } returns "tenantId"
 
         // Run Test
-        val exception = assertThrows<HttpClientErrorException> {
-            conditionHandler.conditionsByPatientAndCategory(
-                tenantId = "tenantId",
-                patientFhirId = "123456789",
-                conditionCategoryCode = ConditionCategoryCode.PROBLEM_LIST_ITEM,
-                dfe = dfe
-            )
-        }
+        val exception =
+            assertThrows<HttpClientErrorException> {
+                conditionHandler.conditionsByPatientAndCategory(
+                    tenantId = "tenantId",
+                    patientFhirId = "123456789",
+                    conditionCategoryCode = ConditionCategoryCode.PROBLEM_LIST_ITEM,
+                    dfe = dfe,
+                )
+            }
         assertEquals("404 Invalid Tenant: tenantId", exception.message)
     }
 
@@ -105,14 +106,15 @@ class ConditionHandlerTest {
         every { dfe.getAuthorizedTenantId() } returns null
 
         // Run Test
-        val exception = assertThrows<HttpClientErrorException> {
-            conditionHandler.conditionsByPatientAndCategory(
-                tenantId = "tenantId",
-                patientFhirId = "123456789",
-                conditionCategoryCode = ConditionCategoryCode.PROBLEM_LIST_ITEM,
-                dfe = dfe
-            )
-        }
+        val exception =
+            assertThrows<HttpClientErrorException> {
+                conditionHandler.conditionsByPatientAndCategory(
+                    tenantId = "tenantId",
+                    patientFhirId = "123456789",
+                    conditionCategoryCode = ConditionCategoryCode.PROBLEM_LIST_ITEM,
+                    dfe = dfe,
+                )
+            }
 
         assertEquals("403 No Tenants authorized for request.", exception.message)
     }
@@ -123,28 +125,31 @@ class ConditionHandlerTest {
         every { tenantService.getTenantForMnemonic("tenantId") } returns tenant
         every { dfe.getAuthorizedTenantId() } returns "tenantId"
 
-        every { ehrFactory.getVendorFactory(tenant) } returns mockk {
-            every { conditionService } returns mockk {
-                every {
-                    findConditions(
-                        tenant = tenant,
-                        patientFhirId = "123456789",
-                        conditionCategoryCode = ConditionCategoryCode.PROBLEM_LIST_ITEM.code,
-                        clinicalStatus = "active"
-                    )
-                } throws (IllegalStateException("Error"))
+        every { ehrFactory.getVendorFactory(tenant) } returns
+            mockk {
+                every { conditionService } returns
+                    mockk {
+                        every {
+                            findConditions(
+                                tenant = tenant,
+                                patientFhirId = "123456789",
+                                conditionCategoryCode = ConditionCategoryCode.PROBLEM_LIST_ITEM.code,
+                                clinicalStatus = "active",
+                            )
+                        } throws (IllegalStateException("Error"))
+                    }
             }
-        }
 
         every { queueService.enqueueMessages(listOf()) } just Runs
 
         // Run Test
-        val result = conditionHandler.conditionsByPatientAndCategory(
-            tenantId = "tenantId",
-            patientFhirId = "123456789",
-            conditionCategoryCode = ConditionCategoryCode.PROBLEM_LIST_ITEM,
-            dfe = dfe
-        )
+        val result =
+            conditionHandler.conditionsByPatientAndCategory(
+                tenantId = "tenantId",
+                patientFhirId = "123456789",
+                conditionCategoryCode = ConditionCategoryCode.PROBLEM_LIST_ITEM,
+                dfe = dfe,
+            )
 
         assertNotNull(result)
         assertEquals("Error", result.errors[0].message)
@@ -157,28 +162,31 @@ class ConditionHandlerTest {
         every { tenantService.getTenantForMnemonic("tenantId") } returns tenant
         every { dfe.getAuthorizedTenantId() } returns "tenantId"
 
-        every { ehrFactory.getVendorFactory(tenant) } returns mockk {
-            every { conditionService } returns mockk {
-                every {
-                    findConditions(
-                        tenant = tenant,
-                        patientFhirId = "123456789",
-                        conditionCategoryCode = ConditionCategoryCode.PROBLEM_LIST_ITEM.code,
-                        clinicalStatus = "active"
-                    )
-                } throws (ServiceUnavailableException(HttpStatusCode.ServiceUnavailable, "Proxy"))
+        every { ehrFactory.getVendorFactory(tenant) } returns
+            mockk {
+                every { conditionService } returns
+                    mockk {
+                        every {
+                            findConditions(
+                                tenant = tenant,
+                                patientFhirId = "123456789",
+                                conditionCategoryCode = ConditionCategoryCode.PROBLEM_LIST_ITEM.code,
+                                clinicalStatus = "active",
+                            )
+                        } throws (ServiceUnavailableException(HttpStatusCode.ServiceUnavailable, "Proxy"))
+                    }
             }
-        }
 
         every { queueService.enqueueMessages(listOf()) } just Runs
 
         // Run Test
-        val result = conditionHandler.conditionsByPatientAndCategory(
-            tenantId = "tenantId",
-            patientFhirId = "123456789",
-            conditionCategoryCode = ConditionCategoryCode.PROBLEM_LIST_ITEM,
-            dfe = dfe
-        )
+        val result =
+            conditionHandler.conditionsByPatientAndCategory(
+                tenantId = "tenantId",
+                patientFhirId = "123456789",
+                conditionCategoryCode = ConditionCategoryCode.PROBLEM_LIST_ITEM,
+                dfe = dfe,
+            )
 
         assertNotNull(result)
         assertEquals("Received 503 Service Unavailable when calling Proxy", result.errors[0].message)
@@ -188,72 +196,82 @@ class ConditionHandlerTest {
     @Test
     fun `ensure condition is correctly returned`() {
         // Mock response
-        val condition1 = mockk<R4Condition> {
-            every { id } returns Id("12345")
-            every { identifier } returns listOf(
-                mockk {
-                    every { system?.value } returns "test-system"
-                    every { value?.value } returns "test-value"
-                }
-            )
-            every { clinicalStatus } returns mockk {
-                every { coding } returns listOf(
-                    mockk {
-                        every { system?.value } returns "test-system"
-                        every { version?.value } returns "test-version"
-                        every { code?.value } returns "test-code"
-                        every { display?.value } returns "test-display"
-                        every { userSelected?.value } returns true
-                    }
-                )
-                every { text?.value } returns "clinical status text"
-            }
-            every { category } returns listOf(
-                mockk {
-                    every { coding } returns listOf(
+        val condition1 =
+            mockk<R4Condition> {
+                every { id } returns Id("12345")
+                every { identifier } returns
+                    listOf(
                         mockk {
                             every { system?.value } returns "test-system"
-                            every { version?.value } returns "test-version"
-                            every { code?.value } returns "test-code"
-                            every { display?.value } returns "test-display"
-                            every { userSelected?.value } returns true
-                        }
+                            every { value?.value } returns "test-value"
+                        },
                     )
-                    every { text?.value } returns "category text"
-                }
-            )
-            every { code } returns mockk {
-                every { coding } returns listOf(
+                every { clinicalStatus } returns
                     mockk {
-                        every { system?.value } returns "test-system"
-                        every { version?.value } returns "test-version"
-                        every { code?.value } returns "test-code"
-                        every { display?.value } returns "test-display"
-                        every { userSelected?.value } returns true
+                        every { coding } returns
+                            listOf(
+                                mockk {
+                                    every { system?.value } returns "test-system"
+                                    every { version?.value } returns "test-version"
+                                    every { code?.value } returns "test-code"
+                                    every { display?.value } returns "test-display"
+                                    every { userSelected?.value } returns true
+                                },
+                            )
+                        every { text?.value } returns "clinical status text"
                     }
-                )
-                every { text?.value } returns "code text"
+                every { category } returns
+                    listOf(
+                        mockk {
+                            every { coding } returns
+                                listOf(
+                                    mockk {
+                                        every { system?.value } returns "test-system"
+                                        every { version?.value } returns "test-version"
+                                        every { code?.value } returns "test-code"
+                                        every { display?.value } returns "test-display"
+                                        every { userSelected?.value } returns true
+                                    },
+                                )
+                            every { text?.value } returns "category text"
+                        },
+                    )
+                every { code } returns
+                    mockk {
+                        every { coding } returns
+                            listOf(
+                                mockk {
+                                    every { system?.value } returns "test-system"
+                                    every { version?.value } returns "test-version"
+                                    every { code?.value } returns "test-code"
+                                    every { display?.value } returns "test-display"
+                                    every { userSelected?.value } returns true
+                                },
+                            )
+                        every { text?.value } returns "code text"
+                    }
+                every { recordedDate } returns DateTime("2021-03-08")
             }
-            every { recordedDate } returns DateTime("2021-03-08")
-        }
         val response = listOf(condition1)
 
         every { tenant.mnemonic } returns "tenantId"
         every { tenantService.getTenantForMnemonic("tenantId") } returns tenant
         every { dfe.getAuthorizedTenantId() } returns "tenantId"
 
-        every { ehrFactory.getVendorFactory(tenant) } returns mockk {
-            every { conditionService } returns mockk {
-                every {
-                    findConditions(
-                        tenant = tenant,
-                        patientFhirId = "123456789",
-                        conditionCategoryCode = ConditionCategoryCode.PROBLEM_LIST_ITEM.code,
-                        clinicalStatus = "active"
-                    )
-                } returns response
+        every { ehrFactory.getVendorFactory(tenant) } returns
+            mockk {
+                every { conditionService } returns
+                    mockk {
+                        every {
+                            findConditions(
+                                tenant = tenant,
+                                patientFhirId = "123456789",
+                                conditionCategoryCode = ConditionCategoryCode.PROBLEM_LIST_ITEM.code,
+                                clinicalStatus = "active",
+                            )
+                        } returns response
+                    }
             }
-        }
         mockkObject(JacksonUtil)
         every { JacksonUtil.writeJsonValue(condition1) } returns "raw JSON for condition"
         every {
@@ -264,19 +282,20 @@ class ConditionHandlerTest {
                         resourceType = ResourceType.CONDITION,
                         tenant = "tenantId",
                         text = "raw JSON for condition",
-                        metadata = metadata
-                    )
-                )
+                        metadata = metadata,
+                    ),
+                ),
             )
         } just Runs
 
         // Run Test
-        val actualResponse = conditionHandler.conditionsByPatientAndCategory(
-            tenantId = "tenantId",
-            patientFhirId = "123456789",
-            conditionCategoryCode = ConditionCategoryCode.PROBLEM_LIST_ITEM,
-            dfe = dfe
-        )
+        val actualResponse =
+            conditionHandler.conditionsByPatientAndCategory(
+                tenantId = "tenantId",
+                patientFhirId = "123456789",
+                conditionCategoryCode = ConditionCategoryCode.PROBLEM_LIST_ITEM,
+                dfe = dfe,
+            )
 
         // Check results
         assertNotNull(actualResponse)
@@ -289,61 +308,69 @@ class ConditionHandlerTest {
     @Test
     fun `ensure enqueueMessage exception still returns data to user`() {
         // Mock response
-        val condition1 = mockk<R4Condition> {
-            every { code } returns CodeableConcept("code".asFHIR())
-            every { id } returns Id("12345")
-            every { identifier } returns listOf(
-                mockk {
-                    every { system?.value } returns "test-system"
-                    every { value?.value } returns "test-value"
-                }
-            )
-            every { clinicalStatus } returns mockk {
-                every { coding } returns listOf(
-                    mockk {
-                        every { system?.value } returns "test-system"
-                        every { version?.value } returns "test-version"
-                        every { code?.value } returns "test-code"
-                        every { display?.value } returns "test-display"
-                        every { userSelected?.value } returns true
-                    }
-                )
-                every { text?.value } returns "clinical status text"
-            }
-            every { category } returns listOf(
-                mockk {
-                    every { coding } returns listOf(
+        val condition1 =
+            mockk<R4Condition> {
+                every { code } returns CodeableConcept("code".asFHIR())
+                every { id } returns Id("12345")
+                every { identifier } returns
+                    listOf(
                         mockk {
                             every { system?.value } returns "test-system"
-                            every { version?.value } returns "test-version"
-                            every { code?.value } returns "test-code"
-                            every { display?.value } returns "test-display"
-                            every { userSelected?.value } returns true
-                        }
+                            every { value?.value } returns "test-value"
+                        },
                     )
-                    every { text?.value } returns "category text"
-                }
-            )
-            every { recordedDate } returns DateTime("2021-03-08")
-        }
+                every { clinicalStatus } returns
+                    mockk {
+                        every { coding } returns
+                            listOf(
+                                mockk {
+                                    every { system?.value } returns "test-system"
+                                    every { version?.value } returns "test-version"
+                                    every { code?.value } returns "test-code"
+                                    every { display?.value } returns "test-display"
+                                    every { userSelected?.value } returns true
+                                },
+                            )
+                        every { text?.value } returns "clinical status text"
+                    }
+                every { category } returns
+                    listOf(
+                        mockk {
+                            every { coding } returns
+                                listOf(
+                                    mockk {
+                                        every { system?.value } returns "test-system"
+                                        every { version?.value } returns "test-version"
+                                        every { code?.value } returns "test-code"
+                                        every { display?.value } returns "test-display"
+                                        every { userSelected?.value } returns true
+                                    },
+                                )
+                            every { text?.value } returns "category text"
+                        },
+                    )
+                every { recordedDate } returns DateTime("2021-03-08")
+            }
         val response = listOf(condition1)
 
         every { tenant.mnemonic } returns "tenantId"
         every { tenantService.getTenantForMnemonic("tenantId") } returns tenant
         every { dfe.getAuthorizedTenantId() } returns "tenantId"
 
-        every { ehrFactory.getVendorFactory(tenant) } returns mockk {
-            every { conditionService } returns mockk {
-                every {
-                    findConditions(
-                        tenant = tenant,
-                        patientFhirId = "123456789",
-                        conditionCategoryCode = ConditionCategoryCode.PROBLEM_LIST_ITEM.code,
-                        clinicalStatus = "active"
-                    )
-                } returns response
+        every { ehrFactory.getVendorFactory(tenant) } returns
+            mockk {
+                every { conditionService } returns
+                    mockk {
+                        every {
+                            findConditions(
+                                tenant = tenant,
+                                patientFhirId = "123456789",
+                                conditionCategoryCode = ConditionCategoryCode.PROBLEM_LIST_ITEM.code,
+                                clinicalStatus = "active",
+                            )
+                        } returns response
+                    }
             }
-        }
         mockkObject(JacksonUtil)
         every { JacksonUtil.writeJsonValue(condition1) } returns "raw JSON for condition"
         every {
@@ -354,19 +381,20 @@ class ConditionHandlerTest {
                         resourceType = ResourceType.CONDITION,
                         tenant = "tenantId",
                         text = "raw JSON for condition",
-                        metadata = metadata
-                    )
-                )
+                        metadata = metadata,
+                    ),
+                ),
             )
         } throws (Exception("exception"))
 
         // Run Test
-        val actualResponse = conditionHandler.conditionsByPatientAndCategory(
-            tenantId = "tenantId",
-            patientFhirId = "123456789",
-            conditionCategoryCode = ConditionCategoryCode.PROBLEM_LIST_ITEM,
-            dfe = dfe
-        )
+        val actualResponse =
+            conditionHandler.conditionsByPatientAndCategory(
+                tenantId = "tenantId",
+                patientFhirId = "123456789",
+                conditionCategoryCode = ConditionCategoryCode.PROBLEM_LIST_ITEM,
+                dfe = dfe,
+            )
 
         // Check results
         assertNotNull(actualResponse)
@@ -385,18 +413,20 @@ class ConditionHandlerTest {
         every { tenantService.getTenantForMnemonic("tenantId") } returns tenant
         every { dfe.getAuthorizedTenantId() } returns "tenantId"
 
-        every { ehrFactory.getVendorFactory(tenant) } returns mockk {
-            every { conditionService } returns mockk {
-                every {
-                    findConditions(
-                        tenant = tenant,
-                        patientFhirId = "123456789",
-                        conditionCategoryCode = ConditionCategoryCode.PROBLEM_LIST_ITEM.code,
-                        clinicalStatus = "active"
-                    )
-                } returns response
+        every { ehrFactory.getVendorFactory(tenant) } returns
+            mockk {
+                every { conditionService } returns
+                    mockk {
+                        every {
+                            findConditions(
+                                tenant = tenant,
+                                patientFhirId = "123456789",
+                                conditionCategoryCode = ConditionCategoryCode.PROBLEM_LIST_ITEM.code,
+                                clinicalStatus = "active",
+                            )
+                        } returns response
+                    }
             }
-        }
 
         every {
             queueService.enqueueMessages(
@@ -406,19 +436,20 @@ class ConditionHandlerTest {
                         resourceType = ResourceType.CONDITION,
                         tenant = "tenantId",
                         text = "raw JSON for condition",
-                        metadata = metadata
-                    )
-                )
+                        metadata = metadata,
+                    ),
+                ),
             )
         } just Runs
 
         // Run Test
-        val actualResponse = conditionHandler.conditionsByPatientAndCategory(
-            tenantId = "tenantId",
-            patientFhirId = "123456789",
-            conditionCategoryCode = ConditionCategoryCode.PROBLEM_LIST_ITEM,
-            dfe = dfe
-        )
+        val actualResponse =
+            conditionHandler.conditionsByPatientAndCategory(
+                tenantId = "tenantId",
+                patientFhirId = "123456789",
+                conditionCategoryCode = ConditionCategoryCode.PROBLEM_LIST_ITEM,
+                dfe = dfe,
+            )
 
         // Check results
         assertNotNull(actualResponse)

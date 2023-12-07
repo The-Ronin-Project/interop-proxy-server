@@ -16,36 +16,40 @@ class CodeableConceptTest {
         val ehrCoding1 = relaxedMockk<R4Coding>()
         val ehrCoding2 = relaxedMockk<R4Coding>()
 
-        val ehrCodeableConcept = relaxedMockk<R4CodeableConcept> {
-            every { coding } returns listOf(ehrCoding1, ehrCoding2)
-        }
+        val ehrCodeableConcept =
+            relaxedMockk<R4CodeableConcept> {
+                every { coding } returns listOf(ehrCoding1, ehrCoding2)
+            }
         val codeableConcept = CodeableConcept(ehrCodeableConcept)
         assertEquals(2, codeableConcept.coding.size)
     }
 
     @Test
     fun `can get text`() {
-        val ehrCodeableConcept = relaxedMockk<R4CodeableConcept> {
-            every { text } returns "text".asFHIR()
-        }
+        val ehrCodeableConcept =
+            relaxedMockk<R4CodeableConcept> {
+                every { text } returns "text".asFHIR()
+            }
         val codeableConcept = CodeableConcept(ehrCodeableConcept)
         assertEquals("text", codeableConcept.text)
     }
 
     @Test
     fun `can get null text`() {
-        val ehrCodeableConcept = relaxedMockk<R4CodeableConcept> {
-            every { text } returns null
-        }
+        val ehrCodeableConcept =
+            relaxedMockk<R4CodeableConcept> {
+                every { text } returns null
+            }
         val codeableConcept = CodeableConcept(ehrCodeableConcept)
         assertNull(codeableConcept.text)
     }
 
     @Test
     fun `can get text with null value`() {
-        val ehrCodeableConcept = relaxedMockk<R4CodeableConcept> {
-            every { text } returns FHIRString(null)
-        }
+        val ehrCodeableConcept =
+            relaxedMockk<R4CodeableConcept> {
+                every { text } returns FHIRString(null)
+            }
         val codeableConcept = CodeableConcept(ehrCodeableConcept)
         assertNull(codeableConcept.text)
     }

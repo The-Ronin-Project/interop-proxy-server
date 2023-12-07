@@ -12,7 +12,7 @@ data class Cerner(
     val messagePractitioner: String,
     val messageTopic: String?,
     val messageCategory: String?,
-    val messagePriority: String?
+    val messagePriority: String?,
 ) : Vendor {
     override val vendorType: VendorType = VendorType.CERNER
 }

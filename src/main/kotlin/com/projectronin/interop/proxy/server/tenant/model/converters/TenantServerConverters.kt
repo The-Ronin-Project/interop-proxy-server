@@ -13,7 +13,7 @@ fun TenantServerDO.toProxyTenantServer(): TenantServer {
         messageType = messageType.name,
         address = address,
         port = port,
-        serverType = serverType.abbreviation
+        serverType = serverType.abbreviation,
     )
 }
 
@@ -24,8 +24,9 @@ fun TenantServer.toTenantServerDO(proxyTenant: Tenant): TenantServerDO {
         address = this@toTenantServerDO.address
         port = this@toTenantServerDO.port
         serverType = ProcessingID.values().first { it.abbreviation == this@toTenantServerDO.serverType }
-        tenant = TenantDO {
-            id = proxyTenant.id
-        }
+        tenant =
+            TenantDO {
+                id = proxyTenant.id
+            }
     }
 }

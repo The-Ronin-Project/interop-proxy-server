@@ -7,26 +7,29 @@ import com.projectronin.interop.tenant.config.data.model.TenantDO
 
 fun MirthTenantConfigDO.toProxyMirthTenantConfig(): MirthTenantConfig {
     return MirthTenantConfig(
-        locationIds = if (locationIds.isEmpty()) {
-            emptyList()
-        } else {
-            locationIds.split(",")
-        },
+        locationIds =
+            if (locationIds.isEmpty()) {
+                emptyList()
+            } else {
+                locationIds.split(",")
+            },
         lastUpdated = lastUpdated,
-        blockedResources = if (blockedResources.isNullOrEmpty()) {
-            emptyList()
-        } else {
-            blockedResources!!.split(",")
-        }
+        blockedResources =
+            if (blockedResources.isNullOrEmpty()) {
+                emptyList()
+            } else {
+                blockedResources!!.split(",")
+            },
     )
 }
 
 fun MirthTenantConfig.toMirthTenantConfigDO(proxyTenant: Tenant): MirthTenantConfigDO {
     return MirthTenantConfigDO {
         locationIds = this@toMirthTenantConfigDO.locationIds.joinToString(",")
-        tenant = TenantDO {
-            id = proxyTenant.id
-        }
+        tenant =
+            TenantDO {
+                id = proxyTenant.id
+            }
         lastUpdated = this@toMirthTenantConfigDO.lastUpdated
         blockedResources = this@toMirthTenantConfigDO.blockedResources.joinToString(",")
     }

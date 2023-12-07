@@ -17,7 +17,7 @@ private fun EhrDO.toEpicEHR(): ProxyEHR {
         instanceName = this.instanceName,
         clientId = this.clientId,
         publicKey = this.publicKey,
-        privateKey = this.privateKey
+        privateKey = this.privateKey,
     )
 }
 
@@ -27,7 +27,7 @@ private fun EhrDO.toCernerEHR(): ProxyEHR {
         instanceName = this.instanceName,
         clientId = this.clientId,
         accountId = this.accountId,
-        secret = this.secret
+        secret = this.secret,
     )
 }
 

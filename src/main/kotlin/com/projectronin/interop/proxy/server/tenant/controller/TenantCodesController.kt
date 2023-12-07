@@ -24,19 +24,19 @@ import org.springframework.web.bind.annotation.RestController
 @RequestMapping("/tenants/{tenantMnemonic}/codes")
 class TenantCodesController(
     private val tenantService: TenantService,
-    private val tenantCodesDAO: TenantCodesDAO
+    private val tenantCodesDAO: TenantCodesDAO,
 ) {
-
     /**
      * Retrieves the bsaCode, bmiCode, and list of staging codes configured for a tenant.
      */
     @GetMapping
     @Trace
     fun get(
-        @PathVariable tenantMnemonic: String
+        @PathVariable tenantMnemonic: String,
     ): ResponseEntity<TenantCodes> {
-        val tenantCodes = tenantCodesDAO.getByTenantMnemonic(tenantMnemonic)
-            ?: throw NoTenantFoundException("No Tenant Codes Found with that mnemonic")
+        val tenantCodes =
+            tenantCodesDAO.getByTenantMnemonic(tenantMnemonic)
+                ?: throw NoTenantFoundException("No Tenant Codes Found with that mnemonic")
 
         return ResponseEntity(tenantCodes.toProxyTenantCodes(), HttpStatus.OK)
     }
@@ -48,10 +48,11 @@ class TenantCodesController(
     @Trace
     fun insert(
         @PathVariable tenantMnemonic: String,
-        @RequestBody tenantCodes: TenantCodes
+        @RequestBody tenantCodes: TenantCodes,
     ): ResponseEntity<TenantCodes> {
-        val tenant = tenantService.getTenantForMnemonic(tenantMnemonic)
-            ?: throw NoTenantFoundException("No Tenant With that mnemonic")
+        val tenant =
+            tenantService.getTenantForMnemonic(tenantMnemonic)
+                ?: throw NoTenantFoundException("No Tenant With that mnemonic")
 
         val insertedCodeConfig = tenantCodesDAO.insertCodes(tenantCodes.toTenantCodesDO(tenant = tenant.internalId))
 
@@ -65,16 +66,17 @@ class TenantCodesController(
     @Trace
     fun update(
         @PathVariable tenantMnemonic: String,
-        @RequestBody tenantCodes: TenantCodes
+        @RequestBody tenantCodes: TenantCodes,
     ): ResponseEntity<TenantCodes> {
-        val tenant = tenantService.getTenantForMnemonic(tenantMnemonic)
-            ?: throw NoTenantFoundException("No Tenant With that mnemonic")
+        val tenant =
+            tenantService.getTenantForMnemonic(tenantMnemonic)
+                ?: throw NoTenantFoundException("No Tenant With that mnemonic")
 
         val result = tenantCodesDAO.updateCodes(tenantCodes.toTenantCodesDO(tenant = tenant.internalId))
 
         return result?.let { ResponseEntity(it.toProxyTenantCodes(), HttpStatus.OK) } ?: ResponseEntity(
             null,
-            HttpStatus.NOT_FOUND
+            HttpStatus.NOT_FOUND,
         )
     }
 }

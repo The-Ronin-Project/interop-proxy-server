@@ -30,51 +30,56 @@ class TenantControllerTest {
     private var ehrFactory = mockk<EHRFactory>()
     private var tenantController = TenantController(tenantService, ehrFactory)
 
-    private val proxyVendor = ProxyEpic(
-        release = "release",
-        serviceEndpoint = "serviceEndpoint",
-        authEndpoint = "authEndpoint",
-        ehrUserId = "ehrUserId",
-        messageType = "messageType",
-        practitionerProviderSystem = "providerSystemExample",
-        practitionerUserSystem = "userSystemExample",
-        patientMRNSystem = "mrnSystemExample",
-        patientInternalSystem = "internalSystemExample",
-        encounterCSNSystem = "encounterCSNSystem",
-        patientMRNTypeText = "patientMRNTypeText",
-        hsi = null,
-        instanceName = "instanceName",
-        departmentInternalSystem = "departmentInternalSystem",
-        patientOnboardedFlagId = "flagId",
-        orderSystem = "orderSystem"
-    )
-    private val proxyTenant = ProxyTenant(
-        id = 1,
-        mnemonic = "mnemonic1",
-        availableStart = LocalTime.of(20, 0),
-        availableEnd = LocalTime.of(6, 0),
-        vendor = proxyVendor,
-        name = "test tenant",
-        timezone = "America/Los_Angeles",
-        monitoredIndicator = null
-    )
-    private val tenantServiceTenant = mockk<TenantServiceTenant> {
-        every { internalId } returns 1
-        every { mnemonic } returns "mnemonic1"
-    }
-    private val proxyTenantNoTimes = ProxyTenant(
-        id = 2,
-        mnemonic = "mnemonic2",
-        availableStart = null,
-        availableEnd = null,
-        vendor = proxyVendor,
-        name = "test tenant2",
-        timezone = "America/Denver",
-        monitoredIndicator = null
-    )
-    private val tenantServiceTenantNoBatch = mockk<TenantServiceTenant> {
-        every { mnemonic } returns "mnemonic2"
-    }
+    private val proxyVendor =
+        ProxyEpic(
+            release = "release",
+            serviceEndpoint = "serviceEndpoint",
+            authEndpoint = "authEndpoint",
+            ehrUserId = "ehrUserId",
+            messageType = "messageType",
+            practitionerProviderSystem = "providerSystemExample",
+            practitionerUserSystem = "userSystemExample",
+            patientMRNSystem = "mrnSystemExample",
+            patientInternalSystem = "internalSystemExample",
+            encounterCSNSystem = "encounterCSNSystem",
+            patientMRNTypeText = "patientMRNTypeText",
+            hsi = null,
+            instanceName = "instanceName",
+            departmentInternalSystem = "departmentInternalSystem",
+            patientOnboardedFlagId = "flagId",
+            orderSystem = "orderSystem",
+        )
+    private val proxyTenant =
+        ProxyTenant(
+            id = 1,
+            mnemonic = "mnemonic1",
+            availableStart = LocalTime.of(20, 0),
+            availableEnd = LocalTime.of(6, 0),
+            vendor = proxyVendor,
+            name = "test tenant",
+            timezone = "America/Los_Angeles",
+            monitoredIndicator = null,
+        )
+    private val tenantServiceTenant =
+        mockk<TenantServiceTenant> {
+            every { internalId } returns 1
+            every { mnemonic } returns "mnemonic1"
+        }
+    private val proxyTenantNoTimes =
+        ProxyTenant(
+            id = 2,
+            mnemonic = "mnemonic2",
+            availableStart = null,
+            availableEnd = null,
+            vendor = proxyVendor,
+            name = "test tenant2",
+            timezone = "America/Denver",
+            monitoredIndicator = null,
+        )
+    private val tenantServiceTenantNoBatch =
+        mockk<TenantServiceTenant> {
+            every { mnemonic } returns "mnemonic2"
+        }
 
     @BeforeEach
     fun setup() {
@@ -138,16 +143,17 @@ class TenantControllerTest {
 
     @Test
     fun `insert with just a start doesn't create batch config`() {
-        val proxyTenantNoStart = ProxyTenant(
-            id = 2,
-            mnemonic = "mnemonic2",
-            availableStart = null,
-            availableEnd = LocalTime.of(6, 0),
-            vendor = proxyVendor,
-            name = "test tenant2",
-            timezone = "America/Denver",
-            monitoredIndicator = null
-        )
+        val proxyTenantNoStart =
+            ProxyTenant(
+                id = 2,
+                mnemonic = "mnemonic2",
+                availableStart = null,
+                availableEnd = LocalTime.of(6, 0),
+                vendor = proxyVendor,
+                name = "test tenant2",
+                timezone = "America/Denver",
+                monitoredIndicator = null,
+            )
         every { proxyTenantNoStart.toTenantServerTenant() } returns mockk()
         every { tenantService.insertTenant(any()) } returns tenantServiceTenantNoBatch
         val response = tenantController.insert(proxyTenantNoStart)
@@ -157,16 +163,17 @@ class TenantControllerTest {
 
     @Test
     fun `insert with just a end doesn't create batch config`() {
-        val proxyTenantNoEnd = ProxyTenant(
-            id = 2,
-            mnemonic = "mnemonic2",
-            availableStart = LocalTime.of(6, 0),
-            availableEnd = null,
-            vendor = proxyVendor,
-            name = "test tenant2",
-            timezone = "America/Denver",
-            monitoredIndicator = null
-        )
+        val proxyTenantNoEnd =
+            ProxyTenant(
+                id = 2,
+                mnemonic = "mnemonic2",
+                availableStart = LocalTime.of(6, 0),
+                availableEnd = null,
+                vendor = proxyVendor,
+                name = "test tenant2",
+                timezone = "America/Denver",
+                monitoredIndicator = null,
+            )
         every { proxyTenantNoEnd.toTenantServerTenant() } returns mockk()
         every { tenantService.insertTenant(any()) } returns tenantServiceTenantNoBatch
         val response = tenantController.insert(proxyTenantNoEnd)
@@ -229,7 +236,7 @@ class TenantControllerTest {
         every { ehrFactory.getVendorFactory(tenantServiceTenant).healthCheckService.healthCheck(tenantServiceTenant) } returns false
         every {
             ehrFactory.getVendorFactory(tenantServiceTenantNoBatch).healthCheckService.healthCheck(
-                tenantServiceTenantNoBatch
+                tenantServiceTenantNoBatch,
             )
         } returns true
 

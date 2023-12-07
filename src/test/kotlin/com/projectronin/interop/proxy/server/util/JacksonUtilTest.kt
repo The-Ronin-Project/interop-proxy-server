@@ -8,7 +8,6 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 internal class JacksonUtilTest {
-
     @Test
     fun `string test`() {
         val realPatient = Patient(active = FHIRBoolean.TRUE, language = Code("Code"))

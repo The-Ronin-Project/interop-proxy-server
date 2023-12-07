@@ -23,7 +23,7 @@ fun TenantServiceTenant.toProxyTenant(): ProxyTenant {
         availableStart = batchConfig?.availableStart,
         availableEnd = batchConfig?.availableEnd,
         vendor = vendor.toProxyVendor(),
-        monitoredIndicator = monitoredIndicator
+        monitoredIndicator = monitoredIndicator,
     )
 }
 
@@ -51,7 +51,7 @@ private fun TenantServiceEpic.toProxyEpic(): ProxyEpic {
         instanceName = instanceName,
         departmentInternalSystem = departmentInternalSystem,
         patientOnboardedFlagId = patientOnboardedFlagId,
-        orderSystem = orderSystem
+        orderSystem = orderSystem,
     )
 }
 
@@ -64,7 +64,7 @@ private fun TenantServiceCerner.toProxyCerner(): ProxyCerner {
         messagePractitioner = messagePractitioner,
         messageTopic = messageTopic,
         messageCategory = messageCategory,
-        messagePriority = messagePriority
+        messagePriority = messagePriority,
     )
 }
 
@@ -77,13 +77,14 @@ fun ProxyTenant.toTenantServerTenant(newId: Int = this.id): TenantServiceTenant 
         mnemonic = mnemonic,
         name = name,
         timezone = ZoneId.of(timezone),
-        batchConfig = availableStart?.let { start ->
-            availableEnd?.let { end ->
-                BatchConfig(start, end)
-            }
-        },
+        batchConfig =
+            availableStart?.let { start ->
+                availableEnd?.let { end ->
+                    BatchConfig(start, end)
+                }
+            },
         vendor = vendor.toTenantServerTenant(),
-        monitoredIndicator = monitoredIndicator
+        monitoredIndicator = monitoredIndicator,
     )
 }
 
@@ -112,7 +113,7 @@ private fun ProxyEpic.toTenantServerEpic(): TenantServiceEpic {
         authenticationConfig = EpicAuthenticationConfig(authEndpoint, "", ""),
         departmentInternalSystem = departmentInternalSystem,
         patientOnboardedFlagId = patientOnboardedFlagId,
-        orderSystem = orderSystem
+        orderSystem = orderSystem,
     )
 }
 
@@ -124,12 +125,13 @@ private fun ProxyCerner.toTenantServerCerner(): TenantServiceCerner {
         clientId = "",
         messagePractitioner = messagePractitioner,
         messageTopic = messageTopic,
-        authenticationConfig = CernerAuthenticationConfig(
-            authEndpoint = authEndpoint,
-            accountId = "",
-            secret = ""
-        ),
+        authenticationConfig =
+            CernerAuthenticationConfig(
+                authEndpoint = authEndpoint,
+                accountId = "",
+                secret = "",
+            ),
         messageCategory = messageCategory,
-        messagePriority = messagePriority
+        messagePriority = messagePriority,
     )
 }

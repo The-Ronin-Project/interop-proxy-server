@@ -27,13 +27,13 @@ class M2MAuthService(private val properties: Auth0MachineToMachineProperties, pr
         return try {
             ParsedM2MToken(
                 m2mJwtDecoder.decode(token),
-                true
+                true,
             )
         } catch (e: Exception) {
             logger.info { "M2M Auth Failed with exception: ${e.message}" }
             ParsedM2MToken(
                 null,
-                false
+                false,
             )
         }
     }
@@ -41,5 +41,5 @@ class M2MAuthService(private val properties: Auth0MachineToMachineProperties, pr
 
 data class ParsedM2MToken(
     val token: Jwt?,
-    val success: Boolean
+    val success: Boolean,
 )

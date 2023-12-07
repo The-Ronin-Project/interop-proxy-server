@@ -31,17 +31,19 @@ class MirthTenantConfigController(
     private val mirthTenantConfigDAO: MirthTenantConfigDAO,
     private val tenantService: TenantService,
     private val loadService: KafkaLoadService,
-    @Value("\${proxy.load.locations.on.tenant.config.update:no}") private val loadLocations: String = "no" // temp
+    @Value("\${proxy.load.locations.on.tenant.config.update:no}")
+    private val loadLocations: String = "no",
 ) {
     private val logger = KotlinLogging.logger { }
 
     @GetMapping
     @Trace
     fun get(
-        @PathVariable tenantMnemonic: String
+        @PathVariable tenantMnemonic: String,
     ): ResponseEntity<MirthTenantConfig?> {
-        val mirthTenantConfigs = mirthTenantConfigDAO.getByTenantMnemonic(tenantMnemonic)
-            ?: throw NoTenantFoundException("No Mirth Config Found with that mnemonic")
+        val mirthTenantConfigs =
+            mirthTenantConfigDAO.getByTenantMnemonic(tenantMnemonic)
+                ?: throw NoTenantFoundException("No Mirth Config Found with that mnemonic")
 
         return ResponseEntity(mirthTenantConfigs.toProxyMirthTenantConfig(), HttpStatus.OK)
     }
@@ -50,10 +52,11 @@ class MirthTenantConfigController(
     @Trace
     fun insert(
         @PathVariable tenantMnemonic: String,
-        @RequestBody mirthTenantConfig: MirthTenantConfig
+        @RequestBody mirthTenantConfig: MirthTenantConfig,
     ): ResponseEntity<MirthTenantConfig> {
-        val tenant = tenantService.getTenantForMnemonic(tenantMnemonic)
-            ?: throw NoTenantFoundException("No Tenant With that mnemonic")
+        val tenant =
+            tenantService.getTenantForMnemonic(tenantMnemonic)
+                ?: throw NoTenantFoundException("No Tenant With that mnemonic")
 
         val insertMirthTenantConfig = mirthTenantConfig.toMirthTenantConfigDO(tenant.toProxyTenant())
 
@@ -66,17 +69,19 @@ class MirthTenantConfigController(
     @Trace
     fun update(
         @PathVariable tenantMnemonic: String,
-        @RequestBody mirthTenantConfig: MirthTenantConfig
+        @RequestBody mirthTenantConfig: MirthTenantConfig,
     ): ResponseEntity<MirthTenantConfig?> {
-        val tenant = tenantService.getTenantForMnemonic(tenantMnemonic)
-            ?: throw NoTenantFoundException("No Tenant With that mnemonic")
+        val tenant =
+            tenantService.getTenantForMnemonic(tenantMnemonic)
+                ?: throw NoTenantFoundException("No Tenant With that mnemonic")
 
         val updatedMirthTenantConfig = mirthTenantConfig.toMirthTenantConfigDO(tenant.toProxyTenant())
         val result = mirthTenantConfigDAO.updateConfig(updatedMirthTenantConfig)
-        val status = result?.let {
-            sendLocationLoadEvent(tenantMnemonic, mirthTenantConfig.locationIds)
-            HttpStatus.OK
-        } ?: HttpStatus.NOT_FOUND
+        val status =
+            result?.let {
+                sendLocationLoadEvent(tenantMnemonic, mirthTenantConfig.locationIds)
+                HttpStatus.OK
+            } ?: HttpStatus.NOT_FOUND
 
         return ResponseEntity(result?.toProxyMirthTenantConfig(), status)
     }
@@ -93,7 +98,10 @@ class MirthTenantConfigController(
         return ResponseEntity(e.message, HttpStatus.INTERNAL_SERVER_ERROR)
     }
 
-    private fun sendLocationLoadEvent(tenantMnemonic: String, locationIds: List<String>) {
+    private fun sendLocationLoadEvent(
+        tenantMnemonic: String,
+        locationIds: List<String>,
+    ) {
         if (loadLocations == "yes") {
             val metadata = generateMetadata()
 
@@ -102,7 +110,7 @@ class MirthTenantConfigController(
                 DataTrigger.AD_HOC,
                 locationIds,
                 ResourceType.Location,
-                metadata
+                metadata,
             )
         }
     }

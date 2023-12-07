@@ -13,7 +13,7 @@ import com.projectronin.interop.fhir.r4.resource.Condition as R4Condition
 @GraphQLDescription("A patient condition")
 data class Condition(
     private val condition: R4Condition,
-    private val tenant: Tenant
+    private val tenant: Tenant,
 ) {
     @GraphQLDescription("The internal identifier for this condition")
     val id: String? by lazy {

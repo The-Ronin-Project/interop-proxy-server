@@ -31,12 +31,15 @@ import com.projectronin.interop.proxy.server.model.Appointment as ProxyServerApp
 class AppointmentHandler(
     private val ehrFactory: EHRFactory,
     private val tenantService: TenantService,
-    private val queueService: QueueService
+    private val queueService: QueueService,
 ) : Query {
     private val logger = KotlinLogging.logger { }
     private val dateFormatter = DateUtil()
 
-    @GraphQLDescription("Finds appointments for a given MRN and date range. Requires User Auth matching to the requested tenant or will result in an error with no results.")
+    @GraphQLDescription(
+        "Finds appointments for a given MRN and date range. " +
+            "Requires User Auth matching to the requested tenant or will result in an error with no results.",
+    )
     @Deprecated("This query is deprecated.", ReplaceWith("appointmentsByPatientAndDate"))
     @Trace
     fun appointmentsByMRNAndDate(
@@ -44,21 +47,24 @@ class AppointmentHandler(
         mrn: String,
         startDate: String,
         endDate: String,
-        dfe: DataFetchingEnvironment
+        dfe: DataFetchingEnvironment,
     ): DataFetcherResult<List<ProxyServerAppointment>> {
         val tenant = findAndValidateTenant(dfe, tenantService, tenantId)
         val patientFHIRID = ehrFactory.getVendorFactory(tenant).patientService.getPatientFHIRId(tenant, mrn)
         return appointmentHandler(tenant, patientFHIRID, startDate, endDate, mrn)
     }
 
-    @GraphQLDescription("Finds appointments for a given patient UDP ID and date range. Requires User Auth matching to the requested tenant or will result in an error with no results.")
+    @GraphQLDescription(
+        "Finds appointments for a given patient UDP ID and date range. " +
+            "Requires User Auth matching to the requested tenant or will result in an error with no results.",
+    )
     @Trace
     fun appointmentsByPatientAndDate(
         tenantId: String,
         patientFhirId: String,
         startDate: String,
         endDate: String,
-        dfe: DataFetchingEnvironment // automatically added to requests
+        dfe: DataFetchingEnvironment,
     ): DataFetcherResult<List<ProxyServerAppointment>> {
         val tenant = findAndValidateTenant(dfe, tenantService, tenantId)
         // INT-2073: This should be corrected in Appointment and moved there.
@@ -71,28 +77,30 @@ class AppointmentHandler(
         patientFhirId: String,
         startDate: String,
         endDate: String,
-        patientMrn: String? = null
+        patientMrn: String? = null,
     ): DataFetcherResult<List<ProxyServerAppointment>> {
         logger.info { "Processing appointment query for tenant: ${tenant.name}" }
 
         val findAppointmentErrors = mutableListOf<GraphQLError>()
 
         // request appointment list from EHR
-        val appointments = try {
-            val appointmentService = ehrFactory.getVendorFactory(tenant).appointmentService
-            appointmentService.findPatientAppointments(
-                tenant = tenant,
-                patientFHIRId = patientFhirId,
-                startDate = dateFormatter.parseDateString(startDate),
-                endDate = dateFormatter.parseDateString(endDate),
-                patientMRN = patientMrn,
-                useEHRFallback = false // prevent overloading Epic with too many API calls
-            )
-        } catch (e: Exception) {
-            findAppointmentErrors.add(GraphQLException(e.message).toGraphQLError())
-            logger.error(e.getLogMarker(), e) { "Appointment query for tenant ${tenant.name} contains error" }
-            listOf()
-        }
+        val appointments =
+            try {
+                val appointmentService = ehrFactory.getVendorFactory(tenant).appointmentService
+                appointmentService.findPatientAppointments(
+                    tenant = tenant,
+                    patientFHIRId = patientFhirId,
+                    startDate = dateFormatter.parseDateString(startDate),
+                    endDate = dateFormatter.parseDateString(endDate),
+                    patientMRN = patientMrn,
+                    // prevent overloading Epic with too many API calls
+                    useEHRFallback = false,
+                )
+            } catch (e: Exception) {
+                findAppointmentErrors.add(GraphQLException(e.message).toGraphQLError())
+                logger.error(e.getLogMarker(), e) { "Appointment query for tenant ${tenant.name} contains error" }
+                listOf()
+            }
 
         logger.debug { "Appointment query for tenant ${tenant.name} returned" }
 
@@ -108,9 +116,9 @@ class AppointmentHandler(
                             resourceType = ResourceType.APPOINTMENT,
                             tenant = tenant.mnemonic,
                             text = JacksonUtil.writeJsonValue(it),
-                            metadata = metadata
+                            metadata = metadata,
                         )
-                    }
+                    },
                 )
             } catch (e: Exception) {
                 logger.warn { "Exception sending appointments to queue: ${e.message}" }
@@ -127,7 +135,10 @@ class AppointmentHandler(
     /**
      * Translates a list of [Appointment]s into the appropriate list of proxy server [ProxyServerAppointment]s for return.
      */
-    private fun mapFHIRAppointments(fhirAppointments: List<Appointment>, tenant: Tenant): List<ProxyServerAppointment> {
+    private fun mapFHIRAppointments(
+        fhirAppointments: List<Appointment>,
+        tenant: Tenant,
+    ): List<ProxyServerAppointment> {
         return fhirAppointments.map { ProxyServerAppointment(it, tenant) }
     }
 }

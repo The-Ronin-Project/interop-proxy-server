@@ -31,22 +31,24 @@ class ProviderPoolController(private val providerPoolDAO: ProviderPoolDAO, priva
     @Trace
     fun get(
         @PathVariable tenantMnemonic: String,
-        @RequestParam(required = false) providerIds: List<String>? = null
+        @RequestParam(required = false) providerIds: List<String>? = null,
     ): ResponseEntity<List<ProviderPool>> {
-        val tenant = tenantService.getTenantForMnemonic(tenantMnemonic)
-            ?: throw NoTenantFoundException("No Tenant With that mnemonic")
+        val tenant =
+            tenantService.getTenantForMnemonic(tenantMnemonic)
+                ?: throw NoTenantFoundException("No Tenant With that mnemonic")
 
-        val providerPools = if (providerIds != null) {
-            providerPoolDAO.getPoolsForProviders(tenant.internalId, providerIds)
-        } else {
-            providerPoolDAO.getAll(tenant.internalId)
-        }.map {
-            ProviderPool(
-                providerPoolId = it.id,
-                providerId = it.providerId,
-                poolId = it.poolId
-            )
-        }
+        val providerPools =
+            if (providerIds != null) {
+                providerPoolDAO.getPoolsForProviders(tenant.internalId, providerIds)
+            } else {
+                providerPoolDAO.getAll(tenant.internalId)
+            }.map {
+                ProviderPool(
+                    providerPoolId = it.id,
+                    providerId = it.providerId,
+                    poolId = it.poolId,
+                )
+            }
         return ResponseEntity(providerPools, HttpStatus.OK)
     }
 
@@ -54,19 +56,22 @@ class ProviderPoolController(private val providerPoolDAO: ProviderPoolDAO, priva
     @Trace
     fun insert(
         @PathVariable tenantMnemonic: String,
-        @RequestBody providerPool: ProviderPool
+        @RequestBody providerPool: ProviderPool,
     ): ResponseEntity<ProviderPool> {
-        val tenant = tenantService.getTenantForMnemonic(tenantMnemonic)
-            ?: throw NoTenantFoundException("No Tenant With that mnemonic")
+        val tenant =
+            tenantService.getTenantForMnemonic(tenantMnemonic)
+                ?: throw NoTenantFoundException("No Tenant With that mnemonic")
 
-        val insertProviderPoolDO = ProviderPoolDO {
-            this.id = providerPool.providerPoolId
-            this.providerId = providerPool.providerId
-            this.poolId = providerPool.poolId
-            this.tenant = TenantDO {
-                id = tenant.internalId
+        val insertProviderPoolDO =
+            ProviderPoolDO {
+                this.id = providerPool.providerPoolId
+                this.providerId = providerPool.providerId
+                this.poolId = providerPool.poolId
+                this.tenant =
+                    TenantDO {
+                        id = tenant.internalId
+                    }
             }
-        }
 
         return providerPoolDAO.insert(insertProviderPoolDO).let {
             ResponseEntity(ProviderPool(it.id, it.providerId, it.poolId), HttpStatus.OK)
@@ -78,20 +83,23 @@ class ProviderPoolController(private val providerPoolDAO: ProviderPoolDAO, priva
     fun update(
         @PathVariable tenantMnemonic: String,
         @PathVariable providerPoolId: Int,
-        @RequestBody providerPool: ProviderPool
+        @RequestBody providerPool: ProviderPool,
     ): ResponseEntity<ProviderPool?> {
-        val tenant = tenantService.getTenantForMnemonic(tenantMnemonic)
-            ?: throw NoTenantFoundException("No Tenant With that mnemonic")
+        val tenant =
+            tenantService.getTenantForMnemonic(tenantMnemonic)
+                ?: throw NoTenantFoundException("No Tenant With that mnemonic")
 
         // Use providerPoolId from path, regardless of what's in request body
-        val updateProviderPoolDO = ProviderPoolDO {
-            this.id = providerPoolId
-            this.providerId = providerPool.providerId
-            this.poolId = providerPool.poolId
-            this.tenant = TenantDO {
-                id = tenant.internalId
+        val updateProviderPoolDO =
+            ProviderPoolDO {
+                this.id = providerPoolId
+                this.providerId = providerPool.providerId
+                this.poolId = providerPool.poolId
+                this.tenant =
+                    TenantDO {
+                        id = tenant.internalId
+                    }
             }
-        }
 
         val result = providerPoolDAO.update(updateProviderPoolDO)
         val status = result?.let { HttpStatus.OK } ?: HttpStatus.NOT_FOUND
@@ -100,13 +108,18 @@ class ProviderPoolController(private val providerPoolDAO: ProviderPoolDAO, priva
 
     @DeleteMapping("/{providerPoolId}")
     @Trace
-    fun delete(@PathVariable tenantMnemonic: String, @PathVariable providerPoolId: Int): ResponseEntity<String> {
+    fun delete(
+        @PathVariable tenantMnemonic: String,
+        @PathVariable providerPoolId: Int,
+    ): ResponseEntity<String> {
         // Does the providerPoolId belong to the right tenant?
-        val tenant = tenantService.getTenantForMnemonic(tenantMnemonic)
-            ?: throw NoTenantFoundException("No Tenant With that mnemonic")
+        val tenant =
+            tenantService.getTenantForMnemonic(tenantMnemonic)
+                ?: throw NoTenantFoundException("No Tenant With that mnemonic")
 
-        val providerPoolDO = providerPoolDAO.getPoolById(providerPoolId)
-            ?: return ResponseEntity("Provider pool doesn't exist", HttpStatus.OK)
+        val providerPoolDO =
+            providerPoolDAO.getPoolById(providerPoolId)
+                ?: return ResponseEntity("Provider pool doesn't exist", HttpStatus.OK)
 
         if (providerPoolDO.tenant.mnemonic != tenant.mnemonic) {
             throw Exception("Attempted to delete provider pool $providerPoolId from wrong tenant $tenantMnemonic")
@@ -132,7 +145,7 @@ class ProviderPoolController(private val providerPoolDAO: ProviderPoolDAO, priva
         return ProviderPool(
             providerPoolId = this@toProviderPool.id,
             poolId = this@toProviderPool.poolId,
-            providerId = this@toProviderPool.providerId
+            providerId = this@toProviderPool.providerId,
         )
     }
 }

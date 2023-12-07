@@ -19,18 +19,21 @@ class UserAuthServiceTest {
 
     @Test
     fun `ensure validate token returns correctly with real data`() {
-        val expectedResponse = AuthResponse(
-            user = User(
-                tenantId = "peeng"
-            ),
-            userSession = UserSession(
-                expiresAt = "2022-03-05T00:38:09"
+        val expectedResponse =
+            AuthResponse(
+                user =
+                    User(
+                        tenantId = "peeng",
+                    ),
+                userSession =
+                    UserSession(
+                        expiresAt = "2022-03-05T00:38:09",
+                    ),
             )
-        )
 
         mockWebServer.enqueue(
             MockResponse().setBody(validAuthServiceResponse).setHeader("Content-Type", "application/json")
-                .setResponseCode(200)
+                .setResponseCode(200),
         )
         mockWebServer.start()
         val userAuthService = UserAuthService(getClient(), mockWebServer.url("/auth").toString())
@@ -42,7 +45,7 @@ class UserAuthServiceTest {
     @Test
     fun `ensure get validation handles unauthorized token`() {
         mockWebServer.enqueue(
-            MockResponse().setBody("Unauthorized").setHeader("Content-Type", "application/json").setResponseCode(401)
+            MockResponse().setBody("Unauthorized").setHeader("Content-Type", "application/json").setResponseCode(401),
         )
         mockWebServer.start()
         val userAuthService = UserAuthService(getClient(), mockWebServer.url("/auth").toString())
@@ -54,7 +57,7 @@ class UserAuthServiceTest {
     @Test
     fun `ensure get validation throws an exception on server error`() {
         mockWebServer.enqueue(
-            MockResponse().setHeader("Content-Type", "application/json").setResponseCode(500)
+            MockResponse().setHeader("Content-Type", "application/json").setResponseCode(500),
         )
         mockWebServer.start()
         val userAuthService = UserAuthService(getClient(), mockWebServer.url("/auth").toString())

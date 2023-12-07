@@ -15,9 +15,10 @@ class MetadataUtilTest {
     @Test
     fun `generateMetadata returns metadata`() {
         mockkStatic(GlobalTracer::class)
-        every { GlobalTracer.get().activeSpan() } returns mockk {
-            every { context().toTraceId() } returns "trace-id-1"
-        }
+        every { GlobalTracer.get().activeSpan() } returns
+            mockk {
+                every { context().toTraceId() } returns "trace-id-1"
+            }
 
         val dateTime = OffsetDateTime.now(ZoneOffset.UTC)
         mockkStatic(OffsetDateTime::class)

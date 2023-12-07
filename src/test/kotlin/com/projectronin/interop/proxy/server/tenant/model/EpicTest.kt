@@ -9,24 +9,25 @@ import org.junit.jupiter.api.Test
 internal class EpicTest {
     @Test
     fun `can get data`() {
-        val epic = Epic(
-            release = "release",
-            serviceEndpoint = "serviceEndpoint",
-            authEndpoint = "authEndpoint",
-            ehrUserId = "ehrUserId",
-            messageType = "messageType",
-            practitionerProviderSystem = "practitionerProviderSystem",
-            practitionerUserSystem = "practitionerUserSystem",
-            patientMRNSystem = "patientMrnSystem",
-            patientInternalSystem = "patientInternalSystem",
-            encounterCSNSystem = "encounterCSNSystem",
-            patientMRNTypeText = "patientMRNTypeText",
-            hsi = "hsi",
-            instanceName = "instanceName",
-            departmentInternalSystem = "departmentInternalSystem",
-            patientOnboardedFlagId = "flagId",
-            orderSystem = "orderSystem"
-        )
+        val epic =
+            Epic(
+                release = "release",
+                serviceEndpoint = "serviceEndpoint",
+                authEndpoint = "authEndpoint",
+                ehrUserId = "ehrUserId",
+                messageType = "messageType",
+                practitionerProviderSystem = "practitionerProviderSystem",
+                practitionerUserSystem = "practitionerUserSystem",
+                patientMRNSystem = "patientMrnSystem",
+                patientInternalSystem = "patientInternalSystem",
+                encounterCSNSystem = "encounterCSNSystem",
+                patientMRNTypeText = "patientMRNTypeText",
+                hsi = "hsi",
+                instanceName = "instanceName",
+                departmentInternalSystem = "departmentInternalSystem",
+                patientOnboardedFlagId = "flagId",
+                orderSystem = "orderSystem",
+            )
 
         assertEquals(VendorType.EPIC, epic.vendorType)
         assertEquals("release", epic.release)
@@ -46,28 +47,30 @@ internal class EpicTest {
 
     @Test
     fun `can serialize and deserialize`() {
-        val epic = Epic(
-            release = "release",
-            serviceEndpoint = "serviceEndpoint",
-            authEndpoint = "authEndpoint",
-            ehrUserId = "ehrUserId",
-            messageType = "messageType",
-            practitionerProviderSystem = "practitionerProviderSystem",
-            practitionerUserSystem = "practitionerUserSystem",
-            patientMRNSystem = "patientMrnSystem",
-            patientInternalSystem = "patientInternalSystem",
-            encounterCSNSystem = "encounterCSNSystem",
-            patientMRNTypeText = "patientMRNTypeText",
-            hsi = "hsi",
-            instanceName = "instanceName",
-            departmentInternalSystem = "departmentInternalSystem",
-            patientOnboardedFlagId = "flagId",
-            orderSystem = "orderSystem"
-        )
+        val epic =
+            Epic(
+                release = "release",
+                serviceEndpoint = "serviceEndpoint",
+                authEndpoint = "authEndpoint",
+                ehrUserId = "ehrUserId",
+                messageType = "messageType",
+                practitionerProviderSystem = "practitionerProviderSystem",
+                practitionerUserSystem = "practitionerUserSystem",
+                patientMRNSystem = "patientMrnSystem",
+                patientInternalSystem = "patientInternalSystem",
+                encounterCSNSystem = "encounterCSNSystem",
+                patientMRNTypeText = "patientMRNTypeText",
+                hsi = "hsi",
+                instanceName = "instanceName",
+                departmentInternalSystem = "departmentInternalSystem",
+                patientOnboardedFlagId = "flagId",
+                orderSystem = "orderSystem",
+            )
         val json = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(epic)
 
         // Type is added by @JsonTypeInfo annotation in Vendor interface
-        val expectedJSON = """
+        val expectedJSON =
+            """
             {
               "type" : "EPIC",
               "release" : "release",
@@ -88,7 +91,7 @@ internal class EpicTest {
               "orderSystem" : "orderSystem",
               "vendorType" : "EPIC"
             }
-        """.trimIndent()
+            """.trimIndent()
         assertEquals(expectedJSON, json)
 
         val deserializedEpic = objectMapper.readValue<Epic>(json)
@@ -97,28 +100,30 @@ internal class EpicTest {
 
     @Test
     fun `can serialize and deserialize with null values`() {
-        val epic = Epic(
-            release = "release",
-            serviceEndpoint = "serviceEndpoint",
-            authEndpoint = "authEndpoint",
-            ehrUserId = "ehrUserId",
-            messageType = "messageType",
-            practitionerProviderSystem = "practitionerProviderSystem",
-            practitionerUserSystem = "practitionerUserSystem",
-            patientMRNSystem = "patientMrnSystem",
-            patientInternalSystem = "patientInternalSystem",
-            encounterCSNSystem = "encounterCSNSystem",
-            patientMRNTypeText = "patientMRNTypeText",
-            hsi = null,
-            instanceName = "instanceName",
-            departmentInternalSystem = "departmentInternalSystem",
-            patientOnboardedFlagId = null,
-            orderSystem = null
-        )
+        val epic =
+            Epic(
+                release = "release",
+                serviceEndpoint = "serviceEndpoint",
+                authEndpoint = "authEndpoint",
+                ehrUserId = "ehrUserId",
+                messageType = "messageType",
+                practitionerProviderSystem = "practitionerProviderSystem",
+                practitionerUserSystem = "practitionerUserSystem",
+                patientMRNSystem = "patientMrnSystem",
+                patientInternalSystem = "patientInternalSystem",
+                encounterCSNSystem = "encounterCSNSystem",
+                patientMRNTypeText = "patientMRNTypeText",
+                hsi = null,
+                instanceName = "instanceName",
+                departmentInternalSystem = "departmentInternalSystem",
+                patientOnboardedFlagId = null,
+                orderSystem = null,
+            )
         val json = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(epic)
 
         // Type is added by @JsonTypeInfo annotation in Vendor interface
-        val expectedJSON = """
+        val expectedJSON =
+            """
             {
               "type" : "EPIC",
               "release" : "release",
@@ -136,7 +141,7 @@ internal class EpicTest {
               "departmentInternalSystem" : "departmentInternalSystem",
               "vendorType" : "EPIC"
             }
-        """.trimIndent()
+            """.trimIndent()
         assertEquals(expectedJSON, json)
 
         val deserializedEpic = objectMapper.readValue<Epic>(json)

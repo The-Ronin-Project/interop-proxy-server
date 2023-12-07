@@ -9,5 +9,5 @@ package com.projectronin.interop.proxy.server.tenant.model
 data class ProviderPool(
     val providerPoolId: Int,
     val providerId: String,
-    val poolId: String
+    val poolId: String,
 )

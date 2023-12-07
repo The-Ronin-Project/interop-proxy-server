@@ -20,15 +20,17 @@ import com.projectronin.interop.fhir.r4.datatype.Identifier as R4Identifier
 import com.projectronin.interop.fhir.r4.resource.Patient as R4Patient
 
 internal class PatientTest {
-    private val mockTenant = mockk<Tenant> {
-        every { mnemonic } returns "ten"
-    }
+    private val mockTenant =
+        mockk<Tenant> {
+            every { mnemonic } returns "ten"
+        }
 
     @Test
     fun `can get id`() {
-        val ehrPatient = relaxedMockk<R4Patient> {
-            every { id } returns Id("13579")
-        }
+        val ehrPatient =
+            relaxedMockk<R4Patient> {
+                every { id } returns Id("13579")
+            }
 
         val patient = Patient(ehrPatient, mockTenant, emptyList())
         assertEquals("ten-13579", patient.id)
@@ -38,9 +40,10 @@ internal class PatientTest {
     fun `can get identifier`() {
         val ehrIdentifier1 = relaxedMockk<R4Identifier>()
         val ehrIdentifier2 = relaxedMockk<R4Identifier>()
-        val ehrPatient = relaxedMockk<R4Patient> {
-            every { identifier } returns listOf(ehrIdentifier1, ehrIdentifier2)
-        }
+        val ehrPatient =
+            relaxedMockk<R4Patient> {
+                every { identifier } returns listOf(ehrIdentifier1, ehrIdentifier2)
+            }
 
         val patient = Patient(ehrPatient, mockTenant, emptyList())
         assertEquals(2, patient.identifier.size)
@@ -50,13 +53,15 @@ internal class PatientTest {
     fun `can get identifier including ronin identifiers`() {
         val ehrIdentifier1 = relaxedMockk<R4Identifier>()
         val ehrIdentifier2 = relaxedMockk<R4Identifier>()
-        val ehrPatient = relaxedMockk<R4Patient> {
-            every { identifier } returns listOf(ehrIdentifier1, ehrIdentifier2)
-        }
-        val roninIdentifiers = listOf(
-            R4Identifier(system = Uri("system1"), value = "value".asFHIR()),
-            R4Identifier(system = Uri("system2"), value = "value".asFHIR())
-        )
+        val ehrPatient =
+            relaxedMockk<R4Patient> {
+                every { identifier } returns listOf(ehrIdentifier1, ehrIdentifier2)
+            }
+        val roninIdentifiers =
+            listOf(
+                R4Identifier(system = Uri("system1"), value = "value".asFHIR()),
+                R4Identifier(system = Uri("system2"), value = "value".asFHIR()),
+            )
 
         val patient = Patient(ehrPatient, mockTenant, roninIdentifiers)
         assertEquals(4, patient.identifier.size)
@@ -66,9 +71,10 @@ internal class PatientTest {
     fun `can get name`() {
         val ehrHumanName1 = relaxedMockk<R4HumanName>()
         val ehrHumanName2 = relaxedMockk<R4HumanName>()
-        val ehrPatient = relaxedMockk<R4Patient> {
-            every { name } returns listOf(ehrHumanName1, ehrHumanName2)
-        }
+        val ehrPatient =
+            relaxedMockk<R4Patient> {
+                every { name } returns listOf(ehrHumanName1, ehrHumanName2)
+            }
 
         val patient = Patient(ehrPatient, mockTenant, emptyList())
         assertEquals(2, patient.name.size)
@@ -76,9 +82,10 @@ internal class PatientTest {
 
     @Test
     fun `can get birthdate`() {
-        val ehrPatient = relaxedMockk<R4Patient> {
-            every { birthDate } returns Date("1976-07-04")
-        }
+        val ehrPatient =
+            relaxedMockk<R4Patient> {
+                every { birthDate } returns Date("1976-07-04")
+            }
 
         val patient = Patient(ehrPatient, mockTenant, emptyList())
         assertEquals("1976-07-04", patient.birthDate)
@@ -86,18 +93,20 @@ internal class PatientTest {
 
     @Test
     fun `null birthdate`() {
-        val ehrPatient = relaxedMockk<R4Patient> {
-            every { birthDate } returns null
-        }
+        val ehrPatient =
+            relaxedMockk<R4Patient> {
+                every { birthDate } returns null
+            }
         val patient = Patient(ehrPatient, mockTenant, emptyList())
         assertNull(patient.birthDate)
     }
 
     @Test
     fun `can get gender`() {
-        val ehrPatient = relaxedMockk<R4Patient> {
-            every { gender } returns AdministrativeGender.MALE.asCode()
-        }
+        val ehrPatient =
+            relaxedMockk<R4Patient> {
+                every { gender } returns AdministrativeGender.MALE.asCode()
+            }
 
         val patient = Patient(ehrPatient, mockTenant, emptyList())
         assertEquals("male", patient.gender)
@@ -105,9 +114,10 @@ internal class PatientTest {
 
     @Test
     fun `can get null gender`() {
-        val ehrPatient = relaxedMockk<R4Patient> {
-            every { gender } returns null
-        }
+        val ehrPatient =
+            relaxedMockk<R4Patient> {
+                every { gender } returns null
+            }
 
         val patient = Patient(ehrPatient, mockTenant, emptyList())
         assertNull(patient.gender)
@@ -117,9 +127,10 @@ internal class PatientTest {
     fun `can get telecom`() {
         val ehrContactPoint1 = relaxedMockk<R4ContactPoint>()
         val ehrContactPoint2 = relaxedMockk<R4ContactPoint>()
-        val ehrPatient = relaxedMockk<R4Patient> {
-            every { telecom } returns listOf(ehrContactPoint1, ehrContactPoint2)
-        }
+        val ehrPatient =
+            relaxedMockk<R4Patient> {
+                every { telecom } returns listOf(ehrContactPoint1, ehrContactPoint2)
+            }
 
         val patient = Patient(ehrPatient, mockTenant, emptyList())
         assertEquals(2, patient.telecom.size)
@@ -129,9 +140,10 @@ internal class PatientTest {
     fun `can get address`() {
         val ehrAddress1 = relaxedMockk<R4Address>()
         val ehrAddress2 = relaxedMockk<R4Address>()
-        val ehrPatient = relaxedMockk<R4Patient> {
-            every { address } returns listOf(ehrAddress1, ehrAddress2)
-        }
+        val ehrPatient =
+            relaxedMockk<R4Patient> {
+                every { address } returns listOf(ehrAddress1, ehrAddress2)
+            }
 
         val patient = Patient(ehrPatient, mockTenant, emptyList())
         assertEquals(2, patient.address.size)

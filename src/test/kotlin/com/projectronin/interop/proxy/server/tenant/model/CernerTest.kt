@@ -9,16 +9,17 @@ import org.junit.jupiter.api.Test
 internal class CernerTest {
     @Test
     fun `can get data`() {
-        val cerner = Cerner(
-            serviceEndpoint = "serviceEndpoint",
-            authEndpoint = "authEndpoint",
-            patientMRNSystem = "patientMrnSystem",
-            instanceName = "instanceName",
-            messagePractitioner = "practitioner",
-            messageTopic = "topic",
-            messageCategory = "category",
-            messagePriority = "priority"
-        )
+        val cerner =
+            Cerner(
+                serviceEndpoint = "serviceEndpoint",
+                authEndpoint = "authEndpoint",
+                patientMRNSystem = "patientMrnSystem",
+                instanceName = "instanceName",
+                messagePractitioner = "practitioner",
+                messageTopic = "topic",
+                messageCategory = "category",
+                messagePriority = "priority",
+            )
 
         assertEquals(VendorType.CERNER, cerner.vendorType)
         assertEquals("serviceEndpoint", cerner.serviceEndpoint)
@@ -33,19 +34,21 @@ internal class CernerTest {
 
     @Test
     fun `can serialize and deserialize`() {
-        val cerner = Cerner(
-            serviceEndpoint = "serviceEndpoint",
-            authEndpoint = "authEndpoint",
-            patientMRNSystem = "patientMrnSystem",
-            instanceName = "instanceName",
-            messagePractitioner = "practitioner",
-            messageTopic = "topic",
-            messageCategory = "category",
-            messagePriority = "priority"
-        )
+        val cerner =
+            Cerner(
+                serviceEndpoint = "serviceEndpoint",
+                authEndpoint = "authEndpoint",
+                patientMRNSystem = "patientMrnSystem",
+                instanceName = "instanceName",
+                messagePractitioner = "practitioner",
+                messageTopic = "topic",
+                messageCategory = "category",
+                messagePriority = "priority",
+            )
         val json = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(cerner)
 
-        val expectedJSON = """
+        val expectedJSON =
+            """
             {
               "type" : "CERNER",
               "serviceEndpoint" : "serviceEndpoint",
@@ -58,7 +61,7 @@ internal class CernerTest {
               "messagePriority" : "priority",
               "vendorType" : "CERNER"
             }
-        """.trimIndent()
+            """.trimIndent()
         assertEquals(expectedJSON, json)
 
         val deserializedCerner = objectMapper.readValue<Cerner>(json)
@@ -67,19 +70,21 @@ internal class CernerTest {
 
     @Test
     fun `can serialize and deserialize with null values`() {
-        val cerner = Cerner(
-            serviceEndpoint = "serviceEndpoint",
-            authEndpoint = "authEndpoint",
-            patientMRNSystem = "patientMrnSystem",
-            instanceName = "instanceName",
-            messagePractitioner = "practitioner",
-            messageTopic = null,
-            messageCategory = null,
-            messagePriority = null
-        )
+        val cerner =
+            Cerner(
+                serviceEndpoint = "serviceEndpoint",
+                authEndpoint = "authEndpoint",
+                patientMRNSystem = "patientMrnSystem",
+                instanceName = "instanceName",
+                messagePractitioner = "practitioner",
+                messageTopic = null,
+                messageCategory = null,
+                messagePriority = null,
+            )
         val json = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(cerner)
 
-        val expectedJSON = """
+        val expectedJSON =
+            """
             {
               "type" : "CERNER",
               "serviceEndpoint" : "serviceEndpoint",
@@ -89,7 +94,7 @@ internal class CernerTest {
               "messagePractitioner" : "practitioner",
               "vendorType" : "CERNER"
             }
-        """.trimIndent()
+            """.trimIndent()
         assertEquals(expectedJSON, json)
 
         val deserializedCerner = objectMapper.readValue<Cerner>(json)

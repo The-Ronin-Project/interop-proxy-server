@@ -28,25 +28,29 @@ internal class PractitionerHandlerTest {
     private val queueService = mockk<QueueService>()
     private val practService = mockk<PractitionerService>()
     private val handler = PractitionerHandler(factory, tenantService, queueService)
-    private val tenant = mockk<Tenant> {
-        every { mnemonic } returns "tenant"
-    }
-    private val practitioner = mockk<Practitioner> {
-        every { id!!.value } returns "practID1"
-        every { identifier } returns listOf(
-            mockk {
-                every { system } returns Uri("system")
-                every { value?.value } returns "value"
-            }
-        )
-        every { name } returns listOf(
-            mockk {
-                every { use?.value } returns "use"
-                every { family?.value } returns "family"
-                every { given } returns listOf("given").asFHIR()
-            }
-        )
-    }
+    private val tenant =
+        mockk<Tenant> {
+            every { mnemonic } returns "tenant"
+        }
+    private val practitioner =
+        mockk<Practitioner> {
+            every { id!!.value } returns "practID1"
+            every { identifier } returns
+                listOf(
+                    mockk {
+                        every { system } returns Uri("system")
+                        every { value?.value } returns "value"
+                    },
+                )
+            every { name } returns
+                listOf(
+                    mockk {
+                        every { use?.value } returns "use"
+                        every { family?.value } returns "family"
+                        every { given } returns listOf("given").asFHIR()
+                    },
+                )
+        }
 
     @Test
     fun `getById test`() {

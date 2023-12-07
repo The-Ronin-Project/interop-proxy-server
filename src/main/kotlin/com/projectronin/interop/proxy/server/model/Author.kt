@@ -16,7 +16,7 @@ data class StringAuthor(private val author: String) : Author {
 @GraphQLDescription("Reference representation of the Author")
 data class ReferenceAuthor(
     private val author: R4Reference,
-    private val tenant: Tenant
+    private val tenant: Tenant,
 ) : Author {
     @GraphQLDescription("Reference to the author")
     val value: Reference by lazy {

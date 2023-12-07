@@ -29,53 +29,60 @@ import com.projectronin.interop.proxy.server.model.Practitioner as ProxyServerPr
 class PractitionerHandler(
     private val ehrFactory: EHRFactory,
     private val tenantService: TenantService,
-    private val queueService: QueueService
+    private val queueService: QueueService,
 ) : Query {
     private val logger = KotlinLogging.logger { }
 
-    @GraphQLDescription("Searches the EHR for a FHIR Practitioner by an internal identifier, and adds it to the Aidbox queue. Requires M2M Authorization or User Auth matching to the requested tenant or will result in an error with no results.")
+    @GraphQLDescription(
+        "Searches the EHR for a FHIR Practitioner by an internal identifier, and adds it to the Aidbox queue. " +
+            "Requires M2M Authorization or User Auth matching to the requested tenant or will result in an error with no results.",
+    )
     @Trace
     fun getPractitionerByProvider(
         tenantId: String,
         providerId: String,
-        dfe: DataFetchingEnvironment
+        dfe: DataFetchingEnvironment,
     ): DataFetcherResult<ProxyServerPractitioner?> {
         val tenant = findAndValidateTenant(dfe, tenantService, tenantId, false)
         return retrievePractitioner(
             tenant,
             providerId,
-            ehrFactory.getVendorFactory(tenant).practitionerService::getPractitionerByProvider
+            ehrFactory.getVendorFactory(tenant).practitionerService::getPractitionerByProvider,
         )
     }
 
-    @GraphQLDescription("Retrieves a FHIR Practitioner from the EHR, and adds it to the Aidbox queue. Requires M2M Authorization or User Auth matching to the requested tenant or will result in an error with no results.")
+    @GraphQLDescription(
+        "Retrieves a FHIR Practitioner from the EHR, and adds it to the Aidbox queue. " +
+            "Requires M2M Authorization or User Auth matching to the requested tenant or will result in an error with no results.",
+    )
     @Trace
     fun getPractitionerById(
         tenantId: String,
         practitionerFhirId: String,
-        dfe: DataFetchingEnvironment
+        dfe: DataFetchingEnvironment,
     ): DataFetcherResult<ProxyServerPractitioner?> {
         val tenant = findAndValidateTenant(dfe, tenantService, tenantId, false)
         return retrievePractitioner(
             tenant,
             practitionerFhirId,
-            ehrFactory.getVendorFactory(tenant).practitionerService::getPractitioner
+            ehrFactory.getVendorFactory(tenant).practitionerService::getPractitioner,
         )
     }
 
     internal fun retrievePractitioner(
         tenant: Tenant,
         idToUse: String,
-        practitionerLookup: (Tenant, String) -> Practitioner
+        practitionerLookup: (Tenant, String) -> Practitioner,
     ): DataFetcherResult<ProxyServerPractitioner?> {
         val errors = mutableListOf<GraphQLError>()
-        val practitioner = try {
-            practitionerLookup(tenant, idToUse)
-        } catch (e: Exception) {
-            errors.add(GraphQLException(e.message).toGraphQLError())
-            logger.error(e.getLogMarker(), e) { "Practitioner query failed for tenant ${tenant.name}." }
-            null
-        }
+        val practitioner =
+            try {
+                practitionerLookup(tenant, idToUse)
+            } catch (e: Exception) {
+                errors.add(GraphQLException(e.message).toGraphQLError())
+                logger.error(e.getLogMarker(), e) { "Practitioner query failed for tenant ${tenant.name}." }
+                null
+            }
 
         val metadata = generateMetadata()
 
@@ -88,9 +95,9 @@ class PractitionerHandler(
                             resourceType = ResourceType.PRACTITIONER,
                             tenant = tenant.mnemonic,
                             text = JacksonUtil.writeJsonValue(practitioner),
-                            metadata = metadata
-                        )
-                    )
+                            metadata = metadata,
+                        ),
+                    ),
                 )
             } catch (e: Exception) {
                 logger.warn { "Exception sending practitioners to queue: ${e.message}" }

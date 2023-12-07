@@ -33,17 +33,23 @@ class EhrController(private val ehrDAO: EhrDAO) {
 
     @PostMapping
     @Trace
-    fun insert(@RequestBody ehr: Ehr): ResponseEntity<Ehr> {
+    fun insert(
+        @RequestBody ehr: Ehr,
+    ): ResponseEntity<Ehr> {
         val insertedEhr = ehrDAO.insert(ehr.toEhrDO())
         return ResponseEntity(insertedEhr.toProxyEHR(), HttpStatus.CREATED)
     }
 
     @PutMapping("/{instanceName}")
     @Trace
-    fun update(@PathVariable("instanceName") instanceName: String, @RequestBody ehr: Ehr): ResponseEntity<Ehr> {
+    fun update(
+        @PathVariable("instanceName") instanceName: String,
+        @RequestBody ehr: Ehr,
+    ): ResponseEntity<Ehr> {
         val decodedInstanceName = UriUtils.decode(instanceName, Charsets.UTF_8)
-        val existingEhr = ehrDAO.getByInstance(decodedInstanceName)
-            ?: throw NoEHRFoundException("EHR $decodedInstanceName not found")
+        val existingEhr =
+            ehrDAO.getByInstance(decodedInstanceName)
+                ?: throw NoEHRFoundException("EHR $decodedInstanceName not found")
 
         val updatedEhr = ehrDAO.update(ehr.toEhrDO(existingEhr.id))
         return ResponseEntity(updatedEhr.toProxyEHR(), HttpStatus.OK)

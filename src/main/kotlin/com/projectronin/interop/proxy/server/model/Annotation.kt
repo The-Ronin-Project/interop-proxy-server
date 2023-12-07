@@ -9,7 +9,7 @@ import com.projectronin.interop.fhir.r4.datatype.Reference as R4Reference
 @GraphQLDescription("A text note which also contains information about who made the statement and when.")
 data class Annotation(
     private val annotation: R4Annotation,
-    private val tenant: Tenant
+    private val tenant: Tenant,
 ) {
     @GraphQLDescription("Individual responsible for the annotation")
     val author: Author? by lazy {

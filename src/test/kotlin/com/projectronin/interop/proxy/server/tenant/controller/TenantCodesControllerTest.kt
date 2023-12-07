@@ -17,22 +17,24 @@ import org.springframework.http.HttpStatus
 
 class TenantCodesControllerTest {
     private val testMnemonic = "test_tenant"
-    private val tenantService = mockk<TenantService> {
-        every { getTenantForMnemonic(testMnemonic) } returns
-            mockk<Tenant> {
-                every { internalId } returns 7734
-            }
-    }
+    private val tenantService =
+        mockk<TenantService> {
+            every { getTenantForMnemonic(testMnemonic) } returns
+                mockk<Tenant> {
+                    every { internalId } returns 7734
+                }
+        }
     private val tenantCodesDAO = mockk<TenantCodesDAO>()
     private val tenantCodesController = TenantCodesController(tenantService, tenantCodesDAO)
 
     @Test
     fun `ensure tenant controller can read codes and return success`() {
-        every { tenantCodesDAO.getByTenantMnemonic(testMnemonic) } returns TenantCodesDO {
-            bsaCode = "2222"
-            bmiCode = "33333"
-            stageCodes = "2342,23432"
-        }
+        every { tenantCodesDAO.getByTenantMnemonic(testMnemonic) } returns
+            TenantCodesDO {
+                bsaCode = "2222"
+                bmiCode = "33333"
+                stageCodes = "2342,23432"
+            }
 
         val result = tenantCodesController.get(testMnemonic)
         assertNotNull(result)
@@ -55,22 +57,25 @@ class TenantCodesControllerTest {
 
     @Test
     fun `ensure tenant controller can insert codes and return success`() {
-        val expectedCodesDO = TenantCodesDO {
-            tenantId = 7734
-            bsaCode = "2222"
-            bmiCode = "33333"
-            stageCodes = "2342,23432"
-        }
-        every { tenantCodesDAO.insertCodes(expectedCodesDO) } returns TenantCodesDO {
-            bsaCode = "2222"
-            bmiCode = "33333"
-            stageCodes = "2342,23432"
-        }
+        val expectedCodesDO =
+            TenantCodesDO {
+                tenantId = 7734
+                bsaCode = "2222"
+                bmiCode = "33333"
+                stageCodes = "2342,23432"
+            }
+        every { tenantCodesDAO.insertCodes(expectedCodesDO) } returns
+            TenantCodesDO {
+                bsaCode = "2222"
+                bmiCode = "33333"
+                stageCodes = "2342,23432"
+            }
 
-        val result = tenantCodesController.insert(
-            testMnemonic,
-            TenantCodes(bsaCode = "2222", bmiCode = "33333", stageCodes = "2342,23432")
-        )
+        val result =
+            tenantCodesController.insert(
+                testMnemonic,
+                TenantCodes(bsaCode = "2222", bmiCode = "33333", stageCodes = "2342,23432"),
+            )
         assertNotNull(result)
         assertEquals(HttpStatus.CREATED, result.statusCode)
 
@@ -91,22 +96,25 @@ class TenantCodesControllerTest {
 
     @Test
     fun `ensure tenant controller can update codes and return success`() {
-        val expectedCodesDO = TenantCodesDO {
-            tenantId = 7734
-            bsaCode = "2222"
-            bmiCode = "33333"
-            stageCodes = "2342,23432"
-        }
-        every { tenantCodesDAO.updateCodes(expectedCodesDO) } returns TenantCodesDO {
-            bsaCode = "2222"
-            bmiCode = "33333"
-            stageCodes = "2342,23432"
-        }
+        val expectedCodesDO =
+            TenantCodesDO {
+                tenantId = 7734
+                bsaCode = "2222"
+                bmiCode = "33333"
+                stageCodes = "2342,23432"
+            }
+        every { tenantCodesDAO.updateCodes(expectedCodesDO) } returns
+            TenantCodesDO {
+                bsaCode = "2222"
+                bmiCode = "33333"
+                stageCodes = "2342,23432"
+            }
 
-        val result = tenantCodesController.update(
-            testMnemonic,
-            TenantCodes(bsaCode = "2222", bmiCode = "33333", stageCodes = "2342,23432")
-        )
+        val result =
+            tenantCodesController.update(
+                testMnemonic,
+                TenantCodes(bsaCode = "2222", bmiCode = "33333", stageCodes = "2342,23432"),
+            )
         assertNotNull(result)
         assertEquals(HttpStatus.OK, result.statusCode)
 
@@ -118,18 +126,20 @@ class TenantCodesControllerTest {
 
     @Test
     fun `ensure tenant controller update returns 400 for no existing codes`() {
-        val expectedCodesDO = TenantCodesDO {
-            tenantId = 7734
-            bsaCode = "2222"
-            bmiCode = "33333"
-            stageCodes = "2342,23432"
-        }
+        val expectedCodesDO =
+            TenantCodesDO {
+                tenantId = 7734
+                bsaCode = "2222"
+                bmiCode = "33333"
+                stageCodes = "2342,23432"
+            }
         every { tenantCodesDAO.updateCodes(expectedCodesDO) } returns null
 
-        val result = tenantCodesController.update(
-            testMnemonic,
-            TenantCodes(bsaCode = "2222", bmiCode = "33333", stageCodes = "2342,23432")
-        )
+        val result =
+            tenantCodesController.update(
+                testMnemonic,
+                TenantCodes(bsaCode = "2222", bmiCode = "33333", stageCodes = "2342,23432"),
+            )
         assertNotNull(result)
         assertEquals(HttpStatus.NOT_FOUND, result.statusCode)
 

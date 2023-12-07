@@ -20,7 +20,7 @@ data class NoteInput(
     @GraphQLDescription("The originator of the note")
     val noteSender: NoteSender,
     @GraphQLDescription("If the note is an alert")
-    val isAlert: Boolean
+    val isAlert: Boolean,
 ) {
     // Using the pattern here results in some odd parsing logic that actually does not work for our case.
     private val dateTimeFormatter =

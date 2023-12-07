@@ -30,7 +30,7 @@ class TenantServerController(private val tenantServerDAO: TenantServerDAO, priva
     @Trace
     fun getWithType(
         @PathVariable("tenantMnemonic") tenantMnemonic: String,
-        @PathVariable("type") type: String
+        @PathVariable("type") type: String,
     ): ResponseEntity<TenantServer> {
         logger.info { "Retrieving TenantServer with mnemonic $tenantMnemonic and type $type" }
         val tenantServerList = tenantServerDAO.getTenantServers(tenantMnemonic, MessageType.valueOf(type))
@@ -40,7 +40,9 @@ class TenantServerController(private val tenantServerDAO: TenantServerDAO, priva
 
     @GetMapping
     @Trace
-    fun get(@PathVariable("tenantMnemonic") tenantMnemonic: String): ResponseEntity<List<TenantServer>> {
+    fun get(
+        @PathVariable("tenantMnemonic") tenantMnemonic: String,
+    ): ResponseEntity<List<TenantServer>> {
         logger.info { "Retrieving TenantServer with mnemonic $tenantMnemonic" }
         val tenantServerList = tenantServerDAO.getTenantServers(tenantMnemonic)
         if (tenantServerList.isEmpty()) return ResponseEntity(HttpStatus.NOT_FOUND)
@@ -51,11 +53,12 @@ class TenantServerController(private val tenantServerDAO: TenantServerDAO, priva
     @Trace
     fun insert(
         @PathVariable tenantMnemonic: String,
-        @RequestBody tenantServer: TenantServer
+        @RequestBody tenantServer: TenantServer,
     ): ResponseEntity<TenantServer> {
         logger.info { "Inserting new TenantServer for $tenantMnemonic and type ${tenantServer.messageType}" }
-        val tenant = tenantService.getTenantForMnemonic(tenantMnemonic)
-            ?: throw NoTenantFoundException("No Tenant With that mnemonic")
+        val tenant =
+            tenantService.getTenantForMnemonic(tenantMnemonic)
+                ?: throw NoTenantFoundException("No Tenant With that mnemonic")
         val tenantServerDO = tenantServer.toTenantServerDO(tenant.toProxyTenant())
         val inserted = tenantServerDAO.insertTenantServer(tenantServerDO)
         return ResponseEntity(inserted.toProxyTenantServer(), HttpStatus.CREATED)
@@ -65,11 +68,12 @@ class TenantServerController(private val tenantServerDAO: TenantServerDAO, priva
     @Trace
     fun update(
         @PathVariable tenantMnemonic: String,
-        @RequestBody tenantServer: TenantServer
+        @RequestBody tenantServer: TenantServer,
     ): ResponseEntity<TenantServer> {
         logger.info { "Updating new TenantServer for $tenantMnemonic and type ${tenantServer.messageType}" }
-        val tenant = tenantService.getTenantForMnemonic(tenantMnemonic)
-            ?: throw NoTenantFoundException("No Tenant With that mnemonic")
+        val tenant =
+            tenantService.getTenantForMnemonic(tenantMnemonic)
+                ?: throw NoTenantFoundException("No Tenant With that mnemonic")
         val tenantServerDO = tenantServer.toTenantServerDO(tenant.toProxyTenant())
         val updated = tenantServerDAO.updateTenantServer(tenantServerDO)
         val status = updated?.let { HttpStatus.OK } ?: HttpStatus.NOT_FOUND

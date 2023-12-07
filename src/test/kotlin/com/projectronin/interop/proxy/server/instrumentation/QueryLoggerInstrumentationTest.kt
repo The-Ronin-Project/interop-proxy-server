@@ -16,9 +16,10 @@ import org.junit.jupiter.api.Test
 class QueryLoggerInstrumentationTest {
     @Test
     fun `returns the provided execution input after requesting the query`() {
-        val input = mockk<ExecutionInput> {
-            every { query } returns "Query"
-        }
+        val input =
+            mockk<ExecutionInput> {
+                every { query } returns "Query"
+            }
 
         val output = QueryLoggerInstrumentation().instrumentExecutionInput(input, mockk())
         assertEquals(input, output)
@@ -30,11 +31,12 @@ class QueryLoggerInstrumentationTest {
         val executionResult = mockk<ExecutionResult>()
         val instrumentationExecutionParameters = mockk<InstrumentationExecutionParameters>()
 
-        every { executionResult.errors } returns listOf(
-            mockk<ValidationError> {
-                every { message } returns "error"
-            }
-        )
+        every { executionResult.errors } returns
+            listOf(
+                mockk<ValidationError> {
+                    every { message } returns "error"
+                },
+            )
 
         mockkConstructor(SimpleInstrumentation::class)
         every {

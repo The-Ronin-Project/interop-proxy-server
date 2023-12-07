@@ -24,17 +24,18 @@ import org.springframework.web.bind.annotation.RestController
 @RequestMapping("/tenants/{tenantMnemonic}/hl7v2/mdm")
 class TenantMDMConfigController(
     private val tenantMDMConfigDAO: TenantMDMConfigDAO,
-    private val tenantService: TenantService
+    private val tenantService: TenantService,
 ) {
     private val logger = KotlinLogging.logger { }
 
     @GetMapping
     @Trace
     fun get(
-        @PathVariable tenantMnemonic: String
+        @PathVariable tenantMnemonic: String,
     ): ResponseEntity<TenantMDMConfig?> {
-        val tenantMDMConfigs = tenantMDMConfigDAO.getByTenantMnemonic(tenantMnemonic)
-            ?: throw NoTenantFoundException("No Tenant MDM Config Found with that mnemonic")
+        val tenantMDMConfigs =
+            tenantMDMConfigDAO.getByTenantMnemonic(tenantMnemonic)
+                ?: throw NoTenantFoundException("No Tenant MDM Config Found with that mnemonic")
 
         return ResponseEntity(tenantMDMConfigs.toProxyTenantMDMConfig(), HttpStatus.OK)
     }
@@ -43,10 +44,11 @@ class TenantMDMConfigController(
     @Trace
     fun insert(
         @PathVariable tenantMnemonic: String,
-        @RequestBody tenantMDMConfig: TenantMDMConfig
+        @RequestBody tenantMDMConfig: TenantMDMConfig,
     ): ResponseEntity<TenantMDMConfig> {
-        val tenant = tenantService.getTenantForMnemonic(tenantMnemonic)
-            ?: throw NoTenantFoundException("No Tenant With that mnemonic")
+        val tenant =
+            tenantService.getTenantForMnemonic(tenantMnemonic)
+                ?: throw NoTenantFoundException("No Tenant With that mnemonic")
 
         val insertTenantMDMConfig = tenantMDMConfig.toTenantMDMConfigDO(tenant.toProxyTenant())
 
@@ -58,16 +60,18 @@ class TenantMDMConfigController(
     @Trace
     fun update(
         @PathVariable tenantMnemonic: String,
-        @RequestBody tenantMDMConfig: TenantMDMConfig
+        @RequestBody tenantMDMConfig: TenantMDMConfig,
     ): ResponseEntity<TenantMDMConfig?> {
-        val tenant = tenantService.getTenantForMnemonic(tenantMnemonic)
-            ?: throw NoTenantFoundException("No Tenant With that mnemonic")
+        val tenant =
+            tenantService.getTenantForMnemonic(tenantMnemonic)
+                ?: throw NoTenantFoundException("No Tenant With that mnemonic")
 
         val updatedTenantMDMConfig = tenantMDMConfig.toTenantMDMConfigDO(tenant.toProxyTenant())
         val result = tenantMDMConfigDAO.updateConfig(updatedTenantMDMConfig)
-        val status = result?.let {
-            HttpStatus.OK
-        } ?: HttpStatus.NOT_FOUND
+        val status =
+            result?.let {
+                HttpStatus.OK
+            } ?: HttpStatus.NOT_FOUND
 
         return ResponseEntity(result?.toProxyTenantMDMConfig(), status)
     }

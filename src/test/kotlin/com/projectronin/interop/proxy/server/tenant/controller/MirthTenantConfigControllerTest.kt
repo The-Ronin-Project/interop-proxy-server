@@ -31,42 +31,48 @@ class MirthTenantConfigControllerTest {
     private lateinit var tenantService: TenantService
     private lateinit var controller: MirthTenantConfigController
 
-    private val tenantDO = mockk<TenantDO> {
-        every { id } returns 1
-        every { mnemonic } returns "first"
-        every { name } returns "full name"
-    }
-    private val configDO = mockk<MirthTenantConfigDO> {
-        every { tenant } returns tenantDO
-        every { locationIds } returns "bleep,blorp,bloop"
-        every { lastUpdated } returns OffsetDateTime.of(
-            2023,
-            1,
-            1,
-            1,
-            1,
-            1,
-            1,
-            ZoneOffset.UTC
-        )
-        every { blockedResources } returns "beep,boop"
-    }
+    private val tenantDO =
+        mockk<TenantDO> {
+            every { id } returns 1
+            every { mnemonic } returns "first"
+            every { name } returns "full name"
+        }
+    private val configDO =
+        mockk<MirthTenantConfigDO> {
+            every { tenant } returns tenantDO
+            every { locationIds } returns "bleep,blorp,bloop"
+            every { lastUpdated } returns
+                OffsetDateTime.of(
+                    2023,
+                    1,
+                    1,
+                    1,
+                    1,
+                    1,
+                    1,
+                    ZoneOffset.UTC,
+                )
+            every { blockedResources } returns "beep,boop"
+        }
 
-    private val mockProxyTenant = mockk<ProxyTenant> {
-        every { id } returns 1
-    }
-    private val mockTenantServiceTenant = mockk<Tenant> {
-        every { internalId } returns 1
-        every { mnemonic } returns "first"
-        every { name } returns "full name"
-        every { batchConfig } returns null
-        every { vendor } returns mockk()
-        every { name } returns "Epic Tenant"
-        every { timezone } returns ZoneId.of("America/New_York")
-    }
-    private val mockLoadService = mockk<KafkaLoadService> {
-        every { pushLoadEvent(any(), any(), any(), any(), any()) } returns mockk()
-    }
+    private val mockProxyTenant =
+        mockk<ProxyTenant> {
+            every { id } returns 1
+        }
+    private val mockTenantServiceTenant =
+        mockk<Tenant> {
+            every { internalId } returns 1
+            every { mnemonic } returns "first"
+            every { name } returns "full name"
+            every { batchConfig } returns null
+            every { vendor } returns mockk()
+            every { name } returns "Epic Tenant"
+            every { timezone } returns ZoneId.of("America/New_York")
+        }
+    private val mockLoadService =
+        mockk<KafkaLoadService> {
+            every { pushLoadEvent(any(), any(), any(), any(), any()) } returns mockk()
+        }
 
     @BeforeEach
     fun setup() {
@@ -103,20 +109,21 @@ class MirthTenantConfigControllerTest {
     fun `insert works`() {
         every { tenantService.getTenantForMnemonic("first") } returns mockTenantServiceTenant
         every { dao.insertConfig(any()) } returns configDO
-        val mirthTenantConfig = MirthTenantConfig(
-            listOf("bleep", "blorp", "bloop"),
-            OffsetDateTime.of(
-                2023,
-                1,
-                1,
-                1,
-                1,
-                1,
-                1,
-                ZoneOffset.UTC
-            ),
-            listOf("beep", "boop")
-        )
+        val mirthTenantConfig =
+            MirthTenantConfig(
+                listOf("bleep", "blorp", "bloop"),
+                OffsetDateTime.of(
+                    2023,
+                    1,
+                    1,
+                    1,
+                    1,
+                    1,
+                    1,
+                    ZoneOffset.UTC,
+                ),
+                listOf("beep", "boop"),
+            )
         val result = controller.insert("first", mirthTenantConfig)
         assertEquals(HttpStatus.CREATED, result.statusCode)
         assertEquals(mirthTenantConfig, result.body)
@@ -124,12 +131,13 @@ class MirthTenantConfigControllerTest {
 
     @Test
     fun `insert can return empty properties`() {
-        val emptyConfigDO = mockk<MirthTenantConfigDO> {
-            every { tenant } returns tenantDO
-            every { locationIds } returns ""
-            every { lastUpdated } returns null
-            every { blockedResources } returns null
-        }
+        val emptyConfigDO =
+            mockk<MirthTenantConfigDO> {
+                every { tenant } returns tenantDO
+                every { locationIds } returns ""
+                every { lastUpdated } returns null
+                every { blockedResources } returns null
+            }
 
         every { tenantService.getTenantForMnemonic("first") } returns mockTenantServiceTenant
         every { dao.insertConfig(any()) } returns emptyConfigDO

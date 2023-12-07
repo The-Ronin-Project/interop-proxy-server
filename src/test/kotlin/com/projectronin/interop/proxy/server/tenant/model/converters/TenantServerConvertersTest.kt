@@ -13,13 +13,14 @@ import org.junit.jupiter.api.Test
 class TenantServerConvertersTest {
     @Test
     fun `toProxyTenantServer works`() {
-        val tenantServer = TenantServerDO {
-            id = 123
-            messageType = MessageType.MDM
-            address = "google"
-            port = 123
-            serverType = ProcessingID.VALIDATION
-        }
+        val tenantServer =
+            TenantServerDO {
+                id = 123
+                messageType = MessageType.MDM
+                address = "google"
+                port = 123
+                serverType = ProcessingID.VALIDATION
+            }
         val proxyTenantServer = tenantServer.toProxyTenantServer()
         assertNotNull(proxyTenantServer)
         assertEquals("google", proxyTenantServer.address)
@@ -27,13 +28,14 @@ class TenantServerConvertersTest {
 
     @Test
     fun `toTenantServerDO works `() {
-        val tenantServer = TenantServer(
-            id = 1,
-            messageType = "MDM",
-            address = "127.0.0.1",
-            port = 80,
-            serverType = "V"
-        )
+        val tenantServer =
+            TenantServer(
+                id = 1,
+                messageType = "MDM",
+                address = "127.0.0.1",
+                port = 80,
+                serverType = "V",
+            )
         val tenantServerDO = tenantServer.toTenantServerDO(mockk { every { id } returns 1 })
         assertNotNull(tenantServerDO)
         assertEquals("127.0.0.1", tenantServerDO.address)

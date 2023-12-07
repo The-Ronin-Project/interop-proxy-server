@@ -13,29 +13,30 @@ import java.time.LocalTime
 import java.time.ZoneId
 
 class TenantConvertersTest {
-
     @Test
     fun `toProxyTenant - cerner`() {
-        val tenantServerCerner = com.projectronin.interop.tenant.config.model.vendor.Cerner(
-            serviceEndpoint = "serviceEndpoint",
-            patientMRNSystem = "patientMRNSystem",
-            instanceName = "instanceName",
-            clientId = "notLeaked",
-            authenticationConfig = CernerAuthenticationConfig("serviceEndpoint", "notleaked", "notleaked"),
-            messagePractitioner = "Practitioner1",
-            messageTopic = "topic",
-            messageCategory = "category",
-            messagePriority = "priority"
-        )
-        val tenantServiceTenant = Tenant(
-            internalId = 1,
-            mnemonic = "mnemonic",
-            name = "name",
-            timezone = ZoneId.of("America/Los_Angeles"),
-            batchConfig = BatchConfig(availableStart = LocalTime.of(12, 0), availableEnd = LocalTime.of(12, 0)),
-            vendor = tenantServerCerner,
-            monitoredIndicator = null
-        )
+        val tenantServerCerner =
+            com.projectronin.interop.tenant.config.model.vendor.Cerner(
+                serviceEndpoint = "serviceEndpoint",
+                patientMRNSystem = "patientMRNSystem",
+                instanceName = "instanceName",
+                clientId = "notLeaked",
+                authenticationConfig = CernerAuthenticationConfig("serviceEndpoint", "notleaked", "notleaked"),
+                messagePractitioner = "Practitioner1",
+                messageTopic = "topic",
+                messageCategory = "category",
+                messagePriority = "priority",
+            )
+        val tenantServiceTenant =
+            Tenant(
+                internalId = 1,
+                mnemonic = "mnemonic",
+                name = "name",
+                timezone = ZoneId.of("America/Los_Angeles"),
+                batchConfig = BatchConfig(availableStart = LocalTime.of(12, 0), availableEnd = LocalTime.of(12, 0)),
+                vendor = tenantServerCerner,
+                monitoredIndicator = null,
+            )
         val proxyTenant = tenantServiceTenant.toProxyTenant()
         assertNotNull(proxyTenant)
         val cerner = proxyTenant.vendor as Cerner
@@ -50,35 +51,38 @@ class TenantConvertersTest {
 
     @Test
     fun `toProxyTenant - epic`() {
-        val tenantServerEpic = com.projectronin.interop.tenant.config.model.vendor.Epic(
-            clientId = "notLeaked",
-            instanceName = "instanceName",
-            authenticationConfig = EpicAuthenticationConfig(
-                authEndpoint = "authEndpoint",
-                publicKey = "notLeaked",
-                privateKey = "notLeaked"
-            ),
-            serviceEndpoint = "serviceEndpoint",
-            release = "release",
-            ehrUserId = "ehrUserId",
-            messageType = "messageType",
-            practitionerProviderSystem = "providerSystemExample",
-            practitionerUserSystem = "userSystemExample",
-            patientMRNSystem = "mrnSystemExample",
-            patientInternalSystem = "internalSystemExample",
-            encounterCSNSystem = "encounterCSNSystem",
-            patientMRNTypeText = "patientMRNTypeText",
-            departmentInternalSystem = "departmentInternalSystem"
-        )
-        val tenantServiceTenant = Tenant(
-            internalId = 1,
-            mnemonic = "mnemonic",
-            name = "name",
-            timezone = ZoneId.of("America/Los_Angeles"),
-            batchConfig = null,
-            vendor = tenantServerEpic,
-            monitoredIndicator = null
-        )
+        val tenantServerEpic =
+            com.projectronin.interop.tenant.config.model.vendor.Epic(
+                clientId = "notLeaked",
+                instanceName = "instanceName",
+                authenticationConfig =
+                    EpicAuthenticationConfig(
+                        authEndpoint = "authEndpoint",
+                        publicKey = "notLeaked",
+                        privateKey = "notLeaked",
+                    ),
+                serviceEndpoint = "serviceEndpoint",
+                release = "release",
+                ehrUserId = "ehrUserId",
+                messageType = "messageType",
+                practitionerProviderSystem = "providerSystemExample",
+                practitionerUserSystem = "userSystemExample",
+                patientMRNSystem = "mrnSystemExample",
+                patientInternalSystem = "internalSystemExample",
+                encounterCSNSystem = "encounterCSNSystem",
+                patientMRNTypeText = "patientMRNTypeText",
+                departmentInternalSystem = "departmentInternalSystem",
+            )
+        val tenantServiceTenant =
+            Tenant(
+                internalId = 1,
+                mnemonic = "mnemonic",
+                name = "name",
+                timezone = ZoneId.of("America/Los_Angeles"),
+                batchConfig = null,
+                vendor = tenantServerEpic,
+                monitoredIndicator = null,
+            )
         val proxyTenant = tenantServiceTenant.toProxyTenant()
         assertNotNull(proxyTenant)
         val epic = proxyTenant.vendor as Epic
@@ -89,25 +93,27 @@ class TenantConvertersTest {
 
     @Test
     fun `toTenantServer - cerner`() {
-        val proxyTenant = com.projectronin.interop.proxy.server.tenant.model.Tenant(
-            id = 1,
-            mnemonic = "mnemonic",
-            name = "name",
-            availableStart = LocalTime.of(12, 0),
-            availableEnd = LocalTime.of(12, 0),
-            timezone = "America/Los_Angeles",
-            vendor = Cerner(
-                serviceEndpoint = "serviceEndpoint",
-                authEndpoint = "authEndpoint",
-                instanceName = "instanceName",
-                patientMRNSystem = "patientMRNSystem",
-                messagePractitioner = "practitioner",
-                messageTopic = "topic",
-                messageCategory = "category",
-                messagePriority = "priority"
-            ),
-            monitoredIndicator = null
-        )
+        val proxyTenant =
+            com.projectronin.interop.proxy.server.tenant.model.Tenant(
+                id = 1,
+                mnemonic = "mnemonic",
+                name = "name",
+                availableStart = LocalTime.of(12, 0),
+                availableEnd = LocalTime.of(12, 0),
+                timezone = "America/Los_Angeles",
+                vendor =
+                    Cerner(
+                        serviceEndpoint = "serviceEndpoint",
+                        authEndpoint = "authEndpoint",
+                        instanceName = "instanceName",
+                        patientMRNSystem = "patientMRNSystem",
+                        messagePractitioner = "practitioner",
+                        messageTopic = "topic",
+                        messageCategory = "category",
+                        messagePriority = "priority",
+                    ),
+                monitoredIndicator = null,
+            )
         val tenantServerTenant = proxyTenant.toTenantServerTenant()
         assertEquals(1, tenantServerTenant.internalId)
         val cerner = tenantServerTenant.vendor as com.projectronin.interop.tenant.config.model.vendor.Cerner
@@ -121,33 +127,35 @@ class TenantConvertersTest {
 
     @Test
     fun `toTenantServer - epic`() {
-        val proxyTenant = com.projectronin.interop.proxy.server.tenant.model.Tenant(
-            id = 1,
-            mnemonic = "mnemonic",
-            name = "name",
-            availableStart = null,
-            availableEnd = null,
-            timezone = "America/Los_Angeles",
-            vendor = Epic(
-                release = "release",
-                serviceEndpoint = "serviceEndpoint",
-                authEndpoint = "authEndpoint",
-                ehrUserId = "ehrUserId",
-                messageType = "messageType",
-                practitionerProviderSystem = "providerSystemExample",
-                practitionerUserSystem = "userSystemExample",
-                patientMRNSystem = "mrnSystemExample",
-                patientInternalSystem = "internalSystemExample",
-                encounterCSNSystem = "encounterCSNSystem",
-                patientMRNTypeText = "patientMRNTypeText",
-                hsi = null,
-                instanceName = "instanceName",
-                departmentInternalSystem = "departmentInternalSystem",
-                patientOnboardedFlagId = null,
-                orderSystem = "orderSystem"
-            ),
-            monitoredIndicator = null
-        )
+        val proxyTenant =
+            com.projectronin.interop.proxy.server.tenant.model.Tenant(
+                id = 1,
+                mnemonic = "mnemonic",
+                name = "name",
+                availableStart = null,
+                availableEnd = null,
+                timezone = "America/Los_Angeles",
+                vendor =
+                    Epic(
+                        release = "release",
+                        serviceEndpoint = "serviceEndpoint",
+                        authEndpoint = "authEndpoint",
+                        ehrUserId = "ehrUserId",
+                        messageType = "messageType",
+                        practitionerProviderSystem = "providerSystemExample",
+                        practitionerUserSystem = "userSystemExample",
+                        patientMRNSystem = "mrnSystemExample",
+                        patientInternalSystem = "internalSystemExample",
+                        encounterCSNSystem = "encounterCSNSystem",
+                        patientMRNTypeText = "patientMRNTypeText",
+                        hsi = null,
+                        instanceName = "instanceName",
+                        departmentInternalSystem = "departmentInternalSystem",
+                        patientOnboardedFlagId = null,
+                        orderSystem = "orderSystem",
+                    ),
+                monitoredIndicator = null,
+            )
         val tenantServerTenant = proxyTenant.toTenantServerTenant()
         assertEquals(1, tenantServerTenant.internalId)
         val epic = tenantServerTenant.vendor as com.projectronin.interop.tenant.config.model.vendor.Epic
@@ -157,25 +165,27 @@ class TenantConvertersTest {
     // code cov test
     @Test
     fun `toTenantServerTenant() - batch start but no end and new id`() {
-        val proxyTenant = com.projectronin.interop.proxy.server.tenant.model.Tenant(
-            id = 1,
-            mnemonic = "mnemonic",
-            name = "name",
-            availableStart = LocalTime.of(12, 0),
-            availableEnd = null,
-            timezone = "America/Los_Angeles",
-            vendor = Cerner(
-                serviceEndpoint = "serviceEndpoint",
-                authEndpoint = "authEndpoint",
-                instanceName = "instanceName",
-                patientMRNSystem = "patientMRNSystem",
-                messagePractitioner = "practitioner",
-                messageTopic = "topic",
-                messageCategory = "category",
-                messagePriority = "priority"
-            ),
-            monitoredIndicator = null
-        )
+        val proxyTenant =
+            com.projectronin.interop.proxy.server.tenant.model.Tenant(
+                id = 1,
+                mnemonic = "mnemonic",
+                name = "name",
+                availableStart = LocalTime.of(12, 0),
+                availableEnd = null,
+                timezone = "America/Los_Angeles",
+                vendor =
+                    Cerner(
+                        serviceEndpoint = "serviceEndpoint",
+                        authEndpoint = "authEndpoint",
+                        instanceName = "instanceName",
+                        patientMRNSystem = "patientMRNSystem",
+                        messagePractitioner = "practitioner",
+                        messageTopic = "topic",
+                        messageCategory = "category",
+                        messagePriority = "priority",
+                    ),
+                monitoredIndicator = null,
+            )
         val newTenantServerTenant = proxyTenant.toTenantServerTenant(999)
         assertEquals(999, newTenantServerTenant.internalId)
         val newCerner = newTenantServerTenant.vendor as com.projectronin.interop.tenant.config.model.vendor.Cerner

@@ -17,9 +17,9 @@ import org.springframework.context.annotation.FilterType
     excludeFilters = [
         ComponentScan.Filter(
             type = FilterType.ASSIGNABLE_TYPE,
-            value = [TransformManager::class, ValidationClient::class, RoninProfileConfig::class]
-        )
-    ]
+            value = [TransformManager::class, ValidationClient::class, RoninProfileConfig::class],
+        ),
+    ],
 )
 @SpringBootApplication
 class InteropProxyServer

@@ -18,46 +18,51 @@ internal class AnnotationTest {
 
     @Test
     fun `can get time`() {
-        val ehrAnnotation = relaxedMockk<R4Annotation> {
-            every { time?.value } returns "time"
-        }
+        val ehrAnnotation =
+            relaxedMockk<R4Annotation> {
+                every { time?.value } returns "time"
+            }
         val annotation = Annotation(ehrAnnotation, testTenant)
         assertEquals("time", annotation.time)
     }
 
     @Test
     fun `null time`() {
-        val ehrAnnotation = relaxedMockk<R4Annotation> {
-            every { time } returns null
-        }
+        val ehrAnnotation =
+            relaxedMockk<R4Annotation> {
+                every { time } returns null
+            }
         val annotation = Annotation(ehrAnnotation, testTenant)
         assertNull(annotation.time)
     }
 
     @Test
     fun `can get text`() {
-        val ehrAnnotation = relaxedMockk<R4Annotation> {
-            every { text } returns Markdown("text")
-        }
+        val ehrAnnotation =
+            relaxedMockk<R4Annotation> {
+                every { text } returns Markdown("text")
+            }
         val annotation = Annotation(ehrAnnotation, testTenant)
         assertEquals("text", annotation.text)
     }
 
     @Test
     fun `can get null author`() {
-        val ehrAnnotation = relaxedMockk<R4Annotation> {
-            every { author } returns null
-        }
+        val ehrAnnotation =
+            relaxedMockk<R4Annotation> {
+                every { author } returns null
+            }
         val annotation = Annotation(ehrAnnotation, testTenant)
         assertNull(annotation.author)
     }
 
     @Test
     fun `can get string author`() {
-        val ehrAnnotation = relaxedMockk<R4Annotation> {
-            every { author?.value } returns "author"
-            every { author?.type } returns DynamicValueType.STRING
-        }
+        val ehrAnnotation =
+            relaxedMockk<R4Annotation> {
+                every { author?.value } returns "author"
+                every { author?.type } returns DynamicValueType.STRING
+            }
         val annotation = Annotation(ehrAnnotation, testTenant)
         assertTrue(annotation.author is StringAuthor)
     }
@@ -65,23 +70,26 @@ internal class AnnotationTest {
     @Test
     fun `can get reference author`() {
         val referenceAuthor = relaxedMockk<R4Reference>()
-        val ehrAnnotation = relaxedMockk<R4Annotation> {
-            every { author?.value } returns referenceAuthor
-            every { author?.type } returns DynamicValueType.REFERENCE
-        }
+        val ehrAnnotation =
+            relaxedMockk<R4Annotation> {
+                every { author?.value } returns referenceAuthor
+                every { author?.type } returns DynamicValueType.REFERENCE
+            }
         val annotation = Annotation(ehrAnnotation, testTenant)
         assertTrue(annotation.author is ReferenceAuthor)
     }
 
     @Test
     fun `throws exception on unknown author type`() {
-        val ehrAnnotation = relaxedMockk<R4Annotation> {
-            every { author?.type } returns DynamicValueType.MONEY
-        }
+        val ehrAnnotation =
+            relaxedMockk<R4Annotation> {
+                every { author?.type } returns DynamicValueType.MONEY
+            }
         val annotation = Annotation(ehrAnnotation, testTenant)
-        val exception = assertThrows<RuntimeException> {
-            annotation.author
-        }
+        val exception =
+            assertThrows<RuntimeException> {
+                annotation.author
+            }
         assertEquals("Unknown annotation author type encountered", exception.message)
     }
 }

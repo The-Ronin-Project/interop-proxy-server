@@ -9,16 +9,17 @@ fun TenantMDMConfigDO.toProxyTenantMDMConfig(): TenantMDMConfig {
     return TenantMDMConfig(
         mdmDocumentTypeID = mdmDocumentTypeID,
         providerIdentifierSystem = providerIdentifierSystem,
-        receivingSystem = receivingSystem
+        receivingSystem = receivingSystem,
     )
 }
 
 fun TenantMDMConfig.toTenantMDMConfigDO(proxyTenant: Tenant): TenantMDMConfigDO {
     return TenantMDMConfigDO {
         mdmDocumentTypeID = this@toTenantMDMConfigDO.mdmDocumentTypeID
-        tenant = TenantDO {
-            id = proxyTenant.id
-        }
+        tenant =
+            TenantDO {
+                id = proxyTenant.id
+            }
         providerIdentifierSystem = this@toTenantMDMConfigDO.providerIdentifierSystem
         receivingSystem = this@toTenantMDMConfigDO.receivingSystem
     }

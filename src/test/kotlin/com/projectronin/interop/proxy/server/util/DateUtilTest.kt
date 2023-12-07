@@ -7,7 +7,6 @@ import java.time.LocalDate
 import java.time.format.DateTimeParseException
 
 internal class DateUtilTest {
-
     private val util = DateUtil()
 
     @Test

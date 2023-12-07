@@ -12,18 +12,20 @@ internal class RangeTest {
     @Test
     fun `can get low`() {
         val ehrSimpleQuantity = relaxedMockk<R4SimpleQuantity>()
-        val ehrRange = relaxedMockk<R4Range> {
-            every { low } returns ehrSimpleQuantity
-        }
+        val ehrRange =
+            relaxedMockk<R4Range> {
+                every { low } returns ehrSimpleQuantity
+            }
         val range = Range(ehrRange)
         assertEquals(SimpleQuantity(ehrSimpleQuantity), range.low)
     }
 
     @Test
     fun `can get null low`() {
-        val ehrRange = relaxedMockk<R4Range> {
-            every { low } returns null
-        }
+        val ehrRange =
+            relaxedMockk<R4Range> {
+                every { low } returns null
+            }
         val range = Range(ehrRange)
         assertNull(range.low)
     }
@@ -31,18 +33,20 @@ internal class RangeTest {
     @Test
     fun `can get high`() {
         val ehrSimpleQuantity = relaxedMockk<R4SimpleQuantity>()
-        val ehrRange = relaxedMockk<R4Range> {
-            every { high } returns ehrSimpleQuantity
-        }
+        val ehrRange =
+            relaxedMockk<R4Range> {
+                every { high } returns ehrSimpleQuantity
+            }
         val range = Range(ehrRange)
         assertEquals(SimpleQuantity(ehrSimpleQuantity), range.high)
     }
 
     @Test
     fun `can get null high`() {
-        val ehrRange = relaxedMockk<R4Range> {
-            every { high } returns null
-        }
+        val ehrRange =
+            relaxedMockk<R4Range> {
+                every { high } returns null
+            }
         val range = Range(ehrRange)
         assertNull(range.high)
     }

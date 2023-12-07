@@ -23,11 +23,12 @@ class InteropDataFetcherExceptionHandlerTest {
         every { KotlinLogging.logger(any<() -> Unit>()) } returns logger
 
         val illegalStateException = IllegalStateException("message")
-        val parameters = mockk<DataFetcherExceptionHandlerParameters> {
-            every { exception } returns illegalStateException
-            every { sourceLocation } returns mockk(relaxed = true)
-            every { path } returns mockk(relaxed = true)
-        }
+        val parameters =
+            mockk<DataFetcherExceptionHandlerParameters> {
+                every { exception } returns illegalStateException
+                every { sourceLocation } returns mockk(relaxed = true)
+                every { path } returns mockk(relaxed = true)
+            }
 
         val result = InteropDataFetcherExceptionHandler().onException(parameters)
         assertEquals(1, result.errors.size)
@@ -45,11 +46,12 @@ class InteropDataFetcherExceptionHandlerTest {
         every { KotlinLogging.logger(any<() -> Unit>()) } returns logger
 
         val logMarkerException = InteropIllegalArgumentException("message")
-        val parameters = mockk<DataFetcherExceptionHandlerParameters> {
-            every { exception } returns logMarkerException
-            every { sourceLocation } returns mockk(relaxed = true)
-            every { path } returns mockk(relaxed = true)
-        }
+        val parameters =
+            mockk<DataFetcherExceptionHandlerParameters> {
+                every { exception } returns logMarkerException
+                every { sourceLocation } returns mockk(relaxed = true)
+                every { path } returns mockk(relaxed = true)
+            }
 
         val result = InteropDataFetcherExceptionHandler().onException(parameters)
         assertEquals(1, result.errors.size)

@@ -28,30 +28,34 @@ class TenantMDMConfigControllerTest {
     private lateinit var tenantService: TenantService
     private lateinit var controller: TenantMDMConfigController
 
-    private val tenantDO = mockk<TenantDO> {
-        every { id } returns 1
-        every { mnemonic } returns "first"
-        every { name } returns "full name"
-    }
-    private val configDO = mockk<TenantMDMConfigDO> {
-        every { tenant } returns tenantDO
-        every { mdmDocumentTypeID } returns "typeid1"
-        every { providerIdentifierSystem } returns "idsystem1"
-        every { receivingSystem } returns "rsystem1"
-    }
+    private val tenantDO =
+        mockk<TenantDO> {
+            every { id } returns 1
+            every { mnemonic } returns "first"
+            every { name } returns "full name"
+        }
+    private val configDO =
+        mockk<TenantMDMConfigDO> {
+            every { tenant } returns tenantDO
+            every { mdmDocumentTypeID } returns "typeid1"
+            every { providerIdentifierSystem } returns "idsystem1"
+            every { receivingSystem } returns "rsystem1"
+        }
 
-    private val mockProxyTenant = mockk<ProxyTenant> {
-        every { id } returns 1
-    }
-    private val mockTenantServiceTenant = mockk<Tenant> {
-        every { internalId } returns 1
-        every { mnemonic } returns "first"
-        every { name } returns "full name"
-        every { batchConfig } returns null
-        every { vendor } returns mockk()
-        every { name } returns "Epic Tenant"
-        every { timezone } returns ZoneId.of("America/New_York")
-    }
+    private val mockProxyTenant =
+        mockk<ProxyTenant> {
+            every { id } returns 1
+        }
+    private val mockTenantServiceTenant =
+        mockk<Tenant> {
+            every { internalId } returns 1
+            every { mnemonic } returns "first"
+            every { name } returns "full name"
+            every { batchConfig } returns null
+            every { vendor } returns mockk()
+            every { name } returns "Epic Tenant"
+            every { timezone } returns ZoneId.of("America/New_York")
+        }
 
     @BeforeEach
     fun setup() {
@@ -89,11 +93,12 @@ class TenantMDMConfigControllerTest {
     fun `insert works`() {
         every { tenantService.getTenantForMnemonic("first") } returns mockTenantServiceTenant
         every { dao.insertConfig(any()) } returns configDO
-        val tenantMDMConfig = TenantMDMConfig(
-            "typeid1",
-            "idsystem1",
-            "rsystem1"
-        )
+        val tenantMDMConfig =
+            TenantMDMConfig(
+                "typeid1",
+                "idsystem1",
+                "rsystem1",
+            )
         val result = controller.insert("first", tenantMDMConfig)
         assertEquals(HttpStatus.CREATED, result.statusCode)
         assertEquals(tenantMDMConfig, result.body)
@@ -101,12 +106,13 @@ class TenantMDMConfigControllerTest {
 
     @Test
     fun `insert can return empty properties`() {
-        val emptyConfigDO = mockk<TenantMDMConfigDO> {
-            every { tenant } returns tenantDO
-            every { mdmDocumentTypeID } returns ""
-            every { providerIdentifierSystem } returns ""
-            every { receivingSystem } returns ""
-        }
+        val emptyConfigDO =
+            mockk<TenantMDMConfigDO> {
+                every { tenant } returns tenantDO
+                every { mdmDocumentTypeID } returns ""
+                every { providerIdentifierSystem } returns ""
+                every { receivingSystem } returns ""
+            }
 
         every { tenantService.getTenantForMnemonic("first") } returns mockTenantServiceTenant
         every { dao.insertConfig(any()) } returns emptyConfigDO

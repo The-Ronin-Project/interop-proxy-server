@@ -8,5 +8,5 @@ import com.fasterxml.jackson.databind.annotation.JsonNaming
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy::class)
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class UserSession(
-    val expiresAt: String?
+    val expiresAt: String?,
 )

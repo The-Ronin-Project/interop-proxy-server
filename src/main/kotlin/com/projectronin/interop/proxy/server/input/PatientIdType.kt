@@ -4,5 +4,5 @@ enum class PatientIdType {
     FHIR,
 
     @Deprecated("Deprecated ID Type", ReplaceWith(""), DeprecationLevel.WARNING)
-    MRN
+    MRN,
 }

@@ -5,5 +5,5 @@ import java.time.OffsetDateTime
 data class MirthTenantConfig(
     val locationIds: List<String>,
     val lastUpdated: OffsetDateTime? = null,
-    val blockedResources: List<String> = listOf()
+    val blockedResources: List<String> = listOf(),
 )
