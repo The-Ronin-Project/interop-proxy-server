@@ -1,5 +1,4 @@
 import com.expediagroup.graphql.plugin.gradle.tasks.GraphQLGenerateSDLTask
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     java
@@ -129,16 +128,6 @@ dependencies {
     itImplementation("org.liquibase:liquibase-core")
     itImplementation(libs.kotlin.logging)
     itImplementation(libs.jackson.databind)
-}
-
-java {
-    sourceCompatibility = JavaVersion.VERSION_17
-}
-
-tasks.withType(KotlinCompile::class) {
-    compilerOptions {
-        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
-    }
 }
 
 tasks.withType(Test::class) {

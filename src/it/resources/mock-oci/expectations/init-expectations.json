@@ -2,7 +2,7 @@
   {
     "httpRequest": {
       "method": "GET",
-      "path": "/n/.*/b/.*/o/DataNormalizationRegistry%2Fv1%2Fregistry.json"
+      "path": "/n/.*/b/.*/o/TheNormalizationRegistry.json"
     },
     "httpResponse": {
       "statusCode": 200,
