@@ -69,7 +69,7 @@ dependencies {
     implementation(libs.dd.trace.api)
     implementation(libs.ronin.kafka)
 
-    runtimeOnly(libs.bundles.ehr.impls) {
+    implementation(libs.bundles.ehr.impls) {
         // Exclude validation
         exclude(group = "com.projectronin.interop.validation", module = "interop-validation-client")
     }
