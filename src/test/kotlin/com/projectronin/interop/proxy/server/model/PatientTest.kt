@@ -2,8 +2,6 @@ package com.projectronin.interop.proxy.server.model
 
 import com.projectronin.interop.fhir.r4.datatype.primitive.Date
 import com.projectronin.interop.fhir.r4.datatype.primitive.Id
-import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
-import com.projectronin.interop.fhir.r4.datatype.primitive.asFHIR
 import com.projectronin.interop.fhir.r4.valueset.AdministrativeGender
 import com.projectronin.interop.proxy.server.util.asCode
 import com.projectronin.interop.proxy.server.util.relaxedMockk
@@ -32,7 +30,7 @@ internal class PatientTest {
                 every { id } returns Id("13579")
             }
 
-        val patient = Patient(ehrPatient, mockTenant, emptyList())
+        val patient = Patient(ehrPatient, mockTenant)
         assertEquals("ten-13579", patient.id)
     }
 
@@ -45,26 +43,8 @@ internal class PatientTest {
                 every { identifier } returns listOf(ehrIdentifier1, ehrIdentifier2)
             }
 
-        val patient = Patient(ehrPatient, mockTenant, emptyList())
+        val patient = Patient(ehrPatient, mockTenant)
         assertEquals(2, patient.identifier.size)
-    }
-
-    @Test
-    fun `can get identifier including ronin identifiers`() {
-        val ehrIdentifier1 = relaxedMockk<R4Identifier>()
-        val ehrIdentifier2 = relaxedMockk<R4Identifier>()
-        val ehrPatient =
-            relaxedMockk<R4Patient> {
-                every { identifier } returns listOf(ehrIdentifier1, ehrIdentifier2)
-            }
-        val roninIdentifiers =
-            listOf(
-                R4Identifier(system = Uri("system1"), value = "value".asFHIR()),
-                R4Identifier(system = Uri("system2"), value = "value".asFHIR()),
-            )
-
-        val patient = Patient(ehrPatient, mockTenant, roninIdentifiers)
-        assertEquals(4, patient.identifier.size)
     }
 
     @Test
@@ -76,7 +56,7 @@ internal class PatientTest {
                 every { name } returns listOf(ehrHumanName1, ehrHumanName2)
             }
 
-        val patient = Patient(ehrPatient, mockTenant, emptyList())
+        val patient = Patient(ehrPatient, mockTenant)
         assertEquals(2, patient.name.size)
     }
 
@@ -87,7 +67,7 @@ internal class PatientTest {
                 every { birthDate } returns Date("1976-07-04")
             }
 
-        val patient = Patient(ehrPatient, mockTenant, emptyList())
+        val patient = Patient(ehrPatient, mockTenant)
         assertEquals("1976-07-04", patient.birthDate)
     }
 
@@ -97,7 +77,7 @@ internal class PatientTest {
             relaxedMockk<R4Patient> {
                 every { birthDate } returns null
             }
-        val patient = Patient(ehrPatient, mockTenant, emptyList())
+        val patient = Patient(ehrPatient, mockTenant)
         assertNull(patient.birthDate)
     }
 
@@ -108,7 +88,7 @@ internal class PatientTest {
                 every { gender } returns AdministrativeGender.MALE.asCode()
             }
 
-        val patient = Patient(ehrPatient, mockTenant, emptyList())
+        val patient = Patient(ehrPatient, mockTenant)
         assertEquals("male", patient.gender)
     }
 
@@ -119,7 +99,7 @@ internal class PatientTest {
                 every { gender } returns null
             }
 
-        val patient = Patient(ehrPatient, mockTenant, emptyList())
+        val patient = Patient(ehrPatient, mockTenant)
         assertNull(patient.gender)
     }
 
@@ -132,7 +112,7 @@ internal class PatientTest {
                 every { telecom } returns listOf(ehrContactPoint1, ehrContactPoint2)
             }
 
-        val patient = Patient(ehrPatient, mockTenant, emptyList())
+        val patient = Patient(ehrPatient, mockTenant)
         assertEquals(2, patient.telecom.size)
     }
 
@@ -145,7 +125,7 @@ internal class PatientTest {
                 every { address } returns listOf(ehrAddress1, ehrAddress2)
             }
 
-        val patient = Patient(ehrPatient, mockTenant, emptyList())
+        val patient = Patient(ehrPatient, mockTenant)
         assertEquals(2, patient.address.size)
     }
 }

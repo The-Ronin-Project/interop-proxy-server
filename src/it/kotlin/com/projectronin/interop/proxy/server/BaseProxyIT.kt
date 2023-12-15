@@ -61,6 +61,7 @@ abstract class BaseProxyIT {
                     "box_features_validation_skip_reference" to "true"
                 )
             )
+                .withStartupTimeout(Duration.ofMinutes(10))
                 .waitingFor("proxy", Wait.forHealthcheck().withStartupTimeout(Duration.ofSeconds(120)))
                 .start()
     }

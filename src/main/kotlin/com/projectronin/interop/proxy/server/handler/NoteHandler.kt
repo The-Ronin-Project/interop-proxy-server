@@ -12,7 +12,7 @@ import com.projectronin.interop.fhir.r4.datatype.Identifier
 import com.projectronin.interop.fhir.r4.datatype.primitive.asFHIR
 import com.projectronin.interop.fhir.r4.resource.Patient
 import com.projectronin.interop.fhir.r4.resource.Practitioner
-import com.projectronin.interop.fhir.ronin.util.localize
+import com.projectronin.interop.fhir.util.localizeFhirId
 import com.projectronin.interop.proxy.server.input.NoteInput
 import com.projectronin.interop.proxy.server.input.NoteSender
 import com.projectronin.interop.proxy.server.input.PatientIdType
@@ -102,7 +102,7 @@ class NoteHandler(
         val isUDPId = practitionerFhirId.startsWith("${tenant.mnemonic}-")
 
         return try {
-            val id = if (isUDPId) practitionerFhirId else practitionerFhirId.localize(tenant)
+            val id = if (isUDPId) practitionerFhirId else practitionerFhirId.localizeFhirId(tenant.mnemonic)
             runBlocking { ehrDataAuthorityClient.getResourceAs<Practitioner>(tenant.mnemonic, "Practitioner", id) }
                 ?: throw IllegalArgumentException("No Practitioner found for $id")
         } catch (exception: Exception) {

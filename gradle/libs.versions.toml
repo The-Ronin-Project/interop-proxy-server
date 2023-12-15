@@ -1,7 +1,7 @@
 [versions]
 apache-kafka = "3.5.0"
 datadog = "1.25.1"
-ehrda = "2.1.0"
+ehrda = "2.2.0"
 # @keep for forcing version
 graphql-java = "20.4"
 graphql-java-kickstart = "15.1.0"
@@ -10,7 +10,7 @@ hapi-hl7v2 = "2.5.1"
 interop-aidbox = "8.1.0"
 interop-common = "4.1.0"
 interop-datalake = "9.0.0"
-interop-ehr = "13.1.0"
+interop-ehr = "13.1.1"
 interop-event-resource = "1.2.3"
 interop-fhir = "9.1.1"
 interop-gradle = "4.0.0"
@@ -57,7 +57,6 @@ interop-datalake = { module = "com.projectronin.interop.publish:interop-datalake
 interop-ehr-api = { module = "com.projectronin.interop.ehr:interop-ehr", version.ref = "interop-ehr" }
 interop-ehr-cerner = { module = "com.projectronin.interop.ehr:interop-ehr-cerner", version.ref = "interop-ehr" }
 interop-ehr-epic = { module = "com.projectronin.interop.ehr:interop-ehr-epic", version.ref = "interop-ehr" }
-interop-ehr-fhir-ronin = { module = "com.projectronin.interop.ehr:interop-fhir-ronin", version.ref = "interop-ehr" }
 interop-ehr-hl7 = { module = "com.projectronin.interop.ehr:interop-hl7", version.ref = "interop-ehr" }
 interop-ehr-liquibase = { module = "com.projectronin.interop.ehr:interop-ehr-liquibase", version.ref = "interop-ehr" }
 interop-ehr-tenant = { module = "com.projectronin.interop.ehr:interop-tenant", version.ref = "interop-ehr" }

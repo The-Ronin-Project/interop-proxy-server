@@ -25,20 +25,13 @@ dependencies {
     implementation(libs.ehrda.models)
     implementation(libs.interop.common)
     implementation(libs.interop.commonHttp)
-    implementation(libs.interop.datalake) {
-        // Exclude validation
-        exclude(group = "com.projectronin.interop.validation", module = "interop-validation-client")
-    }
+    implementation(libs.interop.datalake)
     implementation(libs.interop.ehr.api)
     implementation(libs.interop.kafka)
     implementation(libs.interop.fhir)
     implementation(libs.interop.queue.api)
     implementation(libs.interop.ehr.tenant)
     implementation(libs.event.interop.resource.internal)
-    implementation(libs.interop.ehr.fhir.ronin) {
-        // Exclude validation
-        exclude(group = "com.projectronin.interop.validation", module = "interop-validation-client")
-    }
     implementation(libs.interop.commonJackson)
 
     implementation(libs.bundles.opentracing)
@@ -69,10 +62,7 @@ dependencies {
     implementation(libs.dd.trace.api)
     implementation(libs.ronin.kafka)
 
-    implementation(libs.bundles.ehr.impls) {
-        // Exclude validation
-        exclude(group = "com.projectronin.interop.validation", module = "interop-validation-client")
-    }
+    implementation(libs.bundles.ehr.impls)
     runtimeOnly(libs.interop.queue.db)
     runtimeOnly(libs.interop.queue.kafka)
     runtimeOnly(libs.mysql.connector.java)
@@ -122,7 +112,6 @@ dependencies {
     itImplementation(libs.interop.fhir)
     itImplementation(libs.interop.fhirGenerators)
     itImplementation(libs.interop.ehr.tenant)
-    // itImplementation(libs.interop.ehr.fhir.ronin.generators)
     itImplementation(libs.ronin.test.data.generator)
     itImplementation("org.springframework.security:spring-security-oauth2-jose")
     itImplementation("org.liquibase:liquibase-core")

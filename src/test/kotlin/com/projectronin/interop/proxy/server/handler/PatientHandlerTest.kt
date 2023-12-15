@@ -15,7 +15,6 @@ import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
 import com.projectronin.interop.fhir.r4.datatype.primitive.asFHIR
 import com.projectronin.interop.fhir.r4.valueset.AdministrativeGender
 import com.projectronin.interop.fhir.r4.valueset.NameUse.USUAL
-import com.projectronin.interop.fhir.ronin.resource.RoninPatient
 import com.projectronin.interop.proxy.server.context.getAuthorizedTenantId
 import com.projectronin.interop.proxy.server.model.Patient
 import com.projectronin.interop.proxy.server.util.JacksonUtil
@@ -57,7 +56,6 @@ class PatientHandlerTest {
     private lateinit var queueService: QueueService
     private lateinit var patientHandler: PatientHandler
     private lateinit var dfe: DataFetchingEnvironment
-    private lateinit var roninPatient: RoninPatient
 
     private val logger = LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME) as ch.qos.logback.classic.Logger
     private val logAppender = ListAppender<ILoggingEvent>()
@@ -84,8 +82,7 @@ class PatientHandlerTest {
         tenantService = mockk()
         queueService = mockk()
         dfe = mockk()
-        roninPatient = mockk()
-        patientHandler = PatientHandler(ehrFactory, tenantService, queueService, roninPatient)
+        patientHandler = PatientHandler(ehrFactory, tenantService, queueService)
     }
 
     @Test
@@ -310,7 +307,6 @@ class PatientHandlerTest {
             )
         } returns response
 
-        every { roninPatient.getRoninIdentifiers(patient1, tenant) } returns roninIdentifiers
         mockkObject(JacksonUtil)
         every { JacksonUtil.writeJsonValue(patient1) } returns "raw JSON for patient"
         every {
@@ -342,7 +338,7 @@ class PatientHandlerTest {
 
         val patients = actualResponse.data
         assertEquals(1, patients.size)
-        assertEquals(Patient(patient1, tenant, roninIdentifiers), patients[0])
+        assertEquals(Patient(patient1, tenant), patients[0])
     }
 
     @Test
@@ -412,7 +408,6 @@ class PatientHandlerTest {
             )
         } returns response
 
-        every { roninPatient.getRoninIdentifiers(patient1, tenant) } returns roninIdentifiers
         mockkObject(JacksonUtil)
         every { JacksonUtil.writeJsonValue(patient1) } returns "raw JSON for patient"
         every {
@@ -444,7 +439,7 @@ class PatientHandlerTest {
 
         val patients = actualResponse.data
         assertEquals(1, patients.size)
-        assertEquals(Patient(patient1, tenant, roninIdentifiers), patients[0])
+        assertEquals(Patient(patient1, tenant), patients[0])
     }
 
     @Test
@@ -513,7 +508,6 @@ class PatientHandlerTest {
             )
         } returns response
 
-        every { roninPatient.getRoninIdentifiers(patient1, tenant) } returns roninIdentifiers
         every {
             queueService.enqueueMessages(
                 listOf(
@@ -543,7 +537,7 @@ class PatientHandlerTest {
 
         val patients = actualResponse.data
         assertEquals(1, patients.size)
-        assertEquals(Patient(patient1, tenant, roninIdentifiers), patients[0])
+        assertEquals(Patient(patient1, tenant), patients[0])
     }
 
     @Test
@@ -683,8 +677,6 @@ class PatientHandlerTest {
                 ),
             )
 
-        every { roninPatient.getRoninIdentifiers(patient1, tenant) } returns roninIdentifiers
-
         val patientService = mockk<PatientService>()
         every { ehrFactory.getVendorFactory(tenant).patientService } returns patientService
         every {
@@ -708,7 +700,7 @@ class PatientHandlerTest {
         assertNotNull(actualResponse)
         val patients = actualResponse.data
         assertEquals(1, patients.size)
-        assertEquals(Patient(patient1, tenant, roninIdentifiers), patients[0])
+        assertEquals(Patient(patient1, tenant), patients[0])
     }
 
     @Test
@@ -806,8 +798,6 @@ class PatientHandlerTest {
                 ),
             )
 
-        every { roninPatient.getRoninIdentifiers(patient1, tenant) } returns roninIdentifiers
-
         val patientService = mockk<PatientService>()
         every { ehrFactory.getVendorFactory(tenant).patientService } returns patientService
         every {
@@ -831,7 +821,7 @@ class PatientHandlerTest {
         assertNotNull(actualResponse)
         val patients = actualResponse.data
         assertEquals(1, patients.size)
-        assertEquals(Patient(patient1, tenant, roninIdentifiers), patients[0])
+        assertEquals(Patient(patient1, tenant), patients[0])
     }
 
     @Test
@@ -977,9 +967,6 @@ class PatientHandlerTest {
                 ),
             )
 
-        every { roninPatient.getRoninIdentifiers(patient1, tenant) } returns roninIdentifiers
-        every { roninPatient.getRoninIdentifiers(patient2, tenant) } returns roninIdentifiers
-
         val patientService = mockk<PatientService>()
         every { ehrFactory.getVendorFactory(tenant).patientService } returns patientService
         every {
@@ -1104,9 +1091,6 @@ class PatientHandlerTest {
                 ),
             )
 
-        every { roninPatient.getRoninIdentifiers(patient1, tenant) } returns roninIdentifiers
-        every { roninPatient.getRoninIdentifiers(patient2, tenant) } returns roninIdentifiers
-
         val patientService = mockk<PatientService>()
         every { ehrFactory.getVendorFactory(tenant).patientService } returns patientService
         every {
@@ -1130,8 +1114,8 @@ class PatientHandlerTest {
         assertNotNull(actualResponse)
         val patients = actualResponse.data
         assertEquals(2, patients.size)
-        assertEquals(Patient(patient1, tenant, roninIdentifiers), patients[0])
-        assertEquals(Patient(patient2, tenant, roninIdentifiers), patients[1])
+        assertEquals(Patient(patient1, tenant), patients[0])
+        assertEquals(Patient(patient2, tenant), patients[1])
     }
 
     @Test
@@ -1189,8 +1173,6 @@ class PatientHandlerTest {
                 ),
             )
 
-        every { roninPatient.getRoninIdentifiers(patient1, tenant) } returns roninIdentifiers
-
         val patientService = mockk<PatientService>()
         every { ehrFactory.getVendorFactory(tenant).patientService } returns patientService
         every {
@@ -1214,7 +1196,7 @@ class PatientHandlerTest {
         assertNotNull(actualResponse)
         val patients = actualResponse.data
         assertEquals(1, patients.size)
-        assertEquals(Patient(patient1, tenant, roninIdentifiers), patients[0])
+        assertEquals(Patient(patient1, tenant), patients[0])
     }
 
     @Test
@@ -1272,8 +1254,6 @@ class PatientHandlerTest {
                 ),
             )
 
-        every { roninPatient.getRoninIdentifiers(patient1, tenant) } returns roninIdentifiers
-
         val patientService = mockk<PatientService>()
         every { ehrFactory.getVendorFactory(tenant).patientService } returns patientService
         every {
@@ -1297,7 +1277,7 @@ class PatientHandlerTest {
         assertNotNull(actualResponse)
         val patients = actualResponse.data
         assertEquals(1, patients.size)
-        assertEquals(Patient(patient1, tenant, roninIdentifiers), patients[0])
+        assertEquals(Patient(patient1, tenant), patients[0])
     }
 
     @Test
@@ -1329,14 +1309,28 @@ class PatientHandlerTest {
             mockk {
                 every { patientService } returns
                     mockk {
-                        every { findPatient(tenant1, LocalDate.of(2001, 2, 3), "Josh", "Smith") } returns emptyList()
+                        every {
+                            findPatient(
+                                tenant1,
+                                LocalDate.of(2001, 2, 3),
+                                "Josh",
+                                "Smith",
+                            )
+                        } returns emptyList()
                     }
             }
         every { ehrFactory.getVendorFactory(tenant2) } returns
             mockk {
                 every { patientService } returns
                     mockk {
-                        every { findPatient(tenant2, LocalDate.of(2001, 2, 3), "Josh", "Smith") } returns emptyList()
+                        every {
+                            findPatient(
+                                tenant2,
+                                LocalDate.of(2001, 2, 3),
+                                "Josh",
+                                "Smith",
+                            )
+                        } returns emptyList()
                     }
             }
 
@@ -1413,9 +1407,6 @@ class PatientHandlerTest {
                             )
                     }
             }
-
-        every { roninPatient.getRoninIdentifiers(patient1, tenant1) } returns emptyList()
-        every { roninPatient.getRoninIdentifiers(patient2, tenant2) } returns emptyList()
 
         val response =
             patientHandler.patientsByTenants(listOf("tenant1", "tenant2"), "Smith", "Josh", "2001-02-03", dfe)
@@ -1497,11 +1488,16 @@ class PatientHandlerTest {
             mockk {
                 every { patientService } returns
                     mockk {
-                        every { findPatient(tenant2, LocalDate.of(2001, 2, 3), "Josh", "Smith") } returns emptyList()
+                        every {
+                            findPatient(
+                                tenant2,
+                                LocalDate.of(2001, 2, 3),
+                                "Josh",
+                                "Smith",
+                            )
+                        } returns emptyList()
                     }
             }
-
-        every { roninPatient.getRoninIdentifiers(patient1, tenant1) } returns emptyList()
 
         val response =
             patientHandler.patientsByTenants(
@@ -1638,8 +1634,6 @@ class PatientHandlerTest {
                     }
             }
 
-        every { roninPatient.getRoninIdentifiers(patient1, tenant1) } returns emptyList()
-
         val response =
             patientHandler.patientsByTenants(
                 listOf("tenant1", "tenant2"),
@@ -1728,7 +1722,14 @@ class PatientHandlerTest {
             mockk {
                 every { patientService } returns
                     mockk {
-                        every { findPatient(tenant1, LocalDate.of(2001, 2, 3), "Josh", "Smith Jr") } returns emptyList()
+                        every {
+                            findPatient(
+                                tenant1,
+                                LocalDate.of(2001, 2, 3),
+                                "Josh",
+                                "Smith Jr",
+                            )
+                        } returns emptyList()
                     }
             }
 

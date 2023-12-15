@@ -1,8 +1,8 @@
 package com.projectronin.interop.proxy.server.model
 
 import com.expediagroup.graphql.generator.annotations.GraphQLDescription
-import com.projectronin.interop.fhir.ronin.util.localize
-import com.projectronin.interop.fhir.ronin.util.localizeReference
+import com.projectronin.interop.fhir.util.localize
+import com.projectronin.interop.fhir.util.localizeFhirId
 import com.projectronin.interop.tenant.config.model.Tenant
 import com.projectronin.interop.fhir.r4.datatype.Reference as R4Reference
 
@@ -24,14 +24,14 @@ data class Reference(
             reference: R4Reference?,
             tenant: Tenant,
         ): Reference {
-            val localizedReference = reference?.localizeReference(tenant)
+            val localizedReference = reference?.localize(tenant.mnemonic)
             localizedReference.apply {
                 return Reference(
                     reference = this?.reference?.value,
                     type = reference?.decomposedType(),
                     display = this?.display?.value,
                     identifier = this?.identifier?.let { Identifier(it) },
-                    id = reference?.decomposedId()?.localize(tenant),
+                    id = reference?.decomposedId()?.localizeFhirId(tenant.mnemonic),
                 )
             }
         }

@@ -2,7 +2,7 @@ package com.projectronin.interop.proxy.server.model
 
 import com.expediagroup.graphql.generator.annotations.GraphQLDescription
 import com.projectronin.interop.fhir.r4.datatype.DynamicValueType
-import com.projectronin.interop.fhir.ronin.util.localize
+import com.projectronin.interop.fhir.util.localizeFhirId
 import com.projectronin.interop.tenant.config.model.Tenant
 import com.projectronin.interop.fhir.r4.datatype.Age as R4Age
 import com.projectronin.interop.fhir.r4.datatype.Period as R4Period
@@ -17,7 +17,7 @@ data class Condition(
 ) {
     @GraphQLDescription("The internal identifier for this condition")
     val id: String? by lazy {
-        condition.id!!.value!!.localize(tenant)
+        condition.id!!.value!!.localizeFhirId(tenant.mnemonic)
     }
 
     @GraphQLDescription("List of external identifiers for this condition")

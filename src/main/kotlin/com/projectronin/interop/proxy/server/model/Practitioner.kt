@@ -1,7 +1,7 @@
 package com.projectronin.interop.proxy.server.model
 
 import com.expediagroup.graphql.generator.annotations.GraphQLDescription
-import com.projectronin.interop.fhir.ronin.util.localize
+import com.projectronin.interop.fhir.util.localizeFhirId
 import com.projectronin.interop.tenant.config.model.Tenant
 import com.projectronin.interop.fhir.r4.resource.Practitioner as R4Practitioner
 
@@ -12,7 +12,7 @@ data class Practitioner(
 ) {
     @GraphQLDescription("The internal identifier for this patient")
     val id: String? by lazy {
-        practitioner.id!!.value!!.localize(tenant)
+        practitioner.id!!.value!!.localizeFhirId(tenant.mnemonic)
     }
 
     @GraphQLDescription("List of practitioner known identifiers")
