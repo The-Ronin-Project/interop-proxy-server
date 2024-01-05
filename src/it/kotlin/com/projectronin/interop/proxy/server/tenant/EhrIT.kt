@@ -34,13 +34,14 @@ class EhrIT : BaseTenantControllerIT() {
 
     @Test
     fun `post ehr when none exists - epic`() {
-        val testEhr = Ehr(
-            vendorType = VendorType.EPIC,
-            instanceName = "Epic Sandbox",
-            clientId = "clientID",
-            publicKey = "publicKey",
-            privateKey = "privateKey"
-        )
+        val testEhr =
+            Ehr(
+                vendorType = VendorType.EPIC,
+                instanceName = "Epic Sandbox",
+                clientId = "clientID",
+                publicKey = "publicKey",
+                privateKey = "privateKey",
+            )
         val response = ProxyClient.post(url, testEhr)
 
         val body = runBlocking { response.body<Ehr>() }
@@ -50,13 +51,14 @@ class EhrIT : BaseTenantControllerIT() {
 
     @Test
     fun `post ehr when none exists - cerner`() {
-        val testEhr = Ehr(
-            vendorType = VendorType.CERNER,
-            instanceName = "Cerner Sandbox",
-            clientId = "clientID",
-            accountId = "accountId",
-            secret = "secret"
-        )
+        val testEhr =
+            Ehr(
+                vendorType = VendorType.CERNER,
+                instanceName = "Cerner Sandbox",
+                clientId = "clientID",
+                accountId = "accountId",
+                secret = "secret",
+            )
         val response = ProxyClient.post(url, testEhr)
         val body = runBlocking { response.body<Ehr>() }
         assertEquals(HttpStatusCode.Created, response.status)
@@ -65,12 +67,13 @@ class EhrIT : BaseTenantControllerIT() {
 
     @Test
     fun `post ehr when none exists - cerner system auth`() {
-        val testEhr = Ehr(
-            vendorType = VendorType.CERNER,
-            instanceName = "Cerner Sandbox",
-            accountId = "accountId",
-            secret = "secret"
-        )
+        val testEhr =
+            Ehr(
+                vendorType = VendorType.CERNER,
+                instanceName = "Cerner Sandbox",
+                accountId = "accountId",
+                secret = "secret",
+            )
         val response = ProxyClient.post(url, testEhr)
         val body = runBlocking { response.body<Ehr>() }
         assertEquals(HttpStatusCode.Created, response.status)
@@ -80,13 +83,14 @@ class EhrIT : BaseTenantControllerIT() {
     @Test
     fun `post fails when ehr exists`() {
         populateTenantData()
-        val testEhr = Ehr(
-            vendorType = VendorType.EPIC,
-            instanceName = "Epic Sandbox",
-            clientId = "clientID",
-            publicKey = "publicKey",
-            privateKey = "privateKey"
-        )
+        val testEhr =
+            Ehr(
+                vendorType = VendorType.EPIC,
+                instanceName = "Epic Sandbox",
+                clientId = "clientID",
+                publicKey = "publicKey",
+                privateKey = "privateKey",
+            )
         val response = ProxyClient.post(url, testEhr)
 
         assertEquals(HttpStatusCode.InternalServerError, response.status)
@@ -94,13 +98,14 @@ class EhrIT : BaseTenantControllerIT() {
 
     @Test
     fun `post fails when missing needed values`() {
-        val testEhr = Ehr(
-            vendorType = VendorType.CERNER,
-            instanceName = "Epic Sandbox",
-            clientId = "clientID",
-            publicKey = "publicKey",
-            privateKey = "privateKey"
-        )
+        val testEhr =
+            Ehr(
+                vendorType = VendorType.CERNER,
+                instanceName = "Epic Sandbox",
+                clientId = "clientID",
+                publicKey = "publicKey",
+                privateKey = "privateKey",
+            )
         val response = ProxyClient.post(url, testEhr)
 
         assertEquals(HttpStatusCode.InternalServerError, response.status)
@@ -109,13 +114,14 @@ class EhrIT : BaseTenantControllerIT() {
     @Test
     fun `put updates existing ehr`() {
         populateTenantData()
-        val updatedEhr = Ehr(
-            vendorType = VendorType.EPIC,
-            instanceName = "Epic Sandbox",
-            clientId = "updated",
-            publicKey = "publicKey",
-            privateKey = "privateKey"
-        )
+        val updatedEhr =
+            Ehr(
+                vendorType = VendorType.EPIC,
+                instanceName = "Epic Sandbox",
+                clientId = "updated",
+                publicKey = "publicKey",
+                privateKey = "privateKey",
+            )
         val fullUrl = "$url/${UriUtils.encodePathSegment("Epic Sandbox", Charsets.UTF_8)}"
         val response = ProxyClient.put(fullUrl, updatedEhr)
 
@@ -126,13 +132,14 @@ class EhrIT : BaseTenantControllerIT() {
 
     @Test
     fun `put fails when ehr does not exist`() {
-        val testEhr = Ehr(
-            vendorType = VendorType.EPIC,
-            instanceName = "Epic Sandbox",
-            clientId = "updated",
-            publicKey = "publicKey",
-            privateKey = "privateKey"
-        )
+        val testEhr =
+            Ehr(
+                vendorType = VendorType.EPIC,
+                instanceName = "Epic Sandbox",
+                clientId = "updated",
+                publicKey = "publicKey",
+                privateKey = "privateKey",
+            )
         val fullUrl = "$url/${UriUtils.encodePathSegment("Epic Sandbox", Charsets.UTF_8)}"
         val response = ProxyClient.put(fullUrl, testEhr)
 

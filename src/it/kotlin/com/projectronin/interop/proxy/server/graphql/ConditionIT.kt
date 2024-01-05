@@ -25,7 +25,6 @@ import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.MethodSource
 
 class ConditionIT : BaseGraphQLIT() {
-
     @AfterEach
     fun `delete all`() {
         MockEHRClient.deleteAllResources("Patient")
@@ -37,51 +36,60 @@ class ConditionIT : BaseGraphQLIT() {
     fun `server handles condition query`(testTenant: String) {
         val patient = patient {}
         val patientId = MockEHRClient.addResource(patient)
-        val condition = condition {
-            subject of reference("Patient", patientId)
-            clinicalStatus of codeableConcept {
-                coding of listOf(
-                    Coding(
-                        system = CodeSystem.CONDITION_CLINICAL.uri,
-                        code = Code("active")
+        val condition =
+            condition {
+                subject of reference("Patient", patientId)
+                clinicalStatus of
+                    codeableConcept {
+                        coding of
+                            listOf(
+                                Coding(
+                                    system = CodeSystem.CONDITION_CLINICAL.uri,
+                                    code = Code("active"),
+                                ),
+                            )
+                    }
+                category of
+                    listOf(
+                        codeableConcept {
+                            coding of
+                                listOf(
+                                    Coding(
+                                        system = CodeSystem.CONDITION_CATEGORY.uri,
+                                        code = Code(ConditionCategoryCode.PROBLEM_LIST_ITEM.code),
+                                        display = "Problem List Item".asFHIR(),
+                                    ),
+                                    Coding(
+                                        system = CodeSystem.SNOMED_CT.uri,
+                                        code = Code("439401001"),
+                                        display = "Diagnosis".asFHIR(),
+                                    ),
+                                )
+                        },
                     )
-                )
+                code of
+                    codeableConcept {
+                        coding of
+                            listOf(
+                                Coding(
+                                    system = CodeSystem.SNOMED_CT.uri,
+                                    code = Code("39065001"),
+                                    display = "Burn of ear".asFHIR(),
+                                ),
+                            )
+                        text of "Burnt Ear"
+                    }
             }
-            category of listOf(
-                codeableConcept {
-                    coding of listOf(
-                        Coding(
-                            system = CodeSystem.CONDITION_CATEGORY.uri,
-                            code = Code(ConditionCategoryCode.PROBLEM_LIST_ITEM.code),
-                            display = "Problem List Item".asFHIR()
-                        ),
-                        Coding(
-                            system = CodeSystem.SNOMED_CT.uri,
-                            code = Code("439401001"),
-                            display = "Diagnosis".asFHIR()
-                        )
-                    )
-                }
-            )
-            code of codeableConcept {
-                coding of listOf(
-                    Coding(
-                        system = CodeSystem.SNOMED_CT.uri,
-                        code = Code("39065001"),
-                        display = "Burn of ear".asFHIR()
-                    )
-                )
-                text of "Burnt Ear"
-            }
-        }
         val conditionId = MockEHRClient.addResource(condition)
-        val query = this::class.java.getResource("/graphql/conditionsByPatient.graphql")!!
-            .readText()
-            .replace("__patFhir__", patientId)
-            .replace("__tenant_mnemonic__", testTenant)
-        val expectedJSON = this::class.java.getResource("/testConditionGraphQLResults.json")!!
-            .readText()
-            .replace("__return__id__", "$testTenant-$conditionId")
+        val query =
+            this::class.java.getResource("/graphql/conditionsByPatient.graphql")!!
+                .readText()
+                .replace("__patFhir__", patientId)
+                .replace("__tenant_mnemonic__", testTenant)
+        val expectedJSON =
+            this::class.java.getResource("/testConditionGraphQLResults.json")!!
+                .readText()
+                .replace("__return__id__", "$testTenant-$conditionId")
 
         val response = ProxyClient.query(query, testTenant)
         val body = runBlocking { response.body<String>() }
@@ -98,14 +106,15 @@ class ConditionIT : BaseGraphQLIT() {
         val testTenant = "epic"
         val patientFhirId = MockEHRClient.addResource(patient {})
 
-        val query = """
+        val query =
+            """
             query {
                conditionsByPatientAndCategory(
                 tenantId:"$testTenant", 
                 patientFhirId:"$patientFhirId", 
                {id}
             }
-        """.trimIndent()
+            """.trimIndent()
 
         val response = ProxyClient.query(query, testTenant)
         val body = runBlocking { response.body<String>() }
@@ -120,7 +129,8 @@ class ConditionIT : BaseGraphQLIT() {
         val patientFhirId = MockEHRClient.addResource(patient {}) // Test patient with no conditions
         val conditionCategoryCode = ConditionCategoryCode.PROBLEM_LIST_ITEM
 
-        val query = """
+        val query =
+            """
             query {
                conditionsByPatientAndCategory(
                 tenantId:"$testTenant", 
@@ -128,7 +138,7 @@ class ConditionIT : BaseGraphQLIT() {
                 conditionCategoryCode:$conditionCategoryCode)
                {id}
             }
-        """.trimIndent()
+            """.trimIndent()
 
         val response = ProxyClient.query(query, testTenant)
         val body = runBlocking { response.body<String>() }

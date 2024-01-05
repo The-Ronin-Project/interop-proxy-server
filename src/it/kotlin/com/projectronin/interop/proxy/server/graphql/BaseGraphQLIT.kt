@@ -25,15 +25,18 @@ abstract class BaseGraphQLIT : BaseProxyIT() {
         }
     }
 
-    fun getM2MAuthentication(): String = runBlocking {
-        val json: JsonNode = httpClient.submitForm(
-            url = "http://localhost:8083/proxy/token",
-            formParameters = Parameters.build {
-                append("grant_type", "client_credentials")
-                append("client_id", "proxy-client")
-                append("client_secret", "secret")
-            }
-        ).body()
-        json.get("access_token").asText()
-    }
+    fun getM2MAuthentication(): String =
+        runBlocking {
+            val json: JsonNode =
+                httpClient.submitForm(
+                    url = "http://localhost:8083/proxy/token",
+                    formParameters =
+                        Parameters.build {
+                            append("grant_type", "client_credentials")
+                            append("client_id", "proxy-client")
+                            append("client_secret", "secret")
+                        },
+                ).body()
+            json.get("access_token").asText()
+        }
 }

@@ -25,22 +25,23 @@ import io.ktor.serialization.jackson.jackson
 import kotlinx.coroutines.runBlocking
 
 object AidboxClient {
-    val httpClient = HttpClient(CIO) {
-        // If not a successful response, Ktor will throw Exceptions
-        expectSuccess = true
+    val httpClient =
+        HttpClient(CIO) {
+            // If not a successful response, Ktor will throw Exceptions
+            expectSuccess = true
 
-        // Setup JSON
-        install(ContentNegotiation) {
-            jackson {
-                JacksonManager.setUpMapper(this)
+            // Setup JSON
+            install(ContentNegotiation) {
+                jackson {
+                    JacksonManager.setUpMapper(this)
+                }
+            }
+
+            // Enable logging.
+            install(Logging) {
+                level = LogLevel.NONE
             }
         }
-
-        // Enable logging.
-        install(Logging) {
-            level = LogLevel.NONE
-        }
-    }
 
     private const val BASE_URL = "http://localhost:8888"
 
@@ -60,33 +61,41 @@ object AidboxClient {
         return "${authentication.tokenType} ${authentication.accessToken}"
     }
 
-    private fun getAllResourcesForTenant(resourceType: String, tenant: String): JsonNode = runBlocking {
-        val tenantIdentifier = TENANT_IDENTIFIER_FORMAT.format(tenant)
-        val url = RESOURCES_FORMAT.format(resourceType)
-        httpClient.get(url) {
-            url {
-                parameters.append("identifier", tenantIdentifier)
-            }
-            headers {
-                append(HttpHeaders.Authorization, getAuthorizationHeader())
-            }
-        }.body()
-    }
+    private fun getAllResourcesForTenant(
+        resourceType: String,
+        tenant: String,
+    ): JsonNode =
+        runBlocking {
+            val tenantIdentifier = TENANT_IDENTIFIER_FORMAT.format(tenant)
+            val url = RESOURCES_FORMAT.format(resourceType)
+            httpClient.get(url) {
+                url {
+                    parameters.append("identifier", tenantIdentifier)
+                }
+                headers {
+                    append(HttpHeaders.Authorization, getAuthorizationHeader())
+                }
+            }.body()
+        }
 
-    inline fun <reified T : Resource<T>> addResource(resource: Resource<T>): T = runBlocking {
-        val resourceUrl = RESOURCES_FORMAT.format(resource.resourceType)
-        httpClient.post(resourceUrl) {
-            headers {
-                append(HttpHeaders.Authorization, getAuthorizationHeader())
-                append("aidbox-validation-skip", "reference")
-            }
-            contentType(ContentType.Application.Json)
-            accept(ContentType.Application.Json)
-            setBody(resource)
-        }.body()
-    }
+    inline fun <reified T : Resource<T>> addResource(resource: Resource<T>): T =
+        runBlocking {
+            val resourceUrl = RESOURCES_FORMAT.format(resource.resourceType)
+            httpClient.post(resourceUrl) {
+                headers {
+                    append(HttpHeaders.Authorization, getAuthorizationHeader())
+                    append("aidbox-validation-skip", "reference")
+                }
+                contentType(ContentType.Application.Json)
+                accept(ContentType.Application.Json)
+                setBody(resource)
+            }.body()
+        }
 
-    private fun deleteResource(resourceType: String, id: String) = runBlocking {
+    private fun deleteResource(
+        resourceType: String,
+        id: String,
+    ) = runBlocking {
         val url = RESOURCE_FORMAT.format(resourceType, id)
         httpClient.delete(url) {
             headers {
@@ -95,7 +104,10 @@ object AidboxClient {
         }
     }
 
-    fun deleteAllResources(resourceType: String, tenant: String) = runBlocking {
+    fun deleteAllResources(
+        resourceType: String,
+        tenant: String,
+    ) = runBlocking {
         val resources = getAllResourcesForTenant(resourceType, tenant)
         resources.get("entry").forEach {
             val resourceId = it.get("resource").get("id").asText()

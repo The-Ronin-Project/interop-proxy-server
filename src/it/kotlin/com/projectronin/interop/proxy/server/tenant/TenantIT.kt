@@ -60,33 +60,35 @@ class TenantIT : BaseTenantControllerIT() {
 
     @Test
     fun `can insert a tenant - epic`() {
-        val vendor = Epic(
-            release = "1.0",
-            serviceEndpoint = "https://apporchard.epic.com/interconnect-aocurprd-oauth",
-            authEndpoint = "https://apporchard.epic.com/interconnect-aocurprd-oauth/oauth2/token",
-            ehrUserId = "1",
-            messageType = "1",
-            practitionerProviderSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.2.836982",
-            practitionerUserSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.2.697780",
-            patientMRNSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.5.737384.14",
-            patientInternalSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.2.698084",
-            encounterCSNSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.5.737384.8",
-            patientMRNTypeText = "MRN",
-            hsi = null,
-            instanceName = "Epic Sandbox",
-            departmentInternalSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.2.686980",
-            patientOnboardedFlagId = null,
-            orderSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.2.798268"
-        )
-        val newTenant = Tenant(
-            id = 0,
-            mnemonic = "CoolNewBoi",
-            availableStart = LocalTime.of(22, 0),
-            availableEnd = LocalTime.of(6, 0),
-            vendor = vendor,
-            name = "coolest boi hospital",
-            timezone = "America/Chicago"
-        )
+        val vendor =
+            Epic(
+                release = "1.0",
+                serviceEndpoint = "https://apporchard.epic.com/interconnect-aocurprd-oauth",
+                authEndpoint = "https://apporchard.epic.com/interconnect-aocurprd-oauth/oauth2/token",
+                ehrUserId = "1",
+                messageType = "1",
+                practitionerProviderSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.2.836982",
+                practitionerUserSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.2.697780",
+                patientMRNSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.5.737384.14",
+                patientInternalSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.2.698084",
+                encounterCSNSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.5.737384.8",
+                patientMRNTypeText = "MRN",
+                hsi = null,
+                instanceName = "Epic Sandbox",
+                departmentInternalSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.2.686980",
+                patientOnboardedFlagId = null,
+                orderSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.2.798268",
+            )
+        val newTenant =
+            Tenant(
+                id = 0,
+                mnemonic = "CoolNewBoi",
+                availableStart = LocalTime.of(22, 0),
+                availableEnd = LocalTime.of(6, 0),
+                vendor = vendor,
+                name = "coolest boi hospital",
+                timezone = "America/Chicago",
+            )
 
         val response = ProxyClient.post(url, newTenant)
 
@@ -98,26 +100,28 @@ class TenantIT : BaseTenantControllerIT() {
 
     @Test
     fun `can insert a tenant - cerner`() {
-        val vendor = Cerner(
-            serviceEndpoint = "serviceEndpoint",
-            authEndpoint = "authEndpoint",
-            patientMRNSystem = "patientMRNSystem",
-            instanceName = "Cerner Sandbox",
-            messagePractitioner = "Practitioner1",
-            messageTopic = "Ronin Alert",
-            messageCategory = "alert",
-            messagePriority = "routine"
-        )
+        val vendor =
+            Cerner(
+                serviceEndpoint = "serviceEndpoint",
+                authEndpoint = "authEndpoint",
+                patientMRNSystem = "patientMRNSystem",
+                instanceName = "Cerner Sandbox",
+                messagePractitioner = "Practitioner1",
+                messageTopic = "Ronin Alert",
+                messageCategory = "alert",
+                messagePriority = "routine",
+            )
 
-        val newTenant = Tenant(
-            id = 0,
-            mnemonic = "CoolNewBoi",
-            availableStart = LocalTime.of(22, 0),
-            availableEnd = LocalTime.of(6, 0),
-            vendor = vendor,
-            name = "coolest boi hospital",
-            timezone = "America/Chicago"
-        )
+        val newTenant =
+            Tenant(
+                id = 0,
+                mnemonic = "CoolNewBoi",
+                availableStart = LocalTime.of(22, 0),
+                availableEnd = LocalTime.of(6, 0),
+                vendor = vendor,
+                name = "coolest boi hospital",
+                timezone = "America/Chicago",
+            )
         val response = ProxyClient.post(url, newTenant)
 
         val body = runBlocking { response.body<Tenant>() }
@@ -128,34 +132,36 @@ class TenantIT : BaseTenantControllerIT() {
 
     @Test
     fun `can insert a tenant with custom MRN`() {
-        val vendor = Epic(
-            release = "1.0",
-            serviceEndpoint = "https://apporchard.epic.com/interconnect-aocurprd-oauth",
-            authEndpoint = "https://apporchard.epic.com/interconnect-aocurprd-oauth/oauth2/token",
-            ehrUserId = "1",
-            messageType = "1",
-            practitionerProviderSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.2.836982",
-            practitionerUserSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.2.697780",
-            patientMRNSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.5.737384.14",
-            patientInternalSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.2.698084",
-            encounterCSNSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.5.737384.8",
-            patientMRNTypeText = "Custom MRN",
-            hsi = null,
-            instanceName = "Epic Sandbox",
-            departmentInternalSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.2.686980",
-            patientOnboardedFlagId = null,
-            orderSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.2.798268"
-        )
+        val vendor =
+            Epic(
+                release = "1.0",
+                serviceEndpoint = "https://apporchard.epic.com/interconnect-aocurprd-oauth",
+                authEndpoint = "https://apporchard.epic.com/interconnect-aocurprd-oauth/oauth2/token",
+                ehrUserId = "1",
+                messageType = "1",
+                practitionerProviderSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.2.836982",
+                practitionerUserSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.2.697780",
+                patientMRNSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.5.737384.14",
+                patientInternalSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.2.698084",
+                encounterCSNSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.5.737384.8",
+                patientMRNTypeText = "Custom MRN",
+                hsi = null,
+                instanceName = "Epic Sandbox",
+                departmentInternalSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.2.686980",
+                patientOnboardedFlagId = null,
+                orderSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.2.798268",
+            )
 
-        val newTenant = Tenant(
-            id = 0,
-            mnemonic = "CoolNewBoi",
-            availableStart = LocalTime.of(22, 0),
-            availableEnd = LocalTime.of(6, 0),
-            vendor = vendor,
-            name = "coolest boi hospital",
-            timezone = "America/New_York"
-        )
+        val newTenant =
+            Tenant(
+                id = 0,
+                mnemonic = "CoolNewBoi",
+                availableStart = LocalTime.of(22, 0),
+                availableEnd = LocalTime.of(6, 0),
+                vendor = vendor,
+                name = "coolest boi hospital",
+                timezone = "America/New_York",
+            )
 
         val response = ProxyClient.post(url, newTenant)
 
@@ -167,35 +173,37 @@ class TenantIT : BaseTenantControllerIT() {
 
     @Test
     fun `can update a tenant - epic`() {
-        val vendor = Epic(
-            release = "2.0",
-            serviceEndpoint = "https://apporchard.epic.com/interconnect-aocurprd-oauth",
-            authEndpoint = "https://apporchard.epic.com/interconnect-aocurprd-oauth/oauth2/token",
-            ehrUserId = "1",
-            messageType = "1",
-            practitionerProviderSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.2.836982",
-            practitionerUserSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.2.697780",
-            patientMRNSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.5.737384.14",
-            patientInternalSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.2.698084",
-            encounterCSNSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.5.737384.8",
-            patientMRNTypeText = "MRN",
-            hsi = null,
-            instanceName = "Epic Sandbox",
-            departmentInternalSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.2.686980",
-            patientOnboardedFlagId = "135124",
-            orderSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.2.798268"
-        )
+        val vendor =
+            Epic(
+                release = "2.0",
+                serviceEndpoint = "https://apporchard.epic.com/interconnect-aocurprd-oauth",
+                authEndpoint = "https://apporchard.epic.com/interconnect-aocurprd-oauth/oauth2/token",
+                ehrUserId = "1",
+                messageType = "1",
+                practitionerProviderSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.2.836982",
+                practitionerUserSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.2.697780",
+                patientMRNSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.5.737384.14",
+                patientInternalSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.2.698084",
+                encounterCSNSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.5.737384.8",
+                patientMRNTypeText = "MRN",
+                hsi = null,
+                instanceName = "Epic Sandbox",
+                departmentInternalSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.2.686980",
+                patientOnboardedFlagId = "135124",
+                orderSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.2.798268",
+            )
 
-        val updatedTenant = Tenant(
-            id = 1001,
-            mnemonic = "epic",
-            availableStart = LocalTime.of(22, 0),
-            availableEnd = LocalTime.of(6, 0),
-            vendor = vendor,
-            name = "App Orchard Test",
-            timezone = "America/Denver",
-            monitoredIndicator = false
-        )
+        val updatedTenant =
+            Tenant(
+                id = 1001,
+                mnemonic = "epic",
+                availableStart = LocalTime.of(22, 0),
+                availableEnd = LocalTime.of(6, 0),
+                vendor = vendor,
+                name = "App Orchard Test",
+                timezone = "America/Denver",
+                monitoredIndicator = false,
+            )
 
         val response = ProxyClient.put("$url/epic", updatedTenant)
 
@@ -206,27 +214,29 @@ class TenantIT : BaseTenantControllerIT() {
 
     @Test
     fun `can update a tenant - cerner`() {
-        val vendor = Cerner(
-            serviceEndpoint = "new serviceEndpoint",
-            authEndpoint = "new authEndpoint",
-            patientMRNSystem = "new patientMRNSystem",
-            instanceName = "Cerner Sandbox",
-            messagePractitioner = "NewPractitioner1",
-            messageTopic = null,
-            messageCategory = null,
-            messagePriority = null
-        )
+        val vendor =
+            Cerner(
+                serviceEndpoint = "new serviceEndpoint",
+                authEndpoint = "new authEndpoint",
+                patientMRNSystem = "new patientMRNSystem",
+                instanceName = "Cerner Sandbox",
+                messagePractitioner = "NewPractitioner1",
+                messageTopic = null,
+                messageCategory = null,
+                messagePriority = null,
+            )
 
-        val updatedTenant = Tenant(
-            id = 2002,
-            mnemonic = "cerner",
-            availableStart = LocalTime.of(22, 0),
-            availableEnd = LocalTime.of(6, 0),
-            vendor = vendor,
-            name = "App Orchard Test",
-            timezone = "America/Denver",
-            monitoredIndicator = true
-        )
+        val updatedTenant =
+            Tenant(
+                id = 2002,
+                mnemonic = "cerner",
+                availableStart = LocalTime.of(22, 0),
+                availableEnd = LocalTime.of(6, 0),
+                vendor = vendor,
+                name = "App Orchard Test",
+                timezone = "America/Denver",
+                monitoredIndicator = true,
+            )
         val response = ProxyClient.put("$url/cerner", updatedTenant)
 
         val body = runBlocking { response.body<Tenant>() }
@@ -236,35 +246,37 @@ class TenantIT : BaseTenantControllerIT() {
 
     @Test
     fun `can update a tenant with custom MRN`() {
-        val vendor = Epic(
-            release = "2.0",
-            serviceEndpoint = "https://apporchard.epic.com/interconnect-aocurprd-oauth",
-            authEndpoint = "https://apporchard.epic.com/interconnect-aocurprd-oauth/oauth2/token",
-            ehrUserId = "1",
-            messageType = "1",
-            practitionerProviderSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.2.836982",
-            practitionerUserSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.2.697780",
-            patientMRNSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.5.737384.14",
-            patientInternalSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.2.698084",
-            encounterCSNSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.5.737384.8",
-            patientMRNTypeText = "Custom MRN",
-            hsi = null,
-            instanceName = "Epic Sandbox",
-            departmentInternalSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.2.686980",
-            patientOnboardedFlagId = null,
-            orderSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.2.798268"
-        )
+        val vendor =
+            Epic(
+                release = "2.0",
+                serviceEndpoint = "https://apporchard.epic.com/interconnect-aocurprd-oauth",
+                authEndpoint = "https://apporchard.epic.com/interconnect-aocurprd-oauth/oauth2/token",
+                ehrUserId = "1",
+                messageType = "1",
+                practitionerProviderSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.2.836982",
+                practitionerUserSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.2.697780",
+                patientMRNSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.5.737384.14",
+                patientInternalSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.2.698084",
+                encounterCSNSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.5.737384.8",
+                patientMRNTypeText = "Custom MRN",
+                hsi = null,
+                instanceName = "Epic Sandbox",
+                departmentInternalSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.2.686980",
+                patientOnboardedFlagId = null,
+                orderSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.2.798268",
+            )
 
-        val updatedTenant = Tenant(
-            id = 1001,
-            mnemonic = "epic",
-            availableStart = LocalTime.of(22, 0),
-            availableEnd = LocalTime.of(6, 0),
-            vendor = vendor,
-            name = "App Orchard Test",
-            timezone = "America/Los_Angeles",
-            monitoredIndicator = false
-        )
+        val updatedTenant =
+            Tenant(
+                id = 1001,
+                mnemonic = "epic",
+                availableStart = LocalTime.of(22, 0),
+                availableEnd = LocalTime.of(6, 0),
+                vendor = vendor,
+                name = "App Orchard Test",
+                timezone = "America/Los_Angeles",
+                monitoredIndicator = false,
+            )
 
         val response = ProxyClient.put("$url/epic", updatedTenant)
 
@@ -275,34 +287,36 @@ class TenantIT : BaseTenantControllerIT() {
 
     @Test
     fun `inserting without important flag defaults to true`() {
-        val vendor = Epic(
-            release = "1.0",
-            serviceEndpoint = "https://apporchard.epic.com/interconnect-aocurprd-oauth",
-            authEndpoint = "https://apporchard.epic.com/interconnect-aocurprd-oauth/oauth2/token",
-            ehrUserId = "1",
-            messageType = "1",
-            practitionerProviderSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.2.836982",
-            practitionerUserSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.2.697780",
-            patientMRNSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.5.737384.14",
-            patientInternalSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.2.698084",
-            encounterCSNSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.5.737384.8",
-            patientMRNTypeText = "MRN",
-            hsi = null,
-            instanceName = "Epic Sandbox",
-            departmentInternalSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.2.686980",
-            patientOnboardedFlagId = null,
-            orderSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.2.798268"
-        )
+        val vendor =
+            Epic(
+                release = "1.0",
+                serviceEndpoint = "https://apporchard.epic.com/interconnect-aocurprd-oauth",
+                authEndpoint = "https://apporchard.epic.com/interconnect-aocurprd-oauth/oauth2/token",
+                ehrUserId = "1",
+                messageType = "1",
+                practitionerProviderSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.2.836982",
+                practitionerUserSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.2.697780",
+                patientMRNSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.5.737384.14",
+                patientInternalSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.2.698084",
+                encounterCSNSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.5.737384.8",
+                patientMRNTypeText = "MRN",
+                hsi = null,
+                instanceName = "Epic Sandbox",
+                departmentInternalSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.2.686980",
+                patientOnboardedFlagId = null,
+                orderSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.2.798268",
+            )
 
-        val newTenant = Tenant(
-            id = 0,
-            mnemonic = "CoolNewBoi",
-            availableStart = LocalTime.of(22, 0),
-            availableEnd = LocalTime.of(6, 0),
-            vendor = vendor,
-            name = "coolest boi hospital",
-            timezone = "America/Chicago"
-        )
+        val newTenant =
+            Tenant(
+                id = 0,
+                mnemonic = "CoolNewBoi",
+                availableStart = LocalTime.of(22, 0),
+                availableEnd = LocalTime.of(6, 0),
+                vendor = vendor,
+                name = "coolest boi hospital",
+                timezone = "America/Chicago",
+            )
 
         val response = ProxyClient.post(url, newTenant)
 
@@ -314,26 +328,28 @@ class TenantIT : BaseTenantControllerIT() {
 
     @Test
     fun `updating without the important flag defaults to true`() {
-        val vendor = Cerner(
-            serviceEndpoint = "new serviceEndpoint",
-            authEndpoint = "new authEndpoint",
-            patientMRNSystem = "new patientMRNSystem",
-            instanceName = "Cerner Sandbox",
-            messagePractitioner = "NewPractitioner1",
-            messageTopic = null,
-            messageCategory = null,
-            messagePriority = null
-        )
+        val vendor =
+            Cerner(
+                serviceEndpoint = "new serviceEndpoint",
+                authEndpoint = "new authEndpoint",
+                patientMRNSystem = "new patientMRNSystem",
+                instanceName = "Cerner Sandbox",
+                messagePractitioner = "NewPractitioner1",
+                messageTopic = null,
+                messageCategory = null,
+                messagePriority = null,
+            )
 
-        val updatedTenant = Tenant(
-            id = 2002,
-            mnemonic = "cerner",
-            availableStart = LocalTime.of(22, 0),
-            availableEnd = LocalTime.of(6, 0),
-            vendor = vendor,
-            name = "App Orchard Test",
-            timezone = "America/Denver"
-        )
+        val updatedTenant =
+            Tenant(
+                id = 2002,
+                mnemonic = "cerner",
+                availableStart = LocalTime.of(22, 0),
+                availableEnd = LocalTime.of(6, 0),
+                vendor = vendor,
+                name = "App Orchard Test",
+                timezone = "America/Denver",
+            )
 
         val response = ProxyClient.put("$url/cerner", updatedTenant)
 

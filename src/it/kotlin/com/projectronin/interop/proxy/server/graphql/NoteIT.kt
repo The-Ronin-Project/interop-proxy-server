@@ -47,60 +47,70 @@ class NoteIT : BaseGraphQLIT() {
     // the compiler yells that this is always epic, but eventually we'll want to test cerner,
     // so I'm hedging my bets here that this will eventually make it easier
     private fun addTenantData(testTenant: String) {
-        val tenantIdentifier = identifier {
-            value of testTenant
-            system of "http://projectronin.com/id/tenantId"
-        }
+        val tenantIdentifier =
+            identifier {
+                value of testTenant
+                system of "http://projectronin.com/id/tenantId"
+            }
 
-        val patient = patient {
-            id of Id("654321")
-            identifier of listOf(
-                identifier {
-                    value of "0202497"
-                    system of "mockEHRMRNSystem"
-                },
-                identifier {
-                    value of "mockPatientInternalSystem"
-                    system of "     Z4572"
-                }
-            )
-            name of listOf(
-                name {
-                    use of "usual" // required
-                }
-            )
-            gender of "female"
-            birthDate of Date("1973-07-21")
-        }
+        val patient =
+            patient {
+                id of Id("654321")
+                identifier of
+                    listOf(
+                        identifier {
+                            value of "0202497"
+                            system of "mockEHRMRNSystem"
+                        },
+                        identifier {
+                            value of "mockPatientInternalSystem"
+                            system of "     Z4572"
+                        },
+                    )
+                name of
+                    listOf(
+                        name {
+                            use of "usual" // required
+                        },
+                    )
+                gender of "female"
+                birthDate of Date("1973-07-21")
+            }
         val patientFHirId = MockEHRClient.addResourceWithID(patient, "654321")
-        val aidboxPatient = patient.copy(
-            id = Id("$testTenant-654321"),
-            identifier = patient.identifier +
-                tenantIdentifier +
-                fhirIdentifier(patientFHirId) +
-                Identifier(
-                    system = Uri("http://projectronin.com/id/mrn"),
-                    value = "0202497".asFHIR()
-                )
-        )
+        val aidboxPatient =
+            patient.copy(
+                id = Id("$testTenant-654321"),
+                identifier =
+                    patient.identifier +
+                        tenantIdentifier +
+                        fhirIdentifier(patientFHirId) +
+                        Identifier(
+                            system = Uri("http://projectronin.com/id/mrn"),
+                            value = "0202497".asFHIR(),
+                        ),
+            )
         AidboxClient.addResource(aidboxPatient)
 
-        val practitioner = practitioner {
-            id of Id("PractitionerFHIRID1")
-            identifier of listOf(
-                identifier {
-                    value of "E1000"
-                    system of "mockEHRUserSystem"
-                }
-            )
-        }
+        val practitioner =
+            practitioner {
+                id of Id("PractitionerFHIRID1")
+                identifier of
+                    listOf(
+                        identifier {
+                            value of "E1000"
+                            system of "mockEHRUserSystem"
+                        },
+                    )
+            }
         val practitionerFhirID = MockEHRClient.addResourceWithID(practitioner, "PractitionerFHIRID1")
-        val aidboxPractitioner = practitioner.copy(
-            id = Id("$testTenant-654321"),
-            identifier = practitioner.identifier +
-                tenantIdentifier +
-                fhirIdentifier(practitionerFhirID)
-        )
+        val aidboxPractitioner =
+            practitioner.copy(
+                id = Id("$testTenant-654321"),
+                identifier =
+                    practitioner.identifier +
+                        tenantIdentifier +
+                        fhirIdentifier(practitionerFhirID),
+            )
         AidboxClient.addResource(aidboxPractitioner)
     }
 
@@ -111,9 +121,12 @@ class NoteIT : BaseGraphQLIT() {
         val notetext = "Test Note"
         val patientid = "$testTenant-654321"
         val practitionerid = "$testTenant-654321"
+
+        @Suppress("ktlint:standard:max-line-length")
         val mutation =
             """mutation sendNote(${'$'}noteInput: NoteInput!, ${'$'}tenantId: String!) {sendNote(noteInput: ${'$'}noteInput, tenantId: ${'$'}tenantId)}"""
-        val query = """
+        val query =
+            """
             |{
             |   "query": "$mutation",
             |   "variables": {
@@ -129,7 +142,7 @@ class NoteIT : BaseGraphQLIT() {
             |      "tenantId": "$testTenant"
             |   }
             |}
-        """.trimMargin()
+            """.trimMargin()
 
         val response = ProxyClient.query(query, testTenant, getBaseHeaders(testTenant))
 
@@ -150,9 +163,12 @@ class NoteIT : BaseGraphQLIT() {
         val notetext = "Test Note"
         val patientid = "$testTenant-654321"
         val practitionerid = "$testTenant-654321"
+
+        @Suppress("ktlint:standard:max-line-length")
         val mutation =
             """mutation sendNote(${'$'}noteInput: NoteInput!, ${'$'}tenantId: String!) {sendNote(noteInput: ${'$'}noteInput, tenantId: ${'$'}tenantId)}"""
-        val query = """
+        val query =
+            """
             |{
             |   "query": "$mutation",
             |   "variables": {
@@ -168,7 +184,7 @@ class NoteIT : BaseGraphQLIT() {
             |      "tenantId": "$testTenant"
             |   }
             |}
-        """.trimMargin()
+            """.trimMargin()
         val m2mToken = getM2MAuthentication()
         val response = ProxyClient.query(query, m2mToken, getBaseHeaders(m2mToken))
 
@@ -189,9 +205,12 @@ class NoteIT : BaseGraphQLIT() {
         val notetext = "Test Note"
         val patientid = "0202497"
         val practitionerid = "$testTenant-654321"
+
+        @Suppress("ktlint:standard:max-line-length")
         val mutation =
             """mutation sendNote(${'$'}noteInput: NoteInput!, ${'$'}tenantId: String!) {sendNote(noteInput: ${'$'}noteInput, tenantId: ${'$'}tenantId)}"""
-        val query = """
+        val query =
+            """
             |{
             |   "query": "$mutation",
             |   "variables": {
@@ -207,7 +226,7 @@ class NoteIT : BaseGraphQLIT() {
             |      "tenantId": "$testTenant"
             |   }
             |}
-        """.trimMargin()
+            """.trimMargin()
         val response = ProxyClient.query(query, testTenant, getBaseHeaders(testTenant))
 
         val body = runBlocking { response.body<String>() }
@@ -221,15 +240,18 @@ class NoteIT : BaseGraphQLIT() {
     }
 
     @Test
-    fun `practitioner UDP ID found in EHR Data Authority, patient UDP ID not found in EHR Data Authority, no EHR fallback for patient UDP ID not found`() {
+    fun `practitioner UDP ID found in EHR Data Authority, patient UDP ID not found, no EHR fallback for patient UDP ID not found`() {
         val testTenant = "epic"
         addTenantData(testTenant)
         val notetext = "Test Note"
         val patientid = "$testTenant-123456"
         val practitionerid = "$testTenant-654321"
+
+        @Suppress("ktlint:standard:max-line-length")
         val mutation =
             """mutation sendNote(${'$'}noteInput: NoteInput!, ${'$'}tenantId: String!) {sendNote(noteInput: ${'$'}noteInput, tenantId: ${'$'}tenantId)}"""
-        val query = """
+        val query =
+            """
             |{
             |   "query": "$mutation",
             |   "variables": {
@@ -245,7 +267,7 @@ class NoteIT : BaseGraphQLIT() {
             |      "tenantId": "$testTenant"
             |   }
             |}
-        """.trimMargin()
+            """.trimMargin()
         val response = ProxyClient.query(query, testTenant, getBaseHeaders(testTenant))
 
         val body = runBlocking { response.body<String>() }
@@ -256,7 +278,7 @@ class NoteIT : BaseGraphQLIT() {
         val errorJSONObject = resultJSONObject["errors"][0]
         assertTrue(
             errorJSONObject["message"].asText()
-                .contains("No Patient found for $patientid")
+                .contains("No Patient found for $patientid"),
         )
     }
 
@@ -267,9 +289,12 @@ class NoteIT : BaseGraphQLIT() {
         val notetext = "Test Note"
         val patientid = "PatientFHIRID1"
         val practitionerid = "PractitionerFHIRID999"
+
+        @Suppress("ktlint:standard:max-line-length")
         val mutation =
             """mutation sendNote(${'$'}noteInput: NoteInput!, ${'$'}tenantId: String!) {sendNote(noteInput: ${'$'}noteInput, tenantId: ${'$'}tenantId)}"""
-        val query = """
+        val query =
+            """
             |{
             |   "query": "$mutation",
             |   "variables": {
@@ -285,7 +310,7 @@ class NoteIT : BaseGraphQLIT() {
             |      "tenantId": "$testTenant"
             |   }
             |}
-        """.trimMargin()
+            """.trimMargin()
         val response = ProxyClient.query(query, testTenant, getBaseHeaders(testTenant))
 
         val body = runBlocking { response.body<String>() }
@@ -295,20 +320,24 @@ class NoteIT : BaseGraphQLIT() {
         val errorJSONObject = resultJSONObject["errors"][0]
         assertTrue(
             errorJSONObject["message"].asText()
-                .contains("No Patient found for") // MockEHR
+                // MockEHR
+                .contains("No Patient found for"),
         )
     }
 
     @Test
-    fun `practitioner non-UDP ID not found in EHR Data Authority, practitioner found in MockEHR, patient UDP ID found in EHR Data Authority`() {
+    fun `practitioner non-UDP ID not found in EHR DA, practitioner found in MockEHR, patient UDP ID found in EHR DA`() {
         val testTenant = "epic"
         addTenantData(testTenant)
         val notetext = "Test Note"
         val patientid = "$testTenant-654321"
         val practitionerid = "PractitionerFHIRID1"
+
+        @Suppress("ktlint:standard:max-line-length")
         val mutation =
             """mutation sendNote(${'$'}noteInput: NoteInput!, ${'$'}tenantId: String!) {sendNote(noteInput: ${'$'}noteInput, tenantId: ${'$'}tenantId)}"""
-        val query = """
+        val query =
+            """
             |{
             |   "query": "$mutation",
             |   "variables": {
@@ -324,7 +353,7 @@ class NoteIT : BaseGraphQLIT() {
             |      "tenantId": "$testTenant"
             |   }
             |}
-        """.trimMargin()
+            """.trimMargin()
         val response = ProxyClient.query(query, testTenant, getBaseHeaders(testTenant))
 
         val dateformat = SimpleDateFormat("yyyyMM")
@@ -343,9 +372,12 @@ class NoteIT : BaseGraphQLIT() {
         val notetext = "Test Note"
         val patientid = "$testTenant-654321"
         val practitionerid = "PractitionerFHIRID1"
+
+        @Suppress("ktlint:standard:max-line-length")
         val mutation =
             """mutation sendNote(${'$'}noteInput: NoteInput!, ${'$'}tenantId: String!) {sendNote(noteInput: ${'$'}noteInput, tenantId: ${'$'}tenantId)}"""
-        val query = """
+        val query =
+            """
             |{
             |   "query": "$mutation",
             |   "variables": {
@@ -361,7 +393,7 @@ class NoteIT : BaseGraphQLIT() {
             |      "tenantId": "$testTenant"
             |   }
             |}
-        """.trimMargin()
+            """.trimMargin()
         val response = ProxyClient.query(query, testTenant, getBaseHeaders(testTenant))
 
         val body = runBlocking { response.body<String>() }
@@ -375,15 +407,18 @@ class NoteIT : BaseGraphQLIT() {
     }
 
     @Test
-    fun `practitioner non-UDP ID not found in EHR Data Authority, practitioner found in MockEHR, patient UDP ID not found in EHR Data Authority, no EHR fallback for this case`() {
+    fun `practitioner non-UDP ID not found in EHRDA, practitioner found in MockEHR,patient UDP ID not found in EHR DA, no EHR fallback`() {
         val testTenant = "epic"
         addTenantData(testTenant)
         val notetext = "Test Note"
         val patientid = "PatientFHIRID1999"
         val practitionerid = "PractitionerFHIRID1"
+
+        @Suppress("ktlint:standard:max-line-length")
         val mutation =
             """mutation sendNote(${'$'}noteInput: NoteInput!, ${'$'}tenantId: String!) {sendNote(noteInput: ${'$'}noteInput, tenantId: ${'$'}tenantId)}"""
-        val query = """
+        val query =
+            """
             |{
             |   "query": "$mutation",
             |   "variables": {
@@ -399,7 +434,7 @@ class NoteIT : BaseGraphQLIT() {
             |      "tenantId": "$testTenant"
             |   }
             |}
-        """.trimMargin()
+            """.trimMargin()
         val response = ProxyClient.query(query, testTenant, getBaseHeaders(testTenant))
 
         val body = runBlocking { response.body<String>() }
@@ -409,7 +444,7 @@ class NoteIT : BaseGraphQLIT() {
         val errorJSONObject = resultJSONObject["errors"][0]
         assertTrue(
             errorJSONObject["message"].asText()
-                .contains("No Patient found for $patientid")
+                .contains("No Patient found for $patientid"),
         )
     }
 
@@ -420,9 +455,12 @@ class NoteIT : BaseGraphQLIT() {
         val notetext = "Test Note"
         val patientid = "0202497"
         val practitionerid = "PractitionerFHIRID1"
+
+        @Suppress("ktlint:standard:max-line-length")
         val mutation =
             """mutation sendNote(${'$'}noteInput: NoteInput!, ${'$'}tenantId: String!) {sendNote(noteInput: ${'$'}noteInput, tenantId: ${'$'}tenantId)}"""
-        val query = """
+        val query =
+            """
             |{
             |   "query": "$mutation",
             |   "variables": {
@@ -438,7 +476,7 @@ class NoteIT : BaseGraphQLIT() {
             |      "tenantId": "$testTenant"
             |   }
             |}
-        """.trimMargin()
+            """.trimMargin()
         val response = ProxyClient.query(query, testTenant, getBaseHeaders(testTenant))
 
         val body = runBlocking { response.body<String>() }
@@ -457,9 +495,12 @@ class NoteIT : BaseGraphQLIT() {
         val notetext = "Test Note"
         val patientid = "123"
         val practitionerid = "PractitionerFHIRID1"
+
+        @Suppress("ktlint:standard:max-line-length")
         val mutation =
             """mutation sendNote(${'$'}noteInput: NoteInput!, ${'$'}tenantId: String!) {sendNote(noteInput: ${'$'}noteInput, tenantId: ${'$'}tenantId)}"""
-        val query = """
+        val query =
+            """
             |{
             |   "query": "$mutation",
             |   "variables": {
@@ -475,7 +516,7 @@ class NoteIT : BaseGraphQLIT() {
             |      "tenantId": "$testTenant"
             |   }
             |}
-        """.trimMargin()
+            """.trimMargin()
         val response = ProxyClient.query(query, testTenant, getBaseHeaders(testTenant))
 
         val body = runBlocking { response.body<String>() }
@@ -484,7 +525,8 @@ class NoteIT : BaseGraphQLIT() {
         val errorJSONObject = resultJSONObject["errors"][0]
         assertTrue(
             errorJSONObject["message"].asText()
-                .contains("No FHIR ID found for patient") // MockEHR
+                // MockEHR
+                .contains("No FHIR ID found for patient"),
         )
     }
 
@@ -495,9 +537,12 @@ class NoteIT : BaseGraphQLIT() {
         val notetext = "Test Note"
         val patientid = "202497"
         val practitionerid = "PractitionerFHIRID1"
+
+        @Suppress("ktlint:standard:max-line-length")
         val mutation =
             """mutation sendNote(${'$'}noteInput: NoteInput!, ${'$'}tenantId: String!) {sendNote(noteInput: ${'$'}noteInput, tenantId: ${'$'}tenantId)}"""
-        val query = """
+        val query =
+            """
             |{
             |   "query": "$mutation",
             |   "variables": {
@@ -513,7 +558,7 @@ class NoteIT : BaseGraphQLIT() {
             |      "tenantId": "$testTenant"
             |   }
             |}
-        """.trimMargin()
+            """.trimMargin()
         val response = ProxyClient.query(query, testTenant, getBaseHeaders(testTenant))
 
         val body = runBlocking { response.body<String>() }

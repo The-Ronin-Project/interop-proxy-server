@@ -21,6 +21,7 @@ class ProviderPoolIT : BaseTenantControllerIT() {
     fun insertBaseData() {
         populateTenantData()
     }
+
     private fun insert() {
         val tenantDO = tenantDAO.getTenantForMnemonic("epic")!!
         providerPoolDAO.insert(
@@ -28,9 +29,10 @@ class ProviderPoolIT : BaseTenantControllerIT() {
                 tenant = tenantDO
                 providerId = "ProviderWithPool"
                 poolId = "14600"
-            }
+            },
         )
     }
+
     fun getCurrentProviderPoolID(): Int {
         val tenantDO = tenantDAO.getTenantForMnemonic("epic")!!
         return providerPoolDAO.getAll(tenantDO.id).first().id
@@ -82,11 +84,12 @@ class ProviderPoolIT : BaseTenantControllerIT() {
     @Test
     fun `insert provider pool`() {
         insert()
-        val insertProviderPool = ProviderPool(
-            providerPoolId = 0,
-            providerId = "NewProviderId",
-            poolId = "NewPoolId"
-        )
+        val insertProviderPool =
+            ProviderPool(
+                providerPoolId = 0,
+                providerId = "NewProviderId",
+                poolId = "NewPoolId",
+            )
         val response = ProxyClient.post(baseUrl.format("epic"), insertProviderPool)
 
         val body = runBlocking { response.body<ProviderPool>() }
@@ -97,11 +100,12 @@ class ProviderPoolIT : BaseTenantControllerIT() {
     @Test
     fun `insert duplicate provider for tenant`() {
         insert()
-        val insertProviderPool = ProviderPool(
-            providerPoolId = 0,
-            providerId = "ProviderWithPool",
-            poolId = "NewPoolId"
-        )
+        val insertProviderPool =
+            ProviderPool(
+                providerPoolId = 0,
+                providerId = "ProviderWithPool",
+                poolId = "NewPoolId",
+            )
         val response = ProxyClient.post(baseUrl.format("epic"), insertProviderPool)
 
         assertEquals(HttpStatusCode.UnprocessableEntity, response.status)
@@ -111,11 +115,12 @@ class ProviderPoolIT : BaseTenantControllerIT() {
     fun `update existing providers pool`() {
         insert()
         val providerPoolId = getCurrentProviderPoolID()
-        val updateProviderPool = ProviderPool(
-            providerPoolId = providerPoolId,
-            providerId = "NewProviderId",
-            poolId = "NewPoolId"
-        )
+        val updateProviderPool =
+            ProviderPool(
+                providerPoolId = providerPoolId,
+                providerId = "NewProviderId",
+                poolId = "NewPoolId",
+            )
         val response = ProxyClient.put(urlByPath.format("epic", providerPoolId), updateProviderPool)
 
         assertEquals(HttpStatusCode.OK, response.status)
@@ -124,11 +129,12 @@ class ProviderPoolIT : BaseTenantControllerIT() {
     @Test
     fun `update non-existing providers pool`() {
         insert()
-        val insertProviderPool = ProviderPool(
-            providerPoolId = 0,
-            providerId = "NewProviderId",
-            poolId = "NewPoolId"
-        )
+        val insertProviderPool =
+            ProviderPool(
+                providerPoolId = 0,
+                providerId = "NewProviderId",
+                poolId = "NewPoolId",
+            )
         val response = ProxyClient.put(urlByPath.format("epic", 54321), insertProviderPool)
 
         assertEquals(HttpStatusCode.NotFound, response.status)

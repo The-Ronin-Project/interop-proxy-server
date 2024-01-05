@@ -27,7 +27,7 @@ class MirthTenantIT : BaseTenantControllerIT() {
                 tenant = tenantDO
                 locationIds = "1,2,3"
                 blockedResources = "4,5,6,7"
-            }
+            },
         )
     }
 
@@ -52,10 +52,11 @@ class MirthTenantIT : BaseTenantControllerIT() {
 
     @Test
     fun `insert works`() {
-        val insertMirthConfig = MirthTenantConfig(
-            locationIds = listOf("inserted", "inserted2"),
-            blockedResources = listOf("blocked", "blocked2")
-        )
+        val insertMirthConfig =
+            MirthTenantConfig(
+                locationIds = listOf("inserted", "inserted2"),
+                blockedResources = listOf("blocked", "blocked2"),
+            )
 
         val response = ProxyClient.post(url.format("epic"), insertMirthConfig)
 
@@ -68,9 +69,10 @@ class MirthTenantIT : BaseTenantControllerIT() {
     @Test
     fun `insert dup fails`() {
         insert()
-        val insertMirthConfig = MirthTenantConfig(
-            locationIds = listOf("inserted", "inserted2")
-        )
+        val insertMirthConfig =
+            MirthTenantConfig(
+                locationIds = listOf("inserted", "inserted2"),
+            )
         val response = ProxyClient.post(url.format("epic"), insertMirthConfig)
 
         assertEquals(HttpStatusCode.InternalServerError, response.status)
@@ -79,10 +81,11 @@ class MirthTenantIT : BaseTenantControllerIT() {
     @Test
     fun `update works`() {
         insert()
-        val updated = MirthTenantConfig(
-            locationIds = listOf("updated", "updated2"),
-            blockedResources = listOf("blocked", "blocked2")
-        )
+        val updated =
+            MirthTenantConfig(
+                locationIds = listOf("updated", "updated2"),
+                blockedResources = listOf("blocked", "blocked2"),
+            )
 
         val response = ProxyClient.put(url.format("epic"), updated)
 
@@ -96,9 +99,10 @@ class MirthTenantIT : BaseTenantControllerIT() {
     fun `update fails`() {
         insert()
 
-        val updated = MirthTenantConfig(
-            locationIds = listOf("updated", "updated2")
-        )
+        val updated =
+            MirthTenantConfig(
+                locationIds = listOf("updated", "updated2"),
+            )
         val response = ProxyClient.put(url.format("notreal"), updated)
 
         assertEquals(HttpStatusCode.NotFound, response.status)

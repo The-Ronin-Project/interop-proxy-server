@@ -58,8 +58,8 @@ abstract class BaseProxyIT {
                     "POSTGRES_DB" to "devbox",
                     "PGPASSWORD" to "postgres",
                     "PGDATABASE" to "devbox",
-                    "box_features_validation_skip_reference" to "true"
-                )
+                    "box_features_validation_skip_reference" to "true",
+                ),
             )
                 .withStartupTimeout(Duration.ofMinutes(10))
                 .waitingFor("proxy", Wait.forHealthcheck().withStartupTimeout(Duration.ofSeconds(120)))
@@ -94,38 +94,41 @@ abstract class BaseProxyIT {
     protected fun populateTenantData() {
         val epicTenantDAO = EpicTenantDAO(tenantDB)
         val cernerTenantDAO = CernerTenantDAO(tenantDB)
-        val epicEHRDO = ehrDAO.insert(
-            EhrDO {
-                id = 101
-                instanceName = "Epic Sandbox"
-                clientId = "clientID"
-                publicKey = "publicKey"
-                privateKey = System.getenv("AO_SANDBOX_KEY")
-                vendorType = VendorType.EPIC
-            }
-        )
-        val cernerEHRDo = ehrDAO.insert(
-            EhrDO {
-                id = 202
-                instanceName = "Cerner Sandbox"
-                clientId = "clientID"
-                accountId = "accountId"
-                secret = "secret"
-                vendorType = VendorType.CERNER
-            }
-        )
-        val mockEpicDo = tenantDAO.insertTenant(
-            TenantDO {
-                id = 1001
-                name = "Mock Epic Hospital"
-                ehr = epicEHRDO
-                mnemonic = "epic"
-                availableBatchEnd = LocalTime.parse("06:00:00")
-                availableBatchEnd = LocalTime.parse("22:00:00")
-                timezone = ZoneId.of("Etc/UTC")
-                monitoredIndicator = true
-            }
-        )
+        val epicEHRDO =
+            ehrDAO.insert(
+                EhrDO {
+                    id = 101
+                    instanceName = "Epic Sandbox"
+                    clientId = "clientID"
+                    publicKey = "publicKey"
+                    privateKey = System.getenv("AO_SANDBOX_KEY")
+                    vendorType = VendorType.EPIC
+                },
+            )
+        val cernerEHRDo =
+            ehrDAO.insert(
+                EhrDO {
+                    id = 202
+                    instanceName = "Cerner Sandbox"
+                    clientId = "clientID"
+                    accountId = "accountId"
+                    secret = "secret"
+                    vendorType = VendorType.CERNER
+                },
+            )
+        val mockEpicDo =
+            tenantDAO.insertTenant(
+                TenantDO {
+                    id = 1001
+                    name = "Mock Epic Hospital"
+                    ehr = epicEHRDO
+                    mnemonic = "epic"
+                    availableBatchEnd = LocalTime.parse("06:00:00")
+                    availableBatchEnd = LocalTime.parse("22:00:00")
+                    timezone = ZoneId.of("Etc/UTC")
+                    monitoredIndicator = true
+                },
+            )
         epicTenantDAO.insert(
             EpicTenantDO {
                 tenantId = mockEpicDo.id
@@ -143,27 +146,28 @@ abstract class BaseProxyIT {
                 departmentInternalSystem = "mockEHRDepartmentInternalSystem"
                 patientOnboardedFlagId = "135124"
                 orderSystem = "mockEHROrderSystem"
-            }
+            },
         )
 
-        val mockCernerDO = tenantDAO.insertTenant(
-            TenantDO {
-                id = 2002
-                name = "Mock Cerner Hospital"
-                ehr = cernerEHRDo
-                mnemonic = "cerner"
-                availableBatchEnd = LocalTime.parse("06:00:00")
-                availableBatchEnd = LocalTime.parse("22:00:00")
-                timezone = ZoneId.of("Etc/UTC")
-            }
-        )
+        val mockCernerDO =
+            tenantDAO.insertTenant(
+                TenantDO {
+                    id = 2002
+                    name = "Mock Cerner Hospital"
+                    ehr = cernerEHRDo
+                    mnemonic = "cerner"
+                    availableBatchEnd = LocalTime.parse("06:00:00")
+                    availableBatchEnd = LocalTime.parse("22:00:00")
+                    timezone = ZoneId.of("Etc/UTC")
+                },
+            )
         cernerTenantDAO.insert(
             CernerTenantDO {
                 tenantId = mockCernerDO.id
                 serviceEndpoint = "http://mockehr:8080/cerner/fhir/r4"
                 authEndpoint = "http://mockehr:8080/cerner/oauth2/token"
                 patientMRNSystem = "mockEHRMRNSystem"
-            }
+            },
         )
         tenantDB.transactionManager
     }

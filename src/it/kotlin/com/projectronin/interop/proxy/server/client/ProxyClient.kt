@@ -19,24 +19,30 @@ import io.ktor.util.StringValues
 import kotlinx.coroutines.runBlocking
 
 object ProxyClient {
-    val httpClient = HttpClient(CIO) {
-        install(HttpTimeout) {
-            requestTimeoutMillis = 60000
-        }
-        // Setup JSON
-        install(ContentNegotiation) {
-            jackson {
-                JacksonManager.setUpMapper(this)
+    val httpClient =
+        HttpClient(CIO) {
+            install(HttpTimeout) {
+                requestTimeoutMillis = 60000
+            }
+            // Setup JSON
+            install(ContentNegotiation) {
+                jackson {
+                    JacksonManager.setUpMapper(this)
+                }
+            }
+
+            // Enable logging.
+            install(Logging) {
+                level = LogLevel.NONE
             }
         }
-
-        // Enable logging.
-        install(Logging) {
-            level = LogLevel.NONE
-        }
-    }
     val url = "http://localhost:8080/graphql"
-    fun query(query: String, token: String, headers: StringValues = getBaseGraphQLHeaders(token)) = runBlocking {
+
+    fun query(
+        query: String,
+        token: String,
+        headers: StringValues = getBaseGraphQLHeaders(token),
+    ) = runBlocking {
         httpClient.post(url) {
             headers { appendAll(headers) }
             setBody(query)
@@ -57,15 +63,19 @@ object ProxyClient {
         }
     }
 
-    fun get(url: String) = runBlocking {
-        httpClient.get(url) {
-            headers {
-                appendAll(getBaseTenantHeaders())
+    fun get(url: String) =
+        runBlocking {
+            httpClient.get(url) {
+                headers {
+                    appendAll(getBaseTenantHeaders())
+                }
             }
         }
-    }
 
-    inline fun <reified T> post(url: String, body: T) = runBlocking {
+    inline fun <reified T> post(
+        url: String,
+        body: T,
+    ) = runBlocking {
         httpClient.post(url) {
             headers {
                 appendAll(getBaseTenantHeaders())
@@ -74,7 +84,10 @@ object ProxyClient {
         }
     }
 
-    inline fun <reified T> put(url: String, body: T) = runBlocking {
+    inline fun <reified T> put(
+        url: String,
+        body: T,
+    ) = runBlocking {
         httpClient.put(url) {
             headers {
                 appendAll(getBaseTenantHeaders())
@@ -82,11 +95,13 @@ object ProxyClient {
             setBody(body)
         }
     }
-    fun delete(url: String) = runBlocking {
-        httpClient.delete(url) {
-            headers {
-                appendAll(getBaseTenantHeaders())
+
+    fun delete(url: String) =
+        runBlocking {
+            httpClient.delete(url) {
+                headers {
+                    appendAll(getBaseTenantHeaders())
+                }
             }
         }
-    }
 }

@@ -26,24 +26,25 @@ import mu.KotlinLogging
 object MockEHRClient {
     val logger = KotlinLogging.logger { }
 
-    val httpClient = HttpClient(CIO) {
-        // If not a successful response, Ktor will throw Exceptions
-        expectSuccess = true
-        install(HttpTimeout) {
-            requestTimeoutMillis = 60000
-        }
-        // Setup JSON
-        install(ContentNegotiation) {
-            jackson {
-                JacksonManager.setUpMapper(this)
+    val httpClient =
+        HttpClient(CIO) {
+            // If not a successful response, Ktor will throw Exceptions
+            expectSuccess = true
+            install(HttpTimeout) {
+                requestTimeoutMillis = 60000
+            }
+            // Setup JSON
+            install(ContentNegotiation) {
+                jackson {
+                    JacksonManager.setUpMapper(this)
+                }
+            }
+
+            // Enable logging.
+            install(Logging) {
+                level = LogLevel.NONE
             }
         }
-
-        // Enable logging.
-        install(Logging) {
-            level = LogLevel.NONE
-        }
-    }
 
     private const val BASE_URL = "http://localhost:8081"
 
@@ -51,50 +52,62 @@ object MockEHRClient {
     const val RESOURCES_FORMAT = "$FHIR_URL/%s"
     const val RESOURCE_FORMAT = "$RESOURCES_FORMAT/%s"
 
-    inline fun <reified T : Resource<T>> addResource(resource: Resource<T>): String = runBlocking {
-        val resourceUrl = RESOURCES_FORMAT.format(resource.resourceType)
-        val response = httpClient.post(resourceUrl) {
-            contentType(ContentType.Application.Json)
-            accept(ContentType.Application.Json)
-            setBody(resource)
+    inline fun <reified T : Resource<T>> addResource(resource: Resource<T>): String =
+        runBlocking {
+            val resourceUrl = RESOURCES_FORMAT.format(resource.resourceType)
+            val response =
+                httpClient.post(resourceUrl) {
+                    contentType(ContentType.Application.Json)
+                    accept(ContentType.Application.Json)
+                    setBody(resource)
+                }
+            val location = response.headers["Content-Location"]
+            logger.warn { "$location" }
+            delay(1000)
+            location!!.removePrefix("$resourceUrl/")
         }
-        val location = response.headers["Content-Location"]
-        logger.warn { "$location" }
-        delay(1000)
-        location!!.removePrefix("$resourceUrl/")
-    }
 
-    inline fun <reified T : Resource<T>> addResourceWithID(resource: Resource<T>, fhirID: String): String = runBlocking {
-        val resourceUrl = RESOURCE_FORMAT.format(resource.resourceType, fhirID)
-        val response = httpClient.put(resourceUrl) {
-            contentType(ContentType.Application.Json)
-            accept(ContentType.Application.Json)
-            setBody(resource)
+    inline fun <reified T : Resource<T>> addResourceWithID(
+        resource: Resource<T>,
+        fhirID: String,
+    ): String =
+        runBlocking {
+            val resourceUrl = RESOURCE_FORMAT.format(resource.resourceType, fhirID)
+            val response =
+                httpClient.put(resourceUrl) {
+                    contentType(ContentType.Application.Json)
+                    accept(ContentType.Application.Json)
+                    setBody(resource)
+                }
+            val location = response.headers["Content-Location"]
+            logger.warn { "$location" }
+            delay(1000)
+            fhirID
         }
-        val location = response.headers["Content-Location"]
-        logger.warn { "$location" }
-        delay(1000)
-        fhirID
-    }
 
-    fun deleteResource(resourceType: String, id: String) = runBlocking {
+    fun deleteResource(
+        resourceType: String,
+        id: String,
+    ) = runBlocking {
         val url = RESOURCE_FORMAT.format(resourceType, id)
         httpClient.delete(url)
         delay(1000)
     }
 
-    fun deleteAllResources(resourceType: String) = runBlocking {
-        val resources = getAllResources(resourceType)
-        KotlinLogging.logger { }.warn { resources }
-        resources.entry.forEach {
-            val resourceId = it.resource?.id?.value
-            resourceId?.let { deleteResource(resourceType, resourceId) }
+    fun deleteAllResources(resourceType: String) =
+        runBlocking {
+            val resources = getAllResources(resourceType)
+            KotlinLogging.logger { }.warn { resources }
+            resources.entry.forEach {
+                val resourceId = it.resource?.id?.value
+                resourceId?.let { deleteResource(resourceType, resourceId) }
+            }
         }
-    }
 
-    fun getAllResources(resourceType: String): Bundle = runBlocking {
-        val url = RESOURCES_FORMAT.format(resourceType)
-        httpClient.get(url) {
-        }.body()
-    }
+    fun getAllResources(resourceType: String): Bundle =
+        runBlocking {
+            val url = RESOURCES_FORMAT.format(resourceType)
+            httpClient.get(url) {
+            }.body()
+        }
 }

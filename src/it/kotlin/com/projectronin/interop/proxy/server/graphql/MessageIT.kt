@@ -31,7 +31,6 @@ import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.MethodSource
 
 class MessageIT : BaseGraphQLIT() {
-
     fun getBaseHeaders(token: String): StringValues {
         return StringValues.build {
             append(HttpHeaders.Authorization, "Bearer $token")
@@ -56,81 +55,93 @@ class MessageIT : BaseGraphQLIT() {
                 tenant = tenantDO
                 providerId = "ProviderWithPool"
                 poolId = "14600"
+            },
+        )
+        val tenantIdentifier =
+            identifier {
+                value of testTenant
+                system of "http://projectronin.com/id/tenantId"
             }
-        )
-        val tenantIdentifier = identifier {
-            value of testTenant
-            system of "http://projectronin.com/id/tenantId"
-        }
 
-        val patient = patient {
-            id of Id("patientFHIRID3")
-            identifier of listOf(
-                identifier {
-                    value of "111"
-                    system of "mockEHRMRNSystem"
-                },
-                identifier {
-                    value of "mockPatientInternalSystem"
-                    system of "     Z4572"
-                }
-            )
-            name of listOf(
-                name {
-                    use of "usual" // required
-                }
-            )
-            gender of "male"
-            birthDate of Date("1990-01-01")
-        }
+        val patient =
+            patient {
+                id of Id("patientFHIRID3")
+                identifier of
+                    listOf(
+                        identifier {
+                            value of "111"
+                            system of "mockEHRMRNSystem"
+                        },
+                        identifier {
+                            value of "mockPatientInternalSystem"
+                            system of "     Z4572"
+                        },
+                    )
+                name of
+                    listOf(
+                        name {
+                            use of "usual" // required
+                        },
+                    )
+                gender of "male"
+                birthDate of Date("1990-01-01")
+            }
         val patientFHirId = MockEHRClient.addResourceWithID(patient, "patientFHIRID3")
-        val aidboxPatient = patient.copy(
-            id = Id("$testTenant-patientFHIRID3"),
-            identifier = patient.identifier +
-                tenantIdentifier +
-                fhirIdentifier(patientFHirId) +
-                Identifier(
-                    system = Uri("http://projectronin.com/id/mrn"),
-                    value = "111".asFHIR()
-                )
-        )
+        val aidboxPatient =
+            patient.copy(
+                id = Id("$testTenant-patientFHIRID3"),
+                identifier =
+                    patient.identifier +
+                        tenantIdentifier +
+                        fhirIdentifier(patientFHirId) +
+                        Identifier(
+                            system = Uri("http://projectronin.com/id/mrn"),
+                            value = "111".asFHIR(),
+                        ),
+            )
         AidboxClient.addResource(aidboxPatient)
-        val practitionerPool = practitioner {
-            id of Id("$testTenant-PractitionerPoolFHIRID1")
-            identifier of listOf(
-                identifier {
-                    value of "ProviderWithPool"
-                    system of "mockEHRUserSystem"
-                    type of CodeableConcept(text = "External".asFHIR())
-                },
-                tenantIdentifier,
-                fhirIdentifier("PractitionerPoolFHIRID1")
-            )
-        }
-        val practitioner1 = practitioner {
-            id of Id("$testTenant-PractitionerFHIRID1")
-            identifier of listOf(
-                identifier {
-                    value of "IPMD2"
-                    system of "mockEHRUserSystem"
-                    type of CodeableConcept(text = "External".asFHIR())
-                },
-                tenantIdentifier,
-                fhirIdentifier("PractitionerFHIRID1")
-            )
-        }
-        val practitioner2 = practitioner {
-            id of Id("$testTenant-PractitionerFHIRID2")
-            identifier of listOf(
-                identifier {
-                    value of "IPMD2"
-                    system of "mockEHRUserSystem"
-                    type of CodeableConcept(text = "External".asFHIR())
-                },
-                tenantIdentifier,
-                fhirIdentifier("PractitionerFHIRID2")
-            )
-        }
+        val practitionerPool =
+            practitioner {
+                id of Id("$testTenant-PractitionerPoolFHIRID1")
+                identifier of
+                    listOf(
+                        identifier {
+                            value of "ProviderWithPool"
+                            system of "mockEHRUserSystem"
+                            type of CodeableConcept(text = "External".asFHIR())
+                        },
+                        tenantIdentifier,
+                        fhirIdentifier("PractitionerPoolFHIRID1"),
+                    )
+            }
+        val practitioner1 =
+            practitioner {
+                id of Id("$testTenant-PractitionerFHIRID1")
+                identifier of
+                    listOf(
+                        identifier {
+                            value of "IPMD2"
+                            system of "mockEHRUserSystem"
+                            type of CodeableConcept(text = "External".asFHIR())
+                        },
+                        tenantIdentifier,
+                        fhirIdentifier("PractitionerFHIRID1"),
+                    )
+            }
+        val practitioner2 =
+            practitioner {
+                id of Id("$testTenant-PractitionerFHIRID2")
+                identifier of
+                    listOf(
+                        identifier {
+                            value of "IPMD2"
+                            system of "mockEHRUserSystem"
+                            type of CodeableConcept(text = "External".asFHIR())
+                        },
+                        tenantIdentifier,
+                        fhirIdentifier("PractitionerFHIRID2"),
+                    )
+            }
 
         AidboxClient.addResource(practitionerPool)
         AidboxClient.addResource(practitioner1)
@@ -144,10 +155,13 @@ class MessageIT : BaseGraphQLIT() {
         val mrn = "111"
         val id = "$testTenant-PractitionerFHIRID1"
         val message = "Test message"
+
+        @Suppress("ktlint:standard:max-line-length")
         val mutation =
             """mutation sendMessage (${'$'}message: MessageInput!, ${'$'}tenantId: String!) {sendMessage (message: ${'$'}message, tenantId: ${'$'}tenantId)}"""
 
-        val query = """
+        val query =
+            """
             |{
             |   "variables": {
             |      "message": {
@@ -163,7 +177,7 @@ class MessageIT : BaseGraphQLIT() {
             |   },
             |   "query": "$mutation"
             |}
-        """.trimMargin()
+            """.trimMargin()
         val expectedJSON = """{"data":{"sendMessage":"sent"}}"""
         val response = ProxyClient.query(query, testTenant, getBaseHeaders(testTenant))
 
@@ -183,10 +197,13 @@ class MessageIT : BaseGraphQLIT() {
         val mrn = "111"
         val id = "$testTenant-PractitionerPoolFHIRID1"
         val message = "Test pool message"
+
+        @Suppress("ktlint:standard:max-line-length")
         val mutation =
             """mutation sendMessage (${'$'}message: MessageInput!, ${'$'}tenantId: String!) {sendMessage (message: ${'$'}message, tenantId: ${'$'}tenantId)}"""
 
-        val query = """
+        val query =
+            """
             |{
             |   "variables": {
             |      "message": {
@@ -202,7 +219,7 @@ class MessageIT : BaseGraphQLIT() {
             |   },
             |   "query": "$mutation"
             |}
-        """.trimMargin()
+            """.trimMargin()
 
         val expectedJSON = """{"data":{"sendMessage":"sent"}}"""
         val response = ProxyClient.query(query, testTenant, getBaseHeaders(testTenant))
@@ -224,10 +241,13 @@ class MessageIT : BaseGraphQLIT() {
         val idPool = "$testTenant-PractitionerPoolFHIRID1"
         val idNotPool = "$testTenant-PractitionerFHIRID1"
         val message = "Test pool message"
+
+        @Suppress("ktlint:standard:max-line-length")
         val mutation =
             """mutation sendMessage (${'$'}message: MessageInput!, ${'$'}tenantId: String!) {sendMessage (message: ${'$'}message, tenantId: ${'$'}tenantId)}"""
 
-        val query = """
+        val query =
+            """
             |{
             |   "variables": {
             |      "message": {
@@ -248,7 +268,7 @@ class MessageIT : BaseGraphQLIT() {
             |   },
             |   "query": "$mutation"
             |}
-        """.trimMargin()
+            """.trimMargin()
 
         val expectedJSON = """{"data":{"sendMessage":"sent"}}"""
         val response = ProxyClient.query(query, testTenant, getBaseHeaders(testTenant))
@@ -269,10 +289,13 @@ class MessageIT : BaseGraphQLIT() {
         val mrn = "fake"
         val id = "$testTenant-PractitionerFHIRIDI1"
         val message = "Test message"
+
+        @Suppress("ktlint:standard:max-line-length")
         val mutation =
             """mutation sendMessage (${'$'}message: MessageInput!, ${'$'}tenantId: String!) {sendMessage (message: ${'$'}message, tenantId: ${'$'}tenantId)}"""
 
-        val query = """
+        val query =
+            """
             |{
             |   "variables": {
             |      "message": {
@@ -288,7 +311,7 @@ class MessageIT : BaseGraphQLIT() {
             |   },
             |   "query": "$mutation"
             |}
-        """.trimMargin()
+            """.trimMargin()
         val response = ProxyClient.query(query, testTenant, getBaseHeaders(testTenant))
 
         val body = runBlocking { response.body<String>() }
@@ -304,10 +327,13 @@ class MessageIT : BaseGraphQLIT() {
         addTenantData(testTenant)
         val mrn = "111"
         val id = "$testTenant-PractitionerFHIRIDI1"
+
+        @Suppress("ktlint:standard:max-line-length")
         val mutation =
             """mutation sendMessage (${'$'}message: MessageInput!, ${'$'}tenantId: String!) {sendMessage (message: ${'$'}message, tenantId: ${'$'}tenantId)}"""
 
-        val query = """
+        val query =
+            """
         |{
         |   "variables": {
         |      "message": {
@@ -322,7 +348,7 @@ class MessageIT : BaseGraphQLIT() {
         |   },
         |   "query": "$mutation"
         |}
-        """.trimMargin()
+            """.trimMargin()
         val response = ProxyClient.query(query, testTenant, getBaseHeaders(testTenant))
 
         val body = runBlocking { response.body<String>() }
@@ -339,10 +365,13 @@ class MessageIT : BaseGraphQLIT() {
         val mrn = "111"
         val id = "$testTenant-PractitionerFHIRID1"
         val message = "Test message"
+
+        @Suppress("ktlint:standard:max-line-length")
         val mutation =
             """mutation sendMessage (${'$'}message: MessageInput!, ${'$'}tenantId: String!) {sendMessage (message: ${'$'}message, tenantId: ${'$'}tenantId)}"""
 
-        val query = """
+        val query =
+            """
             |{
             |   "variables": {
             |      "message": {
@@ -358,7 +387,7 @@ class MessageIT : BaseGraphQLIT() {
             |   },
             |   "query": "$mutation"
             |}
-        """.trimMargin()
+            """.trimMargin()
         val expectedJSON = """{"data":{"sendMessage":"sent"}}"""
         val m2mToken = getM2MAuthentication()
         val response = ProxyClient.query(query, m2mToken, getBaseHeaders(m2mToken))
@@ -379,10 +408,13 @@ class MessageIT : BaseGraphQLIT() {
         val mrn = "111"
         val id = "$testTenant-7e52ab01-0393-4e97-afd8-5b0649ab49e2"
         val message = "Test message"
+
+        @Suppress("ktlint:standard:max-line-length")
         val mutation =
             """mutation sendMessage (${'$'}message: MessageInput!, ${'$'}tenantId: String!) {sendMessage (message: ${'$'}message, tenantId: ${'$'}tenantId)}"""
 
-        val query = """
+        val query =
+            """
             |{
             |   "variables": {
             |      "message": {
@@ -398,7 +430,7 @@ class MessageIT : BaseGraphQLIT() {
             |   },
             |   "query": "$mutation"
             |}
-        """.trimMargin()
+            """.trimMargin()
         val response = ProxyClient.query(query, testTenant, getBaseHeaders(testTenant))
 
         val body = runBlocking { response.body<String>() }
@@ -408,7 +440,7 @@ class MessageIT : BaseGraphQLIT() {
         assertEquals(HttpStatusCode.OK, response.status)
         assertTrue(
             errorJSONObject["message"].asText()
-                .contains("No Practitioner found for $id")
+                .contains("No Practitioner found for $id"),
         )
     }
 
@@ -419,10 +451,13 @@ class MessageIT : BaseGraphQLIT() {
         val id = "$testTenant-PractitionerFHIRID1"
         val patientId = "$testTenant-patientFHIRID3"
         val message = "Test message"
+
+        @Suppress("ktlint:standard:max-line-length")
         val mutation =
             """mutation sendMessage (${'$'}message: MessageInput!, ${'$'}tenantId: String!) {sendMessage (message: ${'$'}message, tenantId: ${'$'}tenantId)}"""
 
-        val query = """
+        val query =
+            """
             |{
             |   "variables": {
             |      "message": {
@@ -438,7 +473,7 @@ class MessageIT : BaseGraphQLIT() {
             |   },
             |   "query": "$mutation"
             |}
-        """.trimMargin()
+            """.trimMargin()
         val expectedJSON = """{"data":{"sendMessage":"sent"}}"""
 
         val response = ProxyClient.query(query, testTenant, getBaseHeaders(testTenant))

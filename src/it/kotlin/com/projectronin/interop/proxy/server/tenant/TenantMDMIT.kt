@@ -28,7 +28,7 @@ class TenantMDMIT : BaseTenantControllerIT() {
                 mdmDocumentTypeID = "1,2,3"
                 providerIdentifierSystem = "4,5,6,7"
                 receivingSystem = "8,9"
-            }
+            },
         )
     }
 
@@ -54,11 +54,12 @@ class TenantMDMIT : BaseTenantControllerIT() {
 
     @Test
     fun `insert works`() {
-        val insertMDMConfig = TenantMDMConfig(
-            mdmDocumentTypeID = "typeidinsert",
-            providerIdentifierSystem = "idsysteminsert",
-            receivingSystem = "rsysteminsert"
-        )
+        val insertMDMConfig =
+            TenantMDMConfig(
+                mdmDocumentTypeID = "typeidinsert",
+                providerIdentifierSystem = "idsysteminsert",
+                receivingSystem = "rsysteminsert",
+            )
 
         val response = ProxyClient.post(url.format("epic"), insertMDMConfig)
 
@@ -72,11 +73,12 @@ class TenantMDMIT : BaseTenantControllerIT() {
     @Test
     fun `insert dup fails`() {
         insert()
-        val insertMDMConfig = TenantMDMConfig(
-            mdmDocumentTypeID = "typeidinsert",
-            providerIdentifierSystem = "idsysteminsert",
-            receivingSystem = "rsysteminsert"
-        )
+        val insertMDMConfig =
+            TenantMDMConfig(
+                mdmDocumentTypeID = "typeidinsert",
+                providerIdentifierSystem = "idsysteminsert",
+                receivingSystem = "rsysteminsert",
+            )
         val response = ProxyClient.post(url.format("epic"), insertMDMConfig)
 
         assertEquals(HttpStatusCode.InternalServerError, response.status)
@@ -85,11 +87,12 @@ class TenantMDMIT : BaseTenantControllerIT() {
     @Test
     fun `update works`() {
         insert()
-        val updated = TenantMDMConfig(
-            mdmDocumentTypeID = "typeidinsert2",
-            providerIdentifierSystem = "idsysteminsert2",
-            receivingSystem = "rsysteminsert2"
-        )
+        val updated =
+            TenantMDMConfig(
+                mdmDocumentTypeID = "typeidinsert2",
+                providerIdentifierSystem = "idsysteminsert2",
+                receivingSystem = "rsysteminsert2",
+            )
 
         val response = ProxyClient.put(url.format("epic"), updated)
 
@@ -104,11 +107,12 @@ class TenantMDMIT : BaseTenantControllerIT() {
     fun `update fails`() {
         insert()
 
-        val updated = TenantMDMConfig(
-            mdmDocumentTypeID = "typeidinsert2",
-            providerIdentifierSystem = "idsysteminsert2",
-            receivingSystem = "rsysteminsert2"
-        )
+        val updated =
+            TenantMDMConfig(
+                mdmDocumentTypeID = "typeidinsert2",
+                providerIdentifierSystem = "idsysteminsert2",
+                receivingSystem = "rsysteminsert2",
+            )
         val response = ProxyClient.put(url.format("notreal"), updated)
 
         assertEquals(HttpStatusCode.NotFound, response.status)

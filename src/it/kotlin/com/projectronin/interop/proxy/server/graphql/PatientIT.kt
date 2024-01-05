@@ -22,62 +22,67 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.MethodSource
-class PatientIT : BaseGraphQLIT() {
 
+class PatientIT : BaseGraphQLIT() {
     // we only ever put stuff in mock-ehr, so no need to have a tenant specific data
     private fun addTenantData() {
-        val patient = patient {
-            id of Id("PatientFHIRID1")
-            identifier of listOf(
-                identifier {
-                    value of "0202497"
-                    system of "mockEHRMRNSystem"
-                },
-                identifier {
-                    value of "     Z4572"
-                    system of "mockPatientInternalSystem"
-                },
-                identifier { // just a random identifier we don't use to test
-                    value of "987654321A"
-                    system of "https://open.epic.com/FHIR/StructureDefinition/PayerMemberId"
-                }
-            )
-            name of listOf(
-                name {
-                    use of "official"
-                    family of "Mychart"
-                    given of listOf("Allison")
-                },
-                name {
-                    use of "usual" // required
-                    family of "Mychart"
-                    given of listOf("Ali")
-                }
-            )
-            gender of "female"
-            birthDate of Date("1987-01-15")
-            address of listOf(
-                address {
-                    city of "Madison"
-                    line of listOf("123 Main St.".asFHIR())
-                    postalCode of "53703"
-                    state of "WI"
-                    use of "home"
-                }
-            )
-            telecom of listOf(
-                ContactPoint(
-                    system = Code("phone"),
-                    use = Code("home"),
-                    value = "608-123-4567".asFHIR()
-                ),
-                ContactPoint(
-                    system = Code("email"),
-                    use = null,
-                    value = "beau@beau.com".asFHIR()
-                )
-            )
-        }
+        val patient =
+            patient {
+                id of Id("PatientFHIRID1")
+                identifier of
+                    listOf(
+                        identifier {
+                            value of "0202497"
+                            system of "mockEHRMRNSystem"
+                        },
+                        identifier {
+                            value of "     Z4572"
+                            system of "mockPatientInternalSystem"
+                        },
+                        identifier { // just a random identifier we don't use to test
+                            value of "987654321A"
+                            system of "https://open.epic.com/FHIR/StructureDefinition/PayerMemberId"
+                        },
+                    )
+                name of
+                    listOf(
+                        name {
+                            use of "official"
+                            family of "Mychart"
+                            given of listOf("Allison")
+                        },
+                        name {
+                            use of "usual" // required
+                            family of "Mychart"
+                            given of listOf("Ali")
+                        },
+                    )
+                gender of "female"
+                birthDate of Date("1987-01-15")
+                address of
+                    listOf(
+                        address {
+                            city of "Madison"
+                            line of listOf("123 Main St.".asFHIR())
+                            postalCode of "53703"
+                            state of "WI"
+                            use of "home"
+                        },
+                    )
+                telecom of
+                    listOf(
+                        ContactPoint(
+                            system = Code("phone"),
+                            use = Code("home"),
+                            value = "608-123-4567".asFHIR(),
+                        ),
+                        ContactPoint(
+                            system = Code("email"),
+                            use = null,
+                            value = "beau@beau.com".asFHIR(),
+                        ),
+                    )
+            }
         MockEHRClient.addResourceWithID(patient, "PatientFHIRID1")
     }
 
@@ -95,12 +100,14 @@ class PatientIT : BaseGraphQLIT() {
     @MethodSource("tenantMnemonics")
     fun `server handles patient query`(testTenant: String) {
         addTenantData()
-        val query = this::class.java.getResource("/graphql/patientByNameAndDOB.graphql")!!
-            .readText()
-            .replace("__tenant_mnemonic__", testTenant)
-        val expectedJSON = this::class.java.getResource("/testPatientGraphQLResults.json")!!
-            .readText()
-            .replace("__return__id__", "$testTenant-PatientFHIRID1")
+        val query =
+            this::class.java.getResource("/graphql/patientByNameAndDOB.graphql")!!
+                .readText()
+                .replace("__tenant_mnemonic__", testTenant)
+        val expectedJSON =
+            this::class.java.getResource("/testPatientGraphQLResults.json")!!
+                .readText()
+                .replace("__return__id__", "$testTenant-PatientFHIRID1")
         val response = ProxyClient.query(query, testTenant)
 
         val body = runBlocking { response.body<String>() }
@@ -119,12 +126,13 @@ class PatientIT : BaseGraphQLIT() {
         val given = "Allison"
         val birthdate = "1987-01-15"
 
-        val query = """
+        val query =
+            """
             |query {
             |   patientsByNameAndDOB(tenantId: "$testTenant", given: "$given", birthdate: "$birthdate") 
             |   {id}
             |}
-        """.trimMargin()
+            """.trimMargin()
         val response = ProxyClient.query(query, testTenant)
         val body = runBlocking { response.body<String>() }
         val resultJSONNode = JacksonManager.objectMapper.readTree(body)
@@ -141,12 +149,13 @@ class PatientIT : BaseGraphQLIT() {
         val given = "Fake Name"
         val birthdate = "1900-01-15"
 
-        val query = """
+        val query =
+            """
             |query {
             |   patientsByNameAndDOB(tenantId: "$testTenant", family: "$family", given: "$given", birthdate: "$birthdate") 
             |   {id}
             |}
-        """.trimMargin()
+            """.trimMargin()
         val response = ProxyClient.query(query, testTenant)
 
         val body = runBlocking { response.body<String>() }
@@ -161,12 +170,14 @@ class PatientIT : BaseGraphQLIT() {
     @MethodSource("tenantMnemonics")
     fun `server handles patient query with m2m auth`(testTenant: String) {
         addTenantData()
-        val query = this::class.java.getResource("/graphql/patientByNameAndDOB.graphql")!!
-            .readText()
-            .replace("__tenant_mnemonic__", testTenant)
-        val expectedJSON = this::class.java.getResource("/testPatientGraphQLResults.json")!!
-            .readText()
-            .replace("__return__id__", "$testTenant-PatientFHIRID1")
+        val query =
+            this::class.java.getResource("/graphql/patientByNameAndDOB.graphql")!!
+                .readText()
+                .replace("__tenant_mnemonic__", testTenant)
+        val expectedJSON =
+            this::class.java.getResource("/testPatientGraphQLResults.json")!!
+                .readText()
+                .replace("__return__id__", "$testTenant-PatientFHIRID1")
         val m2mToken = getM2MAuthentication()
         val response = ProxyClient.query(query, m2mToken)
 
@@ -187,12 +198,13 @@ class PatientIT : BaseGraphQLIT() {
         val given = "Allison"
         val birthdate = "1987-01-15"
 
-        val query = """
+        val query =
+            """
             |query {
             |   patientsByNameAndDOB(tenantId: "$tenantId", family: "$family", given: "$given", birthdate: "$birthdate") 
             |   {id}
             |}
-        """.trimMargin()
+            """.trimMargin()
 
         val response = ProxyClient.query(query, "epic")
 
@@ -203,7 +215,7 @@ class PatientIT : BaseGraphQLIT() {
         assertEquals(HttpStatusCode.OK, response.status)
         assertEquals(
             "Exception while fetching data (/patientsByNameAndDOB) : 403 Requested Tenant 'fake' does not match authorized Tenant 'epic'",
-            errorJSONObject["message"].asText()
+            errorJSONObject["message"].asText(),
         )
     }
 

@@ -29,7 +29,6 @@ import org.junit.jupiter.params.provider.MethodSource
 import java.time.ZoneId
 
 class AppointmentIT : BaseGraphQLIT() {
-
     @AfterEach
     fun `delete all`() {
         MockEHRClient.deleteAllResources("Appointment")
@@ -40,84 +39,96 @@ class AppointmentIT : BaseGraphQLIT() {
     }
 
     private fun addTenantData(testTenant: String) {
-        val tenantIdentifier = identifier {
-            value of testTenant
-            system of "http://projectronin.com/id/tenantId"
-        }
+        val tenantIdentifier =
+            identifier {
+                value of testTenant
+                system of "http://projectronin.com/id/tenantId"
+            }
 
-        val patient = patient {
-            id of Id("PatientFHIRID1")
-            identifier of listOf(
-                identifier {
-                    value of "0202497"
-                    system of "mockEHRMRNSystem"
-                },
-                identifier {
-                    value of "mockPatientInternalSystem"
-                    system of "     Z4572"
-                }
-            )
-            name of listOf(
-                name {
-                    use of "usual" // required
-                }
-            )
-            gender of "male"
-        }
+        val patient =
+            patient {
+                id of Id("PatientFHIRID1")
+                identifier of
+                    listOf(
+                        identifier {
+                            value of "0202497"
+                            system of "mockEHRMRNSystem"
+                        },
+                        identifier {
+                            value of "mockPatientInternalSystem"
+                            system of "     Z4572"
+                        },
+                    )
+                name of
+                    listOf(
+                        name {
+                            use of "usual" // required
+                        },
+                    )
+                gender of "male"
+            }
         val patientFHirId = MockEHRClient.addResourceWithID(patient, "PatientFHIRID1")
-        val aidboxPatient = patient.copy(
-            id = Id("$testTenant-PatientFHIRID1"),
-            identifier = patient.identifier +
-                tenantIdentifier +
-                fhirIdentifier(patientFHirId) +
-                Identifier(
-                    system = Uri("http://projectronin.com/id/mrn"),
-                    value = "0202497".asFHIR()
-                )
-        )
+        val aidboxPatient =
+            patient.copy(
+                id = Id("$testTenant-PatientFHIRID1"),
+                identifier =
+                    patient.identifier +
+                        tenantIdentifier +
+                        fhirIdentifier(patientFHirId) +
+                        Identifier(
+                            system = Uri("http://projectronin.com/id/mrn"),
+                            value = "0202497".asFHIR(),
+                        ),
+            )
         AidboxClient.addResource(aidboxPatient)
 
-        val appointment1 = appointment {
-            id of Id("AppointmentFHIRID1")
-            status of "booked"
-            participant of listOf(
-                participant {
-                    status of "accepted"
-                    actor of reference("Patient", patientFHirId)
-                }
-            )
-            minutesDuration of 8
-            start of Instant("2022-01-01T09:00:00Z")
-            end of Instant("2022-01-01T10:00:00Z")
-        }
+        val appointment1 =
+            appointment {
+                id of Id("AppointmentFHIRID1")
+                status of "booked"
+                participant of
+                    listOf(
+                        participant {
+                            status of "accepted"
+                            actor of reference("Patient", patientFHirId)
+                        },
+                    )
+                minutesDuration of 8
+                start of Instant("2022-01-01T09:00:00Z")
+                end of Instant("2022-01-01T10:00:00Z")
+            }
 
-        val appointment2 = appointment {
-            id of Id("AppointmentFHIRID2")
-            status of "booked"
-            participant of listOf(
-                participant {
-                    status of "accepted"
-                    actor of reference("Patient", patientFHirId)
-                }
-            )
-            minutesDuration of 8
-            start of Instant("2022-01-01T10:00:00Z")
-            end of Instant("2022-01-01T11:00:00Z")
-        }
+        val appointment2 =
+            appointment {
+                id of Id("AppointmentFHIRID2")
+                status of "booked"
+                participant of
+                    listOf(
+                        participant {
+                            status of "accepted"
+                            actor of reference("Patient", patientFHirId)
+                        },
+                    )
+                minutesDuration of 8
+                start of Instant("2022-01-01T10:00:00Z")
+                end of Instant("2022-01-01T11:00:00Z")
+            }
 
-        val appointment3 = appointment {
-            id of Id("AppointmentFHIRID3")
-            status of "booked"
-            participant of listOf(
-                participant {
-                    status of "accepted"
-                    actor of reference("Patient", patientFHirId)
-                }
-            )
-            minutesDuration of 8
-            start of Instant("2023-01-01T09:00:00Z")
-            end of Instant("2023-01-01T10:00:00Z")
-        }
+        val appointment3 =
+            appointment {
+                id of Id("AppointmentFHIRID3")
+                status of "booked"
+                participant of
+                    listOf(
+                        participant {
+                            status of "accepted"
+                            actor of reference("Patient", patientFHirId)
+                        },
+                    )
+                minutesDuration of 8
+                start of Instant("2023-01-01T09:00:00Z")
+                end of Instant("2023-01-01T10:00:00Z")
+            }
         MockEHRClient.addResourceWithID(appointment1, "AppointmentFHIRID1")
         MockEHRClient.addResourceWithID(appointment2, "AppointmentFHIRID2")
         MockEHRClient.addResourceWithID(appointment3, "AppointmentFHIRID3")
@@ -126,11 +137,12 @@ class AppointmentIT : BaseGraphQLIT() {
     @ParameterizedTest
     @MethodSource("tenantMnemonics")
     fun `server errors when appointment by MRN query is missing patient data`(testTenant: String) {
-        val query = this::class.java.getResource("/graphql/appointmentsByMRN.graphql")!!
-            .readText()
-            .replace("__START_DATE__", "01-01-2022")
-            .replace("__END_DATE__", "02-02-2022")
-            .replace("__tenant_mnemonic__", testTenant)
+        val query =
+            this::class.java.getResource("/graphql/appointmentsByMRN.graphql")!!
+                .readText()
+                .replace("__START_DATE__", "01-01-2022")
+                .replace("__END_DATE__", "02-02-2022")
+                .replace("__tenant_mnemonic__", testTenant)
         val response = ProxyClient.query(query, testTenant)
         val body = runBlocking { response.body<String>() }
         val resultJSONNode = JacksonManager.objectMapper.readTree(body)
@@ -142,11 +154,12 @@ class AppointmentIT : BaseGraphQLIT() {
     @MethodSource("tenantMnemonics")
     fun `server handles appointment by MRN query`(testTenant: String) {
         addTenantData(testTenant)
-        val query = this::class.java.getResource("/graphql/appointmentsByMRN.graphql")!!
-            .readText()
-            .replace("__START_DATE__", "01-01-2022")
-            .replace("__END_DATE__", "02-02-2022")
-            .replace("__tenant_mnemonic__", testTenant)
+        val query =
+            this::class.java.getResource("/graphql/appointmentsByMRN.graphql")!!
+                .readText()
+                .replace("__START_DATE__", "01-01-2022")
+                .replace("__END_DATE__", "02-02-2022")
+                .replace("__tenant_mnemonic__", testTenant)
         val response = ProxyClient.query(query, testTenant)
         val body = runBlocking { response.body<String>() }
         val resultJSONNode = JacksonManager.objectMapper.readTree(body)
@@ -183,12 +196,13 @@ class AppointmentIT : BaseGraphQLIT() {
     @MethodSource("tenantMnemonics")
     fun `server handles appointment by FHIR ID query`(testTenant: String) {
         addTenantData(testTenant)
-        val query = this::class.java.getResource("/graphql/appointmentsByFHIR.graphql")!!
-            .readText()
-            .replace("__PATIENT_FHIR__", "PatientFHIRID1")
-            .replace("__START_DATE__", "01-01-2022")
-            .replace("__END_DATE__", "02-02-2022")
-            .replace("__tenant_mnemonic__", testTenant)
+        val query =
+            this::class.java.getResource("/graphql/appointmentsByFHIR.graphql")!!
+                .readText()
+                .replace("__PATIENT_FHIR__", "PatientFHIRID1")
+                .replace("__START_DATE__", "01-01-2022")
+                .replace("__END_DATE__", "02-02-2022")
+                .replace("__tenant_mnemonic__", testTenant)
         val response = ProxyClient.query(query, testTenant)
         val body = runBlocking { response.body<String>() }
         val resultJSONNode = JacksonManager.objectMapper.readTree(body)
@@ -225,12 +239,13 @@ class AppointmentIT : BaseGraphQLIT() {
     @MethodSource("tenantMnemonics")
     fun `server handles appointment by Ronin FHIR ID query`(testTenant: String) {
         addTenantData(testTenant)
-        val query = this::class.java.getResource("/graphql/appointmentsByFHIR.graphql")!!
-            .readText()
-            .replace("__PATIENT_FHIR__", "$testTenant-PatientFHIRID1")
-            .replace("__START_DATE__", "01-01-2022")
-            .replace("__END_DATE__", "02-02-2022")
-            .replace("__tenant_mnemonic__", testTenant)
+        val query =
+            this::class.java.getResource("/graphql/appointmentsByFHIR.graphql")!!
+                .readText()
+                .replace("__PATIENT_FHIR__", "$testTenant-PatientFHIRID1")
+                .replace("__START_DATE__", "01-01-2022")
+                .replace("__END_DATE__", "02-02-2022")
+                .replace("__tenant_mnemonic__", testTenant)
         val response = ProxyClient.query(query, testTenant)
         val body = runBlocking { response.body<String>() }
         val resultJSONNode = JacksonManager.objectMapper.readTree(body)
@@ -269,12 +284,13 @@ class AppointmentIT : BaseGraphQLIT() {
         addTenantData(testTenant)
         changeTimeZone("America/Chicago")
 
-        val query = this::class.java.getResource("/graphql/appointmentsByFHIR.graphql")!!
-            .readText()
-            .replace("__PATIENT_FHIR__", "PatientFHIRID1")
-            .replace("__START_DATE__", "01-01-2022")
-            .replace("__END_DATE__", "02-02-2022")
-            .replace("__tenant_mnemonic__", testTenant)
+        val query =
+            this::class.java.getResource("/graphql/appointmentsByFHIR.graphql")!!
+                .readText()
+                .replace("__PATIENT_FHIR__", "PatientFHIRID1")
+                .replace("__START_DATE__", "01-01-2022")
+                .replace("__END_DATE__", "02-02-2022")
+                .replace("__tenant_mnemonic__", testTenant)
         val response = ProxyClient.query(query, testTenant)
         val body = runBlocking { response.body<String>() }
         val resultJSONNode = JacksonManager.objectMapper.readTree(body)
@@ -307,12 +323,13 @@ class AppointmentIT : BaseGraphQLIT() {
         val startDate = "12-01-2021"
         val mrn = "0202497"
 
-        val query = """
+        val query =
+            """
             |query {
             |   appointmentsByMRNAndDate(mrn: "$mrn", startDate: "$startDate", tenantId: "$testTenant")
             |   {id}
             |}
-        """.trimMargin()
+            """.trimMargin()
 
         val response = ProxyClient.query(query, testTenant)
         val body = runBlocking { response.body<String>() }
@@ -329,12 +346,13 @@ class AppointmentIT : BaseGraphQLIT() {
         val endDate = "12-01-2001"
         val mrn = "0202497"
 
-        val query = """
+        val query =
+            """
             |query {
             |   appointmentsByMRNAndDate(endDate: "$endDate", mrn: "$mrn", startDate: "$startDate", tenantId: "$testTenant")
             |   {id}
             |}
-        """.trimMargin()
+            """.trimMargin()
 
         val response = ProxyClient.query(query, testTenant)
         val body = runBlocking { response.body<String>() }

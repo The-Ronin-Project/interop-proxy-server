@@ -25,10 +25,11 @@ class PractitionerIT : BaseGraphQLIT() {
     fun `server handles practitioner by FHIR ID query`(testTenant: String) {
         val practitioner = practitioner {}
         val id = MockEHRClient.addResource(practitioner)
-        val query = this::class.java.getResource("/graphql/practitionerById.graphql")!!
-            .readText()
-            .replace("__tenant_mnemonic__", testTenant)
-            .replace("__id__", id)
+        val query =
+            this::class.java.getResource("/graphql/practitionerById.graphql")!!
+                .readText()
+                .replace("__tenant_mnemonic__", testTenant)
+                .replace("__id__", id)
         val response = ProxyClient.query(query, testTenant)
 
         val body = runBlocking { response.body<String>() }
@@ -39,18 +40,21 @@ class PractitionerIT : BaseGraphQLIT() {
     @Test
     fun `server handles practitioner by provider query`() {
         val testTenant = "epic"
-        val practitioner = practitioner {
-            identifier of listOf(
-                identifier {
-                    system of "mockEHRProviderSystem"
-                    value of "E1000"
-                }
-            )
-        }
+        val practitioner =
+            practitioner {
+                identifier of
+                    listOf(
+                        identifier {
+                            system of "mockEHRProviderSystem"
+                            value of "E1000"
+                        },
+                    )
+            }
         val id = MockEHRClient.addResource(practitioner)
-        val query = this::class.java.getResource("/graphql/practitionerByProvider.graphql")!!
-            .readText()
-            .replace("__tenant_mnemonic__", testTenant)
+        val query =
+            this::class.java.getResource("/graphql/practitionerByProvider.graphql")!!
+                .readText()
+                .replace("__tenant_mnemonic__", testTenant)
         val response = ProxyClient.query(query, testTenant)
 
         val body = runBlocking { response.body<String>() }
@@ -61,10 +65,11 @@ class PractitionerIT : BaseGraphQLIT() {
     @ParameterizedTest
     @MethodSource("tenantMnemonics")
     fun `server handles not finding practitioner by FHIR ID query`(testTenant: String) {
-        val query = this::class.java.getResource("/graphql/practitionerById.graphql")!!
-            .readText()
-            .replace("__tenant_mnemonic__", testTenant)
-            .replace("__id__", "nonExistent")
+        val query =
+            this::class.java.getResource("/graphql/practitionerById.graphql")!!
+                .readText()
+                .replace("__tenant_mnemonic__", testTenant)
+                .replace("__id__", "nonExistent")
         val response = ProxyClient.query(query, testTenant)
 
         val body = runBlocking { response.body<String>() }

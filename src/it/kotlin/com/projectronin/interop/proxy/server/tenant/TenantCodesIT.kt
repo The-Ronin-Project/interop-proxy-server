@@ -23,16 +23,17 @@ class TenantCodesIT : BaseTenantControllerIT() {
                 bsaCode = "bsa_code_value"
                 bmiCode = "bmi_code_value"
                 stageCodes = "staging_code_1,stage_code_2"
-            }
+            },
         )
         val response = ProxyClient.get("$serverUrl/tenants/epic/codes")
 
         val body = runBlocking { response.body<Map<String, String>>() }
-        val validCodes = mapOf(
-            "bmiCode" to "bmi_code_value",
-            "bsaCode" to "bsa_code_value",
-            "stageCodes" to "staging_code_1,stage_code_2"
-        )
+        val validCodes =
+            mapOf(
+                "bmiCode" to "bmi_code_value",
+                "bsaCode" to "bsa_code_value",
+                "stageCodes" to "staging_code_1,stage_code_2",
+            )
         assertEquals(3, body.size)
         body.forEach {
             assertTrue(it.key in validCodes.keys)
@@ -45,14 +46,15 @@ class TenantCodesIT : BaseTenantControllerIT() {
     @Test
     fun `can insert tenant codes`() {
         populateTenantData()
-        val response = ProxyClient.post(
-            "$serverUrl/tenants/epic/codes",
-            TenantCodes(
-                bsaCode = "bsa_code_value",
-                bmiCode = "bmi_code_value",
-                stageCodes = "staging_code_value_1,stage_code_value_2"
+        val response =
+            ProxyClient.post(
+                "$serverUrl/tenants/epic/codes",
+                TenantCodes(
+                    bsaCode = "bsa_code_value",
+                    bmiCode = "bmi_code_value",
+                    stageCodes = "staging_code_value_1,stage_code_value_2",
+                ),
             )
-        )
 
         val body = runBlocking { response.body<TenantCodes>() }
         assertEquals("bsa_code_value", body.bsaCode)
@@ -72,16 +74,17 @@ class TenantCodesIT : BaseTenantControllerIT() {
                 bsaCode = "bsa_code_value"
                 bmiCode = "bmi_code_value"
                 stageCodes = "staging_code_1,stage_code_2"
-            }
+            },
         )
-        val response = ProxyClient.put(
-            "$serverUrl/tenants/epic/codes",
-            TenantCodes(
-                bsaCode = "bsa_code_value_2",
-                bmiCode = "bmi_code_value_2",
-                stageCodes = "staging_code_value_A,stage_code_value_B"
+        val response =
+            ProxyClient.put(
+                "$serverUrl/tenants/epic/codes",
+                TenantCodes(
+                    bsaCode = "bsa_code_value_2",
+                    bmiCode = "bmi_code_value_2",
+                    stageCodes = "staging_code_value_A,stage_code_value_B",
+                ),
             )
-        )
 
         val body = runBlocking { response.body<TenantCodes>() }
         assertEquals("bsa_code_value_2", body.bsaCode)

@@ -24,6 +24,7 @@ class TenantServerIT : BaseTenantControllerIT() {
     fun insertBaseData() {
         populateTenantData()
     }
+
     private fun insert() {
         val tenantDO = tenantDAO.getTenantForMnemonic("epic")!!
         tenantServerDAO.insertTenantServer(
@@ -33,7 +34,7 @@ class TenantServerIT : BaseTenantControllerIT() {
                 address = "google.com"
                 port = 1010
                 serverType = ProcessingID.NONPRODUCTIONTESTING
-            }
+            },
         )
     }
 
@@ -73,12 +74,13 @@ class TenantServerIT : BaseTenantControllerIT() {
 
     @Test
     fun `insert works`() {
-        val tenantServer = TenantServer(
-            messageType = "MDM",
-            address = "google.com",
-            port = 1010,
-            serverType = "N"
-        )
+        val tenantServer =
+            TenantServer(
+                messageType = "MDM",
+                address = "google.com",
+                port = 1010,
+                serverType = "N",
+            )
 
         val response = ProxyClient.post(url.format("epic"), tenantServer)
 
@@ -90,12 +92,13 @@ class TenantServerIT : BaseTenantControllerIT() {
     @Test
     fun `insert fails with duplicate`() {
         insert()
-        val tenantServer = TenantServer(
-            messageType = "MDM",
-            address = "google.com",
-            port = 1010,
-            serverType = "N"
-        )
+        val tenantServer =
+            TenantServer(
+                messageType = "MDM",
+                address = "google.com",
+                port = 1010,
+                serverType = "N",
+            )
         val response = ProxyClient.post(url.format("epic"), tenantServer)
 
         assertEquals(HttpStatusCode.InternalServerError, response.status)
@@ -105,13 +108,14 @@ class TenantServerIT : BaseTenantControllerIT() {
     fun `update works`() {
         insert()
         val existing = tenantServerDAO.getTenantServers("epic", MessageType.MDM).first()
-        val tenantServer = TenantServer(
-            id = existing.id,
-            messageType = "MDM",
-            address = "new",
-            port = 1010,
-            serverType = "N"
-        )
+        val tenantServer =
+            TenantServer(
+                id = existing.id,
+                messageType = "MDM",
+                address = "new",
+                port = 1010,
+                serverType = "N",
+            )
 
         val response = ProxyClient.put(url.format("epic"), tenantServer)
 
@@ -122,12 +126,13 @@ class TenantServerIT : BaseTenantControllerIT() {
 
     @Test
     fun `update fails when it's not already present`() {
-        val tenantServer = TenantServer(
-            messageType = "MDM",
-            address = "new",
-            port = 1010,
-            serverType = "N"
-        )
+        val tenantServer =
+            TenantServer(
+                messageType = "MDM",
+                address = "new",
+                port = 1010,
+                serverType = "N",
+            )
 
         val response = ProxyClient.put(url.format("epic"), tenantServer)
 
