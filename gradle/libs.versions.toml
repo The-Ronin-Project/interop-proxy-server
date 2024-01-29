@@ -13,7 +13,7 @@ interop-datalake = "9.0.0"
 interop-ehr = "13.1.1"
 interop-event-resource = "1.2.3"
 interop-fhir = "9.1.1"
-interop-gradle = "4.0.2"
+interop-gradle = "4.0.3"
 interop-kafka = "9.0.0"
 interop-queue = "3.0.0"
 jackson = "2.16.1"
@@ -33,7 +33,7 @@ ronin-kafka = "1.1.2"
 ronin-test = "0.2.0"
 spring-boot = "3.2.2"
 spring-mockk = "4.0.2"
-testcontainers = "1.19.3"
+testcontainers = "1.19.4"
 
 [libraries]
 dd-trace-api = { module = "com.datadoghq:dd-trace-api", version.ref = "datadog" }
