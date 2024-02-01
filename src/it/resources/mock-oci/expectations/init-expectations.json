@@ -34,6 +34,31 @@
   },
   {
     "httpRequest": {
+      "method": "PUT",
+      "path": "/n/.*/b/.*/o/raw_data_response.*"
+    },
+    "httpResponse": {
+      "statusCode": 200,
+      "headers": {
+        "Content-Type": [
+          "application/json"
+        ]
+      },
+      "body": {
+        "FakeNode": "Fake Object Retrieved From Mock Server"
+      }
+    },
+    "id": "PutRawExpectation",
+    "priority": 0,
+    "timeToLive": {
+      "unlimited": true
+    },
+    "times": {
+      "unlimited": true
+    }
+  },
+  {
+    "httpRequest": {
       "method": "GET",
       "path": "/seki/session/validate"
     },
