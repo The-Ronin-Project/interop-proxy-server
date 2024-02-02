@@ -1,5 +1,6 @@
 package com.projectronin.interop.proxy.server.graphql
 
+import com.fasterxml.jackson.databind.JsonNode
 import com.projectronin.interop.common.jackson.JacksonManager
 import com.projectronin.interop.fhir.generators.datatypes.address
 import com.projectronin.interop.fhir.generators.datatypes.identifier
@@ -18,6 +19,8 @@ import io.ktor.http.HttpStatusCode
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
@@ -84,6 +87,29 @@ class PatientIT : BaseGraphQLIT() {
                     )
             }
         MockEHRClient.addResourceWithID(patient, "PatientFHIRID1")
+    }
+
+    private fun checkTenantData(patient: JsonNode) {
+        assertNotNull(
+            patient["identifier"].firstOrNull { it["system"].textValue() == "mockEHRMRNSystem" && it["value"].textValue() == "0202497" },
+        )
+        assertNotNull(
+            patient["identifier"].firstOrNull {
+                it["system"].textValue() == "mockPatientInternalSystem" && it["value"].textValue() == "     Z4572"
+            },
+        )
+        assertNotNull(
+            patient["identifier"].firstOrNull {
+                it["system"].textValue() == "https://open.epic.com/FHIR/StructureDefinition/PayerMemberId" &&
+                    it["value"].textValue() == "987654321A"
+            },
+        )
+        assertEquals(patient["gender"].asText(), "female")
+        assertEquals(patient["birthDate"].asText(), "1987-01-15")
+        assertEquals(patient["address"].size(), 1)
+        assertEquals(patient["address"][0]["city"].asText(), "Madison")
+        assertEquals(patient["address"][0]["use"].asText(), "home")
+        assertEquals(patient["telecom"].size(), 2)
     }
 
     /**
@@ -248,5 +274,57 @@ class PatientIT : BaseGraphQLIT() {
         assertEquals("404 Invalid Tenant: unknown", resultJSONNode["errors"][0]["message"].asText())
         val roninTenant = resultJSONNode["data"]["patientsByTenants"][0]
         assertEquals(1, roninTenant["patients"].size())
+    }
+
+    @Test
+    fun `patientByUdpId can fetch the patient`() {
+        addTenantData()
+        val tenantId = "epic"
+        val udpId = "$tenantId-PatientFHIRID1"
+        val requestedSchema =
+            this::class.java.getResource("/graphql/patientResponseSchema")!!
+                .readText()
+        val query =
+            """
+            |query {
+            |   patientByUdpId(tenantId: "$tenantId", udpId: "$udpId") 
+            |   $requestedSchema
+            |}
+            """.trimMargin()
+        val m2mToken = getM2MAuthentication()
+        val response = ProxyClient.query(query, m2mToken)
+
+        val body = runBlocking { response.body<String>() }
+        val resultJSONNode = JacksonManager.objectMapper.readTree(body)
+
+        assertEquals(resultJSONNode.get("data").get("patientByUdpId").size(), 1)
+        checkTenantData(resultJSONNode.get("data").get("patientByUdpId")[0])
+        assertNull(resultJSONNode.get("errors"))
+    }
+
+    @Test
+    fun `patientByPatientFhirId can fetch the patient`() {
+        addTenantData()
+        val tenant = "epic"
+        val patientFhirId = "PatientFHIRID1"
+        val requestedSchema =
+            this::class.java.getResource("/graphql/patientResponseSchema")!!
+                .readText()
+        val query =
+            """
+            |query {
+            |   patientByFhirId(tenantId: "$tenant", patientFhirId: "$patientFhirId") 
+            |   $requestedSchema
+            |}
+            """.trimMargin()
+        val m2mToken = getM2MAuthentication()
+        val response = ProxyClient.query(query, m2mToken)
+
+        val body = runBlocking { response.body<String>() }
+        val resultJSONNode = JacksonManager.objectMapper.readTree(body)
+
+        assertEquals(resultJSONNode.get("data").get("patientByFhirId").size(), 1)
+        checkTenantData(resultJSONNode.get("data").get("patientByFhirId")[0])
+        assertNull(resultJSONNode.get("errors"))
     }
 }

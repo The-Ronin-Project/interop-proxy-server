@@ -1,0 +1,25 @@
+{
+    address {
+        city
+        line
+        postalCode
+        state
+        use
+    }
+    birthDate
+    gender
+    identifier {
+        system
+        value
+    }
+    name {
+        family
+        given
+        use
+    }
+    telecom {
+        system
+        use
+        value
+    }
+}

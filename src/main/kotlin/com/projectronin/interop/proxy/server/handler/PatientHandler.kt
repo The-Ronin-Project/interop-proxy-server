@@ -8,6 +8,7 @@ import com.projectronin.interop.common.resource.ResourceType
 import com.projectronin.interop.ehr.factory.EHRFactory
 import com.projectronin.interop.fhir.r4.datatype.primitive.Date
 import com.projectronin.interop.fhir.r4.datatype.primitive.FHIRString
+import com.projectronin.interop.fhir.util.unlocalizeFhirId
 import com.projectronin.interop.proxy.server.model.PatientsByTenant
 import com.projectronin.interop.proxy.server.util.DateUtil
 import com.projectronin.interop.proxy.server.util.JacksonUtil
@@ -124,6 +125,63 @@ class PatientHandler(
         return DataFetcherResult.newResult<List<PatientsByTenant>>()
             .data(responseData).errors(patientSearchErrors).build()
     }
+
+    @GraphQLDescription(
+        "Finds patient given a tenantId and UDPId. " +
+            "Requires M2M Authorization or User Auth matching to the implicitly requested tenant " +
+            "or will result in an error with no results.",
+    )
+    @Trace
+    fun patientByUdpId(
+        tenantId: String,
+        udpId: String,
+        dfe: DataFetchingEnvironment,
+    ): DataFetcherResult<List<ProxyServerPatient>> {
+        logger.trace { "Processing patient query for tenantId $tenantId udpId: $udpId" }
+        val patientId = udpId.unlocalizeFhirId(tenantId)
+        return patientByFhirId(tenantId, patientId, dfe)
+    }
+
+    @GraphQLDescription(
+        "Finds patient given a Tenant ID and FHIR ID. " +
+            "Requires M2M Authorization or User Auth matching to the implicitly requested tenant " +
+            "or will result in an error with no results.",
+    )
+    @Trace
+    fun patientByFhirId(
+        tenantId: String,
+        patientFhirId: String,
+        dfe: DataFetchingEnvironment,
+    ): DataFetcherResult<List<ProxyServerPatient>> =
+        runBlocking {
+            runCatching {
+                logger.info { "Retrieving patient for tenant $tenantId patientFhirId $patientFhirId" }
+
+                // external call
+                val tenant = findAndValidateTenant(dfe, tenantService, tenantId, false)
+                val patientService = ehrFactory.getVendorFactory(tenant).patientService
+                val patient = patientService.getPatient(tenant, patientFhirId)
+
+                // Enqueue Patient
+                queuePatients(listOf(patient), tenant)
+
+                // map Patient to ProxyServerPatient
+                val proxyServerPatients = mapFHIRPatients(listOf(patient), tenant)
+                proxyServerPatients
+            }.fold(
+                onSuccess = {
+                    DataFetcherResult.newResult<List<ProxyServerPatient>>()
+                        .data(it)
+                        .build()
+                },
+                onFailure = {
+                    DataFetcherResult.newResult<List<ProxyServerPatient>>()
+                        .data(emptyList())
+                        .error(GraphQLException(it.message).toGraphQLError())
+                        .build()
+                },
+            )
+        }
 
     private fun searchPatients(
         tenant: Tenant,

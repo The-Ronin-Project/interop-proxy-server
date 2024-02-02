@@ -296,6 +296,10 @@ type Query {
   getPractitionerById(practitionerFhirId: String!, tenantId: String!): Practitioner
   "Searches the EHR for a FHIR Practitioner by an internal identifier, and adds it to the Aidbox queue. Requires M2M Authorization or User Auth matching to the requested tenant or will result in an error with no results."
   getPractitionerByProvider(providerId: String!, tenantId: String!): Practitioner
+  "Finds patient given a Tenant ID and FHIR ID. Requires M2M Authorization or User Auth matching to the implicitly requested tenant or will result in an error with no results."
+  patientByFhirId(patientFhirId: String!, tenantId: String!): [Patient!]!
+  "Finds patient given a tenantId and UDPId. Requires M2M Authorization or User Auth matching to the implicitly requested tenant or will result in an error with no results."
+  patientByUdpId(tenantId: String!, udpId: String!): [Patient!]!
   "Finds patient(s) that exactly match on family name, given name, and birthdate (YYYY-mm-dd format). Requires M2M Authorization or User Auth matching to the requested tenant or will result in an error with no results."
   patientsByNameAndDOB(birthdate: String!, family: String!, given: String!, tenantId: String!): [Patient!]!
   "Finds patient(s) across the supplied tenants that exactly match on family name, given name, and birthdate (YYYY-mm-dd format). Requires M2M Authorization or User Auth matching to the requested tenant or will result in an error with no results."

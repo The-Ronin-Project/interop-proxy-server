@@ -32,7 +32,9 @@ import io.mockk.just
 import io.mockk.mockk
 import io.mockk.mockkObject
 import io.mockk.mockkStatic
+import io.mockk.runs
 import io.mockk.unmockkAll
+import io.mockk.verify
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -1741,5 +1743,106 @@ class PatientHandlerTest {
         assertEquals(0, dataByTenant["tenant1"]!!.patients.size)
 
         assertEquals(0, response.errors.size)
+    }
+
+    @Test
+    fun `patientByUdpId & patientByFhirId - handles unauthorized`() {
+        val tenant = mockk<Tenant>()
+        val tenantId = "tenantId"
+        val patientId = "PATIENT_ID"
+        every { tenantService.getTenantForMnemonic(tenantId) } returns tenant
+        every { dfe.getAuthorizedTenantId() } returns "differentTenantId"
+
+        every { queueService.enqueueMessages(listOf()) } just Runs
+
+        // Run Test on patientByUdpId
+        val result1 = patientHandler.patientByUdpId(tenantId, "$tenantId-$patientId", dfe)
+
+        assertEquals(0, result1.data.size)
+        assertEquals(1, result1.errors.size)
+        assertEquals(
+            "403 Requested Tenant '$tenantId' does not match authorized Tenant 'differentTenantId'",
+            result1.errors[0].message,
+        )
+
+        // Run Test on patientByFhirId
+        val result2 = patientHandler.patientByFhirId(tenantId, patientId, dfe)
+
+        assertEquals(0, result2.data.size)
+        assertEquals(1, result2.errors.size)
+        assertEquals(
+            "403 Requested Tenant '$tenantId' does not match authorized Tenant 'differentTenantId'",
+            result2.errors[0].message,
+        )
+    }
+
+    @Test
+    fun `patientByUdpId & patientByFhirId - handles happy case`() {
+        val tenantId = "tenantId"
+        val patientId = "PATIENT_ID"
+
+        val tenant =
+            mockk<Tenant> {
+                every { mnemonic } returns tenantId
+            }
+        every { tenantService.getTenantForMnemonic(tenantId) } returns tenant
+        every { dfe.getAuthorizedTenantId() } returns tenantId
+        val patient =
+            mockk<R4Patient>(relaxed = true) {
+                every { id } returns Id(patientId)
+                every { name } returns
+                    listOf(
+                        mockk {
+                            every { use } returns USUAL.asCode()
+                            every { family?.value } returns "Smith"
+                            every { given } returns listOf("Josh").asFHIR()
+                        },
+                    )
+                every { birthDate } returns Date("2001-02-03")
+                every { gender } returns AdministrativeGender.MALE.asCode()
+            }
+        every { ehrFactory.getVendorFactory(tenant) } returns
+            mockk {
+                every { patientService } returns
+                    mockk {
+                        every { getPatient(tenant, patientId) } returns patient
+                    }
+            }
+        every { queueService.enqueueMessages(any()) } just runs
+        mockkObject(JacksonUtil)
+        every { JacksonUtil.writeJsonValue(patient) } returns "raw JSON for patient Josh Smith"
+
+        // Run Test on patientByUdpId
+        val result1 = patientHandler.patientByUdpId(tenantId, "$tenantId-$patientId", dfe)
+
+        assertEquals(1, result1.data.size)
+        assertEquals(0, result1.errors.size)
+
+        val found1 = result1.data[0]
+        assertEquals("Smith", found1.name[0].family)
+        assertEquals("Josh", found1.name[0].given.first())
+        assertEquals("$tenantId-$patientId", found1.id)
+
+        // Run Test on patientByFhirId
+        val result2 = patientHandler.patientByFhirId(tenantId, patientId, dfe)
+
+        assertEquals(1, result2.data.size)
+        assertEquals(0, result2.errors.size)
+
+        val found2 = result2.data[0]
+        assertEquals("Smith", found2.name[0].family)
+        assertEquals("Josh", found2.name[0].given.first())
+        assertEquals("$tenantId-$patientId", found2.id)
+
+        // Verify Message was enqueued twice since we called it 2 times
+        val enqueueCalls = ArrayList<List<ApiMessage>>()
+        verify(exactly = 2) {
+            queueService.enqueueMessages(capture((enqueueCalls)))
+        }
+        for (messages in enqueueCalls) {
+            assertEquals(1, messages.size)
+            assertEquals(ResourceType.PATIENT, messages[0].resourceType)
+            assertEquals("raw JSON for patient Josh Smith", messages[0].text)
+        }
     }
 }
