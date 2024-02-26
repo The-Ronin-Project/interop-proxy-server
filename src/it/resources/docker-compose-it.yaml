@@ -29,7 +29,6 @@ services:
       EHRDA_AUTH_CLIENT_SECRET: "ehrda-secret"
       EHRDA_AUTH_AUTH0: "false"
       OCI_INFX_REGISTRY_FILE: "TheNormalizationRegistry.json"
-
     healthcheck:
       test: [ "CMD", "curl", "-k", "-X", "GET", "localhost:8080/actuator/health" ]
       timeout: 5s
@@ -105,7 +104,7 @@ services:
     ports:
       - "3306:3306"
     volumes:
-      - ./db/init:/docker-entrypoint-initdb.d
+      - ../../../build/resources/it/db/init:/docker-entrypoint-initdb.d
     healthcheck:
       test: [ "CMD", "mysqladmin" ,"ping", "-h", "localhost", "-u", "ehr", "-psecret" ]
       timeout: 5s
@@ -119,7 +118,7 @@ services:
       #      - DATA_LOAD=db/changelog/insertTestData.yaml
       - AO_SANDBOX_KEY
     volumes:
-      - ./db/changelog/:/liquibase/changelog/db/changelog
+      - ../../../build/resources/it/db/changelog/:/liquibase/changelog/db/changelog
     depends_on:
       mockehrmysql:
         condition: service_healthy
@@ -156,8 +155,8 @@ services:
     platform: linux/amd64
     image: "docker-proxy.devops.projectronin.io/mockserver/mockserver:latest"
     volumes:
-      - "./mock-oci/config/mockserver.properties:/config/mockserver.properties"
-      - "./mock-oci/expectations:/expectations"
+      - ../../../build/resources/it/mock-oci/config/mockserver.properties:/config/mockserver.properties
+      - ../../../build/resources/it/mock-oci/expectations:/expectations
     ports:
       - 1081:443
     networks:
@@ -178,21 +177,20 @@ services:
     environment:
       - AIDBOX_LICENSE_ID
       - AIDBOX_LICENSE_KEY
-      - AIDBOX_PORT
-      - AIDBOX_CLIENT_ID
-      - AIDBOX_ADMIN_ID
-      - AIDBOX_ADMIN_PASSWORD
-      - AIDBOX_CLIENT_SECRET
-      - PGPORT
-      - PGHOSTPORT
-      - AIDBOX_FHIR_VERSION
-      - PGHOST
-      - PGUSER
-      - PGPASSWORD
-      - PGDATABASE
-      - box_features_validation_skip_reference
+      - AIDBOX_PORT=8888
+      - AIDBOX_CLIENT_ID=client
+      - AIDBOX_ADMIN_ID=admin
+      - AIDBOX_ADMIN_PASSWORD=secret
+      - AIDBOX_CLIENT_SECRET=secret
+      - AIDBOX_FHIR_VERSION=4.0.0
+      - PGHOST=devbox-db
+      - PGPORT=5432
+      - PGUSER=postgres
+      - PGPASSWORD=postgres
+      - PGDATABASE=devbox
+      - box_features_validation_skip_reference=true
     volumes:
-      - ./config:/var/config
+      - ../../../build/resources/it/config:/var/config
     healthcheck:
       test: [ "CMD", "curl", "-H", "\"Content-Type: application/json\"", "-H", "\"Accept: application/json\"", "-X", "POST", "-d", "\"{\\\"query\\\":\\\"query { PractitionerList { id } }\\\"}\"", "http://localhost:8888/$$graphql", "-u", "client:secret" ]
       timeout: 5s
@@ -203,17 +201,12 @@ services:
     platform: linux/amd64
     ports:
       - "5437:5432"
+    expose:
+      - 5432
     environment:
-      - PGPORT
-      - PGHOSTPORT
-      - PGHOST
-      - PGUSER
-      - PGPASSWORD
-      - POSTGRES_USER
-      - POSTGRES_PASSWORD
-      - POSTGRES_DB
-      - PGDATABASE
-      - box_features_validation_skip_reference
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=devbox
   kafka:
     image: docker-proxy.devops.projectronin.io/wurstmeister/kafka
     ports:
@@ -256,6 +249,6 @@ services:
     ports:
       - "8083:8080"
     volumes:
-      - ./:/host
+      - ../../../build/resources/it:/host
     environment:
       - JSON_CONFIG_PATH=/host/mock-oauth2-config.json
