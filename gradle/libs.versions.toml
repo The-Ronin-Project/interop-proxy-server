@@ -1,6 +1,6 @@
 [versions]
 apache-kafka = "3.5.0"
-datadog = "1.30.0"
+datadog = "1.30.1"
 ehrda = "2.3.0"
 # @keep for forcing version
 graphql-java = "20.4"
@@ -31,9 +31,9 @@ opentracing = "0.33.0"
 owasp = "9.0.9"
 ronin-kafka = "1.1.2"
 ronin-test = "0.2.0"
-spring-boot = "3.2.2"
+spring-boot = "3.2.3"
 spring-mockk = "4.0.2"
-testcontainers = "1.19.5"
+testcontainers = "1.19.6"
 
 [libraries]
 dd-trace-api = { module = "com.datadoghq:dd-trace-api", version.ref = "datadog" }
