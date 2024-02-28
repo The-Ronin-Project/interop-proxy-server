@@ -6,4 +6,5 @@ data class MirthTenantConfig(
     val locationIds: List<String>,
     val lastUpdated: OffsetDateTime? = null,
     val blockedResources: List<String> = listOf(),
+    val allowedResources: List<String> = listOf(),
 )

@@ -30,6 +30,7 @@ class MirthConfigConvertersTest {
                         ZoneOffset.UTC,
                     )
                 blockedResources = "beep,boop,bop"
+                allowedResources = "blah,blap,blam,blup"
                 tenant =
                     TenantDO {
                         id = 1
@@ -40,6 +41,7 @@ class MirthConfigConvertersTest {
         assertEquals(3, proxyConfig.locationIds.size)
         assertEquals(config.lastUpdated, proxyConfig.lastUpdated)
         assertEquals(3, proxyConfig.blockedResources.size)
+        assertEquals(4, proxyConfig.allowedResources.size)
     }
 
     @Test
@@ -53,12 +55,14 @@ class MirthConfigConvertersTest {
                     }
                 lastUpdated = null
                 blockedResources = ""
+                allowedResources = ""
             }
         val proxyConfig = config.toProxyMirthTenantConfig()
         assertNotNull(proxyConfig)
         assertEquals(0, proxyConfig.locationIds.size)
         assertNull(proxyConfig.lastUpdated)
         assertEquals(0, proxyConfig.blockedResources.size)
+        assertEquals(0, proxyConfig.allowedResources.size)
     }
 
     @Test
@@ -82,11 +86,13 @@ class MirthConfigConvertersTest {
                         ZoneOffset.UTC,
                     ),
                 blockedResources = listOf("beep", "boop", "bop"),
+                allowedResources = listOf("blah", "blap", "blam", "blup"),
             )
         val configDo = proxyConfig.toMirthTenantConfigDO(tenant)
         assertNotNull(configDo)
         assertEquals("123,1231,123123", configDo.locationIds)
         assertEquals(proxyConfig.lastUpdated, configDo.lastUpdated)
         assertEquals("beep,boop,bop", configDo.blockedResources)
+        assertEquals("blah,blap,blam,blup", configDo.allowedResources)
     }
 }

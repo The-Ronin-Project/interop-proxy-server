@@ -20,6 +20,12 @@ fun MirthTenantConfigDO.toProxyMirthTenantConfig(): MirthTenantConfig {
             } else {
                 blockedResources!!.split(",")
             },
+        allowedResources =
+            if (allowedResources.isNullOrEmpty()) {
+                emptyList()
+            } else {
+                allowedResources!!.split(",")
+            },
     )
 }
 
@@ -32,5 +38,6 @@ fun MirthTenantConfig.toMirthTenantConfigDO(proxyTenant: Tenant): MirthTenantCon
             }
         lastUpdated = this@toMirthTenantConfigDO.lastUpdated
         blockedResources = this@toMirthTenantConfigDO.blockedResources.joinToString(",")
+        allowedResources = this@toMirthTenantConfigDO.allowedResources.joinToString(",")
     }
 }

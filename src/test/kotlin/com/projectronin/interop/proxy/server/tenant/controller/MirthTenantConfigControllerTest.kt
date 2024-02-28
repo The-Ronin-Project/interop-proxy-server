@@ -53,6 +53,7 @@ class MirthTenantConfigControllerTest {
                     ZoneOffset.UTC,
                 )
             every { blockedResources } returns "beep,boop"
+            every { allowedResources } returns "this,is,an,allowed,resource"
         }
 
     private val mockProxyTenant =
@@ -97,6 +98,7 @@ class MirthTenantConfigControllerTest {
         val results = controller.get("first")
         assertEquals(3, results.body?.locationIds?.size)
         assertEquals(2, results.body?.blockedResources?.size)
+        assertEquals(5, results.body?.allowedResources?.size)
     }
 
     @Test
@@ -123,6 +125,7 @@ class MirthTenantConfigControllerTest {
                     ZoneOffset.UTC,
                 ),
                 listOf("beep", "boop"),
+                listOf("this", "is", "an", "allowed", "resource"),
             )
         val result = controller.insert("first", mirthTenantConfig)
         assertEquals(HttpStatus.CREATED, result.statusCode)
@@ -137,6 +140,7 @@ class MirthTenantConfigControllerTest {
                 every { locationIds } returns ""
                 every { lastUpdated } returns null
                 every { blockedResources } returns null
+                every { allowedResources } returns null
             }
 
         every { tenantService.getTenantForMnemonic("first") } returns mockTenantServiceTenant
@@ -148,6 +152,7 @@ class MirthTenantConfigControllerTest {
         assertEquals(HttpStatus.CREATED, result.statusCode)
         assertEquals(emptyList<String>(), result.body?.locationIds)
         assertEquals(emptyList<String>(), result.body?.blockedResources)
+        assertEquals(emptyList<String>(), result.body?.allowedResources)
     }
 
     @Test

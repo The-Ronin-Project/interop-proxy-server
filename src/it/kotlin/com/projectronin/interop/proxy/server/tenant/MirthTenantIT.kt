@@ -27,6 +27,7 @@ class MirthTenantIT : BaseTenantControllerIT() {
                 tenant = tenantDO
                 locationIds = "1,2,3"
                 blockedResources = "4,5,6,7"
+                allowedResources = "0,1,2,3,4"
             },
         )
     }
@@ -39,6 +40,7 @@ class MirthTenantIT : BaseTenantControllerIT() {
         val body = runBlocking { response.body<MirthTenantConfig>() }
         assertEquals(listOf("1", "2", "3"), body.locationIds)
         assertEquals(listOf("4", "5", "6", "7"), body.blockedResources)
+        assertEquals(listOf("0", "1", "2", "3", "4"), body.allowedResources)
     }
 
     @Test
@@ -56,6 +58,7 @@ class MirthTenantIT : BaseTenantControllerIT() {
             MirthTenantConfig(
                 locationIds = listOf("inserted", "inserted2"),
                 blockedResources = listOf("blocked", "blocked2"),
+                allowedResources = listOf("allowed1", "allowed2"),
             )
 
         val response = ProxyClient.post(url.format("epic"), insertMirthConfig)
@@ -64,6 +67,7 @@ class MirthTenantIT : BaseTenantControllerIT() {
         assertEquals(HttpStatusCode.Created, response.status)
         assertEquals(insertMirthConfig.locationIds, body.locationIds)
         assertEquals(insertMirthConfig.blockedResources, body.blockedResources)
+        assertEquals(insertMirthConfig.allowedResources, body.allowedResources)
     }
 
     @Test
@@ -85,6 +89,7 @@ class MirthTenantIT : BaseTenantControllerIT() {
             MirthTenantConfig(
                 locationIds = listOf("updated", "updated2"),
                 blockedResources = listOf("blocked", "blocked2"),
+                allowedResources = listOf("allowed", "allowed2"),
             )
 
         val response = ProxyClient.put(url.format("epic"), updated)
@@ -93,6 +98,7 @@ class MirthTenantIT : BaseTenantControllerIT() {
         assertEquals(HttpStatusCode.OK, response.status)
         assertEquals(updated.locationIds, body.locationIds)
         assertEquals(updated.blockedResources, body.blockedResources)
+        assertEquals(updated.allowedResources, body.allowedResources)
     }
 
     @Test
