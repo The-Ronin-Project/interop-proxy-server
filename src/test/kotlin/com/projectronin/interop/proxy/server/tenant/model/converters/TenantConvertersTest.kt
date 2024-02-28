@@ -153,6 +153,7 @@ class TenantConvertersTest {
                         departmentInternalSystem = "departmentInternalSystem",
                         patientOnboardedFlagId = null,
                         orderSystem = "orderSystem",
+                        appVersion = "appVersion",
                     ),
                 monitoredIndicator = null,
             )

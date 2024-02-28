@@ -48,6 +48,7 @@ class TenantControllerTest {
             departmentInternalSystem = "departmentInternalSystem",
             patientOnboardedFlagId = "flagId",
             orderSystem = "orderSystem",
+            appVersion = "appVersion",
         )
     private val proxyTenant =
         ProxyTenant(

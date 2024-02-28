@@ -36,6 +36,7 @@ class TenantTest {
                         departmentInternalSystem = "departmentInternalSystem",
                         patientOnboardedFlagId = null,
                         orderSystem = "orderSystem",
+                        appVersion = "appVersion",
                     ),
                 monitoredIndicator = null,
             )
@@ -77,6 +78,7 @@ class TenantTest {
                         departmentInternalSystem = "departmentInternalSystem",
                         patientOnboardedFlagId = null,
                         orderSystem = "orderSystem",
+                        appVersion = "appVersion",
                     ),
                 monitoredIndicator = true,
             )
@@ -106,6 +108,7 @@ class TenantTest {
                 "instanceName" : "Epic Sandbox",
                 "departmentInternalSystem" : "departmentInternalSystem",
                 "orderSystem" : "orderSystem",
+                "appVersion" : "appVersion",
                 "vendorType" : "EPIC"
               },
               "timezone" : "America/Chicago",
@@ -146,6 +149,7 @@ class TenantTest {
                         departmentInternalSystem = "departmentInternalSystem",
                         patientOnboardedFlagId = null,
                         orderSystem = null,
+                        appVersion = "appVersion",
                     ),
             )
         val json = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(tenant)
@@ -173,6 +177,7 @@ class TenantTest {
                 "patientMRNTypeText" : "patientMRNTypeText",
                 "instanceName" : "Epic Sandbox",
                 "departmentInternalSystem" : "departmentInternalSystem",
+                "appVersion" : "appVersion",
                 "vendorType" : "EPIC"
               },
               "timezone" : "America/Chicago",

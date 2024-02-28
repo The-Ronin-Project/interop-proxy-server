@@ -78,6 +78,7 @@ class TenantIT : BaseTenantControllerIT() {
                 departmentInternalSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.2.686980",
                 patientOnboardedFlagId = null,
                 orderSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.2.798268",
+                appVersion = null,
             )
         val newTenant =
             Tenant(
@@ -150,6 +151,7 @@ class TenantIT : BaseTenantControllerIT() {
                 departmentInternalSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.2.686980",
                 patientOnboardedFlagId = null,
                 orderSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.2.798268",
+                appVersion = null,
             )
 
         val newTenant =
@@ -191,6 +193,7 @@ class TenantIT : BaseTenantControllerIT() {
                 departmentInternalSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.2.686980",
                 patientOnboardedFlagId = "135124",
                 orderSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.2.798268",
+                appVersion = null,
             )
 
         val updatedTenant =
@@ -264,6 +267,7 @@ class TenantIT : BaseTenantControllerIT() {
                 departmentInternalSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.2.686980",
                 patientOnboardedFlagId = null,
                 orderSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.2.798268",
+                appVersion = null,
             )
 
         val updatedTenant =
@@ -305,6 +309,7 @@ class TenantIT : BaseTenantControllerIT() {
                 departmentInternalSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.2.686980",
                 patientOnboardedFlagId = null,
                 orderSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.2.798268",
+                appVersion = null,
             )
 
         val newTenant =

@@ -52,6 +52,7 @@ private fun TenantServiceEpic.toProxyEpic(): ProxyEpic {
         departmentInternalSystem = departmentInternalSystem,
         patientOnboardedFlagId = patientOnboardedFlagId,
         orderSystem = orderSystem,
+        appVersion = appVersion,
     )
 }
 
@@ -114,6 +115,7 @@ private fun ProxyEpic.toTenantServerEpic(): TenantServiceEpic {
         departmentInternalSystem = departmentInternalSystem,
         patientOnboardedFlagId = patientOnboardedFlagId,
         orderSystem = orderSystem,
+        appVersion = appVersion,
     )
 }
 
